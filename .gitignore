@@ -1,0 +1,19 @@
+# Environment files
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Dependencies
+backend/vendor/
+frontend/node_modules/
+
+# Build outputs
+frontend/dist/
+
+# Laravel specific
+backend/storage/logs/*
+backend/bootstrap/cache/*
+
+# OS files
+.DS_Store
+Thumbs.db
