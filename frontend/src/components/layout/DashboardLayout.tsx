@@ -53,7 +53,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <BookOpen className="h-5 w-5 text-secondary" />
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-lg tracking-tighter leading-none">
+              <span className="font-sans font-extrabold text-xl tracking-tighter leading-none">
                 FILAMERIAN
               </span>
               <span className="text-[9px] font-bold text-secondary tracking-[0.2em] uppercase mt-1">

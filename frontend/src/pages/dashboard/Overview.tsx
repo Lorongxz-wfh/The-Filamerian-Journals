@@ -17,10 +17,10 @@ const Overview: React.FC = () => {
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-display font-bold text-primary">
+          <h1 className="text-3xl font-sans font-extrabold text-primary">
             Welcome back, {user.name || 'Scholar'}
           </h1>
-          <p className="text-slate-500 font-serif italic leading-relaxed">
+          <p className="text-sm text-slate-500 font-sans leading-relaxed">
             Here's what's happening with the Filamerian Research System today.
           </p>
         </div>
@@ -44,7 +44,7 @@ const Overview: React.FC = () => {
               </div>
             </div>
             <div className="space-y-1">
-              <span className="text-2xl font-display font-bold text-primary">{stat.value}</span>
+              <span className="text-2xl font-sans font-extrabold text-primary">{stat.value}</span>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{stat.label}</p>
             </div>
           </div>
@@ -86,8 +86,8 @@ const Overview: React.FC = () => {
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <BookOpen className="h-24 w-24" />
             </div>
-            <h3 className="text-lg font-display font-bold mb-4 relative z-10">Launch New Journal</h3>
-            <p className="text-xs text-white/60 font-serif leading-relaxed mb-8 relative z-10">
+            <h3 className="text-lg font-sans font-extrabold mb-4 relative z-10">Launch New Journal</h3>
+            <p className="text-xs text-white/60 font-sans leading-relaxed mb-8 relative z-10">
               Ready to expand the collection? Start a new publication cycle and invite contributors.
             </p>
             <button className="w-full py-3 bg-secondary text-primary rounded-xl font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
@@ -101,7 +101,7 @@ const Overview: React.FC = () => {
               {[1, 2].map((i) => (
                 <div key={i} className="flex gap-4">
                   <div className="h-2 w-2 rounded-full bg-secondary mt-1.5 shrink-0" />
-                  <p className="text-xs text-slate-600 font-serif leading-relaxed">
+                  <p className="text-xs text-slate-600 font-sans leading-relaxed">
                     New user registration pending for <span className="font-bold text-primary">Dr. Julian Santos</span> (Staff)
                   </p>
                 </div>

@@ -24,13 +24,23 @@
     @apply bg-slate-50 text-foreground font-sans antialiased;
   }
 
+  /* Default headings to professional sans-serif */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-primary;
+    @apply font-sans font-bold tracking-tight text-primary;
   }
 }
 
 @layer components {
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Utility for the "Fancy" Website titles */
+  .font-fancy {
+    @apply font-display tracking-tight uppercase;
+  }
+
+  .font-academic {
+    @apply font-serif leading-relaxed;
   }
 }
