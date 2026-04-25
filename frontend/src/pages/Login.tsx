@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { motion } from 'framer-motion';
 import api from '@/services/api';
 import Button from '@/components/ui/Button';
 import { BookOpen, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
@@ -35,7 +36,12 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8 bg-white border border-slate-100 p-10 rounded-3xl shadow-xl shadow-primary/5 relative overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="w-full max-w-md space-y-8 bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl shadow-primary/5 relative overflow-hidden"
+      >
         {/* Decorative background element */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary" />
         

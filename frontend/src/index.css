@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Fontsource Imports */
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+@import "@fontsource/plus-jakarta-sans/800.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/700.css";
+@import "@fontsource/spectral/400.css";
+@import "@fontsource/spectral/600.css";
+@import "@fontsource/cinzel/400.css";
+@import "@fontsource/cinzel/700.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/700.css";
+
 @theme {
   --color-primary: #1E3A8A;
   --color-secondary: #D4AF37;
@@ -11,6 +25,7 @@
   --font-display: "Cinzel", serif;
   --font-editorial: "Playfair Display", serif;
   --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-mono: "Geist Mono", monospace;
   
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
@@ -18,15 +33,17 @@
 }
 
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
-
   body {
-    @apply bg-slate-50 text-foreground font-sans antialiased;
+    @apply bg-slate-50 text-foreground font-sans antialiased selection:bg-primary/10 selection:text-primary;
   }
 
-  /* Default headings to professional sans-serif */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-bold tracking-tight text-primary;
+    @apply font-sans font-extrabold tracking-tight text-primary;
+  }
+
+  /* Smooth scroll for the entire app */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -35,12 +52,21 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Utility for the "Fancy" Website titles */
+  /* Liquid Glass Refraction */
+  .liquid-glass {
+    @apply backdrop-blur-xl border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-500;
+  }
+
   .font-fancy {
     @apply font-display tracking-tight uppercase;
   }
 
   .font-academic {
     @apply font-serif leading-relaxed;
+  }
+
+  /* Monospace for Data */
+  .data-mono {
+    @apply font-mono tracking-tighter tabular-nums;
   }
 }

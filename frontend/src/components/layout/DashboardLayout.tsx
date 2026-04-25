@@ -45,11 +45,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <aside className="w-72 bg-primary text-white flex flex-col shadow-2xl z-50">
+      <aside className="w-72 bg-primary text-white flex flex-col z-50 relative overflow-hidden">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
+        
         {/* Brand */}
-        <div className="p-8 border-b border-white/5">
+        <div className="p-8 border-b border-white/5 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center liquid-glass">
               <BookOpen className="h-5 w-5 text-secondary" />
             </div>
             <div className="flex flex-col">
@@ -64,22 +67,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-grow p-6 space-y-8">
+        <nav className="flex-grow p-6 space-y-8 relative z-10">
           <div className="space-y-2">
-            <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] px-4">Main Menu</span>
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] px-4">Main Menu</span>
             {menuItems.map((item) => (
               <Link 
                 key={item.path} 
                 to={item.path}
                 className={cn(
-                  "flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
+                  "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group",
                   location.pathname === item.path 
-                    ? "bg-secondary text-primary shadow-lg shadow-secondary/10" 
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
+                    ? "bg-secondary text-primary shadow-xl shadow-secondary/20" 
+                    : "text-white/40 hover:bg-white/5 hover:text-white"
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className={cn("h-4 w-4", location.pathname === item.path ? "text-primary" : "text-white/20 group-hover:text-white")} />
                   <span className="text-sm font-bold">{item.label}</span>
                 </div>
                 {location.pathname === item.path && <ChevronRight className="h-3 w-3" />}
@@ -89,19 +92,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
           {user.role === 'Super Admin' && (
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] px-4">Administration</span>
+              <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] px-4">Administration</span>
               {adminItems.map((item) => (
                 <Link 
                   key={item.path} 
                   to={item.path}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all group",
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group",
                     location.pathname === item.path 
-                      ? "bg-secondary text-primary shadow-lg shadow-secondary/10" 
-                      : "text-white/60 hover:bg-white/5 hover:text-white"
+                      ? "bg-secondary text-primary shadow-xl shadow-secondary/20" 
+                      : "text-white/40 hover:bg-white/5 hover:text-white"
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className={cn("h-4 w-4", location.pathname === item.path ? "text-primary" : "text-white/20 group-hover:text-white")} />
                   <span className="text-sm font-bold">{item.label}</span>
                 </Link>
               ))}
@@ -110,19 +113,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </nav>
 
         {/* User Info & Logout */}
-        <div className="p-6 border-t border-white/5">
-          <div className="flex items-center gap-3 px-4 py-4 mb-4 bg-white/5 rounded-2xl">
-            <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-primary font-bold text-sm shadow-inner">
+        <div className="p-6 border-t border-white/5 relative z-10">
+          <div className="flex items-center gap-3 px-4 py-4 mb-4 bg-white/5 rounded-2xl liquid-glass">
+            <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-primary font-bold text-sm shadow-inner ring-2 ring-white/10">
               {user.name?.charAt(0) || 'U'}
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-bold truncate leading-none mb-1">{user.name || 'User'}</span>
-              <span className="text-[10px] text-white/40 uppercase tracking-tighter truncate">{user.role || 'Member'}</span>
+              <span className="text-[10px] text-white/30 uppercase tracking-tighter truncate">{user.role || 'Member'}</span>
             </div>
           </div>
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-300 hover:bg-rose-500/10 transition-all font-bold text-sm"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:text-rose-300 hover:bg-rose-500/10 transition-all font-bold text-sm"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
