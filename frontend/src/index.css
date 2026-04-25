@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0F172A;
+  --color-primary: #1E3A8A;
   --color-secondary: #D4AF37;
-  --color-accent: #1E3A8A;
+  --color-accent: #3B82F6;
   --color-background: #FFFFFF;
-  --color-foreground: #1E293B;
+  --color-foreground: #0F172A;
   
   --font-serif: "Spectral", serif;
   --font-display: "Cinzel", serif;
@@ -25,7 +25,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display tracking-tight text-primary;
   }
 }
 

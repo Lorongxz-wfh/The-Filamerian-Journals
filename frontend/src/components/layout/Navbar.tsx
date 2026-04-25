@@ -4,50 +4,52 @@ import Button from '@/components/ui/Button';
 
 const Navbar = () => {
   return (
-    <nav className="border-b border-slate-200 bg-white sticky top-0 z-50">
-      <div className="container-custom flex h-16 items-center justify-between">
+    <nav className="border-b-2 border-primary/10 bg-white sticky top-0 z-50">
+      <div className="container-custom flex h-20 items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 text-primary" />
+        <Link to="/" className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <BookOpen className="h-6 w-6 text-secondary" />
+          </div>
           <div className="flex flex-col">
-            <span className="font-display font-bold text-lg tracking-tighter text-primary leading-none">
+            <span className="font-display font-bold text-2xl tracking-tighter text-primary leading-none">
               FILAMERIAN
             </span>
-            <span className="text-[9px] font-bold text-secondary tracking-[0.2em] uppercase leading-none mt-1">
+            <span className="text-[10px] font-bold text-secondary tracking-[0.3em] uppercase leading-none mt-1.5">
               Journals
             </span>
           </div>
         </Link>
         
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          <div className="flex items-center gap-6 border-r border-slate-200 pr-8 mr-2">
-            <Link to="/journals" className="text-xs font-bold text-slate-500 hover:text-primary uppercase tracking-wider transition-colors">
+        <div className="hidden md:flex items-center gap-10">
+          <div className="flex items-center gap-8">
+            <Link to="/journals" className="text-xs font-bold text-primary/60 hover:text-primary uppercase tracking-widest transition-colors">
               Journals
             </Link>
-            <Link to="/archives" className="text-xs font-bold text-slate-500 hover:text-primary uppercase tracking-wider transition-colors">
+            <Link to="/archives" className="text-xs font-bold text-primary/60 hover:text-primary uppercase tracking-widest transition-colors">
               Archives
             </Link>
-            <Link to="/announcements" className="text-xs font-bold text-slate-500 hover:text-primary uppercase tracking-wider transition-colors">
+            <Link to="/announcements" className="text-xs font-bold text-primary/60 hover:text-primary uppercase tracking-widest transition-colors">
               Announcements
             </Link>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5 border-l border-slate-100 pl-10">
             <button className="text-slate-400 hover:text-primary transition-colors">
-              <Search className="h-4 w-4" />
+              <Search className="h-5 w-5" />
             </button>
             <Link to="/login">
-              <Button size="sm" variant="outline" className="h-9 text-xs rounded-lg px-4 border-slate-200">
-                Sign In
+              <Button size="sm" className="h-10 text-xs rounded-lg px-6 shadow-md shadow-primary/10">
+                Portal Login
               </Button>
             </Link>
           </div>
         </div>
 
         {/* Mobile Menu Trigger */}
-        <button className="md:hidden h-8 w-8 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
-          <Menu className="h-4 w-4 text-primary" />
+        <button className="md:hidden h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100">
+          <Menu className="h-5 w-5 text-primary" />
         </button>
       </div>
     </nav>
