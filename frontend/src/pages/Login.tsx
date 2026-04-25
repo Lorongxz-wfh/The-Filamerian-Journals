@@ -117,7 +117,7 @@ const Login: React.FC = () => {
             Protected academic system. Unauthorized access is strictly prohibited.
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
