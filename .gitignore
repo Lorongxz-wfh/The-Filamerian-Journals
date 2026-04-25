@@ -17,3 +17,7 @@ backend/bootstrap/cache/*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Antigravity skills
+.agents/
+skills-lock.json
