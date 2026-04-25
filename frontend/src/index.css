@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #0F172A;
+  --color-secondary: #D4AF37;
+  --color-accent: #1E3A8A;
+  --color-background: #FDFBF7;
+  --color-foreground: #1E293B;
+  
+  --font-serif: "Spectral", serif;
+  --font-display: "Cinzel", serif;
+  --font-editorial: "Playfair Display", serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+  
+  --shadow-diffusion: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-[1400px] mx-auto px-4 md:px-8;
+  }
+  
+  .glass-panel {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-diffusion;
+  }
+  
+  /* Double Bezel Card */
+  .bezel-card-outer {
+    @apply bg-black/5 p-2 rounded-3xl border border-black/5 shadow-diffusion;
+  }
+  
+  .bezel-card-inner {
+    @apply bg-white p-6 rounded-[calc(2.5rem-0.5rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)];
+  }
+}
