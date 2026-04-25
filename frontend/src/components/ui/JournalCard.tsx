@@ -22,54 +22,51 @@ const JournalCard: React.FC<JournalCardProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('bezel-card-outer group cursor-pointer', className)}>
-      <div className="bezel-card-inner flex flex-col h-full bg-white overflow-hidden">
-        {/* Image Container */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl mb-6 bg-slate-100">
-          {image ? (
-            <img
-              src={image}
-              alt={title}
-              className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <BookOpen className="w-12 h-12 text-primary/20" />
-            </div>
-          )}
-          
-          {/* Overlay Tag */}
-          <div className="absolute top-4 left-4">
-            <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-bold text-primary shadow-sm backdrop-blur-sm">
-              Featured
-            </span>
+    <div className={cn('group cursor-pointer bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300', className)}>
+      {/* Image Container */}
+      <div className="relative aspect-video overflow-hidden bg-slate-50 border-b border-slate-50">
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <BookOpen className="w-10 h-10 text-slate-200" />
           </div>
+        )}
+        
+        <div className="absolute top-3 left-3">
+          <span className="inline-flex items-center rounded-md bg-white/90 px-2 py-0.5 text-[9px] uppercase tracking-[0.1em] font-bold text-primary shadow-sm backdrop-blur-sm">
+            Current
+          </span>
         </div>
+      </div>
 
-        {/* Content */}
-        <div className="flex flex-col flex-grow">
-          <div className="flex items-center gap-2 mb-3 text-[11px] font-semibold text-secondary uppercase tracking-widest">
-            <Calendar className="w-3 h-3" />
-            <span>{date || 'March 2024'}</span>
+      {/* Content */}
+      <div className="p-5 flex flex-col h-full">
+        <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-secondary uppercase tracking-widest">
+          <Calendar className="w-3 h-3" />
+          <span>{date || 'March 2024'}</span>
+        </div>
+        
+        <h3 className="text-lg font-display font-bold text-primary mb-2 leading-tight group-hover:text-secondary transition-colors duration-300">
+          {title}
+        </h3>
+        
+        <p className="text-xs text-slate-500 line-clamp-2 font-serif leading-relaxed mb-4">
+          {description}
+        </p>
+        
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-slate-50">
+          <div className="flex flex-col">
+            <span className="text-[9px] text-slate-400 uppercase tracking-tighter font-bold">Release info</span>
+            <span className="text-xs font-bold text-primary/80">Vol. {volume || '01'} No. {issue || '01'}</span>
           </div>
           
-          <h3 className="text-xl font-display font-bold text-primary mb-3 leading-tight group-hover:text-secondary transition-colors duration-300">
-            {title}
-          </h3>
-          
-          <p className="text-sm text-slate-600 line-clamp-3 font-serif leading-relaxed mb-6">
-            {description}
-          </p>
-          
-          <div className="mt-auto flex items-center justify-between pt-4 border-t border-slate-100">
-            <div className="flex flex-col">
-              <span className="text-[10px] text-slate-400 uppercase tracking-tighter">Current Release</span>
-              <span className="text-xs font-bold text-primary">Vol. {volume || '01'} No. {issue || '01'}</span>
-            </div>
-            
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/10 transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-110">
-              <ArrowRight className="w-4 h-4" />
-            </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-100 transition-all duration-300 group-hover:border-primary group-hover:text-primary">
+            <ArrowRight className="w-4 h-4" />
           </div>
         </div>
       </div>
