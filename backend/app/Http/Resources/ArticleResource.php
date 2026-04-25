@@ -19,7 +19,7 @@ class ArticleResource extends JsonResource
             'issue_id' => $this->issue_id,
             'title' => $this->title,
             'abstract' => $this->abstract,
-            'pdf_path' => $this->pdf_path,
+            'pdf_url' => $this->pdf_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->pdf_path) : null,
             'page_start' => $this->page_start,
             'page_end' => $this->page_end,
             'issue' => new IssueResource($this->whenLoaded('issue')),
