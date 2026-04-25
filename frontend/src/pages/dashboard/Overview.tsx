@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen, FileText, Users, Eye, TrendingUp, Calendar } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Overview: React.FC = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
