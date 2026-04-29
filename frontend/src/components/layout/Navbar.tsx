@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { BookOpen, User, Menu, Search } from 'lucide-react';
+import { BookOpen, Menu, Search } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 const Navbar = () => {
