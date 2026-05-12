@@ -11,7 +11,7 @@ class IssueController extends Controller
 {
     public function index()
     {
-        return IssueResource::collection(Issue::with('volume.journal')->get());
+        return IssueResource::collection(Issue::with('volume.journal')->paginate(15));
     }
 
     public function store(Request $request)

@@ -11,7 +11,7 @@ class VolumeController extends Controller
 {
     public function index()
     {
-        return VolumeResource::collection(Volume::with('journal')->get());
+        return VolumeResource::collection(Volume::with('journal')->paginate(15));
     }
 
     public function store(Request $request)

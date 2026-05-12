@@ -11,7 +11,7 @@ class KeywordController extends Controller
 {
     public function index()
     {
-        return KeywordResource::collection(Keyword::all());
+        return KeywordResource::collection(Keyword::paginate(15));
     }
 
     public function store(Request $request)

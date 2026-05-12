@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { motion } from 'framer-motion';
 import api from '@/services/api';
 import Button from '@/components/ui/Button';
-import { BookOpen, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -19,12 +18,17 @@ const Login: React.FC = () => {
 
     try {
       const response = await api.post('/login', { email, password });
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      // Redirect to dashboard
+      const { access_token, user } = response.data;
+
+      // Extract role name from Spatie roles array (e.g., [{name: 'Super Admin'}])
+      const roleName = user.roles?.[0]?.name || 'Member';
+      const userData = { ...user, role: roleName };
+
+      // Store token consistently — auth_token matches the API interceptor
+      localStorage.setItem('auth_token', access_token);
+      localStorage.setItem('token', access_token); // ProtectedRoute guard checks 'token'
+      localStorage.setItem('user', JSON.stringify(userData));
+
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
@@ -36,88 +40,78 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="w-full max-w-md space-y-8 bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl shadow-primary/5 relative overflow-hidden"
-      >
-        {/* Decorative background element */}
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary" />
-        
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <BookOpen className="h-7 w-7 text-secondary" />
-          </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-display font-bold text-primary">Portal Login</h1>
-            <p className="text-sm text-slate-400 font-serif italic">Access the Filamerian Research System</p>
-          </div>
+      <div className="w-full max-w-sm space-y-6 bg-surface border border-border p-8">
+        <div className="flex flex-col items-center text-center space-y-3">
+          <h1 className="text-xl text-primary">Portal Login</h1>
+          <p className="text-[13px] text-muted">
+            Access the Filamerian Research System
+          </p>
         </div>
 
         {error && (
-          <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm animate-shake">
-            <AlertCircle className="h-5 w-5 shrink-0" />
-            <p className="font-bold">{error}</p>
+          <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 text-red-700 text-[13px]">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <p>{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] ml-1">Email Address</label>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">
+              Email Address
+            </label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors"
                 placeholder="admin@filamer.edu.ph"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between ml-1">
-              <label className="text-[11px] font-bold text-primary uppercase tracking-[0.2em]">Password</label>
-              <a href="#" className="text-[10px] font-bold text-secondary uppercase hover:underline">Forgot?</a>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">
+                Password
+              </label>
             </div>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full py-4 text-sm font-bold uppercase tracking-widest shadow-lg shadow-primary/20"
+          <Button
+            type="submit"
+            className="w-full py-3 text-[13px] font-medium"
             disabled={loading}
           >
             {loading ? (
-              <div className="flex items-center gap-2">
+              <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Authenticating...</span>
-              </div>
+                Authenticating...
+              </span>
             ) : (
-              'Sign In to System'
+              'Sign In'
             )}
           </Button>
         </form>
 
-        <div className="text-center pt-4">
-          <p className="text-xs text-slate-400 font-serif">
-            Protected academic system. Unauthorized access is strictly prohibited.
-          </p>
-        </div>
-      </motion.div>
+        <p className="text-[11px] text-muted text-center pt-2">
+          Protected academic system. Unauthorized access is prohibited.
+        </p>
+      </div>
     </div>
   );
 };

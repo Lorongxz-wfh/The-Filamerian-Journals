@@ -11,7 +11,7 @@ class AnnouncementController extends Controller
 {
     public function index()
     {
-        return AnnouncementResource::collection(Announcement::orderBy('published_at', 'desc')->get());
+        return AnnouncementResource::collection(Announcement::orderBy('published_at', 'desc')->paginate(15));
     }
 
     public function store(Request $request)

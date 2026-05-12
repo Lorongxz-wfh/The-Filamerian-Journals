@@ -1,8 +1,16 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router';
 import Home from '@/pages/Home';
 import Journals from '@/pages/Journals';
+import Archives from '@/pages/Archives';
+import JournalDetail from '@/pages/JournalDetail';
+import Announcements from '@/pages/Announcements';
 import Login from '@/pages/Login';
 import Overview from '@/pages/dashboard/Overview';
+import MyJournals from '@/pages/dashboard/MyJournals';
+import Articles from '@/pages/dashboard/Articles';
+import Feedback from '@/pages/dashboard/Feedback';
+import UserManager from '@/pages/dashboard/UserManager';
+import SystemSettings from '@/pages/dashboard/SystemSettings';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -19,22 +27,29 @@ function App() {
         {/* Public Website Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/journals" element={<PublicLayout><Journals /></PublicLayout>} />
+        <Route path="/journals/:slug" element={<PublicLayout><JournalDetail /></PublicLayout>} />
+        <Route path="/archives" element={<PublicLayout><Archives /></PublicLayout>} />
+        <Route path="/announcements" element={<PublicLayout><Announcements /></PublicLayout>} />
         <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
 
         {/* Dashboard System Routes */}
-        <Route 
-          path="/dashboard/*" 
+        <Route
+          path="/dashboard/*"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <Routes>
                   <Route index element={<Overview />} />
-                  {/* Add more dashboard routes here */}
+                  <Route path="journals" element={<MyJournals />} />
+                  <Route path="articles" element={<Articles />} />
+                  <Route path="feedback" element={<Feedback />} />
+                  <Route path="users" element={<UserManager />} />
+                  <Route path="settings" element={<SystemSettings />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </DashboardLayout>
             </ProtectedRoute>
-          } 
+          }
         />
 
         {/* Fallback */}

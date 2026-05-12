@@ -14,7 +14,7 @@ class JournalController extends Controller
      */
     public function index()
     {
-        return JournalResource::collection(Journal::all());
+        return JournalResource::collection(Journal::paginate(15));
     }
 
     /**

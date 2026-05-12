@@ -11,7 +11,7 @@ class AuthorController extends Controller
 {
     public function index()
     {
-        return AuthorResource::collection(Author::all());
+        return AuthorResource::collection(Author::paginate(15));
     }
 
     public function store(Request $request)

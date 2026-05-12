@@ -1,47 +1,46 @@
 @import "tailwindcss";
 
-/* Fontsource Imports */
+/* Fontsource Imports — Minimal set */
 @import "@fontsource/plus-jakarta-sans/400.css";
 @import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
 @import "@fontsource/plus-jakarta-sans/700.css";
-@import "@fontsource/plus-jakarta-sans/800.css";
-@import "@fontsource/geist-mono/400.css";
-@import "@fontsource/geist-mono/700.css";
-@import "@fontsource/spectral/400.css";
-@import "@fontsource/spectral/600.css";
 @import "@fontsource/cinzel/400.css";
 @import "@fontsource/cinzel/700.css";
-@import "@fontsource/playfair-display/400.css";
-@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/700.css";
 
 @theme {
-  --color-primary: #1E3A8A;
-  --color-secondary: #D4AF37;
-  --color-accent: #3B82F6;
-  --color-background: #FFFFFF;
-  --color-foreground: #0F172A;
-  
-  --font-serif: "Spectral", serif;
+  /* Client-specified palette */
+  --color-primary: #002d72;
+  --color-secondary: #fdb515;
+  --color-background: #f8f8f7;
+  --color-foreground: #1a1a1a;
+  --color-surface: #ffffff;
+  --color-border: #d4d4d4;
+  --color-muted: #6b7280;
+
+  /* Three font families max */
   --font-display: "Cinzel", serif;
-  --font-editorial: "Playfair Display", serif;
   --font-sans: "Plus Jakarta Sans", sans-serif;
   --font-mono: "Geist Mono", monospace;
-  
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.5rem;
+
+  /* Sharp radii */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-foreground font-sans antialiased selection:bg-primary/10 selection:text-primary;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-secondary/20 selection:text-primary;
   }
 
+  /* Headings: Cinzel regular weight, NOT bold */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-sans font-extrabold tracking-tight text-primary;
+    @apply font-display font-normal tracking-wide text-primary;
   }
 
-  /* Smooth scroll for the entire app */
   html {
     scroll-behavior: smooth;
   }
@@ -52,21 +51,8 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Liquid Glass Refraction */
-  .liquid-glass {
-    @apply backdrop-blur-xl border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all duration-500;
-  }
-
-  .font-fancy {
-    @apply font-display tracking-tight uppercase;
-  }
-
-  .font-academic {
-    @apply font-serif leading-relaxed;
-  }
-
-  /* Monospace for Data */
+  /* Monospace for data displays */
   .data-mono {
-    @apply font-mono tracking-tighter tabular-nums;
+    @apply font-mono tracking-tight tabular-nums;
   }
 }

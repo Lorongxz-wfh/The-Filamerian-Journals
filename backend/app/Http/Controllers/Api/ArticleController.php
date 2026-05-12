@@ -11,7 +11,7 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        return ArticleResource::collection(Article::with(['issue.volume.journal', 'authors', 'keywords'])->get());
+        return ArticleResource::collection(Article::with(['issue.volume.journal', 'authors', 'keywords'])->paginate(15));
     }
 
     public function store(Request $request)
