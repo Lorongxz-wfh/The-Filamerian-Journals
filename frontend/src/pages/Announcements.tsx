@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronRight } from 'lucide-react';
-import axios from 'axios';
+import api from '@/services/api';
 
 interface Announcement {
   id: number;
@@ -16,7 +16,7 @@ const Announcements: React.FC = () => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/public/announcements');
+        const res = await api.get('/public/announcements');
         setAnnouncements(res.data.data);
       } catch (err) {
         console.error('Failed to fetch announcements', err);

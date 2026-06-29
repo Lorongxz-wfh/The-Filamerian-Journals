@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, Calendar, ChevronDown, ExternalLink } from 'lucide-react';
-import axios from 'axios';
+import api, { STORAGE_URL } from '@/services/api';
 
 interface Author {
   id: number;
@@ -55,7 +55,7 @@ const JournalDetail: React.FC = () => {
   useEffect(() => {
     const fetchJournal = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/api/public/journals/${slug}`);
+        const res = await api.get(`/public/journals/${slug}`);
         const data = res.data.data;
         setJournal(data);
         if (data.volumes?.length > 0) {
@@ -100,7 +100,7 @@ const JournalDetail: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-4">
           {journal.cover_image ? (
-            <img src={`http://127.0.0.1:8000/storage/${journal.cover_image}`} alt={journal.title} className="w-full aspect-[3/2] object-cover border border-border" />
+            <img src={`${STORAGE_URL}${journal.cover_image}`} alt={journal.title} className="w-full aspect-[3/2] object-cover border border-border" />
           ) : (
             <div className="w-full aspect-[3/2] bg-surface border border-border flex items-center justify-center">
               <span className="text-muted text-[13px]">No Cover</span>
@@ -198,7 +198,7 @@ const JournalDetail: React.FC = () => {
                             <div className="shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
                               {article.pdf_path && (
                                 <a 
-                                  href={`http://127.0.0.1:8000/storage/${article.pdf_path}`} 
+                                  href={`${STORAGE_URL}${article.pdf_path}`} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
                                   className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1"

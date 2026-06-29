@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import JournalCard from '@/components/ui/JournalCard';
 import { Search } from 'lucide-react';
-import axios from 'axios';
+import api, { STORAGE_URL } from '@/services/api';
 
 const categories = ['All', 'Science', 'Education', 'Arts', 'Multidisciplinary'] as const;
 
@@ -25,7 +25,7 @@ const Journals: React.FC = () => {
   useEffect(() => {
     const fetchJournals = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/public/journals?with_volumes=1');
+        const res = await api.get('/public/journals?with_volumes=1');
         setJournals(res.data.data);
       } catch (err) {
         console.error('Failed to fetch journals', err);
@@ -102,7 +102,7 @@ const Journals: React.FC = () => {
                 date={new Date(j.created_at).toLocaleDateString()}
                 volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
                 issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
-                image={j.cover_image ? `http://127.0.0.1:8000/storage/${j.cover_image}` : undefined}
+                image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                 category={j.category}
               />
             );

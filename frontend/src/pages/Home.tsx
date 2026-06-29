@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight } from 'lucide-react';
-import axios from 'axios';
+import api, { STORAGE_URL } from '@/services/api';
 
 const categories = ['All', 'Science', 'Education', 'Arts', 'Multidisciplinary'] as const;
 
@@ -34,8 +34,8 @@ const Home: React.FC = () => {
     const fetchData = async () => {
       try {
         const [jrnRes, annRes] = await Promise.all([
-          axios.get('http://127.0.0.1:8000/api/public/journals?with_volumes=1'),
-          axios.get('http://127.0.0.1:8000/api/public/announcements')
+          api.get('/public/journals?with_volumes=1'),
+          api.get('/public/announcements')
         ]);
         setJournals(jrnRes.data.data);
         setAnnouncements(annRes.data.data.slice(0, 3)); // Only show latest 3
@@ -98,7 +98,7 @@ const Home: React.FC = () => {
                       date={new Date(j.created_at).toLocaleDateString()}
                       volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
                       issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
-                      image={j.cover_image ? `http://127.0.0.1:8000/storage/${j.cover_image}` : undefined}
+                      image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                       category={j.category}
                     />
                   );

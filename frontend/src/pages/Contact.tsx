@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Phone, Loader2, CheckCircle2 } from 'lucide-react';
-import axios from 'axios';
+import api from '@/services/api';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ const Contact: React.FC = () => {
     setError('');
     
     try {
-      await axios.post('http://127.0.0.1:8000/api/public/feedbacks', formData);
+      await api.post('/public/feedbacks', formData);
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setSuccess(false), 5000);

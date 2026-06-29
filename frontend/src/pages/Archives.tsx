@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { ChevronDown, BookOpen, Calendar, FileText, ExternalLink } from 'lucide-react';
-import axios from 'axios';
+import api, { STORAGE_URL } from '@/services/api';
 
 interface Author {
   id: number;
@@ -51,7 +51,7 @@ const Archives: React.FC = () => {
   useEffect(() => {
     const fetchJournals = async () => {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/public/journals?with_volumes=1');
+        const res = await api.get('/public/journals?with_volumes=1');
         const data = res.data.data;
         setJournals(data);
         if (data.length > 0) {
@@ -203,7 +203,7 @@ const Archives: React.FC = () => {
                                           </div>
                                           {article.pdf_path && (
                                             <a 
-                                              href={`http://127.0.0.1:8000/storage/${article.pdf_path}`}
+                                              href={`${STORAGE_URL}${article.pdf_path}`}
                                               target="_blank"
                                               rel="noopener noreferrer"
                                             >
