@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, Calendar, ChevronDown, ExternalLink } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
 
 interface Author {
   id: number;
@@ -198,7 +198,7 @@ const JournalDetail: React.FC = () => {
                             <div className="shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
                               {article.pdf_path && (
                                 <a 
-                                  href={`${STORAGE_URL}${article.pdf_path}`} 
+                                  href={`${API_BASE_URL}/public/articles/${article.id}/download`} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
                                   className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1"

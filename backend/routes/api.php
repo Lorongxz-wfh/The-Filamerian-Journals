@@ -38,8 +38,10 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Public Routes — no auth required
+Route::get('/public/search', [\App\Http\Controllers\Api\SearchController::class, 'index']);
 Route::get('/public/journals', [\App\Http\Controllers\Api\JournalController::class, 'index']);
 Route::get('/public/journals/{journal}', [\App\Http\Controllers\Api\JournalController::class, 'show']);
+Route::get('/public/articles/{article}/download', [\App\Http\Controllers\Api\ArticleController::class, 'download']);
 Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
 
 // Settings & Feedbacks

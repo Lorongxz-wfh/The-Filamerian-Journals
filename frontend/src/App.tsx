@@ -19,6 +19,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import Contact from '@/pages/Contact';
 import About from '@/pages/About';
 
+import Search from '@/pages/Search';
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
   if (!token) return <Navigate to="/login" replace />;
@@ -31,6 +33,7 @@ function App() {
       <Routes>
         {/* Public Website Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/search" element={<PublicLayout><Search /></PublicLayout>} />
         <Route path="/journals" element={<PublicLayout><Journals /></PublicLayout>} />
         <Route path="/journals/:slug" element={<PublicLayout><JournalDetail /></PublicLayout>} />
         <Route path="/archives" element={<PublicLayout><Archives /></PublicLayout>} />

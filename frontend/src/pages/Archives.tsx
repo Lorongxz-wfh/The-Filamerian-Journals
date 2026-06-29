@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { ChevronDown, BookOpen, Calendar, FileText, ExternalLink } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
 
 interface Author {
   id: number;
@@ -203,7 +203,7 @@ const Archives: React.FC = () => {
                                           </div>
                                           {article.pdf_path && (
                                             <a 
-                                              href={`${STORAGE_URL}${article.pdf_path}`}
+                                              href={`${API_BASE_URL}/public/articles/${article.id}/download`}
                                               target="_blank"
                                               rel="noopener noreferrer"
                                             >

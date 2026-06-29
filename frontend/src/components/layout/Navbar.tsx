@@ -1,7 +1,17 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Menu, Search } from 'lucide-react';
+import { useState } from 'react';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
   return (
     <nav className="bg-primary sticky top-0 z-50">
       <div className="container-custom flex h-16 items-center justify-between gap-6">
@@ -19,6 +29,9 @@ const Navbar = () => {
             <input
               type="text"
               placeholder="Search journals, articles, authors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
               className="w-full pl-9 pr-4 py-2 bg-white border border-white text-[13px] text-primary placeholder:text-muted/50 focus:outline-none focus:border-border transition-colors"
             />
           </div>

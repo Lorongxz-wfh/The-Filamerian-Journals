@@ -104,4 +104,15 @@ class ArticleController extends Controller
 
         return response()->noContent();
     }
+
+    public function download(Article $article)
+    {
+        $article->increment('downloads_count');
+
+        if (!$article->pdf_path) {
+            return response()->json(['message' => 'PDF not found.'], 404);
+        }
+
+        return response()->redirectTo(url('storage/' . $article->pdf_path));
+    }
 }
