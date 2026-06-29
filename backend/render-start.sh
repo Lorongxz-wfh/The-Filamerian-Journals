@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
 
-echo "Running Database Migrations..."
+echo "Running Database Migrations & Seeders..."
 php artisan migrate --force
+php artisan db:seed --force
 
 echo "Optimizing Configuration..."
 php artisan optimize:clear
