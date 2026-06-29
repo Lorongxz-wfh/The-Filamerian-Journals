@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, Calendar, FileText, ExternalLink } from 'lucide-react';
+import { ChevronDown, BookOpen, Calendar, FileText, ExternalLink, Quote } from 'lucide-react';
 import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
+import CitationModal from '@/components/ui/CitationModal';
 
 interface Author {
   id: number;
@@ -45,6 +46,10 @@ interface Journal {
 const Archives: React.FC = () => {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Citation Modal State
+  const [citationArticle, setCitationArticle] = useState<any>(null);
+  const [citationContext, setCitationContext] = useState<any>({});
   const [expandedJournal, setExpandedJournal] = useState<number | null>(null);
   const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
 
@@ -199,6 +204,21 @@ const Archives: React.FC = () => {
                                                 <span>pp. {article.page_start}-{article.page_end}</span>
                                               )}
                                               {article.doi && <span>DOI: {article.doi}</span>}
+                                              
+                                              <button
+                                                onClick={() => {
+                                                  setCitationArticle(article);
+                                                  setCitationContext({
+                                                    journalTitle: journal.title,
+                                                    volumeNumber: vol.volume_number,
+                                                    issueNumber: issue.issue_number,
+                                                    year: vol.year
+                                                  });
+                                                }}
+                                                className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1"
+                                              >
+                                                <Quote className="h-3 w-3" /> Cite
+                                              </button>
                                             </div>
                                           </div>
                                           {article.pdf_path && (
@@ -206,8 +226,9 @@ const Archives: React.FC = () => {
                                               href={`${API_BASE_URL}/public/articles/${article.id}/download`}
                                               target="_blank"
                                               rel="noopener noreferrer"
+                                              className="flex items-center gap-1 text-[11px] text-secondary hover:underline opacity-0 group-hover:opacity-100 transition-opacity mt-1"
                                             >
-                                              <ExternalLink className="h-3 w-3 text-secondary shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                              <ExternalLink className="h-3 w-3" /> PDF
                                             </a>
                                           )}
                                         </div>
@@ -242,6 +263,16 @@ const Archives: React.FC = () => {
           })
         )}
       </div>
+
+      <CitationModal 
+        isOpen={!!citationArticle}
+        onClose={() => setCitationArticle(null)}
+        article={citationArticle}
+        journalTitle={citationContext.journalTitle}
+        volumeNumber={citationContext.volumeNumber}
+        issueNumber={citationContext.issueNumber}
+        year={citationContext.year}
+      />
     </div>
   );
 };

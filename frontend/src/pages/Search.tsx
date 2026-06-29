@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router';
-import { Search as SearchIcon, FileText, BookOpen, ExternalLink } from 'lucide-react';
+import { Search as SearchIcon, FileText, BookOpen, ExternalLink, Quote } from 'lucide-react';
 import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
+import CitationModal from '@/components/ui/CitationModal';
 
 interface SearchResults {
   journals: any[];
@@ -15,6 +16,9 @@ const Search: React.FC = () => {
   
   const [results, setResults] = useState<SearchResults>({ journals: [], articles: [] });
   const [loading, setLoading] = useState(false);
+
+  // Citation Modal State
+  const [citationArticle, setCitationArticle] = useState<any>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -127,6 +131,13 @@ const Search: React.FC = () => {
                           View PDF
                         </a>
                       )}
+                      <button
+                        onClick={() => setCitationArticle(article)}
+                        className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider mt-1"
+                      >
+                        <Quote className="h-3.5 w-3.5" />
+                        Cite
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -144,6 +155,16 @@ const Search: React.FC = () => {
           )}
         </div>
       )}
+
+      <CitationModal 
+        isOpen={!!citationArticle}
+        onClose={() => setCitationArticle(null)}
+        article={citationArticle}
+        journalTitle={citationArticle?.issue?.volume?.journal?.title}
+        volumeNumber={citationArticle?.issue?.volume?.volume_number}
+        issueNumber={citationArticle?.issue?.issue_number}
+        year={citationArticle?.issue?.volume?.year}
+      />
     </div>
   );
 };
