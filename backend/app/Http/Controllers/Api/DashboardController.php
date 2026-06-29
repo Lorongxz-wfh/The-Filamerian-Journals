@@ -16,12 +16,21 @@ class DashboardController extends Controller
      */
     public function stats()
     {
+        $recentArticles = Article::latest()->take(5)->get()->map(function($article) {
+            return [
+                'action' => 'New article added',
+                'target' => $article->title,
+                'time' => $article->created_at->diffForHumans(),
+            ];
+        });
+
         return response()->json([
             'journals' => Journal::count(),
             'articles' => Article::count(),
             'authors' => Author::count(),
             'users' => User::count(),
             'announcements' => Announcement::count(),
+            'recentActivity' => $recentArticles,
         ]);
     }
 }

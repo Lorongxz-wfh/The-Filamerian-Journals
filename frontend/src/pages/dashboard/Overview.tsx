@@ -3,7 +3,14 @@ import { BookOpen, FileText, Users, ArrowRight } from 'lucide-react';
 import api from '@/services/api';
 
 const Overview: React.FC = () => {
-  const [data, setData] = useState({ journals: 0, articles: 0, authors: 0, users: 0, announcements: 0 });
+  const [data, setData] = useState<{
+    journals: number;
+    articles: number;
+    authors: number;
+    users: number;
+    announcements: number;
+    recentActivity: Array<{ action: string; target: string; time: string }>;
+  }>({ journals: 0, articles: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -24,13 +31,7 @@ const Overview: React.FC = () => {
     { label: 'System Users', value: data.users.toString(), icon: Users },
   ];
 
-  const recentActivity = [
-    { action: 'New article submitted', target: 'Community Health Practices in Western Visayas', time: '2h ago' },
-    { action: 'Volume published', target: 'FCU Research Journal Vol. 15', time: '1d ago' },
-    { action: 'Author registered', target: 'Dr. Maria Santos, College of Education', time: '2d ago' },
-    { action: 'Issue finalized', target: 'Science Review Issue 3, 2024', time: '3d ago' },
-    { action: 'Article accepted', target: 'Pedagogical Innovations in Faith-Based Education', time: '4d ago' },
-  ];
+
 
   return (
     <div className="space-y-8">
@@ -70,7 +71,7 @@ const Overview: React.FC = () => {
           </div>
 
           <div className="border border-border bg-surface divide-y divide-border">
-            {recentActivity.map((item, i) => (
+            {data.recentActivity.map((item, i) => (
               <div key={i} className="flex items-center justify-between px-5 py-4 group hover:bg-background transition-colors">
                 <div className="min-w-0">
                   <p className="text-[13px] font-medium text-primary truncate">
