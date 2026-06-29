@@ -26,8 +26,9 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies (with retry and source fallback for Github 400 errors)
+RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction || \
+    composer install --no-dev --optimize-autoloader --prefer-source --no-interaction
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
