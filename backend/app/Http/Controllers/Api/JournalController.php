@@ -6,15 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\Journal;
 use App\Http\Resources\JournalResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class JournalController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return JournalResource::collection(Journal::paginate(15));
+        $query = Journal::query();
+
+        // Eager-load nested relationships when requested
+        if ($request->boolean('with_volumes')) {
+            $query->with(['volumes.issues.articles.authors']);
+        }
+
+        return JournalResource::collection($query->paginate(50));
     }
 
     /**
@@ -24,9 +32,19 @@ class JournalController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:journals,slug',
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category' => 'nullable|string|max:100',
+            'issn' => 'nullable|string|max:50',
+            'frequency' => 'nullable|string|max:100',
+            'editor' => 'nullable|string|max:255',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
+
+        // Auto-generate slug from title if not provided
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Str::slug($validated['title']);
+        }
 
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('journals', 'public');
@@ -40,9 +58,12 @@ class JournalController extends Controller
 
     /**
      * Display the specified resource.
+     * Supports both ID and slug lookups.
      */
     public function show(Journal $journal)
     {
+        $journal->load(['volumes.issues.articles.authors']);
+
         return new JournalResource($journal);
     }
 
@@ -53,8 +74,13 @@ class JournalController extends Controller
     {
         $validated = $request->validate([
             'title' => 'string|max:255',
+            'slug' => 'string|max:255|unique:journals,slug,' . $journal->id,
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category' => 'nullable|string|max:100',
+            'issn' => 'nullable|string|max:50',
+            'frequency' => 'nullable|string|max:100',
+            'editor' => 'nullable|string|max:255',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -76,6 +102,11 @@ class JournalController extends Controller
      */
     public function destroy(Journal $journal)
     {
+        // Delete cover image if exists
+        if ($journal->cover_image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($journal->cover_image);
+        }
+
         $journal->delete();
 
         return response()->noContent();

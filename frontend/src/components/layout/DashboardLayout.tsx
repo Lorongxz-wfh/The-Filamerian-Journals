@@ -30,6 +30,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
     { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals' },
     { label: 'Articles', icon: FileText, path: '/dashboard/articles' },
+    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements' },
     { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback' },
   ];
 

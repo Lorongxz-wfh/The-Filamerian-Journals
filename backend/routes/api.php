@@ -10,6 +10,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Dashboard stats
+    Route::get('/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'stats']);
+
     // Read-only for all authenticated users
     Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['index', 'show']);
     Route::apiResource('volumes', \App\Http\Controllers\Api\VolumeController::class)->only(['index', 'show']);
@@ -28,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['store', 'update', 'destroy']);
+
+        // User management (Super Admin only)
+        Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
     });
 });
 
@@ -35,3 +41,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/public/journals', [\App\Http\Controllers\Api\JournalController::class, 'index']);
 Route::get('/public/journals/{journal}', [\App\Http\Controllers\Api\JournalController::class, 'show']);
 Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
+
+// Settings & Feedbacks
+Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);
+Route::post('/public/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'store']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/settings', [\App\Http\Controllers\Api\SettingController::class, 'store'])->middleware('role:Super Admin');
+    Route::get('/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'index'])->middleware('role:Super Admin|Editor');
+    Route::put('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'update'])->middleware('role:Super Admin|Editor');
+    Route::delete('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'destroy'])->middleware('role:Super Admin');
+});

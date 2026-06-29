@@ -7,12 +7,17 @@ import Announcements from '@/pages/Announcements';
 import Login from '@/pages/Login';
 import Overview from '@/pages/dashboard/Overview';
 import MyJournals from '@/pages/dashboard/MyJournals';
+import ManageJournal from '@/pages/dashboard/ManageJournal';
 import Articles from '@/pages/dashboard/Articles';
+import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+
+import Contact from '@/pages/Contact';
+import About from '@/pages/About';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -30,6 +35,8 @@ function App() {
         <Route path="/journals/:slug" element={<PublicLayout><JournalDetail /></PublicLayout>} />
         <Route path="/archives" element={<PublicLayout><Archives /></PublicLayout>} />
         <Route path="/announcements" element={<PublicLayout><Announcements /></PublicLayout>} />
+        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
         <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
 
         {/* Dashboard System Routes */}
@@ -41,7 +48,9 @@ function App() {
                 <Routes>
                   <Route index element={<Overview />} />
                   <Route path="journals" element={<MyJournals />} />
+                  <Route path="journals/:slug" element={<ManageJournal />} />
                   <Route path="articles" element={<Articles />} />
+                  <Route path="announcements" element={<ManageAnnouncements />} />
                   <Route path="feedback" element={<Feedback />} />
                   <Route path="users" element={<UserManager />} />
                   <Route path="settings" element={<SystemSettings />} />

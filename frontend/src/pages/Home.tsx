@@ -1,19 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight } from 'lucide-react';
-import { journals } from '@/data/journals';
+import axios from 'axios';
 
-const categories = ['All', 'Science', 'Education', 'Arts'] as const;
+const categories = ['All', 'Science', 'Education', 'Arts', 'Multidisciplinary'] as const;
 
-const announcements = [
-  { date: 'April 11, 2024', title: 'Call for Papers: Special Issue on Community Resilience and Health' },
-  { date: 'March 28, 2024', title: 'FCU Multidisciplinary Research Journal Now Indexed in ASEAN Citation Index' },
-  { date: 'March 20, 2024', title: 'Editorial Board Meeting — April 2024' },
-];
+interface Journal {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  cover_image: string | null;
+  volumes?: any[];
+  created_at: string;
+}
+
+interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+}
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [jrnRes, annRes] = await Promise.all([
+          axios.get('http://127.0.0.1:8000/api/public/journals?with_volumes=1'),
+          axios.get('http://127.0.0.1:8000/api/public/announcements')
+        ]);
+        setJournals(jrnRes.data.data);
+        setAnnouncements(annRes.data.data.slice(0, 3)); // Only show latest 3
+      } catch (err) {
+        console.error('Failed to fetch public data', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filteredJournals = activeTab === 'All'
     ? journals
@@ -27,11 +60,11 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Journals Grid */}
           <div className="lg:col-span-8 space-y-8">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <h2 className="text-lg uppercase tracking-wider">
+            <div className="flex items-center justify-between border-b border-border pb-4 overflow-x-auto">
+              <h2 className="text-lg uppercase tracking-wider shrink-0 mr-8">
                 Academic Journals
               </h2>
-              <div className="flex gap-6">
+              <div className="flex gap-6 shrink-0">
                 {categories.map((cat) => (
                   <button
                     key={cat}
@@ -48,22 +81,32 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredJournals.map((j) => (
-                <JournalCard
-                  key={j.id}
-                  slug={j.slug}
-                  title={j.title}
-                  description={j.description}
-                  date={j.date}
-                  volume={j.latestVolume}
-                  issue={j.latestIssue}
-                  image={j.image}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="py-12 text-center text-muted text-sm">Loading journals...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredJournals.map((j) => {
+                  const latestVol = j.volumes?.[0];
+                  const latestIssue = latestVol?.issues?.[0];
+                  
+                  return (
+                    <JournalCard
+                      key={j.id}
+                      slug={j.slug}
+                      title={j.title}
+                      description={j.description}
+                      date={new Date(j.created_at).toLocaleDateString()}
+                      volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
+                      issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
+                      image={j.cover_image ? `http://127.0.0.1:8000/storage/${j.cover_image}` : undefined}
+                      category={j.category}
+                    />
+                  );
+                })}
+              </div>
+            )}
 
-            {filteredJournals.length === 0 && (
+            {!loading && filteredJournals.length === 0 && (
               <div className="py-12 text-center border border-border bg-surface">
                 <p className="text-[13px] text-muted">No journals in this category.</p>
               </div>
@@ -90,19 +133,26 @@ const Home: React.FC = () => {
                 <ChevronRight className="h-4 w-4 text-muted group-hover:text-primary transition-colors" />
               </Link>
 
-              <div className="space-y-6">
-                {announcements.map((item, i) => (
-                  <div key={i} className="group cursor-pointer">
-                    <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
-                      {item.date}
-                    </span>
-                    <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-1">
-                      {item.title}
-                    </h4>
-                    {i < announcements.length - 1 && <div className="border-b border-border mt-4" />}
-                  </div>
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center text-muted text-xs py-4">Loading news...</div>
+              ) : (
+                <div className="space-y-6">
+                  {announcements.map((item, i) => (
+                    <div key={item.id} className="group cursor-pointer">
+                      <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                      <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-1">
+                        {item.title}
+                      </h4>
+                      {i < announcements.length - 1 && <div className="border-b border-border mt-4" />}
+                    </div>
+                  ))}
+                  {announcements.length === 0 && (
+                    <p className="text-xs text-muted">No announcements posted.</p>
+                  )}
+                </div>
+              )}
 
               <Link
                 to="/announcements"
@@ -123,10 +173,10 @@ const Home: React.FC = () => {
               <ul className="space-y-3">
                 {['Submission Guidelines', 'Editorial Board', 'Ethics & Malpractice', 'Indexing & Abstracting'].map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-[13px] text-muted hover:text-primary flex items-center justify-between group transition-colors">
+                    <Link to="/about" className="text-[13px] text-muted hover:text-primary flex items-center justify-between group transition-colors">
                       {link}
                       <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

@@ -1,12 +1,27 @@
-import React from 'react';
-import { BookOpen, FileText, Users, Eye, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, FileText, Users, ArrowRight } from 'lucide-react';
+import api from '@/services/api';
 
 const Overview: React.FC = () => {
+  const [data, setData] = useState({ journals: 0, articles: 0, authors: 0, users: 0, announcements: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/dashboard/stats');
+        setData(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const stats = [
-    { label: 'Journals', value: '12', icon: BookOpen },
-    { label: 'Articles', value: '458', icon: FileText },
-    { label: 'Views', value: '25,482', icon: Eye },
-    { label: 'Authors', value: '84', icon: Users },
+    { label: 'Journals', value: data.journals.toString(), icon: BookOpen },
+    { label: 'Articles', value: data.articles.toString(), icon: FileText },
+    { label: 'Authors', value: data.authors.toString(), icon: Users },
+    { label: 'System Users', value: data.users.toString(), icon: Users },
   ];
 
   const recentActivity = [

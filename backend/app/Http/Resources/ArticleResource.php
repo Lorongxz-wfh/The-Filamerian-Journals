@@ -22,6 +22,8 @@ class ArticleResource extends JsonResource
             'pdf_url' => $this->pdf_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->pdf_path) : null,
             'page_start' => $this->page_start,
             'page_end' => $this->page_end,
+            'doi' => $this->doi,
+            'status' => $this->status,
             'issue' => new IssueResource($this->whenLoaded('issue')),
             'authors' => AuthorResource::collection($this->whenLoaded('authors')),
             'keywords' => KeywordResource::collection($this->whenLoaded('keywords')),

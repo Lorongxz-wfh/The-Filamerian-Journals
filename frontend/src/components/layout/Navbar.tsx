@@ -32,16 +32,28 @@ const Navbar = () => {
           <Link to="/archives" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
             Archives
           </Link>
-          <Link to="/announcements" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
-            Announcements
+          <Link to="/about" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
+            About
+          </Link>
+          <Link to="/contact" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
+            Contact
           </Link>
           <span className="w-px h-5 bg-white/20" />
-          <Link
-            to="/login"
-            className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
-          >
-            Portal Login
-          </Link>
+          {localStorage.getItem('token') ? (
+            <Link
+              to="/dashboard"
+              className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
+            >
+              Portal Login
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Trigger */}

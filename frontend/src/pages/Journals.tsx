@@ -1,18 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import JournalCard from '@/components/ui/JournalCard';
 import { Search } from 'lucide-react';
-import { journals } from '@/data/journals';
+import axios from 'axios';
 
 const categories = ['All', 'Science', 'Education', 'Arts', 'Multidisciplinary'] as const;
+
+interface Journal {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  cover_image: string | null;
+  volumes?: any[];
+  created_at: string;
+}
 
 const Journals: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [search, setSearch] = useState('');
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJournals = async () => {
+      try {
+        const res = await axios.get('http://127.0.0.1:8000/api/public/journals?with_volumes=1');
+        setJournals(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch journals', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJournals();
+  }, []);
 
   const filtered = journals.filter((j) => {
     const matchesCategory = activeTab === 'All' || j.category === activeTab;
     const matchesSearch = j.title.toLowerCase().includes(search.toLowerCase()) ||
-      j.description.toLowerCase().includes(search.toLowerCase());
+      (j.description && j.description.toLowerCase().includes(search.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -41,7 +68,7 @@ const Journals: React.FC = () => {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex gap-1 border border-border bg-surface w-fit">
+      <div className="flex gap-1 border border-border bg-surface w-fit flex-wrap">
         {categories.map((cat) => (
           <button
             key={cat}
@@ -58,29 +85,40 @@ const Journals: React.FC = () => {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((journal) => (
-          <JournalCard
-            key={journal.id}
-            slug={journal.slug}
-            title={journal.title}
-            description={journal.description}
-            image={journal.image}
-            date={journal.date}
-            volume={journal.latestVolume}
-            issue={journal.latestIssue}
-            category={journal.category}
-          />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="py-16 text-center border border-border bg-surface">
-          <p className="text-[13px] text-muted">No journals found.</p>
+      {loading ? (
+        <div className="py-20 text-center text-muted">Loading journals...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((j) => {
+            const latestVol = j.volumes?.[0];
+            const latestIssue = latestVol?.issues?.[0];
+            
+            return (
+              <JournalCard
+                key={j.id}
+                slug={j.slug}
+                title={j.title}
+                description={j.description}
+                date={new Date(j.created_at).toLocaleDateString()}
+                volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
+                issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
+                image={j.cover_image ? `http://127.0.0.1:8000/storage/${j.cover_image}` : undefined}
+                category={j.category}
+              />
+            );
+          })}
         </div>
       )}
 
-      <p className="text-[11px] text-muted">Showing {filtered.length} of {journals.length} journals</p>
+      {!loading && filtered.length === 0 && (
+        <div className="py-16 text-center border border-border bg-surface">
+          <p className="text-[13px] text-muted">No journals found matching your search.</p>
+        </div>
+      )}
+
+      {!loading && (
+        <p className="text-[11px] text-muted">Showing {filtered.length} of {journals.length} journals</p>
+      )}
     </div>
   );
 };

@@ -20,6 +20,7 @@ class VolumeResource extends JsonResource
             'volume_number' => $this->volume_number,
             'year' => $this->year,
             'journal' => new JournalResource($this->whenLoaded('journal')),
+            'issues' => IssueResource::collection($this->whenLoaded('issues')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

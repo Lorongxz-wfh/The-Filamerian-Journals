@@ -11,9 +11,22 @@ class Journal extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'description',
+        'category',
+        'issn',
+        'frequency',
+        'editor',
         'cover_image',
     ];
+
+    /**
+     * Use slug for route model binding on public routes.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     public function volumes()
     {

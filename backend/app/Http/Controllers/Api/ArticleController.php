@@ -11,7 +11,7 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        return ArticleResource::collection(Article::with(['issue.volume.journal', 'authors', 'keywords'])->paginate(15));
+        return ArticleResource::collection(Article::with(['issue.volume.journal', 'authors', 'keywords'])->paginate(50));
     }
 
     public function store(Request $request)
@@ -23,6 +23,8 @@ class ArticleController extends Controller
             'pdf_path' => 'nullable|file|mimes:pdf|max:10240', // 10MB max
             'page_start' => 'nullable|integer',
             'page_end' => 'nullable|integer',
+            'doi' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:Published,Pending,Revision,Draft',
             'author_ids' => 'nullable|array',
             'author_ids.*' => 'exists:authors,id',
             'keyword_ids' => 'nullable|array',
@@ -44,7 +46,7 @@ class ArticleController extends Controller
             $article->keywords()->sync($request->keyword_ids);
         }
 
-        return new ArticleResource($article->load(['authors', 'keywords']));
+        return new ArticleResource($article->load(['authors', 'keywords', 'issue.volume.journal']));
     }
 
     public function show(Article $article)
@@ -61,6 +63,8 @@ class ArticleController extends Controller
             'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
             'page_start' => 'nullable|integer',
             'page_end' => 'nullable|integer',
+            'doi' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:Published,Pending,Revision,Draft',
             'author_ids' => 'nullable|array',
             'author_ids.*' => 'exists:authors,id',
             'keyword_ids' => 'nullable|array',
@@ -86,11 +90,16 @@ class ArticleController extends Controller
             $article->keywords()->sync($request->keyword_ids);
         }
 
-        return new ArticleResource($article->load(['authors', 'keywords']));
+        return new ArticleResource($article->load(['authors', 'keywords', 'issue.volume.journal']));
     }
 
     public function destroy(Article $article)
     {
+        // Delete PDF if exists
+        if ($article->pdf_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($article->pdf_path);
+        }
+
         $article->delete();
 
         return response()->noContent();

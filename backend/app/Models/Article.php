@@ -16,6 +16,8 @@ class Article extends Model
         'pdf_path',
         'page_start',
         'page_end',
+        'doi',
+        'status',
     ];
 
     public function issue()

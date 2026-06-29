@@ -20,6 +20,7 @@ class IssueResource extends JsonResource
             'issue_number' => $this->issue_number,
             'published_at' => $this->published_at,
             'volume' => new VolumeResource($this->whenLoaded('volume')),
+            'articles' => ArticleResource::collection($this->whenLoaded('articles')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
