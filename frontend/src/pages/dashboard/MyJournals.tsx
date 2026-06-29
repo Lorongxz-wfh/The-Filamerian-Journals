@@ -97,7 +97,7 @@ const MyJournals: React.FC = () => {
 
     try {
       if (editingJournal) {
-        await api.put(`/journals/${editingJournal.id}`, formData);
+        await api.put(`/journals/${editingJournal.slug}`, formData);
       } else {
         await api.post('/journals', formData);
       }
@@ -111,12 +111,12 @@ const MyJournals: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (slug: string) => {
     if (!window.confirm('Are you sure you want to delete this journal? This action cannot be undone.')) {
       return;
     }
     try {
-      await api.delete(`/journals/${id}`);
+      await api.delete(`/journals/${slug}`);
       await fetchJournals();
     } catch (err) {
       console.error('Delete failed:', err);
@@ -205,7 +205,7 @@ const MyJournals: React.FC = () => {
                   <Edit2 className="h-4 w-4" />
                 </button>
                 <button 
-                  onClick={() => handleDelete(journal.id)}
+                  onClick={() => handleDelete(journal.slug)}
                   className="h-7 w-7 flex items-center justify-center text-muted/30 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                   title="Delete"
                 >
