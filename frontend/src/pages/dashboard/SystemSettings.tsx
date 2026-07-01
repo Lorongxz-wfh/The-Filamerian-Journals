@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Globe, Mail, Database, Shield, Loader2 } from 'lucide-react';
 import api from '@/services/api';
+import Input from '@/components/ui/Input';
+import { FormSkeleton } from '@/components/ui/Skeleton';
 
 const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState<Record<string, string>>({
@@ -12,6 +14,7 @@ const SystemSettings: React.FC = () => {
     notify_review_completion: '1',
     notify_user_registration: '0',
     notify_system_health: '1',
+    journal_categories: 'Science, Education, Arts, Multidisciplinary',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -56,9 +59,7 @@ const SystemSettings: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="py-20 text-center text-muted">Loading settings...</div>;
-  }
+  if (loading) return <FormSkeleton rows={6} />;
 
   return (
     <div className="space-y-8">
@@ -80,33 +81,27 @@ const SystemSettings: React.FC = () => {
             <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">General</h2>
           </div>
           <div className="space-y-4">
-            <div>
-              <label className="text-[11px] font-semibold text-muted uppercase tracking-wider block mb-1.5">Site Title</label>
-              <input 
-                type="text" 
-                value={settings.site_title} 
-                onChange={(e) => handleChange('site_title', e.target.value)}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors" 
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-semibold text-muted uppercase tracking-wider block mb-1.5">Tagline</label>
-              <input 
-                type="text" 
-                value={settings.tagline} 
-                onChange={(e) => handleChange('tagline', e.target.value)}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors" 
-              />
-            </div>
-            <div>
-              <label className="text-[11px] font-semibold text-muted uppercase tracking-wider block mb-1.5">Contact Email</label>
-              <input 
-                type="email" 
-                value={settings.contact_email} 
-                onChange={(e) => handleChange('contact_email', e.target.value)}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors" 
-              />
-            </div>
+            <Input 
+              label="Site Title" 
+              value={settings.site_title} 
+              onChange={(e) => handleChange('site_title', e.target.value)}
+            />
+            <Input 
+              label="Tagline" 
+              value={settings.tagline} 
+              onChange={(e) => handleChange('tagline', e.target.value)}
+            />
+            <Input 
+              label="Contact Email" type="email"
+              value={settings.contact_email} 
+              onChange={(e) => handleChange('contact_email', e.target.value)}
+            />
+            <Input 
+              label="Journal Categories" hint="Comma Separated"
+              value={settings.journal_categories} 
+              onChange={(e) => handleChange('journal_categories', e.target.value)}
+              placeholder="Science, Education, Arts"
+            />
           </div>
         </div>
 
@@ -149,7 +144,7 @@ const SystemSettings: React.FC = () => {
                 type="number" 
                 value={settings.max_upload_size}
                 onChange={(e) => handleChange('max_upload_size', e.target.value)}
-                className="w-20 px-2 py-1 bg-background border border-border text-right focus:outline-none focus:border-primary" 
+                className="w-20 px-2 py-1 bg-background border border-border text-[13px] text-right focus:outline-none focus:border-primary transition-colors" 
               />
             </div>
             <div className="flex justify-between py-1.5 border-b border-border">

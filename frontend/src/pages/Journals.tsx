@@ -3,7 +3,7 @@ import JournalCard from '@/components/ui/JournalCard';
 import { Search } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 
-const categories = ['All', 'Science', 'Education', 'Arts', 'Multidisciplinary'] as const;
+// Dynamic categories fetched from API
 
 interface Journal {
   id: number;
@@ -22,11 +22,20 @@ const Journals: React.FC = () => {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
+
   useEffect(() => {
     const fetchJournals = async () => {
       try {
-        const res = await api.get('/public/journals?with_volumes=1');
-        setJournals(res.data.data);
+        const [jrnRes, setRes] = await Promise.all([
+          api.get('/public/journals?with_volumes=1'),
+          api.get('/public/settings')
+        ]);
+        setJournals(jrnRes.data.data);
+        
+        const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+        const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
+        setAvailableCategories(['All', ...catsArray]);
       } catch (err) {
         console.error('Failed to fetch journals', err);
       } finally {
@@ -69,7 +78,7 @@ const Journals: React.FC = () => {
 
       {/* Category Tabs */}
       <div className="flex gap-1 border border-border bg-surface w-fit flex-wrap">
-        {categories.map((cat) => (
+        {availableCategories.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveTab(cat)}

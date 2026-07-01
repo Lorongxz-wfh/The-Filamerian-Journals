@@ -18,6 +18,7 @@ class Article extends Model
         'page_end',
         'doi',
         'status',
+        'cover_path',
     ];
 
     public function issue()

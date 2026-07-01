@@ -11,6 +11,8 @@ import MyJournals from '@/pages/dashboard/MyJournals';
 import ManageJournal from '@/pages/dashboard/ManageJournal';
 import Articles from '@/pages/dashboard/Articles';
 import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
+import Notifications from '@/pages/dashboard/Notifications';
+import ManageResources from '@/pages/dashboard/ManageResources';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
@@ -58,6 +60,8 @@ function App() {
                   <Route path="journals/:slug" element={<ManageJournal />} />
                   <Route path="articles" element={<Articles />} />
                   <Route path="announcements" element={<ManageAnnouncements />} />
+                  <Route path="notifications" element={<Notifications />} />
+                  <Route path="resources" element={<ManageResources />} />
                   <Route path="feedback" element={<Feedback />} />
                   <Route path="users" element={<UserManager />} />
                   <Route path="settings" element={<SystemSettings />} />

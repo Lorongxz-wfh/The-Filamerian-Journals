@@ -4,6 +4,8 @@ import { ArrowLeft, Plus, BookOpen, Calendar, Edit2, Trash2, ChevronDown } from 
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import { ListSkeleton } from '@/components/ui/Skeleton';
 
 interface Issue {
   id: number;
@@ -141,8 +143,7 @@ const ManageJournal: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="py-10 text-center text-muted text-sm">Loading...</div>;
-  if (!journal) return <div className="py-10 text-center text-muted text-sm">Journal not found</div>;
+  if (!journal && !loading) return <div className="py-10 text-center text-muted text-[13px]">Journal not found</div>;
 
   return (
     <div className="space-y-8">
@@ -153,10 +154,10 @@ const ManageJournal: React.FC = () => {
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h1 className="text-xl uppercase tracking-wider line-clamp-1">{journal.title}</h1>
+            <h1 className="text-xl uppercase tracking-wider line-clamp-1">{journal?.title || 'Loading...'}</h1>
             <p className="text-[13px] text-muted mt-1">Manage volumes and issues</p>
           </div>
-          <Button onClick={() => handleOpenVolModal()} className="shrink-0 flex items-center gap-2">
+          <Button onClick={() => handleOpenVolModal()} disabled={!journal} className="shrink-0 flex items-center gap-2">
             <Plus className="h-4 w-4" /> New Volume
           </Button>
         </div>
@@ -164,12 +165,14 @@ const ManageJournal: React.FC = () => {
 
       {/* Volumes List */}
       <div className="space-y-4">
-        {journal.volumes?.length === 0 ? (
+        {loading && !journal ? (
+          <ListSkeleton colSpans={[12]} rows={4} />
+        ) : journal?.volumes?.length === 0 ? (
           <div className="border border-border bg-surface p-10 text-center text-[13px] text-muted">
             No volumes added yet. Create one to get started.
           </div>
         ) : (
-          journal.volumes?.map((vol) => (
+          journal?.volumes?.map((vol) => (
             <div key={vol.id} className="border border-border bg-surface">
               {/* Volume Header */}
               <div 
@@ -222,11 +225,11 @@ const ManageJournal: React.FC = () => {
                             <span className="text-[13px] font-medium text-primary">Issue {issue.issue_number}</span>
                             <span className="text-[11px] text-muted ml-2">Published: {issue.published_at}</span>
                           </div>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleOpenIssueModal(vol.id, issue)} className="text-muted/40 hover:text-primary h-6 w-6 flex items-center justify-center">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => handleOpenIssueModal(vol.id, issue)} className="text-muted/60 hover:text-primary hover:bg-black/5 rounded h-6 w-6 flex items-center justify-center transition-all">
                               <Edit2 className="h-3.5 w-3.5" />
                             </button>
-                            <button onClick={() => deleteIssue(issue.id)} className="text-muted/40 hover:text-red-500 h-6 w-6 flex items-center justify-center">
+                            <button onClick={() => deleteIssue(issue.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 rounded h-6 w-6 flex items-center justify-center transition-all">
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
@@ -244,20 +247,12 @@ const ManageJournal: React.FC = () => {
       {/* Volume Modal */}
       <Modal isOpen={isVolModalOpen} onClose={() => !isSubmitting && setIsVolModalOpen(false)} title={editingVol ? 'Edit Volume' : 'New Volume'}>
         <form onSubmit={submitVolume} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Volume Number</label>
-            <input 
-              type="number" required value={volFormData.volume_number} onChange={e => setVolFormData({...volFormData, volume_number: e.target.value})}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Year</label>
-            <input 
-              type="number" required value={volFormData.year} onChange={e => setVolFormData({...volFormData, year: e.target.value})}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
+          <Input 
+            label="Volume Number" required type="number" value={volFormData.volume_number} onChange={e => setVolFormData({...volFormData, volume_number: e.target.value})}
+          />
+          <Input 
+            label="Year" required type="number" value={volFormData.year} onChange={e => setVolFormData({...volFormData, year: e.target.value})}
+          />
           <div className="flex justify-end gap-3 pt-4 mt-6">
             <Button type="button" variant="outline" onClick={() => setIsVolModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Volume'}</Button>
@@ -268,20 +263,12 @@ const ManageJournal: React.FC = () => {
       {/* Issue Modal */}
       <Modal isOpen={isIssueModalOpen} onClose={() => !isSubmitting && setIsIssueModalOpen(false)} title={editingIssue ? 'Edit Issue' : 'New Issue'}>
         <form onSubmit={submitIssue} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Issue Number</label>
-            <input 
-              type="number" required value={issueFormData.issue_number} onChange={e => setIssueFormData({...issueFormData, issue_number: e.target.value})}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Publication Date</label>
-            <input 
-              type="date" required value={issueFormData.published_at} onChange={e => setIssueFormData({...issueFormData, published_at: e.target.value})}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
+          <Input 
+            label="Issue Number" required type="number" value={issueFormData.issue_number} onChange={e => setIssueFormData({...issueFormData, issue_number: e.target.value})}
+          />
+          <Input 
+            label="Publication Date" required type="date" value={issueFormData.published_at} onChange={e => setIssueFormData({...issueFormData, published_at: e.target.value})}
+          />
           <div className="flex justify-end gap-3 pt-4 mt-6">
             <Button type="button" variant="outline" onClick={() => setIsIssueModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Issue'}</Button>

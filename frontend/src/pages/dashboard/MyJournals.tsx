@@ -4,6 +4,10 @@ import { BookOpen, Plus, Search, Settings2, Edit2, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Textarea from '@/components/ui/Textarea';
+import { ListSkeleton } from '@/components/ui/Skeleton';
 
 interface Journal {
   id: number;
@@ -41,13 +45,22 @@ const MyJournals: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
   const fetchJournals = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/journals?with_volumes=1');
-      setJournals(response.data.data);
+      const [journalsRes, settingsRes] = await Promise.all([
+        api.get('/journals?with_volumes=1'),
+        api.get('/public/settings')
+      ]);
+      setJournals(journalsRes.data.data);
+      
+      const catsString = settingsRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+      const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
+      setAvailableCategories(catsArray);
     } catch (err) {
-      console.error('Failed to fetch journals:', err);
+      console.error('Failed to fetch journals or settings:', err);
     } finally {
       setLoading(false);
     }
@@ -157,8 +170,8 @@ const MyJournals: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="border border-border bg-surface">
-        <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
+      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
+        <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
           <div className="col-span-5">Title</div>
           <div className="col-span-2">Category</div>
           <div className="col-span-2 text-center">Volumes</div>
@@ -167,18 +180,19 @@ const MyJournals: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="px-5 py-10 text-center text-[13px] text-muted">Loading journals...</div>
+          <ListSkeleton colSpans={[5, 2, 2, 2, 1]} rows={5} />
         ) : filtered.length === 0 ? (
           <div className="px-5 py-10 text-center text-[13px] text-muted">No journals found.</div>
         ) : (
           filtered.map((journal) => (
             <div
               key={journal.id}
-              className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 items-center hover:bg-background transition-colors group cursor-default"
+              onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
+              className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 items-center hover:bg-background transition-colors group cursor-pointer"
             >
               <div className="col-span-5 flex items-center gap-3 min-w-0">
                 <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
-                <span className="text-[13px] font-medium text-primary truncate">{journal.title}</span>
+                <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">{journal.title}</span>
               </div>
               <div className="col-span-2 text-[13px] text-muted truncate">
                 {journal.category || '-'}
@@ -191,22 +205,22 @@ const MyJournals: React.FC = () => {
               </div>
               <div className="col-span-1 flex justify-end gap-2">
                 <button 
-                  onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
-                  className="h-7 w-7 flex items-center justify-center text-muted/30 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/journals/${journal.slug}`); }}
+                  className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-primary hover:bg-black/5 transition-all rounded"
                   title="Manage Volumes & Issues"
                 >
                   <Settings2 className="h-4 w-4" />
                 </button>
                 <button 
-                  onClick={() => handleOpenModal(journal)}
-                  className="h-7 w-7 flex items-center justify-center text-muted/30 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={(e) => { e.stopPropagation(); handleOpenModal(journal); }}
+                  className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-primary hover:bg-black/5 transition-all rounded"
                   title="Edit"
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
                 <button 
-                  onClick={() => handleDelete(journal.slug)}
-                  className="h-7 w-7 flex items-center justify-center text-muted/30 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(journal.slug); }}
+                  className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-red-500 hover:bg-red-500/10 transition-all rounded"
                   title="Delete"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -234,71 +248,50 @@ const MyJournals: React.FC = () => {
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Title *</label>
-              <input 
-                type="text" name="title" required value={formData.title} onChange={handleInputChange}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                placeholder="e.g. FCU Multidisciplinary Research Journal"
+            <div className="md:col-span-2">
+              <Input 
+                label="Title" required name="title" value={formData.title} onChange={handleInputChange} placeholder="e.g. FCU Multidisciplinary Research Journal"
               />
             </div>
             
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Slug</label>
-              <input 
-                type="text" name="slug" value={formData.slug} onChange={handleInputChange}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                placeholder="Auto-generated if empty"
+            <div>
+              <Input 
+                label="Slug" hint="Auto-generated if empty" name="slug" value={formData.slug} onChange={handleInputChange} placeholder="Auto-generated if empty"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Category</label>
-              <select 
-                name="category" value={formData.category} onChange={handleInputChange}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors appearance-none"
+            <div>
+              <Select 
+                label="Category" name="category" value={formData.category} onChange={handleInputChange}
               >
                 <option value="">Select Category</option>
-                <option value="Science">Science</option>
-                <option value="Education">Education</option>
-                <option value="Arts">Arts</option>
-                <option value="Multidisciplinary">Multidisciplinary</option>
-              </select>
+                {availableCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </Select>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">ISSN</label>
-              <input 
-                type="text" name="issn" value={formData.issn} onChange={handleInputChange}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                placeholder="e.g. 2651-7701"
+            <div>
+              <Input 
+                label="ISSN" name="issn" value={formData.issn} onChange={handleInputChange} placeholder="e.g. 2651-7701"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Frequency</label>
-              <input 
-                type="text" name="frequency" value={formData.frequency} onChange={handleInputChange}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                placeholder="e.g. Biannual, Quarterly"
+            <div>
+              <Input 
+                label="Frequency" name="frequency" value={formData.frequency} onChange={handleInputChange} placeholder="e.g. Biannual, Quarterly"
               />
             </div>
             
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Editor in Chief</label>
-              <input 
-                type="text" name="editor" value={formData.editor} onChange={handleInputChange}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                placeholder="e.g. Dr. Julian Santos"
+            <div className="md:col-span-2">
+              <Input 
+                label="Editor in Chief" name="editor" value={formData.editor} onChange={handleInputChange} placeholder="e.g. Dr. Julian Santos"
               />
             </div>
 
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Description</label>
-              <textarea 
-                name="description" value={formData.description} onChange={handleInputChange} rows={3}
-                className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors resize-none"
-                placeholder="Brief description of the journal's scope and focus..."
+            <div className="md:col-span-2">
+              <Textarea 
+                label="Description" name="description" value={formData.description} onChange={handleInputChange} rows={3} placeholder="Brief description of the journal's scope and focus..."
               />
             </div>
           </div>

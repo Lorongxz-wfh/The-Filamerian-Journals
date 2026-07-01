@@ -27,6 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::get('/notifications/unread', [\App\Http\Controllers\Api\NotificationController::class, 'unread']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
+
     // Dashboard stats
     Route::middleware([\App\Http\Middleware\EnsureUserIsApproved::class])->group(function () {
         Route::get('/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'stats']);
@@ -39,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['index', 'show']);
     Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['index', 'show']);
     Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['index', 'show']);
+    Route::apiResource('resources', \App\Http\Controllers\Api\ResourceController::class)->only(['index', 'show']);
 
     Route::get('/articles/{article}/download-url', [\App\Http\Controllers\Api\ArticleController::class, 'getDownloadUrl']);
 
@@ -52,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('resources', \App\Http\Controllers\Api\ResourceController::class)->only(['store', 'update', 'destroy']);
     });
 
     // Super Admin Only
@@ -70,6 +79,8 @@ Route::get('/public/search', [\App\Http\Controllers\Api\SearchController::class,
 Route::get('/public/journals', [\App\Http\Controllers\Api\JournalController::class, 'index']);
 Route::get('/public/journals/{journal}', [\App\Http\Controllers\Api\JournalController::class, 'show']);
 Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
+Route::get('/public/resources', [\App\Http\Controllers\Api\ResourceController::class, 'index']);
+Route::get('/public/resources/{resource:slug}', [\App\Http\Controllers\Api\ResourceController::class, 'show']);
 
 // Settings & Feedbacks
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);

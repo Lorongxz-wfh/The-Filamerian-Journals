@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, BookOpen, Calendar, ChevronDown, ExternalLink, Quote } from 'lucide-react';
+import { ArrowLeft, BookOpen, Calendar, ChevronDown, Quote } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
+import Modal from '@/components/ui/Modal';
 
 interface Author {
   id: number;
@@ -16,7 +17,8 @@ interface Article {
   doi: string | null;
   page_start: number | null;
   page_end: number | null;
-  pdf_path: string | null;
+  pdf_url: string | null;
+  cover_path: string | null;
   authors: Author[];
 }
 
@@ -56,6 +58,10 @@ const JournalDetail: React.FC = () => {
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
   const [citationContext, setCitationContext] = useState<any>({});
+
+  // PDF Viewer Modal State
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchJournal = async () => {
@@ -179,8 +185,38 @@ const JournalDetail: React.FC = () => {
                     {/* Articles Table */}
                     <div className="divide-y divide-border">
                       {issue.articles?.map((article) => (
-                        <div key={article.id} className="px-5 py-4 hover:bg-background/50 transition-colors group cursor-pointer">
+                        <div 
+                          key={article.id} 
+                          className="px-5 py-4 hover:bg-background/50 transition-colors group cursor-pointer"
+                          onClick={async () => {
+                            if (!article.pdf_url) return;
+                            if (!localStorage.getItem('token')) {
+                              window.location.href = '/login';
+                              return;
+                            }
+                            setIsPdfModalOpen(true);
+                            setPdfViewUrl(null);
+                            try {
+                              const res = await api.get(`/articles/${article.id}/download-url`);
+                              let url = res.data.url;
+                              if (url.includes('/storage/')) {
+                                const path = url.split('/storage/')[1];
+                                url = `${STORAGE_URL}${path}`;
+                              }
+                              setPdfViewUrl(url);
+                            } catch (err) {
+                              console.error('Failed to get download URL', err);
+                              alert('Could not load PDF document.');
+                              setIsPdfModalOpen(false);
+                            }
+                          }}
+                        >
                           <div className="flex items-start justify-between gap-4">
+                            {article.cover_path && (
+                              <div className="shrink-0 w-16 h-20 border border-border bg-surface overflow-hidden">
+                                <img src={`${STORAGE_URL}${article.cover_path}`} alt="Cover" className="w-full h-full object-cover" />
+                              </div>
+                            )}
                             <div className="min-w-0 flex-grow">
                               <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors leading-snug">
                                 {article.title}
@@ -200,34 +236,13 @@ const JournalDetail: React.FC = () => {
                                 {article.doi && <span>DOI: {article.doi}</span>}
                               </div>
                             </div>
-                            <div className="shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
-                              {article.pdf_path && (
-                                localStorage.getItem('token') ? (
-                                  <button 
-                                    onClick={async () => {
-                                      try {
-                                        const res = await api.get(`/articles/${article.id}/download-url`);
-                                        window.open(res.data.url, '_blank');
-                                      } catch (err) {
-                                        console.error('Failed to get download URL', err);
-                                      }
-                                    }}
-                                    className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1"
-                                  >
-                                    <ExternalLink className="h-3 w-3" /> PDF
-                                  </button>
-                                ) : (
-                                  <Link 
-                                    to="/login"
-                                    className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1"
-                                    title="Login required to download PDF"
-                                  >
-                                    <ExternalLink className="h-3 w-3" /> PDF (Login)
-                                  </Link>
-                                )
+                            <div className="shrink-0 pt-1 flex flex-col gap-2 items-end text-right">
+                              {!localStorage.getItem('token') && article.pdf_url && (
+                                <span className="text-[10px] text-muted opacity-50 uppercase tracking-wider">Login to view PDF</span>
                               )}
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setCitationArticle(article);
                                   setCitationContext({
                                     journalTitle: journal.title,
@@ -268,6 +283,27 @@ const JournalDetail: React.FC = () => {
         issueNumber={citationContext.issueNumber}
         year={citationContext.year}
       />
+
+      {/* PDF Viewer Modal */}
+      <Modal 
+        isOpen={isPdfModalOpen} 
+        onClose={() => setIsPdfModalOpen(false)} 
+        title="Document Viewer" 
+        className="max-w-4xl h-[95vh]"
+        bodyClassName="p-3"
+      >
+        <div className="w-full h-full flex flex-col">
+          {pdfViewUrl ? (
+            <iframe 
+              src={pdfViewUrl} 
+              className="w-full flex-grow border-0 bg-white" 
+              title="PDF Document Viewer"
+            />
+          ) : (
+            <div className="flex items-center justify-center flex-grow text-muted">Loading document...</div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

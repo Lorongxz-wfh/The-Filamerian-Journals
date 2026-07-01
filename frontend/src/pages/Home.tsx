@@ -4,7 +4,7 @@ import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 
-const categories = ['All', 'Science', 'Education', 'Arts', 'Multidisciplinary'] as const;
+// Dynamic categories fetched from API
 
 interface Journal {
   id: number;
@@ -30,15 +30,26 @@ const Home: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
+  const [resources, setResources] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [jrnRes, annRes] = await Promise.all([
+        const [jrnRes, annRes, setRes, resRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
-          api.get('/public/announcements')
+          api.get('/public/announcements'),
+          api.get('/public/settings'),
+          api.get('/public/resources')
         ]);
         setJournals(jrnRes.data.data);
-        setAnnouncements(annRes.data.data.slice(0, 3)); // Only show latest 3
+        setAnnouncements(annRes.data.data.slice(0, 3));
+        
+        const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+        const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
+        setAvailableCategories(['All', ...catsArray]);
+        
+        setResources(resRes.data.data);
       } catch (err) {
         console.error('Failed to fetch public data', err);
       } finally {
@@ -65,7 +76,7 @@ const Home: React.FC = () => {
                 Academic Journals
               </h2>
               <div className="flex gap-6 shrink-0">
-                {categories.map((cat) => (
+                {availableCategories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setActiveTab(cat)}
@@ -171,10 +182,10 @@ const Home: React.FC = () => {
               </div>
 
               <ul className="space-y-3">
-                {['Submission Guidelines', 'Editorial Board', 'Ethics & Malpractice', 'Indexing & Abstracting'].map((link) => (
-                  <li key={link}>
-                    <Link to="/about" className="text-[13px] text-muted hover:text-primary flex items-center justify-between group transition-colors">
-                      {link}
+                {resources.map((res: any) => (
+                  <li key={res.id}>
+                    <Link to={`/about#${res.slug}`} className="text-[13px] text-muted hover:text-primary flex items-center justify-between group transition-colors">
+                      {res.title}
                       <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
                     </Link>
                   </li>

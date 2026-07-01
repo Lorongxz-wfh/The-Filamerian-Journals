@@ -8,9 +8,10 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   className?: string;
+  bodyClassName?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className, bodyClassName }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -47,7 +48,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
         </div>
         
         {/* Body */}
-        <div className="p-6 overflow-y-auto">
+        <div className={cn("p-6 overflow-y-auto flex-grow flex flex-col", bodyClassName)}>
           {children}
         </div>
       </div>

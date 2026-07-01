@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Loader2, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2 } from 'lucide-react';
 import api from '@/services/api';
+import { MessageListSkeleton } from '@/components/ui/Skeleton';
 
 interface FeedbackItem {
   id: number;
@@ -70,9 +71,7 @@ const Feedback: React.FC = () => {
         {/* Message List */}
         <div className="lg:col-span-5 border border-border bg-surface divide-y divide-border overflow-auto max-h-[600px]">
           {loading ? (
-            <div className="p-8 text-center text-muted flex justify-center items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading...
-            </div>
+            <MessageListSkeleton rows={6} />
           ) : feedbacks.length === 0 ? (
             <div className="p-8 text-center text-muted text-[13px]">
               No messages found.

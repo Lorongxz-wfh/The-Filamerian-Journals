@@ -24,6 +24,15 @@ class AnnouncementController extends Controller
 
         $announcement = Announcement::create($validated);
 
+        // Notify all users about the new announcement
+        $users = \App\Models\User::where('is_approved', true)->get();
+        \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\SystemNotification(
+            'New Announcement',
+            $announcement->title,
+            'info',
+            '/dashboard/announcements'
+        ));
+
         return new AnnouncementResource($announcement);
     }
 

@@ -23,6 +23,7 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
+      await new Promise(r => setTimeout(r, 600)); // UX delay to ensure loading state is visible
       const response = await api.post('/login', { email, password });
       const { access_token, user } = response.data;
 

@@ -3,6 +3,9 @@ import { Plus, Search, Edit2, Trash2, CheckCircle } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import { TableRowSkeleton } from '@/components/ui/Skeleton';
 
 interface User {
   id: number;
@@ -142,9 +145,9 @@ const UserManager: React.FC = () => {
         />
       </div>
 
-      <div className="border border-border bg-surface overflow-x-auto">
+      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
         <table className="w-full min-w-[600px]">
-          <thead>
+          <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
             <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
               <th className="px-5 py-3">Name</th>
               <th className="px-5 py-3">Email</th>
@@ -154,7 +157,7 @@ const UserManager: React.FC = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={4} className="px-5 py-10 text-center text-[13px] text-muted">Loading users...</td></tr>
+              <TableRowSkeleton columns={4} rows={5} />
             ) : filtered.length === 0 ? (
               <tr><td colSpan={4} className="px-5 py-10 text-center text-[13px] text-muted">No users found.</td></tr>
             ) : (
@@ -182,17 +185,17 @@ const UserManager: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2">
                       {!user.is_approved && (
-                        <button onClick={() => handleApprove(user.id)} className="text-muted/40 hover:text-emerald-500 h-6 w-6 flex items-center justify-center" title="Approve User">
-                          <CheckCircle className="h-3.5 w-3.5" />
+                        <button onClick={() => handleApprove(user.id)} className="text-muted/60 hover:text-emerald-500 hover:bg-emerald-50 h-7 w-7 rounded flex items-center justify-center transition-all" title="Approve User">
+                          <CheckCircle className="h-4 w-4" />
                         </button>
                       )}
-                      <button onClick={() => handleOpenModal(user)} className="text-muted/40 hover:text-primary h-6 w-6 flex items-center justify-center">
-                        <Edit2 className="h-3.5 w-3.5" />
+                      <button onClick={() => handleOpenModal(user)} className="text-muted/60 hover:text-primary hover:bg-black/5 h-7 w-7 rounded flex items-center justify-center transition-all">
+                        <Edit2 className="h-4 w-4" />
                       </button>
-                      <button onClick={() => handleDelete(user.id)} className="text-muted/40 hover:text-red-500 h-6 w-6 flex items-center justify-center">
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <button onClick={() => handleDelete(user.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 h-7 w-7 rounded flex items-center justify-center transition-all">
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -208,41 +211,25 @@ const UserManager: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="p-3 bg-red-50 text-red-700 text-[13px]">{error}</div>}
           
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Full Name *</label>
-            <input 
-              type="text" name="name" required value={formData.name} onChange={handleInputChange}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
+          <Input 
+            label="Full Name" required name="name" value={formData.name} onChange={handleInputChange}
+          />
           
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Email Address *</label>
-            <input 
-              type="email" name="email" required value={formData.email} onChange={handleInputChange}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
+          <Input 
+            label="Email Address" type="email" required name="email" value={formData.email} onChange={handleInputChange}
+          />
 
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Password {editingUser && '(Leave blank to keep)'}</label>
-            <input 
-              type="password" name="password" required={!editingUser} value={formData.password} onChange={handleInputChange}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
-            />
-          </div>
+          <Input 
+            label="Password" hint={editingUser ? 'Leave blank to keep' : undefined} type="password" required={!editingUser} name="password" value={formData.password} onChange={handleInputChange}
+          />
 
-          <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Role *</label>
-            <select 
-              name="role" required value={formData.role} onChange={handleInputChange}
-              className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary appearance-none"
-            >
-              <option value="Super Admin">Super Admin</option>
-              <option value="Editor">Editor</option>
-              <option value="Staff">Staff</option>
-            </select>
-          </div>
+          <Select 
+            label="Role" required name="role" value={formData.role} onChange={handleInputChange}
+          >
+            <option value="Super Admin">Super Admin</option>
+            <option value="Editor">Editor</option>
+            <option value="Staff">Staff</option>
+          </Select>
 
           <div className="flex justify-end gap-3 pt-4 mt-6">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
