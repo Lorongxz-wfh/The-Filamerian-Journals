@@ -5,13 +5,14 @@ import api from '@/services/api';
 interface Announcement {
   id: number;
   title: string;
-  content: string;
+  body: string;
   created_at: string;
 }
 
 const Announcements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -26,6 +27,15 @@ const Announcements: React.FC = () => {
     };
     fetchAnnouncements();
   }, []);
+
+  const toggleExpand = (id: number) => {
+    setExpandedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
 
   return (
     <div className="container-custom py-12 space-y-10">
@@ -42,27 +52,36 @@ const Announcements: React.FC = () => {
         ) : announcements.length === 0 ? (
           <div className="py-20 text-center border border-border bg-surface text-muted text-[13px]">No announcements posted yet.</div>
         ) : (
-          announcements.map((item) => (
-            <article key={item.id} className="border border-border bg-surface p-6 hover:bg-background transition-colors cursor-pointer group">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-3.5 w-3.5 text-secondary" />
-                <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
-                  {new Date(item.created_at).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </span>
-              </div>
-              <h2 className="text-[15px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mb-2">
-                {item.title}
-              </h2>
-              <p className="text-[13px] text-muted leading-relaxed whitespace-pre-wrap">{item.content}</p>
-              <div className="flex items-center gap-1 mt-3 text-[12px] font-medium text-primary/50 group-hover:text-primary transition-colors">
-                Read more <ChevronRight className="h-3 w-3" />
-              </div>
-            </article>
-          ))
+          announcements.map((item) => {
+            const isExpanded = expandedIds.has(item.id);
+            return (
+              <article 
+                key={item.id} 
+                onClick={() => toggleExpand(item.id)}
+                className="border border-border bg-surface p-6 hover:bg-background transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="h-3.5 w-3.5 text-secondary" />
+                  <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
+                    {new Date(item.created_at).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+                <h2 className="text-[15px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mb-2">
+                  {item.title}
+                </h2>
+                <p className={`text-[13px] text-muted leading-relaxed whitespace-pre-wrap ${!isExpanded ? 'line-clamp-3' : ''}`}>
+                  {item.body}
+                </p>
+                <div className="flex items-center gap-1 mt-3 text-[12px] font-medium text-primary/50 group-hover:text-primary transition-colors">
+                  {isExpanded ? 'Show less' : 'Read more'} <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                </div>
+              </article>
+            );
+          })
         )}
       </div>
     </div>

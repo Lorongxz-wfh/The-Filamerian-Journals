@@ -20,7 +20,7 @@ interface Journal {
 interface Announcement {
   id: number;
   title: string;
-  content: string;
+  body: string;
   created_at: string;
 }
 
