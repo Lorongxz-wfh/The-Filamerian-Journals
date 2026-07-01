@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import api from '@/services/api';
 import Button from '@/components/ui/Button';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
@@ -115,12 +115,6 @@ const Login: React.FC = () => {
         </form>
 
         <div className="pt-2 text-center space-y-3">
-          <p className="text-[12px] text-muted">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary hover:underline font-medium">
-              Create one
-            </Link>
-          </p>
           <p className="text-[11px] text-muted/60">
             Protected academic system. Unauthorized access is prohibited.
           </p>

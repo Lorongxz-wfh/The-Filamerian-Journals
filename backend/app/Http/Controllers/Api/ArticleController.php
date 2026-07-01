@@ -32,7 +32,7 @@ class ArticleController extends Controller
         ]);
 
         if ($request->hasFile('pdf_path')) {
-            $path = $request->file('pdf_path')->store('articles', 'public');
+            $path = $request->file('pdf_path')->store('articles', 'r2');
             $validated['pdf_path'] = $path;
         }
 
@@ -74,9 +74,9 @@ class ArticleController extends Controller
         if ($request->hasFile('pdf_path')) {
             // Delete old file
             if ($article->pdf_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($article->pdf_path);
+                \Illuminate\Support\Facades\Storage::disk('r2')->delete($article->pdf_path);
             }
-            $path = $request->file('pdf_path')->store('articles', 'public');
+            $path = $request->file('pdf_path')->store('articles', 'r2');
             $validated['pdf_path'] = $path;
         }
 

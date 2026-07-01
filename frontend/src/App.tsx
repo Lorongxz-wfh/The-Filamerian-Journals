@@ -5,7 +5,6 @@ import Archives from '@/pages/Archives';
 import JournalDetail from '@/pages/JournalDetail';
 import Announcements from '@/pages/Announcements';
 import Login from '@/pages/Login';
-import Register from '@/pages/Register';
 import PendingVerification from '@/pages/PendingVerification';
 import Overview from '@/pages/dashboard/Overview';
 import MyJournals from '@/pages/dashboard/MyJournals';
@@ -15,10 +14,6 @@ import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
-import MySubmissions from '@/pages/dashboard/MySubmissions';
-import SubmitManuscript from '@/pages/dashboard/SubmitManuscript';
-import EditorSubmissions from '@/pages/dashboard/EditorSubmissions';
-import ReviewerPortal from '@/pages/dashboard/ReviewerPortal';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -47,7 +42,6 @@ function App() {
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
         <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
         <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
-        <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
         <Route path="/pending-verification" element={<PublicLayout><PendingVerification /></PublicLayout>} />
 
         {/* Dashboard System Routes */}
@@ -65,10 +59,6 @@ function App() {
                   <Route path="feedback" element={<Feedback />} />
                   <Route path="users" element={<UserManager />} />
                   <Route path="settings" element={<SystemSettings />} />
-                  <Route path="submissions" element={<MySubmissions />} />
-                  <Route path="submit" element={<SubmitManuscript />} />
-                  <Route path="manage-submissions" element={<EditorSubmissions />} />
-                  <Route path="reviews" element={<ReviewerPortal />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </DashboardLayout>

@@ -19,32 +19,7 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('Super Admin');
 
-        // Editor User
-        $editor = User::updateOrCreate(
-            ['email' => 'editor@filamerian.com'],
-            ['name' => 'Academic Editor', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
-        );
-        $editor->assignRole('Editor');
-
-        // Staff User
-        $staff = User::updateOrCreate(
-            ['email' => 'staff@filamerian.com'],
-            ['name' => 'Office Staff', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
-        );
-        $staff->assignRole('Staff');
-
-        // Author User
-        $author = User::updateOrCreate(
-            ['email' => 'author@filamerian.com'],
-            ['name' => 'Dr. Author Smith', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
-        );
-        $author->assignRole('Author');
-
-        // Reviewer User
-        $reviewer = User::updateOrCreate(
-            ['email' => 'reviewer@filamerian.com'],
-            ['name' => 'Dr. Reviewer Jones', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
-        );
-        $reviewer->assignRole('Reviewer');
+        // Default Admin User (If they want a default admin, though the Super Admin can create them)
+        // Kept clean, just Super Admin for now
     }
 }

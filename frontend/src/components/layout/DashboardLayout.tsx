@@ -8,7 +8,6 @@ import {
   LogOut,
   Search,
   Bell,
-  FileText,
   MessageSquare,
   Menu,
   X,
@@ -28,16 +27,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Editor', 'Staff', 'Author', 'Reviewer'] },
-    { label: 'My Submissions', icon: FileText, path: '/dashboard/submissions', roles: ['Author'] },
-    { label: 'My Reviews', icon: FileText, path: '/dashboard/reviews', roles: ['Reviewer'] },
     { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Editor', 'Super Admin'] },
-    { label: 'Articles', icon: FileText, path: '/dashboard/articles', roles: ['Super Admin', 'Editor'] },
     { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Editor'] },
     { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Editor'] },
   ];
 
   const adminItems = [
-    { label: 'Manage Submissions', icon: Users, path: '/dashboard/manage-submissions', roles: ['Super Admin', 'Editor'] },
     { label: 'User Manager', icon: Users, path: '/dashboard/users', roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
   ];

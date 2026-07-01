@@ -47,7 +47,7 @@ class JournalController extends Controller
         }
 
         if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('journals', 'public');
+            $path = $request->file('cover_image')->store('journals', 'r2');
             $validated['cover_image'] = $path;
         }
 
@@ -85,10 +85,10 @@ class JournalController extends Controller
 
         if ($request->hasFile('cover_image')) {
             // Delete old image
-            if ($journal->cover_image) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($journal->cover_image);
+            if ($journal->cover_image_path) {
+                \Illuminate\Support\Facades\Storage::disk('r2')->delete($journal->cover_image_path);
             }
-            $path = $request->file('cover_image')->store('journals', 'public');
+            $path = $request->file('cover_image')->store('journals', 'r2');
             $validated['cover_image'] = $path;
         }
 
