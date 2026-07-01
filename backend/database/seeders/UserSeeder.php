@@ -12,12 +12,19 @@ class UserSeeder extends Seeder
     {
         $password = Hash::make('password'); // Default password for all dummy accounts
 
-        // Super Admin User
+        // Super Admin User (IT)
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'superadmin@filamerian.com'],
+            ['name' => 'IT Super Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
+        );
+        $superAdmin->assignRole('Super Admin');
+
+        // Admin User (Primary User)
         $admin = User::updateOrCreate(
             ['email' => 'admin@filamerian.com'],
-            ['name' => 'Super Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
+            ['name' => 'Primary Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
         );
-        $admin->assignRole('Super Admin');
+        $admin->assignRole('Admin');
 
         // Default Admin User (If they want a default admin, though the Super Admin can create them)
         // Kept clean, just Super Admin for now
