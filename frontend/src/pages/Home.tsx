@@ -138,7 +138,7 @@ const Home: React.FC = () => {
               ) : (
                 <div className="space-y-6">
                   {announcements.map((item, i) => (
-                    <div key={item.id} className="group cursor-pointer">
+                    <Link to="/announcements" key={item.id} className="group block">
                       <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
                         {new Date(item.created_at).toLocaleDateString()}
                       </span>
@@ -146,7 +146,7 @@ const Home: React.FC = () => {
                         {item.title}
                       </h4>
                       {i < announcements.length - 1 && <div className="border-b border-border mt-4" />}
-                    </div>
+                    </Link>
                   ))}
                   {announcements.length === 0 && (
                     <p className="text-xs text-muted">No announcements posted.</p>
