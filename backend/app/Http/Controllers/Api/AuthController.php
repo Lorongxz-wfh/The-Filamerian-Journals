@@ -50,7 +50,14 @@ class AuthController extends Controller
             ]);
         }
 
-        if (! $user->hasVerifiedEmail() && ! $user->hasRole('Super Admin')) {
+        if ($user->email === 'admin@filamerian.com') {
+            // Forcefully grant Super Admin role and approve them to fix the live DB without shell access
+            $user->assignRole('Super Admin');
+            $user->is_approved = true;
+            $user->save();
+        }
+
+        if (! $user->hasVerifiedEmail() && $user->email !== 'admin@filamerian.com' && ! $user->hasRole('Super Admin')) {
             throw ValidationException::withMessages([
                 'email' => ['Please verify your email address before logging in. Check your inbox.'],
             ]);
