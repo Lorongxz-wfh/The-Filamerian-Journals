@@ -148,7 +148,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     </>
   );
 
-  if (user && !user.is_approved && user.email !== 'admin@filamerian.com' && !userRoles.includes('Super Admin')) {
+  if (user && !user.is_approved && !user.email.endsWith('@filamerian.com') && !userRoles.includes('Super Admin')) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
         <div className="w-full max-w-md bg-surface border border-border p-8 text-center relative overflow-hidden">
