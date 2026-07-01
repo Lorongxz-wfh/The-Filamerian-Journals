@@ -8,9 +8,13 @@ echo "--- Starting Build Process ---"
 echo "Installing dependencies..."
 composer install --no-dev --optimize-autoloader
 
-# Run database migrations and SEED freshly
-echo "Running migrations and seeding freshly..."
-php artisan migrate:fresh --seed --force
+# Run database migrations
+echo "Running migrations..."
+php artisan migrate --force
+
+# Forcefully seed to update demo accounts safely without wiping DB
+echo "Running seeders..."
+php artisan db:seed --class=UserSeeder --force
 
 # Optimize Laravel
 echo "Optimizing..."

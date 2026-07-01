@@ -50,12 +50,11 @@ class AuthController extends Controller
             ]);
         }
 
-        // TEMPORARILY DISABLED FOR DEMO:
-        // if (! $user->hasVerifiedEmail()) {
-        //     throw ValidationException::withMessages([
-        //         'email' => ['Please verify your email address before logging in. Check your inbox.'],
-        //     ]);
-        // }
+        if (! $user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => ['Please verify your email address before logging in. Check your inbox.'],
+            ]);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
