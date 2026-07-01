@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
-  hint?: string;
+  hint?: React.ReactNode;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
