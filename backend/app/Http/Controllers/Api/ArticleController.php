@@ -105,7 +105,7 @@ class ArticleController extends Controller
         return response()->noContent();
     }
 
-    public function download(Article $article)
+    public function getDownloadUrl(Article $article)
     {
         $article->increment('downloads_count');
 
@@ -113,6 +113,8 @@ class ArticleController extends Controller
             return response()->json(['message' => 'PDF not found.'], 404);
         }
 
-        return response()->redirectTo(url('storage/' . $article->pdf_path));
+        return response()->json([
+            'url' => url('storage/' . $article->pdf_path)
+        ]);
     }
 }

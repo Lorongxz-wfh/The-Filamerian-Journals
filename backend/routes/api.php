@@ -22,6 +22,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['index', 'show']);
     Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['index', 'show']);
 
+    Route::get('/articles/{article}/download-url', [\App\Http\Controllers\Api\ArticleController::class, 'getDownloadUrl']);
+
     // Write operations restricted to Super Admin and Editor
     Route::middleware('role:Super Admin|Editor')->group(function () {
         Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['store', 'update', 'destroy']);
@@ -41,7 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/public/search', [\App\Http\Controllers\Api\SearchController::class, 'index']);
 Route::get('/public/journals', [\App\Http\Controllers\Api\JournalController::class, 'index']);
 Route::get('/public/journals/{journal}', [\App\Http\Controllers\Api\JournalController::class, 'show']);
-Route::get('/public/articles/{article}/download', [\App\Http\Controllers\Api\ArticleController::class, 'download']);
 Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
 
 // Settings & Feedbacks

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router';
+import { useSearchParams, Link } from 'react-router';
 import { Search as SearchIcon, FileText, BookOpen, ExternalLink, Quote } from 'lucide-react';
 import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
@@ -121,15 +121,31 @@ const Search: React.FC = () => {
                     
                     <div className="shrink-0 pt-1 flex flex-col gap-2">
                       {article.pdf_path && (
-                        <a 
-                          href={`${API_BASE_URL}/public/articles/${article.id}/download`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          View PDF
-                        </a>
+                        localStorage.getItem('token') ? (
+                          <button 
+                            onClick={async () => {
+                              try {
+                                const res = await api.get(`/articles/${article.id}/download-url`);
+                                window.open(res.data.url, '_blank');
+                              } catch (err) {
+                                console.error('Failed to get download URL', err);
+                              }
+                            }}
+                            className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            View PDF
+                          </button>
+                        ) : (
+                          <Link 
+                            to="/login"
+                            className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider"
+                            title="Login required to download PDF"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            View PDF (Login)
+                          </Link>
+                        )
                       )}
                       <button
                         onClick={() => setCitationArticle(article)}

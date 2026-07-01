@@ -202,14 +202,29 @@ const JournalDetail: React.FC = () => {
                             </div>
                             <div className="shrink-0 pt-1 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
                               {article.pdf_path && (
-                                <a 
-                                  href={`${API_BASE_URL}/public/articles/${article.id}/download`} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1"
-                                >
-                                  <ExternalLink className="h-3 w-3" /> PDF
-                                </a>
+                                localStorage.getItem('token') ? (
+                                  <button 
+                                    onClick={async () => {
+                                      try {
+                                        const res = await api.get(`/articles/${article.id}/download-url`);
+                                        window.open(res.data.url, '_blank');
+                                      } catch (err) {
+                                        console.error('Failed to get download URL', err);
+                                      }
+                                    }}
+                                    className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1"
+                                  >
+                                    <ExternalLink className="h-3 w-3" /> PDF
+                                  </button>
+                                ) : (
+                                  <Link 
+                                    to="/login"
+                                    className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1"
+                                    title="Login required to download PDF"
+                                  >
+                                    <ExternalLink className="h-3 w-3" /> PDF (Login)
+                                  </Link>
+                                )
                               )}
                               <button
                                 onClick={() => {
