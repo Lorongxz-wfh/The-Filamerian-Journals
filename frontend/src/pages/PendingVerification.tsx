@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { MailCheck, ArrowRight } from 'lucide-react';
+import { MailCheck } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 const PendingVerification: React.FC = () => {
