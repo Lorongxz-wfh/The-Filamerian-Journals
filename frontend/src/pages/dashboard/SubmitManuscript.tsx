@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Upload, FileText, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
 
 const SubmitManuscript: React.FC = () => {

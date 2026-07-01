@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, UserPlus, Users, Search } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import api from '@/services/api';
 
 const EditorSubmissions: React.FC = () => {

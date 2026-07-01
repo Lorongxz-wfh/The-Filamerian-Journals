@@ -27,19 +27,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const menuItems = [
-    { label: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
-    { label: 'My Submissions', icon: FileText, path: '/dashboard/submissions' },
-    { label: 'My Reviews', icon: FileText, path: '/dashboard/reviews' },
-    { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals' },
-    { label: 'Articles', icon: FileText, path: '/dashboard/articles' },
-    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements' },
-    { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback' },
+    { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Editor', 'Staff', 'Author', 'Reviewer'] },
+    { label: 'My Submissions', icon: FileText, path: '/dashboard/submissions', roles: ['Author'] },
+    { label: 'My Reviews', icon: FileText, path: '/dashboard/reviews', roles: ['Reviewer'] },
+    { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Editor', 'Super Admin'] },
+    { label: 'Articles', icon: FileText, path: '/dashboard/articles', roles: ['Super Admin', 'Editor'] },
+    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Editor'] },
+    { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Editor'] },
   ];
 
   const adminItems = [
-    { label: 'Manage Submissions', icon: Users, path: '/dashboard/manage-submissions' },
-    { label: 'User Manager', icon: Users, path: '/dashboard/users' },
-    { label: 'System Settings', icon: Settings, path: '/dashboard/settings' },
+    { label: 'Manage Submissions', icon: Users, path: '/dashboard/manage-submissions', roles: ['Super Admin', 'Editor'] },
+    { label: 'User Manager', icon: Users, path: '/dashboard/users', roles: ['Super Admin'] },
+    { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
   ];
 
   const handleLogout = () => {
@@ -48,6 +48,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+
+  const userRoles = user.roles || (user.role ? [user.role] : []);
+  
+  const hasAccess = (allowedRoles?: string[]) => {
+    if (!allowedRoles) return true;
+    return allowedRoles.some(role => userRoles.includes(role) || userRoles.includes('Super Admin')); // Super admin sees all their allowed stuff anyway
+  };
+
+  const visibleMenuItems = menuItems.filter(item => hasAccess(item.roles));
+  const visibleAdminItems = adminItems.filter(item => hasAccess(item.roles));
 
   const SidebarContent = () => (
     <>
@@ -69,7 +79,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
             Main Menu
           </span>
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -87,12 +97,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           ))}
         </div>
 
-        {user.role === 'Super Admin' && (
+        {visibleAdminItems.length > 0 && (
           <div className="space-y-1">
             <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
               Administration
             </span>
-            {adminItems.map((item) => (
+            {visibleAdminItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}

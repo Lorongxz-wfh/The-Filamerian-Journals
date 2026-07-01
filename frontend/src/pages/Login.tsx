@@ -26,9 +26,9 @@ const Login: React.FC = () => {
       const response = await api.post('/login', { email, password });
       const { access_token, user } = response.data;
 
-      // Extract role name from Spatie roles array (e.g., [{name: 'Super Admin'}])
-      const roleName = user.roles?.[0]?.name || 'Member';
-      const userData = { ...user, role: roleName };
+      // Extract all role names from Spatie roles array
+      const roleNames = user.roles?.map((r: any) => r.name) || ['Member'];
+      const userData = { ...user, roles: roleNames, role: roleNames[0] };
 
       // Store token consistently — auth_token matches the API interceptor
       localStorage.setItem('auth_token', access_token);

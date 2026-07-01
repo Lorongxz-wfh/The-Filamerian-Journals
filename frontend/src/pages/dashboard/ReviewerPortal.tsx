@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Eye, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api from '@/services/api';
 
 interface Review {
   id: number;
