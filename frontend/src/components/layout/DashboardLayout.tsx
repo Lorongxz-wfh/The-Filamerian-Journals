@@ -165,7 +165,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -177,7 +177,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Sidebar — hidden on mobile, visible on lg+ */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 w-64 bg-primary text-white flex flex-col z-50 transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto',
+          'fixed inset-y-0 left-0 w-64 bg-primary text-white flex flex-col z-50 transition-transform duration-200 lg:static lg:translate-x-0 lg:z-auto',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -192,7 +192,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col min-w-0">
+      <div className="flex-grow flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Dashboard Header */}
         <header className="h-14 bg-surface border-b border-border flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-4">
@@ -225,7 +225,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Dashboard Content */}
-        <main className="flex-grow p-6 overflow-auto">
+        <main className="flex-grow p-6 overflow-y-auto">
           {children}
         </main>
       </div>
