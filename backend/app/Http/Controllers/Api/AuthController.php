@@ -50,7 +50,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if (! $user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail() && ! $user->hasRole('Super Admin')) {
             throw ValidationException::withMessages([
                 'email' => ['Please verify your email address before logging in. Check your inbox.'],
             ]);
