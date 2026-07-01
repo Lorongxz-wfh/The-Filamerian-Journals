@@ -24,6 +24,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/articles/{article}/download-url', [\App\Http\Controllers\Api\ArticleController::class, 'getDownloadUrl']);
 
+    // Submissions & Reviews (Authenticated)
+    Route::apiResource('submissions', \App\Http\Controllers\Api\SubmissionController::class)->only(['index', 'store', 'show', 'update']);
+    Route::post('/submissions/{submission}/assign-reviewer', [\App\Http\Controllers\Api\SubmissionController::class, 'assignReviewer'])->middleware('role:Super Admin|Editor');
+    Route::apiResource('reviews', \App\Http\Controllers\Api\ReviewController::class)->only(['index', 'show', 'update']);
+
     // Write operations restricted to Super Admin and Editor
     Route::middleware('role:Super Admin|Editor')->group(function () {
         Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['store', 'update', 'destroy']);

@@ -28,6 +28,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
+    { label: 'My Submissions', icon: FileText, path: '/dashboard/submissions' },
+    { label: 'My Reviews', icon: FileText, path: '/dashboard/reviews' },
     { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals' },
     { label: 'Articles', icon: FileText, path: '/dashboard/articles' },
     { label: 'Announcements', icon: Bell, path: '/dashboard/announcements' },
@@ -35,6 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   ];
 
   const adminItems = [
+    { label: 'Manage Submissions', icon: Users, path: '/dashboard/manage-submissions' },
     { label: 'User Manager', icon: Users, path: '/dashboard/users' },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings' },
   ];

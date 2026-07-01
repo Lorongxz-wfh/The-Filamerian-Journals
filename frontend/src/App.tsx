@@ -13,6 +13,10 @@ import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
+import MySubmissions from '@/pages/dashboard/MySubmissions';
+import SubmitManuscript from '@/pages/dashboard/SubmitManuscript';
+import EditorSubmissions from '@/pages/dashboard/EditorSubmissions';
+import ReviewerPortal from '@/pages/dashboard/ReviewerPortal';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -57,6 +61,10 @@ function App() {
                   <Route path="feedback" element={<Feedback />} />
                   <Route path="users" element={<UserManager />} />
                   <Route path="settings" element={<SystemSettings />} />
+                  <Route path="submissions" element={<MySubmissions />} />
+                  <Route path="submit" element={<SubmitManuscript />} />
+                  <Route path="manage-submissions" element={<EditorSubmissions />} />
+                  <Route path="reviews" element={<ReviewerPortal />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </DashboardLayout>
