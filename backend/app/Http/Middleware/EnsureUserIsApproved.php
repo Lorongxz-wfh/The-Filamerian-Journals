@@ -15,7 +15,7 @@ class EnsureUserIsApproved
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->is_approved && !str_ends_with($request->user()->email, '@filamerian.com') && !$request->user()->hasRole('Super Admin')) {
+        if ($request->user() && !$request->user()->is_approved) {
             return response()->json([
                 'message' => 'Your account is currently pending administrator approval.'
             ], 403);
