@@ -8,13 +8,9 @@ echo "--- Starting Build Process ---"
 echo "Installing dependencies..."
 composer install --no-dev --optimize-autoloader
 
-# Run database migrations
-echo "Running migrations..."
-php artisan migrate --force
-
-# Seed the database (Optional: Only if you want to refresh seeds on every deploy)
-# echo "Seeding database..."
-# php artisan db:seed --force
+# Run database migrations and SEED freshly
+echo "Running migrations and seeding freshly..."
+php artisan migrate:fresh --seed --force
 
 # Optimize Laravel
 echo "Optimizing..."
