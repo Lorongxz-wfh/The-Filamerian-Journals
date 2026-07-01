@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 interface Announcement {
   id: number;
   title: string;
-  content: string;
+  body: string;
   created_at: string;
 }
 
@@ -18,7 +18,7 @@ const ManageAnnouncements: React.FC = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Announcement | null>(null);
-  const [formData, setFormData] = useState({ title: '', content: '' });
+  const [formData, setFormData] = useState({ title: '', body: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +42,9 @@ const ManageAnnouncements: React.FC = () => {
     setError(null);
     setEditingItem(item);
     if (item) {
-      setFormData({ title: item.title, content: item.content });
+      setFormData({ title: item.title, body: item.body });
     } else {
-      setFormData({ title: '', content: '' });
+      setFormData({ title: '', body: '' });
     }
     setIsModalOpen(true);
   };
@@ -148,7 +148,7 @@ const ManageAnnouncements: React.FC = () => {
           <div className="space-y-1.5">
             <label className="text-[12px] font-medium text-primary uppercase tracking-wider">Content *</label>
             <textarea 
-              required rows={6} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})}
+              required rows={6} value={formData.body} onChange={e => setFormData({...formData, body: e.target.value})}
               className="w-full px-4 py-2.5 bg-background border border-border text-[13px] focus:outline-none focus:border-primary resize-none"
             />
           </div>
