@@ -26,13 +26,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const menuItems = [
-    { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Editor', 'Staff', 'Author', 'Reviewer'] },
-    { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Editor', 'Super Admin'] },
-    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Editor'] },
-    { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Editor'] },
+    { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Admin'] },
+    { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Admin', 'Super Admin'] },
+    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Admin'] },
+    { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
   ];
 
   const adminItems = [
+    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
     { label: 'User Manager', icon: Users, path: '/dashboard/users', roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
   ];

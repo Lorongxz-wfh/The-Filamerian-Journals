@@ -43,8 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/articles/{article}/download-url', [\App\Http\Controllers\Api\ArticleController::class, 'getDownloadUrl']);
 
     // Reviews (Authenticated)
-    // Write operations restricted to Super Admin and Editor
-    Route::middleware('role:Super Admin|Editor')->group(function () {
+    // Write operations restricted to Super Admin and Admin
+    Route::middleware('role:Super Admin|Admin')->group(function () {
         Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('volumes', \App\Http\Controllers\Api\VolumeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('issues', \App\Http\Controllers\Api\IssueController::class)->only(['store', 'update', 'destroy']);
@@ -52,10 +52,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['store', 'update', 'destroy']);
+    });
 
-        // User management (Super Admin only)
+    // Super Admin Only
+    Route::middleware('role:Super Admin')->group(function () {
+        // User management
         Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
         Route::post('/users/{user}/approve', [\App\Http\Controllers\Api\UserController::class, 'approve']);
+        // System Health
+        Route::get('/system/health', [\App\Http\Controllers\Api\SystemController::class, 'health']);
     });
     }); // End EnsureUserIsApproved group
 });
@@ -73,8 +78,8 @@ Route::post('/public/feedbacks', [\App\Http\Controllers\Api\FeedbackController::
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware([\App\Http\Middleware\EnsureUserIsApproved::class])->group(function () {
         Route::post('/settings', [\App\Http\Controllers\Api\SettingController::class, 'store'])->middleware('role:Super Admin');
-        Route::get('/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'index'])->middleware('role:Super Admin|Editor');
-        Route::put('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'update'])->middleware('role:Super Admin|Editor');
+        Route::get('/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'index'])->middleware('role:Super Admin|Admin');
+        Route::put('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'update'])->middleware('role:Super Admin|Admin');
         Route::delete('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'destroy'])->middleware('role:Super Admin');
     });
 });

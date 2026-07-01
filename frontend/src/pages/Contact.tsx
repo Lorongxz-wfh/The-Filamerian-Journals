@@ -6,6 +6,7 @@ const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    category: 'General',
     subject: '',
     message: ''
   });
@@ -13,7 +14,7 @@ const Contact: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -25,7 +26,7 @@ const Contact: React.FC = () => {
     try {
       await api.post('/public/feedbacks', formData);
       setSuccess(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      setFormData({ name: '', email: '', category: 'General', subject: '', message: '' });
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
       console.error('Failed to submit message', err);
@@ -130,17 +131,32 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Subject</label>
-              <input 
-                type="text" 
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                placeholder="Inquiry about manuscript submission"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Category</label>
+                <select 
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
+                >
+                  <option value="Journal Suggestion">Journal Suggestion</option>
+                  <option value="System Issue">System Issue</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Subject</label>
+                <input 
+                  type="text" 
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
+                  placeholder="Inquiry about manuscript submission"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

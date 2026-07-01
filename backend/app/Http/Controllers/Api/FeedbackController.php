@@ -21,6 +21,7 @@ class FeedbackController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
+            'category' => 'required|string|in:System Issue,Journal Suggestion,Other',
             'message' => 'required|string'
         ]);
 

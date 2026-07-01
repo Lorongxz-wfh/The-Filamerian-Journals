@@ -9,7 +9,16 @@ class Feedback extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['name', 'email', 'subject', 'message', 'is_read'];
+    protected $table = 'feedback';
+
+    protected $fillable = [
+        'name',
+        'email',
+        'subject',
+        'message',
+        'is_read',
+        'category',
+    ];
     
     protected $casts = [
         'is_read' => 'boolean',

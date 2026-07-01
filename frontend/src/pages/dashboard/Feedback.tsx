@@ -109,7 +109,12 @@ const Feedback: React.FC = () => {
             <div className="space-y-6 flex-grow flex flex-col">
               <div className="border-b border-border pb-4 space-y-3">
                 <div className="flex justify-between items-start gap-4">
-                  <h2 className="text-[15px] font-semibold text-primary leading-snug">{selectedItem.subject}</h2>
+                  <div>
+                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider mb-2">
+                      {selectedItem.category || 'General'}
+                    </span>
+                    <h2 className="text-[15px] font-semibold text-primary leading-snug">{selectedItem.subject}</h2>
+                  </div>
                   <button 
                     onClick={() => handleDelete(selectedItem.id)}
                     className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"

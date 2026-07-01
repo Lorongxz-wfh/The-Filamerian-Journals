@@ -14,6 +14,7 @@ import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
+import SystemHealth from '@/pages/dashboard/SystemHealth';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -52,6 +53,7 @@ function App() {
               <DashboardLayout>
                 <Routes>
                   <Route index element={<Overview />} />
+                  <Route path="health" element={<SystemHealth />} />
                   <Route path="journals" element={<MyJournals />} />
                   <Route path="journals/:slug" element={<ManageJournal />} />
                   <Route path="articles" element={<Articles />} />
