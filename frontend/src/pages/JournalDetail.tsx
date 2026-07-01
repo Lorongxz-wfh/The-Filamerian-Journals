@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, Calendar, ChevronDown, ExternalLink, Quote } from 'lucide-react';
-import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
+import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 
 interface Author {

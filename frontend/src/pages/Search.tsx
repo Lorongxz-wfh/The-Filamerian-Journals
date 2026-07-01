@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router';
 import { Search as SearchIcon, FileText, BookOpen, ExternalLink, Quote } from 'lucide-react';
-import api, { STORAGE_URL, API_BASE_URL } from '@/services/api';
+import api, { STORAGE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
 
