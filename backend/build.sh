@@ -10,11 +10,7 @@ composer install --no-dev --optimize-autoloader
 
 # Run database migrations
 echo "Running migrations..."
-php artisan migrate --force
-
-# Forcefully seed to update demo accounts safely without wiping DB
-echo "Running seeders..."
-php artisan db:seed --class=UserSeeder --force
+php artisan migrate:fresh --seed --force
 
 # Optimize Laravel
 echo "Optimizing..."
