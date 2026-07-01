@@ -148,6 +148,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     </>
   );
 
+  if (user && !user.is_approved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="w-full max-w-md bg-surface border border-border p-8 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/5 rounded-bl-full pointer-events-none" />
+          <h1 className="text-xl text-primary font-display uppercase tracking-wider mb-2">Account Pending</h1>
+          <p className="text-[13px] text-muted mb-6">
+            Your email is verified, but an administrator has not yet approved your account. 
+            You will receive full dashboard access once approved.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-background border border-border text-[13px] font-medium text-primary hover:border-primary/50 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Mobile sidebar overlay */}

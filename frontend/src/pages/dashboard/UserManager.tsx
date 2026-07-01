@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, CheckCircle } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   roles?: { name: string }[];
+  is_approved: boolean;
   created_at: string;
 }
 
@@ -106,6 +107,16 @@ const UserManager: React.FC = () => {
     }
   };
 
+  const handleApprove = async (id: number) => {
+    if (!window.confirm('Approve this user account?')) return;
+    try {
+      await api.post(`/users/${id}/approve`);
+      await fetchUsers();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to approve user.');
+    }
+  };
+
   const filtered = users.filter((u) =>
     u.name.toLowerCase().includes(filter.toLowerCase()) ||
     u.email.toLowerCase().includes(filter.toLowerCase())
@@ -159,12 +170,24 @@ const UserManager: React.FC = () => {
                   </td>
                   <td className="px-5 py-4 text-[12px] text-muted">{user.email}</td>
                   <td className="px-5 py-4">
-                    <span className={`text-[11px] font-semibold px-2 py-1 ${roleColor[user.roles?.[0]?.name || ''] || 'text-muted bg-gray-50'}`}>
-                      {user.roles?.[0]?.name || 'No Role'}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className={`w-max text-[11px] font-semibold px-2 py-1 ${roleColor[user.roles?.[0]?.name || ''] || 'text-muted bg-gray-50'}`}>
+                        {user.roles?.[0]?.name || 'No Role'}
+                      </span>
+                      {!user.is_approved && (
+                        <span className="w-max text-[10px] font-semibold px-2 py-0.5 text-amber-600 bg-amber-50 rounded-sm">
+                          Pending Approval
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {!user.is_approved && (
+                        <button onClick={() => handleApprove(user.id)} className="text-muted/40 hover:text-emerald-500 h-6 w-6 flex items-center justify-center" title="Approve User">
+                          <CheckCircle className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                       <button onClick={() => handleOpenModal(user)} className="text-muted/40 hover:text-primary h-6 w-6 flex items-center justify-center">
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>

@@ -5,6 +5,8 @@ import Archives from '@/pages/Archives';
 import JournalDetail from '@/pages/JournalDetail';
 import Announcements from '@/pages/Announcements';
 import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import PendingVerification from '@/pages/PendingVerification';
 import Overview from '@/pages/dashboard/Overview';
 import MyJournals from '@/pages/dashboard/MyJournals';
 import ManageJournal from '@/pages/dashboard/ManageJournal';
@@ -45,6 +47,8 @@ function App() {
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
         <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
         <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+        <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
+        <Route path="/pending-verification" element={<PublicLayout><PendingVerification /></PublicLayout>} />
 
         {/* Dashboard System Routes */}
         <Route

@@ -10,11 +10,15 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->orderBy('name')->paginate(50);
+        $query = User::with('roles')->orderBy('name');
+        
+        if ($request->has('pending_only')) {
+            $query->where('is_approved', false);
+        }
 
-        return response()->json($users);
+        return response()->json($query->paginate(50));
     }
 
     public function store(Request $request)
@@ -74,5 +78,11 @@ class UserController extends Controller
         $user->delete();
 
         return response()->noContent();
+    }
+
+    public function approve(User $user)
+    {
+        $user->update(['is_approved' => true]);
+        return response()->json(['message' => 'User approved successfully.']);
     }
 }
