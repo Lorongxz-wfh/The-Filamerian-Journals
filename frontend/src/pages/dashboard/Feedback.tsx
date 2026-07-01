@@ -5,6 +5,7 @@ import api from '@/services/api';
 interface FeedbackItem {
   id: number;
   subject: string;
+  category: string;
   name: string;
   email: string;
   message: string;
