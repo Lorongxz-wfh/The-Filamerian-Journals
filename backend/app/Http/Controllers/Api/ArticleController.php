@@ -97,7 +97,7 @@ class ArticleController extends Controller
     {
         // Delete PDF if exists
         if ($article->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($article->pdf_path);
+            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
         }
 
         $article->delete();
@@ -114,7 +114,7 @@ class ArticleController extends Controller
         }
 
         return response()->json([
-            'url' => url('storage/' . $article->pdf_path)
+            'url' => \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($article->pdf_path)
         ]);
     }
 }
