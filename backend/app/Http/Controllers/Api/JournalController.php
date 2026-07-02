@@ -35,10 +35,12 @@ class JournalController extends Controller
             'slug' => 'nullable|string|max:255|unique:journals,slug',
             'description' => 'nullable|string',
             'category' => 'nullable|string|max:100',
+            'publisher' => 'nullable|string|max:255',
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
         // Auto-generate slug from title if not provided
@@ -47,8 +49,13 @@ class JournalController extends Controller
         }
 
         if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('journals', env('FILESYSTEM_DISK', 'public'));
+            $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
             $validated['cover_image'] = $path;
+        }
+
+        if ($request->hasFile('pdf_path')) {
+            $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
+            $validated['pdf_path'] = $path;
         }
 
         $journal = Journal::create($validated);
@@ -77,19 +84,30 @@ class JournalController extends Controller
             'slug' => 'string|max:255|unique:journals,slug,' . $journal->id,
             'description' => 'nullable|string',
             'category' => 'nullable|string|max:100',
+            'publisher' => 'nullable|string|max:255',
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
         if ($request->hasFile('cover_image')) {
             // Delete old image
-            if ($journal->cover_image_path) {
-                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image_path);
+            if ($journal->cover_image) {
+                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);
             }
-            $path = $request->file('cover_image')->store('journals', env('FILESYSTEM_DISK', 'public'));
+            $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
             $validated['cover_image'] = $path;
+        }
+
+        if ($request->hasFile('pdf_path')) {
+            // Delete old PDF
+            if ($journal->pdf_path) {
+                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->pdf_path);
+            }
+            $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
+            $validated['pdf_path'] = $path;
         }
 
         $journal->update($validated);
@@ -105,6 +123,11 @@ class JournalController extends Controller
         // Delete cover image if exists
         if ($journal->cover_image) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($journal->cover_image);
+        }
+
+        // Delete PDF if exists
+        if ($journal->pdf_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($journal->pdf_path);
         }
 
         $journal->delete();

@@ -18,6 +18,8 @@ class Journal extends Model
         'frequency',
         'editor',
         'cover_image',
+        'pdf_path',
+        'publisher',
     ];
 
     /**

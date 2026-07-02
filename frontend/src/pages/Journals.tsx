@@ -11,6 +11,7 @@ interface Journal {
   title: string;
   description: string;
   category: string;
+  publisher: string | null;
   cover_image: string | null;
   volumes?: any[];
   created_at: string;
@@ -21,6 +22,7 @@ const Journals: React.FC = () => {
   const [search, setSearch] = useState('');
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
 
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
 
@@ -92,6 +94,24 @@ const Journals: React.FC = () => {
           </button>
         ))}
       </div>
+      
+      {/* View Toggle */}
+      <div className="flex justify-end mb-4">
+        <div className="inline-flex items-center border border-border bg-surface rounded-sm">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+          >
+            Grid View
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-1.5 text-xs font-medium transition-colors border-l border-border ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+          >
+            List View
+          </button>
+        </div>
+      </div>
 
       {/* Grid */}
       {loading ? (
@@ -113,6 +133,8 @@ const Journals: React.FC = () => {
                 issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
                 image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                 category={j.category}
+                publisher={j.publisher || undefined}
+                viewMode={viewMode}
               />
             );
           })}

@@ -40,7 +40,6 @@ const Articles: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,7 +105,6 @@ const Articles: React.FC = () => {
       });
     }
     setPdfFile(null); // Reset file input
-    setCoverImage(null);
     setIsModalOpen(true);
   };
 
@@ -130,10 +128,6 @@ const Articles: React.FC = () => {
       
       if (pdfFile) {
         payload.append('pdf_path', pdfFile);
-      }
-
-      if (coverImage) {
-        payload.append('cover_image', coverImage);
       }
 
       if (editingArticle) {
@@ -384,21 +378,6 @@ const Articles: React.FC = () => {
               />
               {editingArticle && articleHasPdf(editingArticle) && !pdfFile && (
                 <p className="text-[11px] text-muted mt-1">Leave empty to keep the existing PDF.</p>
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider mb-1.5">
-                Cover Image (Optional)
-              </label>
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
-                className="w-full px-4 py-2 bg-background border border-border text-[13px] text-muted file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-[12px] file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer"
-              />
-              {editingArticle && !coverImage && (
-                <p className="text-[11px] text-muted mt-1">Leave empty to keep the existing cover.</p>
               )}
             </div>
           </div>

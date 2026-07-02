@@ -29,17 +29,11 @@ class ArticleController extends Controller
             'author_ids.*' => 'exists:authors,id',
             'keyword_ids' => 'nullable|array',
             'keyword_ids.*' => 'exists:keywords,id',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         if ($request->hasFile('pdf_path')) {
             $path = $request->file('pdf_path')->store('articles', 'public');
             $validated['pdf_path'] = $path;
-        }
-
-        if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('articles/covers', 'public');
-            $validated['cover_path'] = $path;
         }
 
         $article = Article::create($validated);
@@ -83,7 +77,6 @@ class ArticleController extends Controller
             'author_ids.*' => 'exists:authors,id',
             'keyword_ids' => 'nullable|array',
             'keyword_ids.*' => 'exists:keywords,id',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         if ($request->hasFile('pdf_path')) {
@@ -93,14 +86,6 @@ class ArticleController extends Controller
             }
             $path = $request->file('pdf_path')->store('articles', 'public');
             $validated['pdf_path'] = $path;
-        }
-
-        if ($request->hasFile('cover_image')) {
-            if ($article->cover_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($article->cover_path);
-            }
-            $path = $request->file('cover_image')->store('articles/covers', 'public');
-            $validated['cover_path'] = $path;
         }
 
         $article->update($validated);
@@ -129,11 +114,6 @@ class ArticleController extends Controller
         // Delete PDF if exists
         if ($article->pdf_path) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($article->pdf_path);
-        }
-
-        // Delete Cover if exists
-        if ($article->cover_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($article->cover_path);
         }
 
         $article->delete();

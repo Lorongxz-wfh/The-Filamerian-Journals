@@ -15,10 +15,12 @@ interface Journal {
   slug: string;
   description: string;
   category: string;
+  publisher: string | null;
   issn: string;
   frequency: string;
   editor: string;
   cover_image: string | null;
+  pdf_url: string | null;
   volumes?: any[];
   created_at: string;
   updated_at: string;
@@ -38,10 +40,14 @@ const MyJournals: React.FC = () => {
     slug: '',
     description: '',
     category: '',
+    publisher: '',
     issn: '',
     frequency: '',
     editor: ''
   });
+
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,6 +85,7 @@ const MyJournals: React.FC = () => {
         slug: journal.slug || '',
         description: journal.description || '',
         category: journal.category || '',
+        publisher: journal.publisher || '',
         issn: journal.issn || '',
         frequency: journal.frequency || '',
         editor: journal.editor || ''
@@ -90,11 +97,14 @@ const MyJournals: React.FC = () => {
         slug: '',
         description: '',
         category: '',
+        publisher: '',
         issn: '',
         frequency: '',
         editor: ''
       });
     }
+    setPdfFile(null);
+    setCoverImage(null);
     setIsModalOpen(true);
   };
 
@@ -109,10 +119,33 @@ const MyJournals: React.FC = () => {
     setError(null);
 
     try {
+      const payload = new FormData();
+      payload.append('title', formData.title);
+      payload.append('slug', formData.slug);
+      payload.append('description', formData.description);
+      payload.append('category', formData.category);
+      payload.append('publisher', formData.publisher);
+      payload.append('issn', formData.issn);
+      payload.append('frequency', formData.frequency);
+      payload.append('editor', formData.editor);
+
+      if (pdfFile) {
+        payload.append('pdf_path', pdfFile);
+      }
+
+      if (coverImage) {
+        payload.append('cover_image', coverImage);
+      }
+
       if (editingJournal) {
-        await api.put(`/journals/${editingJournal.slug}`, formData);
+        payload.append('_method', 'PUT'); // Laravel requirement for multipart PUT
+        await api.post(`/journals/${editingJournal.slug}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await api.post('/journals', formData);
+        await api.post('/journals', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       await fetchJournals();
       setIsModalOpen(false);
@@ -270,6 +303,12 @@ const MyJournals: React.FC = () => {
                 ))}
               </Select>
             </div>
+            
+            <div>
+              <Input 
+                label="Publisher" name="publisher" value={formData.publisher} onChange={handleInputChange} placeholder="e.g. Lakbay-Diwa Publishing"
+              />
+            </div>
 
             <div>
               <Input 
@@ -292,6 +331,30 @@ const MyJournals: React.FC = () => {
             <div className="md:col-span-2">
               <Textarea 
                 label="Description" name="description" value={formData.description} onChange={handleInputChange} rows={3} placeholder="Brief description of the journal's scope and focus..."
+              />
+            </div>
+            
+            <div className="md:col-span-1">
+              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider mb-1.5">
+                PDF Document
+              </label>
+              <input 
+                type="file" 
+                accept="application/pdf"
+                onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                className="w-full px-4 py-2 bg-background border border-border text-[13px] text-muted file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer"
+              />
+            </div>
+
+            <div className="md:col-span-1">
+              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider mb-1.5">
+                Cover Image
+              </label>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
+                className="w-full px-4 py-2 bg-background border border-border text-[13px] text-muted file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer"
               />
             </div>
           </div>
