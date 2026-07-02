@@ -12,6 +12,10 @@ composer install --no-dev --optimize-autoloader
 echo "Running migrations..."
 php artisan migrate:fresh --seed --force
 
+# Create storage symlink
+echo "Linking storage..."
+php artisan storage:link --force
+
 # Optimize Laravel
 echo "Optimizing..."
 php artisan optimize
