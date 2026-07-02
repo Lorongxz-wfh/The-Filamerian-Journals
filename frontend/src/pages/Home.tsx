@@ -31,16 +31,14 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
-  const [resources, setResources] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [jrnRes, annRes, setRes, resRes] = await Promise.all([
+        const [jrnRes, annRes, setRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/announcements'),
-          api.get('/public/settings'),
-          api.get('/public/resources')
+          api.get('/public/settings')
         ]);
         setJournals(jrnRes.data.data);
         setAnnouncements(annRes.data.data.slice(0, 3));
@@ -48,8 +46,6 @@ const Home: React.FC = () => {
         const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
         const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
         setAvailableCategories(['All', ...catsArray]);
-        
-        setResources(resRes.data.data);
       } catch (err) {
         console.error('Failed to fetch public data', err);
       } finally {
@@ -171,26 +167,6 @@ const Home: React.FC = () => {
               >
                 See All News
               </Link>
-            </div>
-
-            {/* Resources */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-grow bg-border" />
-                <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Resources</h3>
-                <div className="h-px flex-grow bg-border" />
-              </div>
-
-              <ul className="space-y-3">
-                {resources.map((res: any) => (
-                  <li key={res.id}>
-                    <Link to={`/about#${res.slug}`} className="text-[13px] text-muted hover:text-primary flex items-center justify-between group transition-colors">
-                      {res.title}
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
