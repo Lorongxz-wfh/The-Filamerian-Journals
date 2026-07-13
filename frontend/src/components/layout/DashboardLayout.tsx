@@ -56,7 +56,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const adminItems = [
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
-    { path: '/dashboard/feedback', label: 'Feedback', icon: MessageSquare, roles: ['Admin', 'Super Admin'] },
     { path: '/dashboard/resources', label: 'Resources', icon: FileText, roles: ['Admin', 'Super Admin'] },
     { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
@@ -153,12 +152,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
                 location.pathname === item.path
-                  ? 'bg-secondary text-primary font-semibold'
-                  : 'text-white/50 hover:bg-white/5 hover:text-white'
+                  ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
+                  : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
               )}
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              <span>{item.label}</span>
             </Link>
           ))}
         </div>
@@ -176,12 +175,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
                   location.pathname === item.path
-                    ? 'bg-secondary text-primary font-semibold'
-                    : 'text-white/50 hover:bg-white/5 hover:text-white'
+                    ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
+                    : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
                 )}
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
+                <span>{item.label}</span>
               </Link>
             ))}
           </div>
