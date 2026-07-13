@@ -240,7 +240,7 @@ const MyJournals: React.FC = () => {
                 <button 
                   onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/journals/${journal.slug}`); }}
                   className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-primary hover:bg-black/5 transition-all rounded"
-                  title="Manage Volumes & Issues"
+                  title="Manage Volumes"
                 >
                   <Settings2 className="h-4 w-4" />
                 </button>
@@ -280,6 +280,10 @@ const MyJournals: React.FC = () => {
             </div>
           )}
           
+          <div className="text-[12px] text-muted italic mb-4">
+            (* indicates required field)
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <Input 
@@ -295,7 +299,7 @@ const MyJournals: React.FC = () => {
 
             <div>
               <Select 
-                label="Category" name="category" value={formData.category} onChange={handleInputChange}
+                label="Category" required name="category" value={formData.category} onChange={handleInputChange}
               >
                 <option value="">Select Category</option>
                 {availableCategories.map(cat => (
@@ -335,8 +339,9 @@ const MyJournals: React.FC = () => {
             </div>
             
             <div className="md:col-span-1">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider mb-1.5">
-                PDF Document
+              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider flex justify-between items-center mb-1.5">
+                <span>PDF Document</span>
+                <span className="text-[10px] text-muted normal-case tracking-normal">Max size: 10MB</span>
               </label>
               <input 
                 type="file" 
@@ -347,8 +352,9 @@ const MyJournals: React.FC = () => {
             </div>
 
             <div className="md:col-span-1">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider mb-1.5">
-                Cover Image
+              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider flex justify-between items-center mb-1.5">
+                <span>Cover Image</span>
+                <span className="text-[10px] text-muted normal-case tracking-normal">Format: JPG/PNG, Max: 5MB</span>
               </label>
               <input 
                 type="file" 

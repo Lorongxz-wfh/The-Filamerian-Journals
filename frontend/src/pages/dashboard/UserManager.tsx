@@ -36,7 +36,7 @@ const UserManager: React.FC = () => {
     name: '',
     email: '',
     password: '',
-    role: 'Staff'
+    role: 'Editor'
   });
 
   const fetchUsers = async () => {
@@ -228,7 +228,6 @@ const UserManager: React.FC = () => {
           >
             <option value="Super Admin">Super Admin</option>
             <option value="Editor">Editor</option>
-            <option value="Staff">Staff</option>
           </Select>
 
           <div className="flex justify-end gap-3 pt-4 mt-6">

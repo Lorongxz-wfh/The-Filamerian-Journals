@@ -7,31 +7,35 @@ interface CitationModalProps {
   article: any;
   journalTitle?: string;
   volumeNumber?: number;
-  issueNumber?: number;
   year?: number;
 }
 
 const CitationModal: React.FC<CitationModalProps> = ({
-  isOpen, onClose, article, journalTitle, volumeNumber, issueNumber, year
+  isOpen, onClose, article, journalTitle, volumeNumber, year
 }) => {
   const [copied, setCopied] = useState<string | null>(null);
 
   if (!isOpen || !article) return null;
 
-  const authors = article.authors?.map((a: any) => a.name) || ['Unknown Author'];
-  // Very basic APA name formatting (Last, F.) for demonstration, normally needs robust parsing
+  const formatAuthorName = (fullName: string) => {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length <= 1) return fullName;
+    const lastName = parts.pop();
+    return `${lastName}, ${parts.join(' ')}`;
+  };
+
+  const authors = article.authors?.map((a: any) => formatAuthorName(a.name)) || ['Unknown Author'];
   const title = article.title;
   const journal = journalTitle || 'Unknown Journal';
   const vol = volumeNumber || '';
-  const iss = issueNumber || '';
   const pages = (article.page_start && article.page_end) ? `${article.page_start}-${article.page_end}` : '';
   const yr = year || new Date(article.created_at || Date.now()).getFullYear();
   const doi = article.doi ? `https://doi.org/${article.doi}` : '';
 
   const citations = {
-    APA: `${authors.join(', ')} (${yr}). ${title}. ${journal}${vol ? `, ${vol}` : ''}${iss ? `(${iss})` : ''}${pages ? `, ${pages}` : ''}. ${doi}`,
-    MLA: `${authors[0]}${authors.length > 1 ? ', et al.' : '.'} "${title}." ${journal}, vol. ${vol}, no. ${iss}, ${yr}${pages ? `, pp. ${pages}` : ''}. ${doi}`,
-    Chicago: `${authors.join(', ')}. "${title}." ${journal} ${vol}, no. ${iss} (${yr})${pages ? `: ${pages}` : ''}. ${doi}`
+    APA: `${authors.join(', ')} (${yr}). ${title}. ${journal}${vol ? `, ${vol}` : ''}${pages ? `, ${pages}` : ''}. ${doi}`,
+    MLA: `${authors[0]}${authors.length > 1 ? ', et al.' : '.'} "${title}." ${journal}, vol. ${vol}, ${yr}${pages ? `, pp. ${pages}` : ''}. ${doi}`,
+    Chicago: `${authors.join(', ')}. "${title}." ${journal} ${vol} (${yr})${pages ? `: ${pages}` : ''}. ${doi}`
   };
 
   const handleCopy = (type: string, text: string) => {

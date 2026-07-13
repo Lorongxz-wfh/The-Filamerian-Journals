@@ -16,7 +16,7 @@ interface Article {
   doi: string | null;
   pdf_url: string | null;
   authors: any[];
-  issue: any;
+  volume: any;
   created_at: string;
 }
 
@@ -48,7 +48,7 @@ const Articles: React.FC = () => {
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    issue_id: '',
+    volume_id: '',
     title: '',
     abstract: '',
     doi: '',
@@ -83,7 +83,7 @@ const Articles: React.FC = () => {
     setEditingArticle(article);
     if (article) {
       setFormData({
-        issue_id: String(article.issue?.id || ''),
+        volume_id: String(article.volume?.id || ''),
         title: article.title || '',
         abstract: article.abstract || '',
         doi: article.doi || '',
@@ -94,7 +94,7 @@ const Articles: React.FC = () => {
       });
     } else {
       setFormData({
-        issue_id: '',
+        volume_id: '',
         title: '',
         abstract: '',
         doi: '',
@@ -119,7 +119,7 @@ const Articles: React.FC = () => {
     setError(null);
     try {
       const payload = new FormData();
-      payload.append('issue_id', formData.issue_id);
+      payload.append('volume_id', formData.volume_id);
       payload.append('title', formData.title);
       payload.append('abstract', formData.abstract);
       payload.append('doi', formData.doi);
@@ -176,7 +176,7 @@ const Articles: React.FC = () => {
         const path = url.split('/storage/')[1];
         url = `${STORAGE_URL}${path}`;
       }
-      setPdfViewUrl(url);
+      setPdfViewUrl(url + '#toolbar=0');
     } catch (err) {
       console.error('Failed to get download URL', err);
       alert('Could not load PDF document.');
@@ -269,7 +269,7 @@ const Articles: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-5 py-4 text-[12px] text-muted truncate max-w-[180px]">
-                    {article.issue?.volume?.journal?.title || '-'}
+                    {article.volume?.journal?.title || '-'}
                   </td>
                   <td className="px-5 py-4 text-[12px] text-muted">
                     {article.authors?.map(a => a.name).join(', ') || '-'}
@@ -320,17 +320,15 @@ const Articles: React.FC = () => {
             
             <div className="md:col-span-2">
               <Select 
-                label="Target Issue" required name="issue_id" value={formData.issue_id} onChange={handleInputChange}
+                label="Target Volume" required name="volume_id" value={formData.volume_id} onChange={handleInputChange}
               >
-                <option value="">Select Journal / Volume / Issue</option>
+                <option value="">Select Journal / Volume</option>
                 {journalsData.map(journal => (
                   <optgroup key={`j-${journal.id}`} label={journal.title}>
                     {journal.volumes?.map((vol: any) => (
-                      vol.issues?.map((issue: any) => (
-                        <option key={issue.id} value={issue.id}>
-                          Vol {vol.volume_number} ({vol.year}) — Issue {issue.issue_number}
-                        </option>
-                      ))
+                      <option key={vol.id} value={vol.id}>
+                        Vol {vol.volume_number} ({vol.year})
+                      </option>
                     ))}
                   </optgroup>
                 ))}
@@ -339,7 +337,7 @@ const Articles: React.FC = () => {
 
             <div className="md:col-span-2">
               <Input 
-                label="Author Name" hint='defaults to "The Filamerian Journals"' name="author_name" value={formData.author_name} onChange={handleInputChange} placeholder="e.g. Dr. Julian Santos"
+                label="Author" hint='Defaults to "The Filamerian Journals" if empty' name="author_name" value={formData.author_name} onChange={handleInputChange} placeholder="Honorific: Mr./Ms./Mrs./Dr./Mx.; Last Name, First Name, MI"
               />
             </div>
 
@@ -367,8 +365,9 @@ const Articles: React.FC = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider mb-1.5">
-                PDF Document
+              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider flex justify-between items-center mb-1.5">
+                <span>PDF Document</span>
+                <span className="text-[10px] text-muted normal-case tracking-normal">Max size: 10MB</span>
               </label>
               <input 
                 type="file" 

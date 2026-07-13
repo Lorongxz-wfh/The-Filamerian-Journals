@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('volumes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('journal_id')->constrained()->onDelete('cascade');
-            $table->integer('volume_number');
+            $table->string('volume_number');
             $table->integer('year');
             $table->timestamps();
         });

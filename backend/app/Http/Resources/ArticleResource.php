@@ -16,7 +16,7 @@ class ArticleResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'issue_id' => $this->issue_id,
+            'volume_id' => $this->volume_id,
             'title' => $this->title,
             'abstract' => $this->abstract,
             'pdf_url' => $this->pdf_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->pdf_path) : null,
@@ -24,7 +24,7 @@ class ArticleResource extends JsonResource
             'page_end' => $this->page_end,
             'doi' => $this->doi,
             'status' => $this->status,
-            'issue' => new IssueResource($this->whenLoaded('issue')),
+            'volume' => new VolumeResource($this->whenLoaded('volume')),
             'authors' => AuthorResource::collection($this->whenLoaded('authors')),
             'keywords' => KeywordResource::collection($this->whenLoaded('keywords')),
             'created_at' => $this->created_at,

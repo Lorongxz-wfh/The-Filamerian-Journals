@@ -19,7 +19,7 @@ class JournalController extends Controller
 
         // Eager-load nested relationships when requested
         if ($request->boolean('with_volumes')) {
-            $query->with(['volumes.issues.articles.authors']);
+            $query->with(['volumes.articles.authors']);
         }
 
         return JournalResource::collection($query->paginate(50));

@@ -11,13 +11,13 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        return ArticleResource::collection(Article::with(['issue.volume.journal', 'authors', 'keywords'])->paginate(50));
+        return ArticleResource::collection(Article::with(['volume.journal', 'authors', 'keywords'])->paginate(50));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'issue_id' => 'required|exists:issues,id',
+            'volume_id' => 'required|exists:volumes,id',
             'title' => 'required|string|max:255',
             'abstract' => 'nullable|string',
             'pdf_path' => 'nullable|file|mimes:pdf|max:10240', // 10MB max
@@ -54,18 +54,18 @@ class ArticleController extends Controller
             $article->keywords()->sync($request->keyword_ids);
         }
 
-        return new ArticleResource($article->load(['authors', 'keywords', 'issue.volume.journal']));
+        return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
     }
 
     public function show(Article $article)
     {
-        return new ArticleResource($article->load(['issue.volume.journal', 'authors', 'keywords']));
+        return new ArticleResource($article->load(['volume.journal', 'authors', 'keywords']));
     }
 
     public function update(Request $request, Article $article)
     {
         $validated = $request->validate([
-            'issue_id' => 'exists:issues,id',
+            'volume_id' => 'exists:volumes,id',
             'title' => 'string|max:255',
             'abstract' => 'nullable|string',
             'pdf_path' => 'nullable|file|mimes:pdf|max:10240',

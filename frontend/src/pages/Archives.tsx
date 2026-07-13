@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, Calendar, FileText, Quote } from 'lucide-react';
+import { ChevronDown, BookOpen, FileText, Quote } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
@@ -22,18 +22,11 @@ interface Article {
   authors: Author[];
 }
 
-interface Issue {
-  id: number;
-  issue_number: number;
-  published_at: string;
-  articles: Article[];
-}
-
 interface Volume {
   id: number;
   volume_number: number;
   year: number;
-  issues: Issue[];
+  articles: Article[];
 }
 
 interface Journal {
@@ -88,7 +81,7 @@ const Archives: React.FC = () => {
 
   const totalArticles = journals.reduce(
     (sum, j) => sum + (j.volumes?.reduce(
-      (vs, v) => vs + (v.issues?.reduce((is, i) => is + (i.articles?.length || 0), 0) || 0), 0
+      (vs, v) => vs + (v.articles?.length || 0), 0
     ) || 0), 0
   );
 
@@ -96,7 +89,7 @@ const Archives: React.FC = () => {
     <div className="container-custom py-12 space-y-10">
       {/* Header */}
       <div className="border-b border-border pb-6">
-        <h1 className="text-2xl uppercase tracking-wider">Archives</h1>
+        <h1 className="text-2xl uppercase tracking-wider font-bold">Archives</h1>
         <p className="text-[14px] text-muted max-w-xl leading-relaxed mt-2">
           Browse past volumes and issues across all journals.
         </p>
@@ -107,7 +100,6 @@ const Archives: React.FC = () => {
         {[
           { label: 'Journals', value: journals.length },
           { label: 'Volumes', value: journals.reduce((s, j) => s + (j.volumes?.length || 0), 0) },
-          { label: 'Issues', value: journals.reduce((s, j) => s + (j.volumes?.reduce((vs, v) => vs + (v.issues?.length || 0), 0) || 0), 0) },
           { label: 'Articles', value: totalArticles },
         ].map((s) => (
           <div key={s.label} className="bg-surface p-4 text-center">
@@ -127,7 +119,7 @@ const Archives: React.FC = () => {
           journals.map((journal) => {
             const isOpen = expandedJournal === journal.id;
             const articleCount = journal.volumes?.reduce(
-              (s, v) => s + (v.issues?.reduce((is, i) => is + (i.articles?.length || 0), 0) || 0), 0
+              (s, v) => s + (v.articles?.length || 0), 0
             ) || 0;
 
             return (
@@ -173,107 +165,92 @@ const Archives: React.FC = () => {
                               <span className="text-[13px] font-semibold text-primary">Volume {vol.volume_number}</span>
                               <span className="text-[11px] text-muted">({vol.year})</span>
                               <span className="text-[11px] text-muted/60">
-                                — {vol.issues?.length || 0} issue{(vol.issues?.length || 0) !== 1 ? 's' : ''}, {vol.issues?.reduce((s, i) => s + (i.articles?.length || 0), 0) || 0} articles
+                                — {vol.articles?.length || 0} article{(vol.articles?.length || 0) !== 1 ? 's' : ''}
                               </span>
                             </div>
                             <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${volOpen ? 'rotate-180' : ''}`} />
                           </button>
 
-                          {/* Issues + Articles */}
+                          {/* Articles */}
                           {volOpen && (
                             <div className="bg-background">
-                              {vol.issues?.map((issue) => (
-                                <div key={issue.id} className="border-t border-border">
-                                  <div className="px-6 py-2.5 flex items-center gap-2 bg-background border-b border-border">
-                                    <Calendar className="h-3.5 w-3.5 text-secondary" />
-                                    <span className="text-[12px] font-semibold text-primary">Issue {issue.issue_number}</span>
-                                    <span className="text-[11px] text-muted">— Published: {issue.published_at}</span>
-                                    <span className="text-[11px] text-muted/50 ml-auto">{issue.articles?.length || 0} articles</span>
-                                  </div>
-
-                                  <div className="divide-y divide-border">
-                                    {issue.articles?.map((article) => (
-                                      <div 
-                                        key={article.id} 
-                                        className="px-8 py-3 hover:bg-surface transition-colors group cursor-pointer"
-                                        onClick={async () => {
-                                          if (!article.pdf_path) return;
-                                          if (!localStorage.getItem('token')) {
-                                            window.location.href = '/login';
-                                            return;
-                                          }
-                                          setIsPdfModalOpen(true);
-                                          setPdfViewUrl(null);
-                                          try {
-                                            const res = await api.get(`/articles/${article.id}/download-url`);
-                                            let url = res.data.url;
-                                            if (url.includes('/storage/')) {
-                                              const path = url.split('/storage/')[1];
-                                              url = `${STORAGE_URL}${path}`;
-                                            }
-                                            setPdfViewUrl(url);
-                                          } catch (err) {
-                                            console.error('Failed to get download URL', err);
-                                            alert('Could not load PDF document.');
-                                            setIsPdfModalOpen(false);
-                                          }
-                                        }}
-                                      >
-                                        <div className="flex items-start justify-between gap-4">
-                                          {article.cover_path && (
-                                            <div className="shrink-0 w-12 h-16 border border-border bg-surface overflow-hidden">
-                                              <img src={`${STORAGE_URL}${article.cover_path}`} alt="Cover" className="w-full h-full object-cover" />
-                                            </div>
+                              <div className="divide-y divide-border">
+                                {vol.articles?.map((article) => (
+                                  <div 
+                                    key={article.id} 
+                                    className="px-8 py-3 hover:bg-surface transition-colors group cursor-pointer"
+                                    onClick={async () => {
+                                      if (!article.pdf_path) return;
+                                      if (!localStorage.getItem('token')) {
+                                        window.location.href = '/login';
+                                        return;
+                                      }
+                                      setIsPdfModalOpen(true);
+                                      setPdfViewUrl(null);
+                                      try {
+                                        const res = await api.get(`/articles/${article.id}/download-url`);
+                                        let url = res.data.url;
+                                        if (url.includes('/storage/')) {
+                                          const path = url.split('/storage/')[1];
+                                          url = `${STORAGE_URL}${path}`;
+                                        }
+                                        setPdfViewUrl(url + '#toolbar=0');
+                                      } catch (err) {
+                                        console.error('Failed to get download URL', err);
+                                        alert('Could not load PDF document.');
+                                        setIsPdfModalOpen(false);
+                                      }
+                                    }}
+                                  >
+                                    <div className="flex items-start justify-between gap-4">
+                                      {article.cover_path && (
+                                        <div className="shrink-0 w-12 h-16 border border-border bg-surface overflow-hidden">
+                                          <img src={`${STORAGE_URL}${article.cover_path}`} alt="Cover" className="w-full h-full object-cover" />
+                                        </div>
+                                      )}
+                                      <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <FileText className="h-3.5 w-3.5 text-primary/20 shrink-0" />
+                                          <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
+                                            {article.title}
+                                          </h4>
+                                        </div>
+                                        <p className="text-[11px] text-muted mt-0.5 pl-5">
+                                          {article.authors?.map(a => a.name).join(', ') || 'Unknown'}
+                                        </p>
+                                        <div className="flex items-center gap-4 mt-1 pl-5 text-[10px] text-muted/50">
+                                          {article.page_start && article.page_end && (
+                                            <span>pp. {article.page_start}-{article.page_end}</span>
                                           )}
-                                          <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
-                                              <FileText className="h-3.5 w-3.5 text-primary/20 shrink-0" />
-                                              <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
-                                                {article.title}
-                                              </h4>
-                                            </div>
-                                            <p className="text-[11px] text-muted mt-0.5 pl-5">
-                                              {article.authors?.map(a => a.name).join(', ') || 'Unknown'}
-                                            </p>
-                                            <div className="flex items-center gap-4 mt-1 pl-5 text-[10px] text-muted/50">
-                                              {article.page_start && article.page_end && (
-                                                <span>pp. {article.page_start}-{article.page_end}</span>
-                                              )}
-                                              {article.doi && <span>DOI: {article.doi}</span>}
-                                              
-                                              {!localStorage.getItem('token') && article.pdf_path && (
-                                                <span className="uppercase tracking-wider opacity-50">Login to view PDF</span>
-                                              )}
+                                          {article.doi && <span>DOI: {article.doi}</span>}
+                                          
+                                          {!localStorage.getItem('token') && article.pdf_path && (
+                                            <span className="uppercase tracking-wider opacity-50">Login to view PDF</span>
+                                          )}
 
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setCitationArticle(article);
-                                                  setCitationContext({
-                                                    journalTitle: journal.title,
-                                                    volumeNumber: vol.volume_number,
-                                                    issueNumber: issue.issue_number,
-                                                    year: vol.year
-                                                  });
-                                                }}
-                                                className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 ml-auto"
-                                              >
-                                                <Quote className="h-3 w-3" /> Cite
-                                              </button>
-                                            </div>
-                                          </div>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setCitationArticle(article);
+                                              setCitationContext({
+                                                journalTitle: journal.title,
+                                                volumeNumber: vol.volume_number,
+                                                year: vol.year
+                                              });
+                                            }}
+                                            className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 ml-auto"
+                                          >
+                                            <Quote className="h-3 w-3" /> Cite
+                                          </button>
                                         </div>
                                       </div>
-                                    ))}
-                                    {issue.articles?.length === 0 && (
-                                      <div className="px-8 py-3 text-[11px] text-muted">No articles found in this issue.</div>
-                                    )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
-                              {vol.issues?.length === 0 && (
-                                <div className="px-6 py-4 text-[12px] text-muted bg-background">No issues available.</div>
-                              )}
+                                ))}
+                                {vol.articles?.length === 0 && (
+                                  <div className="px-8 py-3 text-[11px] text-muted">No articles found in this volume.</div>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -301,7 +278,6 @@ const Archives: React.FC = () => {
         article={citationArticle}
         journalTitle={citationContext.journalTitle}
         volumeNumber={citationContext.volumeNumber}
-        issueNumber={citationContext.issueNumber}
         year={citationContext.year}
       />
 

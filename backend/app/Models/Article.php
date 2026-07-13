@@ -10,7 +10,7 @@ class Article extends Model
     use HasFactory;
 
     protected $fillable = [
-        'issue_id',
+        'volume_id',
         'title',
         'abstract',
         'pdf_path',
@@ -20,9 +20,9 @@ class Article extends Model
         'status',
     ];
 
-    public function issue()
+    public function volume()
     {
-        return $this->belongsTo(Issue::class);
+        return $this->belongsTo(Volume::class);
     }
 
     public function authors()

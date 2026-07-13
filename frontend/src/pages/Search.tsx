@@ -45,7 +45,7 @@ const Search: React.FC = () => {
     <div className="container-custom py-12 space-y-10 min-h-[60vh]">
       {/* Header */}
       <div className="border-b border-border pb-6 space-y-2">
-        <h1 className="text-2xl uppercase tracking-wider">Search Results</h1>
+        <h1 className="text-2xl uppercase tracking-wider font-bold">Search Results</h1>
         <p className="text-[14px] text-muted">
           Showing results for: <span className="font-semibold text-primary">"{query}"</span>
         </p>
@@ -94,10 +94,10 @@ const Search: React.FC = () => {
                     <div className="space-y-3 flex-grow">
                       <div className="flex items-center gap-3">
                         <span className="text-[11px] font-medium text-secondary bg-secondary/10 px-2 py-0.5 uppercase tracking-wider">
-                          {article.issue?.volume?.journal?.title || 'Unknown Journal'}
+                          {article.volume?.journal?.title || 'Unknown Journal'}
                         </span>
                         <span className="text-[12px] text-muted">
-                          Vol. {article.issue?.volume?.volume_number}, Issue {article.issue?.issue_number}
+                          Vol. {article.volume?.volume_number || '-'}
                         </span>
                       </div>
                       <h4 className="text-[14px] font-semibold text-primary uppercase tracking-wider">
@@ -126,7 +126,7 @@ const Search: React.FC = () => {
                             onClick={async () => {
                               try {
                                 const res = await api.get(`/articles/${article.id}/download-url`);
-                                window.open(res.data.url, '_blank');
+                                window.open(res.data.url + '#toolbar=0', '_blank');
                               } catch (err) {
                                 console.error('Failed to get download URL', err);
                               }
@@ -176,10 +176,9 @@ const Search: React.FC = () => {
         isOpen={!!citationArticle}
         onClose={() => setCitationArticle(null)}
         article={citationArticle}
-        journalTitle={citationArticle?.issue?.volume?.journal?.title}
-        volumeNumber={citationArticle?.issue?.volume?.volume_number}
-        issueNumber={citationArticle?.issue?.issue_number}
-        year={citationArticle?.issue?.volume?.year}
+        journalTitle={citationArticle?.volume?.journal?.title}
+        volumeNumber={citationArticle?.volume?.volume_number}
+        year={citationArticle?.volume?.year}
       />
     </div>
   );

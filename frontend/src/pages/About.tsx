@@ -44,7 +44,7 @@ const About: React.FC = () => {
   return (
     <div className="container-custom py-12 space-y-10">
       <div className="border-b border-border pb-6">
-        <h1 className="text-2xl uppercase tracking-wider">About & Resources</h1>
+        <h1 className="text-2xl uppercase tracking-wider font-bold">About & Resources</h1>
         <p className="text-[14px] text-muted max-w-xl leading-relaxed mt-2">
           Information for authors, reviewers, and readers regarding our publication standards and policies.
         </p>
@@ -62,7 +62,7 @@ const About: React.FC = () => {
                 <button
                   key={res.id}
                   onClick={() => setActiveTab(res.slug)}
-                  className={`text-left px-4 py-2.5 text-[13px] font-medium transition-colors ${
+                  className={`text-left px-4 py-2.5 text-[13px] font-bold transition-colors ${
                     activeTab === res.slug
                       ? 'bg-primary text-white'
                       : 'text-muted hover:text-primary hover:bg-background'
@@ -81,7 +81,7 @@ const About: React.FC = () => {
               <div className="flex items-center justify-center h-full text-muted">Loading content...</div>
             ) : activeResource ? (
               <div 
-                className="space-y-6 prose prose-sm max-w-none prose-headings:text-primary prose-headings:font-semibold prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary"
+                className="space-y-6 prose prose-sm max-w-none prose-headings:text-primary prose-headings:font-bold prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary"
                 dangerouslySetInnerHTML={{ __html: activeResource.content || '' }}
               />
             ) : (

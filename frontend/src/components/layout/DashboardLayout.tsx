@@ -58,7 +58,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
     { path: '/dashboard/feedback', label: 'Feedback', icon: MessageSquare, roles: ['Admin', 'Super Admin'] },
     { path: '/dashboard/resources', label: 'Resources', icon: FileText, roles: ['Admin', 'Super Admin'] },
-    { path: '/dashboard/users', label: 'User Manager', icon: Users, roles: ['Super Admin'] },
+    { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
   ];
 
@@ -128,7 +128,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const SidebarContent = () => (
     <>
       {/* Brand */}
-      <div className="px-6 py-5 border-b border-white/10">
+      <div className="px-6 py-5 border-b border-white/10 shrink-0">
         <Link to="/" className="flex items-center">
           <span className="font-display font-normal text-secondary text-base tracking-wider uppercase leading-none">
             Filamerian
@@ -140,7 +140,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-grow px-4 py-6 space-y-6">
+      <nav className="flex-grow px-4 py-6 space-y-6 overflow-y-auto dark-scrollbar">
         <div className="space-y-1">
           <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
             Main Menu
@@ -189,7 +189,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </nav>
 
       {/* User Info & Logout */}
-      <div className="px-4 py-4 border-t border-white/10">
+      <div className="px-4 py-4 border-t border-white/10 shrink-0 mt-auto">
         <div className="flex items-center gap-3 px-3 py-3 mb-2">
           <div className="h-8 w-8 bg-secondary flex items-center justify-center text-primary font-semibold text-sm shrink-0">
             {user.name?.charAt(0) || 'U'}

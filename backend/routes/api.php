@@ -41,7 +41,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Read-only for all authenticated users
     Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['index', 'show']);
     Route::apiResource('volumes', \App\Http\Controllers\Api\VolumeController::class)->only(['index', 'show']);
-    Route::apiResource('issues', \App\Http\Controllers\Api\IssueController::class)->only(['index', 'show']);
     Route::apiResource('articles', \App\Http\Controllers\Api\ArticleController::class)->only(['index', 'show']);
     Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['index', 'show']);
     Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['index', 'show']);
@@ -55,7 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:Super Admin|Admin')->group(function () {
         Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('volumes', \App\Http\Controllers\Api\VolumeController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('issues', \App\Http\Controllers\Api\IssueController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('articles', \App\Http\Controllers\Api\ArticleController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['store', 'update', 'destroy']);

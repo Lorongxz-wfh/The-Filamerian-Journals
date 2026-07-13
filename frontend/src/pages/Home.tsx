@@ -94,7 +94,6 @@ const Home: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredJournals.map((j) => {
                   const latestVol = j.volumes?.[0];
-                  const latestIssue = latestVol?.issues?.[0];
                   
                   return (
                     <JournalCard
@@ -104,7 +103,6 @@ const Home: React.FC = () => {
                       description={j.description}
                       date={new Date(j.created_at).toLocaleDateString()}
                       volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
-                      issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
                       image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                       category={j.category}
                     />

@@ -55,11 +55,11 @@ const Journals: React.FC = () => {
   });
 
   return (
-    <div className="container-custom py-12 space-y-10">
+    <div className="container-custom pt-6 pb-12 space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
         <div className="space-y-2">
-          <h1 className="text-2xl uppercase tracking-wider">Our Journals</h1>
+          <h1 className="text-2xl uppercase tracking-wider font-bold">Our Journals</h1>
           <p className="text-[14px] text-muted max-w-xl leading-relaxed">
             Explore our collection of peer-reviewed journals spanning science,
             education, theology, and the humanities.
@@ -113,14 +113,13 @@ const Journals: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Grid / List */}
       {loading ? (
         <div className="py-20 text-center text-muted">Loading journals...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col w-full max-w-5xl mx-auto"}>
           {filtered.map((j) => {
             const latestVol = j.volumes?.[0];
-            const latestIssue = latestVol?.issues?.[0];
             
             return (
               <JournalCard
@@ -130,7 +129,6 @@ const Journals: React.FC = () => {
                 description={j.description}
                 date={new Date(j.created_at).toLocaleDateString()}
                 volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
-                issue={latestIssue ? `Issue ${latestIssue.issue_number}` : ''}
                 image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                 category={j.category}
                 publisher={j.publisher || undefined}

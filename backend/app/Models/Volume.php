@@ -20,8 +20,8 @@ class Volume extends Model
         return $this->belongsTo(Journal::class);
     }
 
-    public function issues()
+    public function articles()
     {
-        return $this->hasMany(Issue::class);
+        return $this->hasMany(Article::class);
     }
 }

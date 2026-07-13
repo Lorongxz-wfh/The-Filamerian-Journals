@@ -40,7 +40,7 @@ const Announcements: React.FC = () => {
   return (
     <div className="container-custom py-12 space-y-10">
       <div className="border-b border-border pb-6">
-        <h1 className="text-2xl uppercase tracking-wider">Announcements</h1>
+        <h1 className="text-2xl uppercase tracking-wider font-bold">Announcements</h1>
         <p className="text-[14px] text-muted max-w-xl leading-relaxed mt-2">
           Latest news and updates from The Filamerian Journals editorial office.
         </p>
