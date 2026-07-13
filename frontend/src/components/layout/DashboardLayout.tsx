@@ -58,6 +58,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
     { path: '/dashboard/resources', label: 'Resources', icon: FileText, roles: ['Admin', 'Super Admin'] },
     { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
+    { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
   ];
 

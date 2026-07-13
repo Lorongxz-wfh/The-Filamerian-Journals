@@ -14,7 +14,7 @@ const Navbar = () => {
   };
   return (
     <nav className="bg-primary sticky top-0 z-50">
-      <div className="container-custom flex h-16 items-center justify-between gap-6">
+      <div className="w-full px-6 lg:px-12 flex h-16 items-center justify-between gap-6">
         {/* Brand — flush left */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
           <span className="font-display font-normal text-secondary text-xl tracking-wider uppercase leading-none">
@@ -38,35 +38,60 @@ const Navbar = () => {
         </div>
 
         {/* Nav links + Login — flush right */}
-        <div className="hidden md:flex items-center gap-8 shrink-0">
-          <Link to="/journals" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
-            Journals
+        <div className="hidden md:flex items-center gap-6 shrink-0 h-full">
+          <Link to="/" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
+            Home
           </Link>
-          <Link to="/archives" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
+          
+          <div className="relative group h-full flex items-center">
+            <Link to="/journals" className="text-[13px] font-medium text-white/70 group-hover:text-white transition-colors tracking-wide h-full flex items-center">
+              Journals
+            </Link>
+            
+            {/* UP Diliman Style Dropdown */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto">
+              <div className="flex flex-col py-2">
+                <Link to="/journals?category=Science" className="px-6 py-4 text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest border-b border-white/10 last:border-0">
+                  Science
+                </Link>
+                <Link to="/journals?category=Education" className="px-6 py-4 text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest border-b border-white/10 last:border-0">
+                  Education
+                </Link>
+                <Link to="/journals?category=Arts" className="px-6 py-4 text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest border-b border-white/10 last:border-0">
+                  Arts
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <Link to="/archives" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
             Archives
           </Link>
-          <Link to="/about" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
+          <Link to="/about" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
             About
           </Link>
-          <Link to="/contact" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide">
+          <Link to="/contact" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
             Contact
           </Link>
-          <span className="w-px h-5 bg-white/20" />
-          {localStorage.getItem('token') ? (
-            <Link
-              to="/dashboard"
-              className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              to="/login"
-              className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
-            >
-              Portal Login
-            </Link>
-          )}
+          
+          <div className="flex items-center h-full ml-2">
+            <span className="w-px h-5 bg-white/20 mr-6" />
+            {localStorage.getItem('token') ? (
+              <Link
+                to="/dashboard"
+                className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
+              >
+                Portal Login
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Mobile Menu Trigger */}

@@ -65,10 +65,10 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-16 pb-16 pt-10">
-      <div className="container-custom">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="w-full px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
           {/* Journals Grid */}
-          <div className="lg:col-span-8 space-y-8">
+          <div className="lg:col-span-9 space-y-8">
             <div className="flex items-center justify-between border-b border-border pb-4 overflow-x-auto">
               <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 mr-8">
                 Academic Journals
@@ -128,7 +128,7 @@ const Home: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 h-full">
+          <div className="lg:col-span-3 h-full">
             {/* Announcements */}
             <div className="border border-border bg-surface p-6 h-full flex flex-col">
               <Link to="/announcements" className="flex items-center justify-between mb-6 pb-3 border-b border-border group">

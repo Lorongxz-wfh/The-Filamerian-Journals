@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import JournalCard from '@/components/ui/JournalCard';
-import { Search } from 'lucide-react';
+import { Search, LayoutGrid, List } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -80,37 +80,39 @@ const Journals: React.FC = () => {
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-1 border border-border bg-surface w-fit flex-wrap">
-        {availableCategories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveTab(cat)}
-            className={`px-4 py-2 text-[12px] font-medium transition-colors ${
-              activeTab === cat
-                ? 'bg-primary text-white'
-                : 'text-muted hover:text-primary'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-      
-      {/* View Toggle */}
-      <div className="flex justify-end mb-4">
-        <div className="inline-flex items-center border border-border bg-surface rounded-sm">
+      {/* Category Tabs & View Toggle */}
+      <div className="flex items-center justify-between border-b border-border pb-4">
+        <div className="flex gap-1 border border-border bg-surface w-fit flex-wrap">
+          {availableCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveTab(cat)}
+              className={`px-4 py-2 text-[12px] font-medium transition-colors ${
+                activeTab === cat
+                  ? 'bg-primary text-white'
+                  : 'text-muted hover:text-primary'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* View Toggle */}
+        <div className="inline-flex items-center border border-border bg-surface rounded-sm h-[38px]">
           <button
             onClick={() => setViewMode('grid')}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+            className={`px-3 py-1.5 h-full flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+            title="Grid View"
           >
-            Grid View
+            <LayoutGrid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 text-xs font-medium transition-colors border-l border-border ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+            className={`px-3 py-1.5 h-full flex items-center justify-center transition-colors border-l border-border ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+            title="List View"
           >
-            List View
+            <List className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -140,12 +142,6 @@ const Journals: React.FC = () => {
               />
             );
           })}
-        </div>
-      )}
-
-      {!loading && filtered.length === 0 && (
-        <div className="py-16 text-center border border-border bg-surface">
-          <p className="text-[13px] text-muted">No journals found matching your search.</p>
         </div>
       )}
 

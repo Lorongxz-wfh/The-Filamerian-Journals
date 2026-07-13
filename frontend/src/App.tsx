@@ -3,6 +3,7 @@ import Home from '@/pages/Home';
 import Journals from '@/pages/Journals';
 import Archives from '@/pages/Archives';
 import JournalDetail from '@/pages/JournalDetail';
+import ArticleDetail from '@/pages/ArticleDetail';
 import Announcements from '@/pages/Announcements';
 import Login from '@/pages/Login';
 import PendingVerification from '@/pages/PendingVerification';
@@ -15,6 +16,7 @@ import Notifications from '@/pages/dashboard/Notifications';
 import ManageResources from '@/pages/dashboard/ManageResources';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
+import ActivityLogs from '@/pages/dashboard/ActivityLogs';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
 import SystemHealth from '@/pages/dashboard/SystemHealth';
 import PublicLayout from '@/components/layout/PublicLayout';
@@ -40,6 +42,7 @@ function App() {
         <Route path="/search" element={<PublicLayout><Search /></PublicLayout>} />
         <Route path="/journals" element={<PublicLayout><Journals /></PublicLayout>} />
         <Route path="/journals/:slug" element={<PublicLayout><JournalDetail /></PublicLayout>} />
+        <Route path="/articles/:id" element={<PublicLayout><ArticleDetail /></PublicLayout>} />
         <Route path="/archives" element={<PublicLayout><Archives /></PublicLayout>} />
         <Route path="/announcements" element={<PublicLayout><Announcements /></PublicLayout>} />
         <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
@@ -64,6 +67,7 @@ function App() {
                   <Route path="resources" element={<ManageResources />} />
                   <Route path="feedback" element={<Feedback />} />
                   <Route path="users" element={<UserManager />} />
+                  <Route path="logs" element={<ActivityLogs />} />
                   <Route path="settings" element={<SystemSettings />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>

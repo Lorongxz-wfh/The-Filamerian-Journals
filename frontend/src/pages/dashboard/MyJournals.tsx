@@ -51,8 +51,9 @@ const MyJournals: React.FC = () => {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([
+    'Science', 'Education', 'Arts', 'Multidisciplinary'
+  ]);
 
   const fetchJournals = async () => {
     try {
@@ -62,10 +63,13 @@ const MyJournals: React.FC = () => {
         api.get('/public/settings')
       ]);
       setJournals(journalsRes.data.data);
+      const data = settingsRes.data?.data || {};
+      const catsString = data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+      const catsArray = typeof catsString === 'string' 
+        ? catsString.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : ['Science', 'Education', 'Arts', 'Multidisciplinary'];
       
-      const catsString = settingsRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-      const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
-      setAvailableCategories(catsArray);
+      setAvailableCategories(catsArray.length > 0 ? catsArray : ['Science', 'Education', 'Arts', 'Multidisciplinary']);
     } catch (err) {
       console.error('Failed to fetch journals or settings:', err);
     } finally {

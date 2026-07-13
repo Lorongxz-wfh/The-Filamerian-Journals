@@ -38,6 +38,8 @@ class UserController extends Controller
 
         $user->assignRole($validated['role']);
 
+        \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
+
         return response()->json($user->load('roles'), 201);
     }
 
@@ -65,6 +67,8 @@ class UserController extends Controller
             $user->syncRoles([$validated['role']]);
         }
 
+        \App\Services\ActivityLogger::log('Updated User', "Updated user account for {$user->name}", get_class($user), $user->id);
+
         return response()->json($user->load('roles'));
     }
 
@@ -75,7 +79,12 @@ class UserController extends Controller
             return response()->json(['message' => 'Cannot delete your own account.'], 403);
         }
 
+        $name = $user->name;
+        $class = get_class($user);
+
         $user->delete();
+
+        \App\Services\ActivityLogger::log('Deleted User', "Deleted user account for {$name}", $class, null);
 
         return response()->noContent();
     }
@@ -83,6 +92,9 @@ class UserController extends Controller
     public function approve(User $user)
     {
         $user->update(['is_approved' => true]);
+
+        \App\Services\ActivityLogger::log('Approved User', "Approved user account for {$user->name}", get_class($user), $user->id);
+
         return response()->json(['message' => 'User approved successfully.']);
     }
 }

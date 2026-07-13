@@ -54,11 +54,19 @@ class ArticleController extends Controller
             $article->keywords()->sync($request->keyword_ids);
         }
 
+        \App\Services\ActivityLogger::log('Created Article', "Created article: {$article->title}", get_class($article), $article->id);
+
         return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
     }
 
     public function show(Article $article)
     {
+        return new ArticleResource($article->load(['volume.journal', 'authors', 'keywords']));
+    }
+
+    public function showPublic(Article $article)
+    {
+        // Public endpoint to retrieve article metadata for SEO/Google Scholar
         return new ArticleResource($article->load(['volume.journal', 'authors', 'keywords']));
     }
 

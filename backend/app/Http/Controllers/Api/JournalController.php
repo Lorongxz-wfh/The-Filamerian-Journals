@@ -60,6 +60,8 @@ class JournalController extends Controller
 
         $journal = Journal::create($validated);
 
+        \App\Services\ActivityLogger::log('Created Journal', "Created journal: {$journal->title}", get_class($journal), $journal->id);
+
         return new JournalResource($journal);
     }
 
@@ -69,7 +71,7 @@ class JournalController extends Controller
      */
     public function show(Journal $journal)
     {
-        $journal->load(['volumes.issues.articles.authors']);
+        $journal->load(['volumes.articles.authors']);
 
         return new JournalResource($journal);
     }
@@ -111,6 +113,8 @@ class JournalController extends Controller
         }
 
         $journal->update($validated);
+
+        \App\Services\ActivityLogger::log('Updated Journal', "Updated journal: {$journal->title}", get_class($journal), $journal->id);
 
         return new JournalResource($journal);
     }

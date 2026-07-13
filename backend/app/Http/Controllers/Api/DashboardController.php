@@ -16,13 +16,18 @@ class DashboardController extends Controller
      */
     public function stats()
     {
-        $recentArticles = Article::latest()->take(5)->get()->map(function($article) {
-            return [
-                'action' => 'New article added',
-                'target' => $article->title,
-                'time' => $article->created_at->diffForHumans(),
-            ];
-        });
+        $recentActivity = \App\Models\ActivityLog::with('user')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function($log) {
+                return [
+                    'action' => $log->action,
+                    'target' => $log->description,
+                    'time' => $log->created_at->diffForHumans(),
+                    'user' => $log->user ? $log->user->name : 'System',
+                ];
+            });
 
         return response()->json([
             'journals' => Journal::count(),
@@ -30,7 +35,19 @@ class DashboardController extends Controller
             'authors' => Author::count(),
             'users' => User::count(),
             'announcements' => Announcement::count(),
-            'recentActivity' => $recentArticles,
+            'recentActivity' => $recentActivity,
         ]);
+    }
+
+    /**
+     * Return paginated activity logs for the admin table.
+     */
+    public function logs()
+    {
+        $logs = \App\Models\ActivityLog::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
+
+        return response()->json($logs);
     }
 }

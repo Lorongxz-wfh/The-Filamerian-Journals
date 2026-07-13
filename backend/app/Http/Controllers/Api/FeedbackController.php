@@ -36,12 +36,21 @@ class FeedbackController extends Controller
         ]);
 
         $feedback->update($validated);
+
+        \App\Services\ActivityLogger::log('Updated Feedback', "Updated feedback status from {$feedback->name}", get_class($feedback), $feedback->id);
+
         return response()->json(['data' => $feedback]);
     }
 
     public function destroy(Feedback $feedback)
     {
+        $name = $feedback->name;
+        $class = get_class($feedback);
+
         $feedback->delete();
+
+        \App\Services\ActivityLogger::log('Deleted Feedback', "Deleted feedback from {$name}", $class, null);
+
         return response()->noContent();
     }
 }

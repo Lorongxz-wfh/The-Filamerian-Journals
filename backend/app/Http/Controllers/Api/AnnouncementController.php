@@ -33,6 +33,8 @@ class AnnouncementController extends Controller
             '/dashboard/announcements'
         ));
 
+        \App\Services\ActivityLogger::log('Created Announcement', "Created announcement: {$announcement->title}", get_class($announcement), $announcement->id);
+
         return new AnnouncementResource($announcement);
     }
 
@@ -51,12 +53,19 @@ class AnnouncementController extends Controller
 
         $announcement->update($validated);
 
+        \App\Services\ActivityLogger::log('Updated Announcement', "Updated announcement: {$announcement->title}", get_class($announcement), $announcement->id);
+
         return new AnnouncementResource($announcement);
     }
 
     public function destroy(Announcement $announcement)
     {
+        $title = $announcement->title;
+        $class = get_class($announcement);
+
         $announcement->delete();
+
+        \App\Services\ActivityLogger::log('Deleted Announcement', "Deleted announcement: {$title}", $class, null);
 
         return response()->noContent();
     }

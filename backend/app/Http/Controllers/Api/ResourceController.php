@@ -24,6 +24,9 @@ class ResourceController extends Controller
         ]);
 
         $resource = \App\Models\Resource::create($validated);
+        
+        \App\Services\ActivityLogger::log('Created Resource', "Created resource: {$resource->title}", get_class($resource), $resource->id);
+        
         return response()->json(['data' => $resource], 201);
     }
 
@@ -42,12 +45,21 @@ class ResourceController extends Controller
         ]);
 
         $resource->update($validated);
+        
+        \App\Services\ActivityLogger::log('Updated Resource', "Updated resource: {$resource->title}", get_class($resource), $resource->id);
+        
         return response()->json(['data' => $resource]);
     }
 
     public function destroy(\App\Models\Resource $resource)
     {
+        $title = $resource->title;
+        $class = get_class($resource);
+
         $resource->delete();
+        
+        \App\Services\ActivityLogger::log('Deleted Resource', "Deleted resource: {$title}", $class, null);
+        
         return response()->noContent();
     }
 }

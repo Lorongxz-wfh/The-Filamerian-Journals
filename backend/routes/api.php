@@ -66,8 +66,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // User management
         Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
         Route::post('/users/{user}/approve', [\App\Http\Controllers\Api\UserController::class, 'approve']);
-        // System Health
+        // System Health & Logs
         Route::get('/system/health', [\App\Http\Controllers\Api\SystemController::class, 'health']);
+        Route::get('/dashboard/logs', [\App\Http\Controllers\Api\DashboardController::class, 'logs']);
     });
     }); // End EnsureUserIsApproved group
 });
@@ -79,6 +80,7 @@ Route::get('/public/journals/{journal}', [\App\Http\Controllers\Api\JournalContr
 Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
 Route::get('/public/resources', [\App\Http\Controllers\Api\ResourceController::class, 'index']);
 Route::get('/public/resources/{resource:slug}', [\App\Http\Controllers\Api\ResourceController::class, 'show']);
+Route::get('/public/articles/{article}', [\App\Http\Controllers\Api\ArticleController::class, 'showPublic']);
 
 // Settings & Feedbacks
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);

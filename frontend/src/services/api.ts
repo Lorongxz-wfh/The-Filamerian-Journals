@@ -21,4 +21,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Add a response interceptor to handle 401 Unauthorized errors globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Clear all auth data
+      localStorage.removeItem('token');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      
+      // Redirect to login if not already there
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login?expired=1';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
