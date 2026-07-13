@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, FileText, Users, ArrowRight } from 'lucide-react';
 import api from '@/services/api';
+import EmptyState from '@/components/ui/EmptyState';
 
 const Overview: React.FC = () => {
   const [data, setData] = useState<{
@@ -71,22 +72,26 @@ const Overview: React.FC = () => {
           </div>
 
           <div className="border border-border bg-surface divide-y divide-border">
-            {data.recentActivity.map((item, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-4 group hover:bg-background transition-colors">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-primary truncate">
-                    {item.target}
-                  </p>
-                  <p className="text-[11px] text-muted mt-0.5">
-                    {item.action}
-                  </p>
+            {data.recentActivity.length === 0 ? (
+              <EmptyState title="No recent activity" description="There are no recent actions recorded in the system yet." className="py-12 bg-transparent" />
+            ) : (
+              data.recentActivity.map((item, i) => (
+                <div key={i} className="flex items-center justify-between px-5 py-4 group hover:bg-background transition-colors">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium text-primary truncate">
+                      {item.target}
+                    </p>
+                    <p className="text-[11px] text-muted mt-0.5">
+                      {item.action}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0 ml-4">
+                    <span className="text-[11px] text-muted/60">{item.time}</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-muted/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
-                <div className="flex items-center gap-4 shrink-0 ml-4">
-                  <span className="text-[11px] text-muted/60">{item.time}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

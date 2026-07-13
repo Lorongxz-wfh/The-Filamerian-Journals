@@ -4,6 +4,8 @@ import { ChevronDown, BookOpen, FileText, Quote } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 interface Author {
   id: number;
@@ -96,7 +98,7 @@ const Archives: React.FC = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border">
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-px bg-border border border-border">
         {[
           { label: 'Journals', value: journals.length },
           { label: 'Volumes', value: journals.reduce((s, j) => s + (j.volumes?.length || 0), 0) },
@@ -112,9 +114,9 @@ const Archives: React.FC = () => {
       {/* Journal Accordion */}
       <div className="space-y-3">
         {loading ? (
-          <div className="py-20 text-center text-muted">Loading archives...</div>
+          <Spinner text="Loading archives..." />
         ) : journals.length === 0 ? (
-          <div className="py-20 text-center border border-border bg-surface text-muted text-[13px]">No journals found.</div>
+          <EmptyState title="No journals found" description="There are no journals with archived volumes yet." className="border border-border bg-surface" />
         ) : (
           journals.map((journal) => {
             const isOpen = expandedJournal === journal.id;

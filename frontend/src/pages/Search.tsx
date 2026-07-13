@@ -4,6 +4,8 @@ import { Search as SearchIcon, FileText, BookOpen, ExternalLink, Quote } from 'l
 import api, { STORAGE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 interface SearchResults {
   journals: any[];
@@ -53,8 +55,7 @@ const Search: React.FC = () => {
 
       {loading ? (
         <div className="py-20 text-center flex flex-col items-center justify-center space-y-4">
-          <SearchIcon className="h-8 w-8 text-muted/30 animate-pulse" />
-          <p className="text-[13px] text-muted tracking-wider uppercase">Searching database...</p>
+          <Spinner size="lg" text="Searching database..." />
         </div>
       ) : (
         <div className="space-y-12">
@@ -163,11 +164,11 @@ const Search: React.FC = () => {
 
           {/* Empty State */}
           {!loading && query && results.journals.length === 0 && results.articles.length === 0 && (
-            <div className="py-20 text-center border border-border bg-surface">
-              <SearchIcon className="h-6 w-6 text-muted/30 mx-auto mb-4" />
-              <p className="text-[13px] text-muted">No results found for "{query}".</p>
-              <p className="text-[12px] text-muted mt-1">Try adjusting your keywords or searching for a specific author.</p>
-            </div>
+            <EmptyState 
+              title={`No results found for "${query}"`} 
+              description="Try adjusting your keywords or searching for a specific author." 
+              className="py-20 border border-border bg-surface" 
+            />
           )}
         </div>
       )}

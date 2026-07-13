@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import api from '@/services/api';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 interface Resource {
   id: number;
@@ -54,9 +56,9 @@ const About: React.FC = () => {
         <div className="lg:w-1/4 shrink-0">
           <div className="flex flex-col gap-1 border border-border bg-surface p-2 sticky top-24">
             {loading ? (
-              <div className="p-4 text-center text-muted text-[13px]">Loading...</div>
+              <Spinner text="Loading..." size="sm" className="py-4" />
             ) : resources.length === 0 ? (
-              <div className="p-4 text-center text-muted text-[13px]">No resources available.</div>
+              <EmptyState title="No resources" description="No resources available." className="p-4" />
             ) : (
               resources.map((res) => (
                 <button
@@ -78,7 +80,7 @@ const About: React.FC = () => {
         <div className="lg:w-3/4">
           <div className="bg-surface border border-border p-8 lg:p-10 min-h-[500px]">
             {loading ? (
-              <div className="flex items-center justify-center h-full text-muted">Loading content...</div>
+              <Spinner text="Loading content..." fullHeight />
             ) : activeResource ? (
               <div 
                 className="space-y-6 prose prose-sm max-w-none prose-headings:text-primary prose-headings:font-bold prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary"

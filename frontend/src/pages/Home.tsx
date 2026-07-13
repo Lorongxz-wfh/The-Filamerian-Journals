@@ -3,6 +3,8 @@ import { Link } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 // Dynamic categories fetched from API
 
@@ -89,7 +91,7 @@ const Home: React.FC = () => {
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-muted text-sm">Loading journals...</div>
+              <Spinner text="Loading journals..." className="py-12" />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredJournals.map((j) => {
@@ -112,9 +114,7 @@ const Home: React.FC = () => {
             )}
 
             {!loading && filteredJournals.length === 0 && (
-              <div className="py-12 text-center border border-border bg-surface">
-                <p className="text-[13px] text-muted">No journals in this category.</p>
-              </div>
+              <EmptyState title="No journals" description="No journals in this category." className="py-12 border border-border bg-surface" />
             )}
 
             <div className="flex justify-center pt-4">
@@ -139,7 +139,7 @@ const Home: React.FC = () => {
               </Link>
 
               {loading ? (
-                <div className="text-center text-muted text-xs py-4">Loading news...</div>
+                <Spinner text="Loading news..." size="sm" className="py-8" />
               ) : (
                 <div className="space-y-6">
                   {announcements.map((item, i) => (

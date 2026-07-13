@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Article {
   id: number;
@@ -252,7 +253,11 @@ const Articles: React.FC = () => {
             {loading ? (
               <TableRowSkeleton columns={6} rows={5} />
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} className="px-5 py-10 text-center text-[13px] text-muted">No articles found.</td></tr>
+              <tr>
+                <td colSpan={6} className="p-0">
+                  <EmptyState title="No articles found" description="There are no articles matching your criteria." className="bg-transparent border-0 py-16" />
+                </td>
+              </tr>
             ) : (
               filtered.map((article) => (
                 <tr 

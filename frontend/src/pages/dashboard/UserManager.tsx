@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface User {
   id: number;
@@ -159,7 +160,11 @@ const UserManager: React.FC = () => {
             {loading ? (
               <TableRowSkeleton columns={4} rows={5} />
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={4} className="px-5 py-10 text-center text-[13px] text-muted">No users found.</td></tr>
+              <tr>
+                <td colSpan={4} className="p-0">
+                  <EmptyState title="No users found" description="No users match your criteria." className="bg-transparent border-0 py-16" />
+                </td>
+              </tr>
             ) : (
               filtered.map((user) => (
                 <tr key={user.id} className="border-b border-border last:border-b-0 hover:bg-background transition-colors group">

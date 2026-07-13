@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronRight } from 'lucide-react';
 import api from '@/services/api';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 interface Announcement {
   id: number;
@@ -48,9 +50,9 @@ const Announcements: React.FC = () => {
 
       <div className="space-y-4">
         {loading ? (
-          <div className="py-20 text-center text-muted">Loading announcements...</div>
+          <Spinner text="Loading announcements..." />
         ) : announcements.length === 0 ? (
-          <div className="py-20 text-center border border-border bg-surface text-muted text-[13px]">No announcements posted yet.</div>
+          <EmptyState title="No announcements" description="No announcements posted yet." className="border border-border bg-surface py-20" />
         ) : (
           announcements.map((item) => {
             const isExpanded = expandedIds.has(item.id);
