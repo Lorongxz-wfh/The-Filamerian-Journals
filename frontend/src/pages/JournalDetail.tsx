@@ -4,6 +4,8 @@ import { ArrowLeft, BookOpen, ChevronDown, Quote } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 interface Author {
   id: number;
@@ -75,7 +77,7 @@ const JournalDetail: React.FC = () => {
   }, [slug]);
 
   if (loading) {
-    return <div className="container-custom py-20 text-center text-muted">Loading journal...</div>;
+    return <Spinner text="Loading journal..." className="py-20" />;
   }
 
   if (!journal) {
@@ -142,7 +144,7 @@ const JournalDetail: React.FC = () => {
         </h2>
 
         {journal.volumes?.length === 0 && (
-          <div className="py-12 text-center text-muted text-[13px]">No volumes published yet.</div>
+          <EmptyState title="No volumes" description="No volumes published yet." className="border border-border bg-surface py-12" />
         )}
 
         {journal.volumes?.map((vol) => (

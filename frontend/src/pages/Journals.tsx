@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import JournalCard from '@/components/ui/JournalCard';
 import { Search } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
+import EmptyState from '@/components/ui/EmptyState';
+import Spinner from '@/components/ui/Spinner';
 
 // Dynamic categories fetched from API
 

@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import { ListSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Resource {
   id: number;
@@ -128,7 +129,7 @@ const ManageResources: React.FC = () => {
         {loading ? (
           <ListSkeleton colSpans={[1, 5, 4, 2]} rows={5} />
         ) : filtered.length === 0 ? (
-          <div className="px-5 py-10 text-center text-[13px] text-muted">No resources found.</div>
+          <EmptyState title="No resources" description="No resources found." className="border-0 bg-transparent py-16" />
         ) : (
           filtered.map((item) => (
             <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-background transition-colors group cursor-default items-center">

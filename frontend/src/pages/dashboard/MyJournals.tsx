@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import { ListSkeleton } from '@/components/ui/Skeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface Journal {
   id: number;
@@ -215,7 +216,7 @@ const MyJournals: React.FC = () => {
         {loading ? (
           <ListSkeleton colSpans={[5, 2, 2, 2, 1]} rows={5} />
         ) : filtered.length === 0 ? (
-          <div className="px-5 py-10 text-center text-[13px] text-muted">No journals found.</div>
+          <EmptyState title="No journals" description="No journals found." className="border-0 bg-transparent py-16" />
         ) : (
           filtered.map((journal) => (
             <div
