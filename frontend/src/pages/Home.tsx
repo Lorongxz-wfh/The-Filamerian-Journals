@@ -65,7 +65,7 @@ const Home: React.FC = () => {
       );
 
   return (
-    <PageWrapper className="flex flex-col gap-16 pb-16 pt-2">
+    <PageWrapper className="flex flex-col gap-16 pb-16 pt-8">
       <div className="w-full px-2 lg:px-6 flex-1 flex flex-col">
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
           {/* Journals Grid */}

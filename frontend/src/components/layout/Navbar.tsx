@@ -1,9 +1,11 @@
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { Menu, Search } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const path = location.pathname;
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -39,12 +41,12 @@ const Navbar = () => {
 
         {/* Nav links + Login — flush right */}
         <div className="hidden md:flex items-center gap-6 shrink-0 h-full">
-          <Link to="/" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
+          <Link to="/" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path === '/' ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             Home
           </Link>
           
           <div className="relative group h-full flex items-center">
-            <Link to="/journals" className="text-[13px] font-medium text-white/70 group-hover:text-white transition-colors tracking-wide h-full flex items-center">
+            <Link to="/journals" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/journals') || path.startsWith('/articles') ? 'text-secondary' : 'text-white/70 group-hover:text-white'}`}>
               Journals
             </Link>
             
@@ -64,13 +66,13 @@ const Navbar = () => {
             </div>
           </div>
 
-          <Link to="/archives" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
+          <Link to="/archives" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/archives') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             Archives
           </Link>
-          <Link to="/about" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
+          <Link to="/about" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/about') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             About
           </Link>
-          <Link to="/contact" className="text-[13px] font-medium text-white/70 hover:text-white transition-colors tracking-wide h-full flex items-center">
+          <Link to="/contact" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/contact') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             Contact
           </Link>
           
