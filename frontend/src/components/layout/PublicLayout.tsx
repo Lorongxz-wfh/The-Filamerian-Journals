@@ -10,7 +10,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans antialiased">
       <Navbar />
-      <main className="container-custom py-12 flex-grow">
+      <main className="container-custom flex-grow">
         {children}
       </main>
       <Footer />

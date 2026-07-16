@@ -6,6 +6,7 @@ import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
+import PageWrapper from '@/components/layout/PageWrapper';
 
 interface SearchResults {
   journals: any[];
@@ -44,7 +45,7 @@ const Search: React.FC = () => {
   }, [query]);
 
   return (
-    <div className="container-custom py-12 space-y-10 min-h-[60vh]">
+    <PageWrapper className="pt-6 pb-12 space-y-10 flex flex-col">
       {/* Header */}
       <div className="border-b border-border pb-6 space-y-2">
         <h1 className="text-2xl uppercase tracking-wider font-bold">Search Results</h1>
@@ -54,7 +55,7 @@ const Search: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center flex flex-col items-center justify-center space-y-4">
+        <div className="flex-1 flex flex-col items-center justify-center space-y-4 min-h-[40vh]">
           <Spinner size="lg" text="Searching database..." />
         </div>
       ) : (
@@ -73,7 +74,7 @@ const Search: React.FC = () => {
                     slug={j.slug}
                     title={j.title}
                     description={j.description}
-                    date={new Date(j.created_at).toLocaleDateString()}
+                    date={new Date(j.created_at).getFullYear().toString()}
                     image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                     category={j.category}
                   />
@@ -181,7 +182,7 @@ const Search: React.FC = () => {
         volumeNumber={citationArticle?.volume?.volume_number}
         year={citationArticle?.volume?.year}
       />
-    </div>
+    </PageWrapper>
   );
 };
 

@@ -5,6 +5,7 @@ import api, { STORAGE_URL } from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
+import PageWrapper from '@/components/layout/PageWrapper';
 
 interface Author {
   id: number;
@@ -74,17 +75,21 @@ const JournalDetail: React.FC = () => {
   }, [slug]);
 
   if (loading) {
-    return <Spinner text="Loading journal..." className="py-20" />;
+    return (
+      <PageWrapper className="container-custom items-center justify-center">
+        <Spinner text="Loading journal..." />
+      </PageWrapper>
+    );
   }
 
   if (!journal) {
     return (
-      <div className="container-custom py-20 text-center">
+      <PageWrapper className="container-custom items-center justify-center text-center">
         <p className="text-muted text-sm">Journal not found.</p>
         <Link to="/journals" className="text-[13px] text-primary font-medium mt-4 inline-block hover:text-secondary transition-colors">
           ← Back to Journals
         </Link>
-      </div>
+      </PageWrapper>
     );
   }
 
@@ -93,7 +98,7 @@ const JournalDetail: React.FC = () => {
   ) || 0;
 
   return (
-    <div className="container-custom py-10 space-y-10">
+    <PageWrapper className="pt-2 pb-10 space-y-6 flex flex-col">
       {/* Back Link */}
       <Link to="/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
@@ -101,21 +106,23 @@ const JournalDetail: React.FC = () => {
 
       {/* Header */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-3">
           {journal.cover_image ? (
-            <img src={`${STORAGE_URL}${journal.cover_image}`} alt={journal.title} className="w-full aspect-[3/4] object-cover border border-border" />
+            <img src={`${STORAGE_URL}${journal.cover_image}`} alt={journal.title} className="w-full max-w-[280px] aspect-[3/4] object-cover border border-border" />
           ) : (
-            <div className="w-full aspect-[3/4] bg-surface border border-border flex items-center justify-center">
+            <div className="w-full max-w-[280px] aspect-[3/4] bg-surface border border-border flex items-center justify-center">
               <span className="text-muted text-[13px]">No Cover</span>
             </div>
           )}
         </div>
-        <div className="lg:col-span-8 space-y-4">
+        <div className="lg:col-span-9 space-y-4">
           <div>
-            <span className="text-[11px] font-semibold text-secondary uppercase tracking-wider">{journal.category || 'Uncategorized'}</span>
-            <h1 className="text-2xl uppercase tracking-wider mt-1 font-bold">{journal.title}</h1>
+            <span className="inline-block text-[11px] font-semibold text-secondary bg-primary px-3 py-1 uppercase tracking-wider mb-3">
+              {journal.category || 'Uncategorized'}
+            </span>
+            <h1 className="text-2xl uppercase tracking-wider font-bold">{journal.title}</h1>
           </div>
-          <p className="text-[14px] text-muted leading-relaxed">{journal.description || 'No description available.'}</p>
+          <p className="text-[14px] text-muted leading-relaxed max-w-4xl">{journal.description || 'No description available.'}</p>
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border mt-4">
@@ -197,7 +204,7 @@ const JournalDetail: React.FC = () => {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-grow">
-                          <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors leading-snug">
+                          <h4 className="text-[13px] font-sans font-bold text-primary group-hover:text-secondary transition-colors leading-snug uppercase">
                             {article.title}
                           </h4>
                           <p className="text-[12px] text-muted mt-1">
@@ -255,7 +262,7 @@ const JournalDetail: React.FC = () => {
           )}
         </div>
       </Modal>
-    </div>
+    </PageWrapper>
   );
 };
 

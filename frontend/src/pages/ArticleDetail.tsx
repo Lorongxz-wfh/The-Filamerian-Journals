@@ -5,6 +5,7 @@ import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
+import PageWrapper from '@/components/layout/PageWrapper';
 
 interface Author {
   id: number;
@@ -125,17 +126,21 @@ const ArticleDetail: React.FC = () => {
   }, [article]);
 
   if (loading) {
-    return <Spinner text="Loading article..." className="py-20" />;
+    return (
+      <PageWrapper className="container-custom items-center justify-center">
+        <Spinner text="Loading article..." />
+      </PageWrapper>
+    );
   }
 
   if (!article) {
     return (
-      <div className="container-custom py-20 text-center">
+      <PageWrapper className="container-custom items-center justify-center text-center">
         <p className="text-muted text-sm">Article not found.</p>
         <Link to="/journals" className="text-[13px] text-primary font-medium mt-4 inline-block hover:text-secondary transition-colors">
           ← Back to Journals
         </Link>
-      </div>
+      </PageWrapper>
     );
   }
 
@@ -163,76 +168,70 @@ const ArticleDetail: React.FC = () => {
   };
 
   return (
-    <div className="container-custom py-10 space-y-8 max-w-5xl">
+    <PageWrapper className="pt-6 pb-10 space-y-8 max-w-5xl flex flex-col mx-auto w-full">
       <Link to={article.volume?.journal?.slug ? `/journals/${article.volume.journal.slug}` : "/journals"} className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to {article.volume?.journal?.title || 'Journal'}
       </Link>
 
-      <div className="bg-surface border border-border p-8 md:p-12 space-y-6">
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold text-secondary uppercase tracking-wider">
-            {article.volume?.journal?.title} • Volume {article.volume?.volume_number} ({article.volume?.year})
-          </p>
-          <h1 className="text-2xl md:text-3xl font-bold text-primary leading-tight">
-            {article.title}
-          </h1>
-          <p className="text-[14px] text-muted pt-2 border-t border-border mt-4 inline-block w-full">
-            <span className="font-medium text-primary">Authors:</span> {article.authors?.map(a => a.name).join(', ') || 'Unknown'}
-          </p>
+      <div className="bg-surface border border-border p-8 md:p-12">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">
+          <div className="space-y-2 flex-1">
+            <p className="text-[11px] font-semibold text-secondary uppercase tracking-wider">
+              {article.volume?.journal?.title} • Volume {article.volume?.volume_number} ({article.volume?.year})
+            </p>
+            <h1 className="text-2xl md:text-3xl font-bold text-primary leading-tight">
+              {article.title}
+            </h1>
+            <div className="pt-4 mt-4 border-t border-border space-y-2">
+              <p className="text-[14px] text-muted">
+                <span className="font-medium text-primary">Authors:</span> {article.authors?.map(a => a.name).join(', ') || 'Unknown'}
+              </p>
+              <div className="flex flex-wrap items-center gap-6 text-[13px] text-muted">
+                {article.volume?.year && <p><span className="font-medium text-primary">Year:</span> {article.volume.year}</p>}
+                {article.doi && <p><span className="font-medium text-primary">DOI:</span> {article.doi}</p>}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 shrink-0 md:w-48">
+            <button
+              onClick={handleReadPDF}
+              className="w-full inline-flex justify-center items-center gap-2 px-6 py-3 bg-primary text-white text-[13px] font-medium hover:bg-secondary hover:text-primary transition-colors tracking-wide"
+            >
+              <BookOpen className="h-4 w-4" />
+              {article.pdf_url ? 'Read Article' : 'No PDF'}
+            </button>
+            
+            <button
+              onClick={() => {
+                setCitationArticle(article);
+                setCitationContext({
+                  journalTitle: article.volume?.journal?.title,
+                  volumeNumber: article.volume?.volume_number,
+                  year: article.volume?.year
+                });
+              }}
+              className="w-full inline-flex justify-center items-center gap-2 px-6 py-3 bg-surface border border-border text-primary text-[13px] font-medium hover:bg-background transition-colors tracking-wide"
+            >
+              <Quote className="h-4 w-4" />
+              Cite
+            </button>
+
+            {!localStorage.getItem('token') && article.pdf_url && (
+              <p className="text-[10px] text-center text-muted uppercase tracking-wider mt-1">
+                Login required
+              </p>
+            )}
+          </div>
         </div>
 
         {article.abstract && (
-          <div className="pt-4 space-y-2">
+          <div className="pt-6 border-t border-border space-y-3">
             <h3 className="text-[12px] font-bold text-primary uppercase tracking-wider">Abstract</h3>
             <p className="text-[14px] text-muted leading-relaxed text-justify">
               {article.abstract}
             </p>
           </div>
-        )}
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border mt-8">
-          {[
-            { label: 'DOI', value: article.doi || '-' },
-            { label: 'Pages', value: (article.page_start && article.page_end) ? `${article.page_start}-${article.page_end}` : '-' },
-            { label: 'Year', value: article.volume?.year || '-' },
-            { label: 'Publisher', value: article.volume?.journal?.publisher || '-' },
-          ].map((m) => (
-            <div key={m.label} className="bg-surface p-4">
-              <p className="text-[10px] font-semibold text-muted uppercase tracking-wider">{m.label}</p>
-              <p className="text-[13px] font-medium text-primary mt-1 break-all">{m.value}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 pt-6 mt-6 border-t border-border">
-          <button
-            onClick={handleReadPDF}
-            className="flex-1 inline-flex justify-center items-center gap-2 px-6 py-3 bg-primary text-white text-[13px] font-medium hover:bg-secondary hover:text-primary transition-colors tracking-wide"
-          >
-            <BookOpen className="h-4 w-4" />
-            {article.pdf_url ? 'Read Full Article' : 'No PDF Available'}
-          </button>
-          
-          <button
-            onClick={() => {
-              setCitationArticle(article);
-              setCitationContext({
-                journalTitle: article.volume?.journal?.title,
-                volumeNumber: article.volume?.volume_number,
-                year: article.volume?.year
-              });
-            }}
-            className="sm:w-auto inline-flex justify-center items-center gap-2 px-6 py-3 bg-surface border border-border text-primary text-[13px] font-medium hover:bg-background transition-colors tracking-wide"
-          >
-            <Quote className="h-4 w-4" />
-            Cite
-          </button>
-        </div>
-        
-        {!localStorage.getItem('token') && article.pdf_url && (
-          <p className="text-[11px] text-center text-muted uppercase tracking-wider mt-2">
-            Login required to read full document
-          </p>
         )}
       </div>
 
@@ -263,7 +262,7 @@ const ArticleDetail: React.FC = () => {
           )}
         </div>
       </Modal>
-    </div>
+    </PageWrapper>
   );
 };
 

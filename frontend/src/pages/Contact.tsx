@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Phone, Loader2, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
+import PageWrapper from '@/components/layout/PageWrapper';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="container-custom py-12 space-y-12">
+    <PageWrapper className="pt-6 pb-12 space-y-12">
       <div className="text-center max-w-2xl mx-auto space-y-4">
         <h1 className="text-3xl uppercase tracking-wider">Contact Us</h1>
         <p className="text-[14px] text-muted leading-relaxed">
@@ -183,7 +184,7 @@ const Contact: React.FC = () => {
           </form>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 };
 

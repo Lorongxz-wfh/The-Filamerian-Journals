@@ -315,7 +315,7 @@ const MyJournals: React.FC = () => {
             
             <div>
               <Input 
-                label="Publisher" name="publisher" value={formData.publisher} onChange={handleInputChange} placeholder="e.g. Lakbay-Diwa Publishing"
+                label="Year Published" name="publisher" value={formData.publisher} onChange={handleInputChange} placeholder="e.g. 2024"
               />
             </div>
 

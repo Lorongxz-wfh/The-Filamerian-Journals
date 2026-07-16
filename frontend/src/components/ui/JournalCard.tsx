@@ -34,7 +34,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
         to={`/journals/${slug}`}
         className={cn('group block text-center transition-all duration-300', className)}
       >
-        <div className="relative overflow-hidden mb-6 bg-background shadow-sm hover:shadow-md transition-shadow aspect-[3/4]">
+        <div className="relative mx-auto max-w-[220px] overflow-hidden mb-6 bg-background shadow-sm hover:shadow-md transition-shadow aspect-[3/4] border border-border">
           {image ? (
             <img
               src={image}
@@ -61,7 +61,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
           )}
           {publisher && (
             <div className="flex flex-col items-center mt-2">
-              <span className="font-bold text-gray-900">Publisher</span>
+              <span className="font-bold text-gray-900">Year Published</span>
               <span className="text-[#0077cc]">{publisher}</span>
             </div>
           )}
@@ -104,7 +104,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
           )}
         </div>
 
-        <h3 className="text-xl font-bold text-primary mb-2 leading-snug group-hover:text-secondary transition-colors duration-200 truncate">
+        <h3 className="text-xl font-bold text-primary mb-2 leading-snug group-hover:text-secondary transition-colors duration-200">
           {title}
         </h3>
 
@@ -114,13 +114,13 @@ const JournalCard: React.FC<JournalCardProps> = ({
         
         {publisher && (
           <div className="text-[12px] text-muted/80 mb-4">
-            <span className="font-semibold text-primary/70">Publisher:</span> {publisher}
+            <span className="font-semibold text-primary/70">Year Published:</span> {publisher}
           </div>
         )}
 
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-primary">
-            {volume ? `Vol. ${volume}` : 'No Volumes'}
+            {volume || 'No Volumes'}
           </span>
           <ArrowRight className="w-5 h-5 text-muted group-hover:text-primary transition-colors" />
         </div>

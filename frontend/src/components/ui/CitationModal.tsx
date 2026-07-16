@@ -18,6 +18,9 @@ const CitationModal: React.FC<CitationModalProps> = ({
   if (!isOpen || !article) return null;
 
   const formatAuthorName = (fullName: string) => {
+    if (fullName.includes(',')) {
+      return fullName.trim();
+    }
     const parts = fullName.trim().split(/\s+/);
     if (parts.length <= 1) return fullName;
     const lastName = parts.pop();
@@ -33,7 +36,7 @@ const CitationModal: React.FC<CitationModalProps> = ({
   const doi = article.doi ? `https://doi.org/${article.doi}` : '';
 
   const citations = {
-    APA: `${authors.join(', ')} (${yr}). ${title}. ${journal}${vol ? `, ${vol}` : ''}${pages ? `, ${pages}` : ''}. ${doi}`,
+    APA: `${authors.join('; ')} (${yr}). ${title}. ${journal}${vol ? `, ${vol}` : ''}${pages ? `, ${pages}` : ''}. ${doi}`,
     MLA: `${authors[0]}${authors.length > 1 ? ', et al.' : '.'} "${title}." ${journal}, vol. ${vol}, ${yr}${pages ? `, pp. ${pages}` : ''}. ${doi}`,
     Chicago: `${authors.join(', ')}. "${title}." ${journal} ${vol} (${yr})${pages ? `: ${pages}` : ''}. ${doi}`
   };
@@ -57,7 +60,7 @@ const CitationModal: React.FC<CitationModalProps> = ({
           {Object.entries(citations).map(([type, text]) => (
             <div key={type} className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-secondary uppercase tracking-wider">{type} Format</span>
+                <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">{type} Format</span>
                 <button 
                   onClick={() => handleCopy(type, text)}
                   className="text-[11px] font-medium text-muted hover:text-primary flex items-center gap-1 transition-colors"

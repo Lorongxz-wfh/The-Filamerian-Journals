@@ -6,6 +6,7 @@ import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
+import PageWrapper from '@/components/layout/PageWrapper';
 
 interface Author {
   id: number;
@@ -88,7 +89,7 @@ const Archives: React.FC = () => {
   );
 
   return (
-    <div className="container-custom py-12 space-y-10">
+    <PageWrapper className="pt-6 pb-12 space-y-10 flex flex-col">
       {/* Header */}
       <div className="border-b border-border pb-6">
         <h1 className="text-2xl uppercase tracking-wider font-bold">Archives</h1>
@@ -112,9 +113,11 @@ const Archives: React.FC = () => {
       </div>
 
       {/* Journal Accordion */}
-      <div className="space-y-3">
+      <div className="flex-1 flex flex-col space-y-3">
         {loading ? (
-          <Spinner text="Loading archives..." />
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
+            <Spinner text="Loading archives..." />
+          </div>
         ) : journals.length === 0 ? (
           <EmptyState title="No journals found" description="There are no journals with archived volumes yet." className="border border-border bg-surface" />
         ) : (
@@ -303,7 +306,7 @@ const Archives: React.FC = () => {
           )}
         </div>
       </Modal>
-    </div>
+    </PageWrapper>
   );
 };
 

@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
+import PageWrapper from '@/components/layout/PageWrapper';
 
 // Dynamic categories fetched from API
 
@@ -64,11 +65,11 @@ const Home: React.FC = () => {
       );
 
   return (
-    <div className="flex flex-col gap-16 pb-16 pt-10">
-      <div className="w-full px-6 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
+    <PageWrapper className="flex flex-col gap-16 pb-16 pt-2">
+      <div className="w-full px-2 lg:px-6 flex-1 flex flex-col">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
           {/* Journals Grid */}
-          <div className="lg:col-span-9 space-y-8">
+          <div className="lg:col-span-9 flex flex-col space-y-8">
             <div className="flex items-center justify-between border-b border-border pb-4 overflow-x-auto">
               <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 mr-8">
                 Academic Journals
@@ -90,10 +91,13 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {loading ? (
-              <Spinner text="Loading journals..." className="py-12" />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex-1 flex flex-col">
+              {loading ? (
+                <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
+                  <Spinner text="Loading journals..." />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredJournals.map((j) => {
                   const latestVol = j.volumes?.[0];
                   
@@ -103,8 +107,8 @@ const Home: React.FC = () => {
                       slug={j.slug}
                       title={j.title}
                       description={j.description}
-                      date={new Date(j.created_at).toLocaleDateString()}
-                      volume={latestVol ? `Vol. ${latestVol.volume_number}` : ''}
+                      date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
+                      volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
                       image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                       category={j.category}
                     />
@@ -112,6 +116,7 @@ const Home: React.FC = () => {
                 })}
               </div>
             )}
+            </div>
 
             {!loading && filteredJournals.length === 0 && (
               <EmptyState title="No journals" description="No journals in this category." className="py-12 border border-border bg-surface" />
@@ -169,7 +174,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 };
 
