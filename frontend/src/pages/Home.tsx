@@ -96,31 +96,29 @@ const Home: React.FC = () => {
                 <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
                   <Spinner text="Loading journals..." />
                 </div>
+              ) : filteredJournals.length === 0 ? (
+                <EmptyState title="No journals" description="No journals in this category." className="py-12 border border-border bg-surface mt-4" />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredJournals.map((j) => {
-                  const latestVol = j.volumes?.[0];
-                  
-                  return (
-                    <JournalCard
-                      key={j.id}
-                      slug={j.slug}
-                      title={j.title}
-                      description={j.description}
-                      date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
-                      volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
-                      image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
-                      category={j.category}
-                    />
-                  );
-                })}
-              </div>
-            )}
+                  {filteredJournals.map((j) => {
+                    const latestVol = j.volumes?.[0];
+                    
+                    return (
+                      <JournalCard
+                        key={j.id}
+                        slug={j.slug}
+                        title={j.title}
+                        description={j.description}
+                        date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
+                        volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
+                        image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
+                        category={j.category}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
-
-            {!loading && filteredJournals.length === 0 && (
-              <EmptyState title="No journals" description="No journals in this category." className="py-12 border border-border bg-surface" />
-            )}
 
             <div className="flex justify-center pt-4">
               <Link
