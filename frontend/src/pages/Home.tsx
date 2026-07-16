@@ -97,7 +97,7 @@ const Home: React.FC = () => {
                   <Spinner text="Loading journals..." />
                 </div>
               ) : filteredJournals.length === 0 ? (
-                <EmptyState title="No journals" description="No journals in this category." className="py-12 border border-border bg-surface mt-4" />
+                <EmptyState title="No journals" description="No journals in this category." className="flex-1 flex flex-col items-center justify-center py-12 border border-border bg-surface mt-4 min-h-[40vh]" />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredJournals.map((j) => {
@@ -164,7 +164,7 @@ const Home: React.FC = () => {
 
               <Link
                 to="/announcements"
-                className="w-full mt-6 text-[12px] font-medium text-muted hover:text-primary uppercase tracking-wider transition-colors text-center border-t border-border pt-4 block"
+                className="w-full mt-auto text-[12px] font-medium text-muted hover:text-primary uppercase tracking-wider transition-colors text-center border-t border-border pt-4 block"
               >
                 See All News
               </Link>
