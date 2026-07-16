@@ -47,7 +47,7 @@ const About: React.FC = () => {
   return (
     <PageWrapper className="pt-6 pb-12 space-y-10 flex flex-col">
       <div className="border-b border-border pb-6">
-        <h1 className="text-2xl uppercase tracking-wider font-bold">About & Resources</h1>
+        <h1 className="text-2xl uppercase tracking-wider font-bold">About</h1>
         <p className="text-[14px] text-muted max-w-xl leading-relaxed mt-2">
           Information for authors, reviewers, and readers regarding our publication standards and policies.
         </p>

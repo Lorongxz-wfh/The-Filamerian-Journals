@@ -167,7 +167,7 @@ const Contact: React.FC = () => {
                 value={formData.message}
                 onChange={handleChange}
                 required
-                rows={5}
+                rows={3}
                 className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors resize-none"
                 placeholder="How can we help you?"
               />
