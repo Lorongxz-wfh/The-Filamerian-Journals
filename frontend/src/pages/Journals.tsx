@@ -127,7 +127,7 @@ const Journals: React.FC = () => {
         ) : filtered.length === 0 ? (
           <EmptyState title="No journals found" description="No journals matched your search criteria." className="py-20 border border-border bg-surface" />
         ) : (
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col w-full max-w-5xl mx-auto"}>
+        <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "flex flex-col w-full max-w-5xl mx-auto"}>
           {filtered.map((j) => {
             const latestVol = j.volumes?.[0];
             

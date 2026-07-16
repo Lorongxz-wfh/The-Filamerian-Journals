@@ -67,7 +67,7 @@ const Search: React.FC = () => {
                 <BookOpen className="h-4 w-4 text-primary" />
                 <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider">Journals ({results.journals.length})</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {results.journals.map((j) => (
                   <JournalCard
                     key={j.id}

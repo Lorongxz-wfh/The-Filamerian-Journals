@@ -16,7 +16,7 @@ const Navbar = () => {
   };
   return (
     <nav className="bg-primary sticky top-0 z-50">
-      <div className="w-full px-6 lg:px-12 flex h-16 items-center justify-between gap-6">
+      <div className="container-custom flex h-16 items-center justify-between gap-4 lg:gap-6">
         {/* Brand — flush left */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
           <span className="font-display font-normal text-secondary text-xl tracking-wider uppercase leading-none">
