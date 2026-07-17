@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -14,10 +13,16 @@ interface Resource {
 }
 
 const About: React.FC = () => {
-  const location = useLocation();
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const initialResources = JSON.parse(localStorage.getItem('resources_cache') || '[]');
+  const [resources, setResources] = useState<Resource[]>(initialResources);
+  
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash && initialResources.find((r: Resource) => r.slug === hash)) return hash;
+    return initialResources.length > 0 ? initialResources[0].slug : '';
+  });
+  
+  const [loading, setLoading] = useState(initialResources.length === 0);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -25,13 +30,16 @@ const About: React.FC = () => {
         const res = await api.get('/public/resources');
         const data = res.data.data;
         setResources(data);
+        localStorage.setItem('resources_cache', JSON.stringify(data));
         
-        // If hash is in URL, select that tab, else first tab
-        const hash = location.hash.replace('#', '');
-        if (hash && data.find((r: Resource) => r.slug === hash)) {
-          setActiveTab(hash);
-        } else if (data.length > 0) {
-          setActiveTab(data[0].slug);
+        // If we didn't have an active tab set from cache, set it now
+        if (!activeTab || !data.find((r: Resource) => r.slug === activeTab)) {
+          const hash = location.hash.replace('#', '');
+          if (hash && data.find((r: Resource) => r.slug === hash)) {
+            setActiveTab(hash);
+          } else if (data.length > 0) {
+            setActiveTab(data[0].slug);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -40,7 +48,7 @@ const About: React.FC = () => {
       }
     };
     fetchResources();
-  }, [location.hash]);
+  }, [location.hash, activeTab]);
 
   const activeResource = resources.find(r => r.slug === activeTab);
 

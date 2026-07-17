@@ -21,13 +21,15 @@ interface Journal {
 }
 
 const Journals: React.FC = () => {
+  const initialJournals = JSON.parse(localStorage.getItem('journals_cache') || '[]');
+  const initialCategories = JSON.parse(localStorage.getItem('categories_cache') || '["All"]');
+
   const [activeTab, setActiveTab] = useState<string>('All');
   const [search, setSearch] = useState('');
-  const [journals, setJournals] = useState<Journal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [journals, setJournals] = useState<Journal[]>(initialJournals);
+  const [availableCategories, setAvailableCategories] = useState<string[]>(initialCategories);
+  const [loading, setLoading] = useState(initialJournals.length === 0);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-
-  const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
 
   useEffect(() => {
     const fetchJournals = async () => {
@@ -36,11 +38,16 @@ const Journals: React.FC = () => {
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/settings')
         ]);
-        setJournals(jrnRes.data.data);
+        
+        const newJournals = jrnRes.data.data;
+        setJournals(newJournals);
+        localStorage.setItem('journals_cache', JSON.stringify(newJournals));
         
         const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
         const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
-        setAvailableCategories(['All', ...catsArray]);
+        const newCategories = ['All', ...catsArray];
+        setAvailableCategories(newCategories);
+        localStorage.setItem('categories_cache', JSON.stringify(newCategories));
       } catch (err) {
         console.error('Failed to fetch journals', err);
       } finally {

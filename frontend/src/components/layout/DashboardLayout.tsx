@@ -13,14 +13,15 @@ import {
   X,
   FileText,
   Check,
-  Loader2
+  Loader2,
+  Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/services/api';
+import { Outlet } from 'react-router';
+import SplashLoader from '@/components/ui/SplashLoader';
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
+interface DashboardLayoutProps {}
 
 interface Notification {
   id: string;
@@ -34,7 +35,7 @@ interface Notification {
   read_at: string | null;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -56,9 +57,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const adminItems = [
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
-    { path: '/dashboard/resources', label: 'Resources', icon: FileText, roles: ['Admin', 'Super Admin'] },
     { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
+    { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
   ];
 
@@ -247,6 +248,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
+      <SplashLoader />
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -362,7 +364,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         {/* Dashboard Content */}
         <main className="flex-grow p-6 overflow-y-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

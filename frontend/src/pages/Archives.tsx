@@ -42,13 +42,17 @@ interface Journal {
 }
 
 const Archives: React.FC = () => {
-  const [journals, setJournals] = useState<Journal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialArchives = JSON.parse(localStorage.getItem('archives_cache') || '[]');
+  const [journals, setJournals] = useState<Journal[]>(initialArchives);
+  const [loading, setLoading] = useState(initialArchives.length === 0);
 
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
   const [citationContext, setCitationContext] = useState<any>({});
-  const [expandedJournal, setExpandedJournal] = useState<number | null>(null);
+  
+  const [expandedJournal, setExpandedJournal] = useState<number | null>(
+    initialArchives.length > 0 ? initialArchives[0].id : null
+  );
   const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
 
   // PDF Viewer Modal State
@@ -61,7 +65,9 @@ const Archives: React.FC = () => {
         const res = await api.get('/public/journals?with_volumes=1');
         const data = res.data.data;
         setJournals(data);
-        if (data.length > 0) {
+        localStorage.setItem('archives_cache', JSON.stringify(data));
+        
+        if (data.length > 0 && !expandedJournal) {
           setExpandedJournal(data[0].id);
         }
       } catch (err) {
@@ -71,7 +77,7 @@ const Archives: React.FC = () => {
       }
     };
     fetchJournals();
-  }, []);
+  }, [expandedJournal]);
 
   const toggleJournal = (id: number) => {
     setExpandedJournal(expandedJournal === id ? null : id);

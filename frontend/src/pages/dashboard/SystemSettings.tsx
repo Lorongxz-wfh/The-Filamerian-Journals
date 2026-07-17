@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Mail, Database, Shield, Loader2 } from 'lucide-react';
+import { Mail, Database, Shield, Loader2 } from 'lucide-react';
 import api from '@/services/api';
-import Input from '@/components/ui/Input';
 import { FormSkeleton } from '@/components/ui/Skeleton';
+import { toast } from 'sonner';
 
 const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState<Record<string, string>>({
-    site_title: 'The Filamerian Journals',
-    tagline: 'Scholarly Excellence In Every Discipline',
-    contact_email: 'journals@filamer.edu.ph',
     max_upload_size: '10',
     notify_new_submission: '1',
     notify_review_completion: '1',
     notify_user_registration: '0',
     notify_system_health: '1',
-    journal_categories: 'Science, Education, Arts, Multidisciplinary',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -47,13 +42,11 @@ const SystemSettings: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      setMessage('');
       await api.post('/settings', { settings });
-      setMessage('Settings saved successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      toast.success('System settings saved successfully!');
     } catch (err) {
       console.error('Failed to save settings', err);
-      setMessage('Failed to save settings.');
+      toast.error('Failed to save system settings.');
     } finally {
       setSaving(false);
     }
@@ -63,48 +56,12 @@ const SystemSettings: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-border pb-4 flex justify-between items-end">
-        <div>
-          <h1 className="text-xl uppercase tracking-wider">System Settings</h1>
-          <p className="text-[13px] text-muted mt-1">Configure portal preferences</p>
-        </div>
-        {message && (
-          <span className="text-[13px] font-medium text-emerald-600">{message}</span>
-        )}
+      <div className="border-b border-border pb-4">
+        <h1 className="text-xl uppercase tracking-wider">System Settings</h1>
+        <p className="text-[13px] text-muted mt-1">Configure backend constraints and notifications</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* General */}
-        <div className="border border-border bg-surface p-6 space-y-5">
-          <div className="flex items-center gap-3 border-b border-border pb-3">
-            <Globe className="h-4 w-4 text-primary/40" />
-            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">General</h2>
-          </div>
-          <div className="space-y-4">
-            <Input 
-              label="Site Title" 
-              value={settings.site_title} 
-              onChange={(e) => handleChange('site_title', e.target.value)}
-            />
-            <Input 
-              label="Tagline" 
-              value={settings.tagline} 
-              onChange={(e) => handleChange('tagline', e.target.value)}
-            />
-            <Input 
-              label="Contact Email" type="email"
-              value={settings.contact_email} 
-              onChange={(e) => handleChange('contact_email', e.target.value)}
-            />
-            <Input 
-              label="Journal Categories" hint="Comma Separated"
-              value={settings.journal_categories} 
-              onChange={(e) => handleChange('journal_categories', e.target.value)}
-              placeholder="Science, Education, Arts"
-            />
-          </div>
-        </div>
-
         {/* Email */}
         <div className="border border-border bg-surface p-6 space-y-5">
           <div className="flex items-center gap-3 border-b border-border pb-3">
@@ -159,7 +116,7 @@ const SystemSettings: React.FC = () => {
         </div>
 
         {/* Security */}
-        <div className="border border-border bg-surface p-6 space-y-5">
+        <div className="border border-border bg-surface p-6 space-y-5 lg:col-span-2 max-w-2xl">
           <div className="flex items-center gap-3 border-b border-border pb-3">
             <Shield className="h-4 w-4 text-primary/40" />
             <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Security</h2>

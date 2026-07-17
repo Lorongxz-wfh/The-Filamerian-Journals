@@ -13,7 +13,6 @@ import ManageJournal from '@/pages/dashboard/ManageJournal';
 import Articles from '@/pages/dashboard/Articles';
 import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
 import Notifications from '@/pages/dashboard/Notifications';
-import ManageResources from '@/pages/dashboard/ManageResources';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import ActivityLogs from '@/pages/dashboard/ActivityLogs';
@@ -25,6 +24,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import Contact from '@/pages/Contact';
 import About from '@/pages/About';
 
+import WebsiteSettings from '@/pages/dashboard/WebsiteSettings';
+import Toaster from '@/components/ui/Toaster';
 import Search from '@/pages/Search';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -52,33 +53,32 @@ function App() {
 
         {/* Dashboard System Routes */}
         <Route
-          path="/dashboard/*"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <Routes>
-                  <Route index element={<Overview />} />
-                  <Route path="health" element={<SystemHealth />} />
-                  <Route path="journals" element={<MyJournals />} />
-                  <Route path="journals/:slug" element={<ManageJournal />} />
-                  <Route path="articles" element={<Articles />} />
-                  <Route path="announcements" element={<ManageAnnouncements />} />
-                  <Route path="notifications" element={<Notifications />} />
-                  <Route path="resources" element={<ManageResources />} />
-                  <Route path="feedback" element={<Feedback />} />
-                  <Route path="users" element={<UserManager />} />
-                  <Route path="logs" element={<ActivityLogs />} />
-                  <Route path="settings" element={<SystemSettings />} />
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </Routes>
-              </DashboardLayout>
+              <DashboardLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Overview />} />
+          <Route path="health" element={<SystemHealth />} />
+          <Route path="journals" element={<MyJournals />} />
+          <Route path="journals/:slug" element={<ManageJournal />} />
+          <Route path="articles" element={<Articles />} />
+          <Route path="announcements" element={<ManageAnnouncements />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="feedback" element={<Feedback />} />
+          <Route path="users" element={<UserManager />} />
+          <Route path="logs" element={<ActivityLogs />} />
+          <Route path="website" element={<WebsiteSettings />} />
+          <Route path="settings" element={<SystemSettings />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Route>
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster position="bottom-right" />
     </Router>
   );
 }

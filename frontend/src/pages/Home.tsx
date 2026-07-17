@@ -27,6 +27,8 @@ interface Announcement {
   created_at: string;
 }
 
+const DEFAULT_ABOUT_US = '<div class="text-center max-w-4xl mx-auto space-y-4 pb-4 border-b border-border mb-4">\n  <h2 class="text-xl font-bold uppercase tracking-wider text-primary">About Us</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>\n</div>';
+
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [journals, setJournals] = useState<Journal[]>([]);
@@ -34,21 +36,60 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
+  const [aboutUsHtml, setAboutUsHtml] = useState<string>(DEFAULT_ABOUT_US);
 
   useEffect(() => {
     const fetchData = async () => {
+      // 1. Instantly load from localStorage (Stale-While-Revalidate)
+      const cachedHome = localStorage.getItem('filamerian_home_cache');
+      if (cachedHome) {
+        try {
+          const { journals: cJournals, announcements: cAnn, settings: cSettings } = JSON.parse(cachedHome);
+          if (cJournals) setJournals(cJournals);
+          if (cAnn) setAnnouncements(cAnn);
+          if (cSettings) {
+            const catsString = cSettings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+            const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
+            setAvailableCategories(['All', ...catsArray]);
+            if (cSettings.home_about_us) {
+              setAboutUsHtml(cSettings.home_about_us);
+            }
+          }
+          setLoading(false); // Stop loading spinner instantly if cache exists
+        } catch(e) {}
+      }
+
+      // 2. Fetch fresh data in the background
       try {
         const [jrnRes, annRes, setRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/announcements'),
           api.get('/public/settings')
         ]);
-        setJournals(jrnRes.data.data);
-        setAnnouncements(annRes.data.data.slice(0, 3));
         
-        const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+        const freshJournals = jrnRes.data.data;
+        const freshAnnouncements = annRes.data.data.slice(0, 3);
+        const freshSettings = setRes.data.data;
+
+        setJournals(freshJournals);
+        setAnnouncements(freshAnnouncements);
+        
+        // Update Local Cache
+        localStorage.setItem('filamerian_home_cache', JSON.stringify({
+          journals: freshJournals,
+          announcements: freshAnnouncements,
+          settings: freshSettings
+        }));
+
+        const catsString = freshSettings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
         const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
         setAvailableCategories(['All', ...catsArray]);
+        
+        if (freshSettings.home_about_us) {
+          setAboutUsHtml(freshSettings.home_about_us);
+        } else {
+          setAboutUsHtml(DEFAULT_ABOUT_US);
+        }
       } catch (err) {
         console.error('Failed to fetch public data', err);
       } finally {
@@ -65,8 +106,16 @@ const Home: React.FC = () => {
       );
 
   return (
-    <PageWrapper className="flex flex-col gap-16 pb-16 pt-8">
-      <div className="w-full px-2 lg:px-6 flex-1 flex flex-col">
+    <PageWrapper className="flex flex-col pb-16 pt-8">
+      {/* About Us Section (Dynamic HTML) */}
+      {aboutUsHtml && (
+        <div 
+          className="w-full px-2 lg:px-6"
+          dangerouslySetInnerHTML={{ __html: aboutUsHtml }} 
+        />
+      )}
+
+      <div className="w-full px-2 lg:px-6 flex-1 flex flex-col mt-0">
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
           {/* Journals Grid */}
           <div className="lg:col-span-9 flex flex-col space-y-8">

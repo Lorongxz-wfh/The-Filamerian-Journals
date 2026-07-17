@@ -34,7 +34,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
         to={`/journals/${slug}`}
         className={cn('group block text-center transition-all duration-300', className)}
       >
-        <div className="relative mx-auto max-w-[220px] overflow-hidden mb-6 bg-background shadow-sm hover:shadow-md transition-shadow aspect-[3/4] border border-border">
+        <div className="relative mx-auto max-w-[160px] overflow-hidden mb-6 bg-background shadow-sm hover:shadow-md transition-shadow aspect-[3/4] border border-border">
           {image ? (
             <img
               src={image}
@@ -77,7 +77,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
       className={cn('group flex items-start gap-6 py-6 border-b border-border hover:bg-black/[0.02] transition-colors duration-200 px-4 -mx-4', className)}
     >
       {/* Image (Portrait) */}
-      <div className="relative w-32 shrink-0 aspect-[3/4] overflow-hidden bg-background border border-border">
+      <div className="relative w-24 shrink-0 aspect-[3/4] overflow-hidden bg-background border border-border">
         {image ? (
           <img
             src={image}
