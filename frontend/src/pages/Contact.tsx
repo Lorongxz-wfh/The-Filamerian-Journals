@@ -38,7 +38,8 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <PageWrapper className="pt-6 pb-12 space-y-12">
+    <PageWrapper className="flex flex-col">
+      {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-4">
         <h1 className="text-3xl uppercase tracking-wider">Contact Us</h1>
         <p className="text-[14px] text-muted leading-relaxed">
@@ -47,8 +48,9 @@ const Contact: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 max-w-5xl mx-auto">
-        {/* Contact Info */}
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 w-full">
+        {/* Left Column - Contact Info */}
         <div className="lg:col-span-4 space-y-8">
           <div className="space-y-6">
             <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider border-b border-border pb-3">

@@ -95,13 +95,11 @@ const Archives: React.FC = () => {
   );
 
   return (
-    <PageWrapper className="pt-6 pb-12 space-y-10 flex flex-col">
-      {/* Header */}
-      <div className="border-b border-border pb-6">
+    <PageWrapper className="flex flex-col w-full">
+      <div className="w-full space-y-10 flex flex-col">
+        {/* Header */}
+        <div className="border-b border-border pb-6">
         <h1 className="text-2xl uppercase tracking-wider font-bold">Archives</h1>
-        <p className="text-[14px] text-muted max-w-xl leading-relaxed mt-2">
-          Browse past volumes and issues across all journals.
-        </p>
       </div>
 
       {/* Summary Stats */}
@@ -281,6 +279,8 @@ const Archives: React.FC = () => {
             );
           })
         )}
+      </div>
+      
       </div>
 
       <CitationModal 

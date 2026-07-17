@@ -168,7 +168,7 @@ const ArticleDetail: React.FC = () => {
   };
 
   return (
-    <PageWrapper className="pt-6 pb-10 space-y-8 max-w-5xl flex flex-col mx-auto w-full">
+    <PageWrapper className="flex flex-col w-full">
       <Link to={article.volume?.journal?.slug ? `/journals/${article.volume.journal.slug}` : "/journals"} className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to {article.volume?.journal?.title || 'Journal'}
       </Link>

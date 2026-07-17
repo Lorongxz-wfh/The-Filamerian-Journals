@@ -27,7 +27,7 @@ interface Announcement {
   created_at: string;
 }
 
-const DEFAULT_ABOUT_US = '<div class="text-center max-w-4xl mx-auto space-y-4 pb-4 border-b border-border mb-4">\n  <h2 class="text-xl font-bold uppercase tracking-wider text-primary">About Us</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>\n</div>';
+const DEFAULT_ABOUT_US = '<h2 class="text-xl font-bold uppercase tracking-wider text-primary">About Us</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
@@ -51,7 +51,7 @@ const Home: React.FC = () => {
             const catsString = cSettings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
             const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
             setAvailableCategories(['All', ...catsArray]);
-            if (cSettings.home_about_us) {
+            if (cSettings.home_about_us !== undefined) {
               setAboutUsHtml(cSettings.home_about_us);
             }
           }
@@ -85,7 +85,7 @@ const Home: React.FC = () => {
         const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
         setAvailableCategories(['All', ...catsArray]);
         
-        if (freshSettings.home_about_us) {
+        if (freshSettings.home_about_us !== undefined) {
           setAboutUsHtml(freshSettings.home_about_us);
         } else {
           setAboutUsHtml(DEFAULT_ABOUT_US);
@@ -106,21 +106,21 @@ const Home: React.FC = () => {
       );
 
   return (
-    <PageWrapper className="flex flex-col pb-16 pt-8">
-      {/* About Us Section (Dynamic HTML) */}
+    <PageWrapper className="flex flex-col">
+      {/* Hero Section */}
       {aboutUsHtml && (
         <div 
-          className="w-full px-2 lg:px-6"
+          className="w-full px-[10%] text-center space-y-1.5 border-b border-border mb-5 pb-3"
           dangerouslySetInnerHTML={{ __html: aboutUsHtml }} 
         />
       )}
 
-      <div className="w-full px-2 lg:px-6 flex-1 flex flex-col mt-0">
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
+      <div className="w-full flex-1 flex flex-col">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-9 xl:gap-[60px] items-start">
           {/* Journals Grid */}
-          <div className="lg:col-span-9 flex flex-col space-y-8">
-            <div className="flex items-center justify-between border-b border-border pb-4 overflow-x-auto">
-              <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 mr-8">
+          <div className="lg:col-span-9 flex flex-col">
+            <div className="flex items-center justify-between border-b border-border mb-4 overflow-x-auto h-[40px]">
+              <h2 className="text-lg font-bold uppercase tracking-wider shrink-0">
                 Academic Journals
               </h2>
               <div className="flex gap-6 shrink-0">
@@ -140,7 +140,7 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col mb-8">
               {loading ? (
                 <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
                   <Spinner text="Loading journals..." />
@@ -148,7 +148,7 @@ const Home: React.FC = () => {
               ) : filteredJournals.length === 0 ? (
                 <EmptyState title="No journals" description="No journals in this category." className="flex-1 flex flex-col items-center justify-center py-12 border border-border bg-surface mt-4 min-h-[40vh]" />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {filteredJournals.map((j) => {
                     const latestVol = j.volumes?.[0];
                     
@@ -162,6 +162,8 @@ const Home: React.FC = () => {
                         volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
                         image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
                         category={j.category}
+                        viewMode="grid"
+                        className="h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] max-w-[260px] mx-auto w-full min-h-[320px]"
                       />
                     );
                   })}
@@ -169,7 +171,7 @@ const Home: React.FC = () => {
               )}
             </div>
 
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center mt-auto">
               <Link
                 to="/journals"
                 className="px-6 py-2.5 border border-border text-[13px] font-medium text-primary hover:bg-primary hover:text-white transition-colors"
@@ -180,9 +182,9 @@ const Home: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-3 h-full">
+          <div className="lg:col-span-3">
             {/* Announcements */}
-            <div className="border border-border bg-surface p-6 h-full flex flex-col">
+            <div className="border border-border bg-surface p-5 h-[425px] flex flex-col">
               <Link to="/announcements" className="flex items-center justify-between mb-6 pb-3 border-b border-border group">
                 <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
                   Announcements

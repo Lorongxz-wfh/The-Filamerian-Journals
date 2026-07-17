@@ -98,8 +98,8 @@ const JournalDetail: React.FC = () => {
   ) || 0;
 
   return (
-    <PageWrapper className="pt-2 pb-10 space-y-6 flex flex-col">
-      {/* Back Link */}
+    <PageWrapper className="flex flex-col">
+      {/* Back button and metadata header */}
       <Link to="/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
       </Link>

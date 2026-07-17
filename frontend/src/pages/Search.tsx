@@ -45,8 +45,8 @@ const Search: React.FC = () => {
   }, [query]);
 
   return (
-    <PageWrapper className="pt-6 pb-12 space-y-10 flex flex-col">
-      {/* Header */}
+    <PageWrapper className="flex flex-col">
+      {/* Search Header */}
       <div className="border-b border-border pb-6 space-y-2">
         <h1 className="text-2xl uppercase tracking-wider font-bold">Search Results</h1>
         <p className="text-[14px] text-muted">

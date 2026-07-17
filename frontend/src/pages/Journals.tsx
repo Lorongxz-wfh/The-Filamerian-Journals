@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
-import { Search, LayoutGrid, List } from 'lucide-react';
+import { Search, LayoutGrid, List, ChevronDown, X } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
-
-// Dynamic categories fetched from API
 
 interface Journal {
   id: number;
@@ -30,28 +28,52 @@ const Journals: React.FC = () => {
   const queryParams = new URLSearchParams(location.search);
   const categoryParam = queryParams.get('category');
 
-  const [activeTab, setActiveTab] = useState<string>(categoryParam || 'All');
   const [search, setSearch] = useState('');
+  const [sortOption, setSortOption] = useState<string>('newest');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    categoryParam ? [categoryParam] : []
+  );
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [journals, setJournals] = useState<Journal[]>(initialJournals);
   const [availableCategories, setAvailableCategories] = useState<string[]>(initialCategories);
   const [loading, setLoading] = useState(initialJournals.length === 0);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
 
-  useEffect(() => {
-    if (categoryParam && availableCategories.includes(categoryParam)) {
-      setActiveTab(categoryParam);
-    } else if (!categoryParam) {
-      setActiveTab('All');
-    }
-  }, [categoryParam, availableCategories]);
+  // Accordion open/close state
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    subject: true,
+    year: true,
+  });
 
-  const handleTabClick = (cat: string) => {
-    setActiveTab(cat);
-    if (cat === 'All') {
-      navigate('/journals');
-    } else {
-      navigate(`/journals?category=${encodeURIComponent(cat)}`);
+  const toggleSection = (key: string) => {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Sync URL category param
+  useEffect(() => {
+    if (categoryParam) {
+      const cats = categoryParam.split(',').map(c => c.trim()).filter(Boolean);
+      setSelectedCategories(cats);
     }
+  }, [categoryParam]);
+
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories(prev => {
+      const next = prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat];
+      // Update URL
+      if (next.length === 0) {
+        navigate('/journals');
+      } else {
+        navigate(`/journals?category=${next.map(c => encodeURIComponent(c)).join(',')}`);
+      }
+      return next;
+    });
+  };
+
+  const toggleYear = (year: string) => {
+    setSelectedYears(prev =>
+      prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year]
+    );
   };
 
   useEffect(() => {
@@ -80,23 +102,70 @@ const Journals: React.FC = () => {
     fetchJournals();
   }, []);
 
-  const filtered = journals.filter((j) => {
-    const matchesCategory = activeTab === 'All' || j.category === activeTab;
-    const matchesSearch = j.title.toLowerCase().includes(search.toLowerCase()) ||
-      (j.description && j.description.toLowerCase().includes(search.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
+  // Only the actual categories (without "All")
+  const actualCategories = useMemo(() =>
+    availableCategories.filter(c => c !== 'All'), [availableCategories]
+  );
+
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    journals.forEach(j => {
+      if (j.volumes && j.volumes.length > 0) {
+        j.volumes.forEach(v => {
+          if (v.year) years.add(v.year.toString());
+        });
+      } else if (j.created_at) {
+        years.add(new Date(j.created_at).getFullYear().toString());
+      }
+    });
+    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a));
+  }, [journals]);
+
+  const filtered = useMemo(() => {
+    let result = journals.filter((j) => {
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(j.category);
+      const matchesSearch = j.title.toLowerCase().includes(search.toLowerCase()) ||
+        (j.description && j.description.toLowerCase().includes(search.toLowerCase()));
+        
+      let matchesYear = true;
+      if (selectedYears.length > 0) {
+        const jYear = j.volumes?.[0]?.year?.toString() || (j.created_at ? new Date(j.created_at).getFullYear().toString() : '');
+        matchesYear = selectedYears.includes(jYear);
+      }
+      
+      return matchesCategory && matchesSearch && matchesYear;
+    });
+
+    result = [...result].sort((a, b) => {
+      if (sortOption === 'a-z') return a.title.localeCompare(b.title);
+      if (sortOption === 'z-a') return b.title.localeCompare(a.title);
+      
+      const aDate = a.volumes?.[0]?.year ? new Date(a.volumes[0].year.toString()).getTime() : new Date(a.created_at || 0).getTime();
+      const bDate = b.volumes?.[0]?.year ? new Date(b.volumes[0].year.toString()).getTime() : new Date(b.created_at || 0).getTime();
+      
+      if (sortOption === 'newest') return bDate - aDate;
+      if (sortOption === 'oldest') return aDate - bDate;
+      
+      return 0;
+    });
+    
+    return result;
+  }, [journals, selectedCategories, search, selectedYears, sortOption]);
+
+  const hasActiveFilters = selectedCategories.length > 0 || selectedYears.length > 0;
+
+  const clearAllFilters = () => {
+    setSelectedCategories([]);
+    setSelectedYears([]);
+    navigate('/journals');
+  };
 
   return (
-    <PageWrapper className="pt-6 pb-12 flex flex-col space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
-        <div className="space-y-2">
+    <PageWrapper className="flex flex-col">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-3">
+        <div>
           <h1 className="text-2xl uppercase tracking-wider font-bold">Our Journals</h1>
-          <p className="text-[14px] text-muted max-w-xl leading-relaxed">
-            Explore our collection of peer-reviewed journals spanning science,
-            education, theology, and the humanities.
-          </p>
         </div>
 
         <div className="relative w-full md:w-72">
@@ -111,77 +180,184 @@ const Journals: React.FC = () => {
         </div>
       </div>
 
-      {/* Category Tabs & View Toggle */}
-      <div className="flex items-center justify-between border-b border-border pb-4">
-        <div className="flex gap-1 border border-border bg-surface w-fit flex-wrap">
-          {availableCategories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => handleTabClick(cat)}
-              className={`px-4 py-2 text-[12px] font-medium transition-colors ${
-                activeTab === cat
-                  ? 'bg-primary text-white'
-                  : 'text-muted hover:text-primary'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      {/* Main Layout: Sidebar + Results */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-8 mt-8">
+        
+        {/* ── Left Sidebar ── */}
+        <aside className="w-full lg:w-[220px] shrink-0">
+          <div className="sticky top-24 space-y-1">
+            <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest mb-4">Filter By</h3>
 
-        {/* View Toggle */}
-        <div className="inline-flex items-center border border-border bg-surface rounded-sm h-[38px]">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`px-3 py-1.5 h-full flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
-            title="Grid View"
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 h-full flex items-center justify-center transition-colors border-l border-border ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
-            title="List View"
-          >
-            <List className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+            {/* Subject / Discipline */}
+            <div className="border border-border">
+              <button
+                onClick={() => toggleSection('subject')}
+                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
+              >
+                Subject / Discipline
+                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.subject ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections.subject && (
+                <div className="px-4 pb-4 space-y-2.5">
+                  {actualCategories.map(cat => (
+                    <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat)}
+                        onChange={() => toggleCategory(cat)}
+                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                      />
+                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{cat}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
 
-      {/* Grid / List */}
-      <div className="flex-1 flex flex-col">
-        {loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
-            <Spinner text="Loading journals..." />
+            {/* Publication Year */}
+            <div className="border border-border">
+              <button
+                onClick={() => toggleSection('year')}
+                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
+              >
+                Publication Year
+                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.year ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections.year && (
+                <div className="px-4 pb-4 space-y-2.5">
+                  {availableYears.map(year => (
+                    <label key={year} className="flex items-center gap-2.5 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedYears.includes(year)}
+                        onChange={() => toggleYear(year)}
+                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                      />
+                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{year}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Clear All */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="w-full mt-3 py-2 text-[11px] font-medium text-muted hover:text-red-600 border border-border hover:border-red-300 transition-colors uppercase tracking-wider"
+              >
+                Clear All Filters
+              </button>
+            )}
           </div>
-        ) : filtered.length === 0 ? (
-          <EmptyState title="No journals found" description="No journals matched your search criteria." className="py-20 border border-border bg-surface" />
-        ) : (
-        <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "flex flex-col w-full max-w-5xl mx-auto"}>
-          {filtered.map((j) => {
-            const latestVol = j.volumes?.[0];
-            
-            return (
-              <JournalCard
-                key={j.id}
-                slug={j.slug}
-                title={j.title}
-                description={j.description}
-                date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
-                volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
-                image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
-                category={j.category}
-                publisher={j.publisher || undefined}
-                viewMode={viewMode}
-              />
-            );
-          })}
-        </div>
-      )}
+        </aside>
 
-      {!loading && (
-        <p className="text-[11px] text-muted mt-8">Showing {filtered.length} of {journals.length} journals</p>
-      )}
+        {/* ── Results Area ── */}
+        <div className="flex-1 flex flex-col min-w-0">
+          
+          {/* Results Header: Active Chips + Sort + View */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4 mb-6">
+            {/* Active Filter Chips */}
+            <div className="flex items-center gap-2 flex-wrap min-h-[32px]">
+              {selectedCategories.map(cat => (
+                <span
+                  key={cat}
+                  className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[11px] font-medium px-2.5 py-1 uppercase tracking-wider"
+                >
+                  {cat}
+                  <button onClick={() => toggleCategory(cat)} className="hover:text-red-600 transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              {selectedYears.map(year => (
+                <span
+                  key={year}
+                  className="inline-flex items-center gap-1.5 bg-secondary/10 text-secondary text-[11px] font-medium px-2.5 py-1 uppercase tracking-wider"
+                >
+                  {year}
+                  <button onClick={() => toggleYear(year)} className="hover:text-red-600 transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              {!hasActiveFilters && (
+                <span className="text-[11px] text-muted">Showing all journals</span>
+              )}
+            </div>
+
+            {/* Sort + View Controls */}
+            <div className="flex items-center gap-3 shrink-0">
+              <select 
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-primary focus:outline-none focus:border-primary transition-colors h-[34px] cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="a-z">Title (A-Z)</option>
+                <option value="z-a">Title (Z-A)</option>
+              </select>
+
+              <div className="inline-flex items-center border border-border bg-surface rounded-sm h-[34px]">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-2.5 py-1.5 h-full flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-2.5 py-1.5 h-full flex items-center justify-center transition-colors border-l border-border ${viewMode === 'list' ? 'bg-primary text-white' : 'text-muted hover:text-primary'}`}
+                  title="List View"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid / List */}
+          <div className="flex-1 flex flex-col mb-[55px]">
+            {loading ? (
+              <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
+                <Spinner text="Loading journals..." />
+              </div>
+            ) : filtered.length === 0 ? (
+              <EmptyState title="No journals found" description="No journals matched your filter criteria." className="py-20 border border-border bg-surface" />
+            ) : (
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8" 
+                : "flex flex-col space-y-4 w-full"
+              }>
+                {filtered.map((j) => {
+                  const latestVol = j.volumes?.[0];
+                  
+                  return (
+                    <JournalCard
+                      key={j.id}
+                      slug={j.slug}
+                      title={j.title}
+                      description={j.description}
+                      date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
+                      volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
+                      image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
+                      category={j.category}
+                      publisher={j.publisher || undefined}
+                      viewMode={viewMode}
+                      className={viewMode === 'grid' ? "h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] mx-auto w-full min-h-[320px]" : ""}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            {!loading && (
+              <p className="text-[11px] text-muted mt-8">Showing {filtered.length} of {journals.length} journals</p>
+            )}
+          </div>
+        </div>
       </div>
     </PageWrapper>
   );
