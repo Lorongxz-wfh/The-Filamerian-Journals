@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { Search, LayoutGrid, List } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
@@ -24,12 +25,34 @@ const Journals: React.FC = () => {
   const initialJournals = JSON.parse(localStorage.getItem('journals_cache') || '[]');
   const initialCategories = JSON.parse(localStorage.getItem('categories_cache') || '["All"]');
 
-  const [activeTab, setActiveTab] = useState<string>('All');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
+  const categoryParam = queryParams.get('category');
+
+  const [activeTab, setActiveTab] = useState<string>(categoryParam || 'All');
   const [search, setSearch] = useState('');
   const [journals, setJournals] = useState<Journal[]>(initialJournals);
   const [availableCategories, setAvailableCategories] = useState<string[]>(initialCategories);
   const [loading, setLoading] = useState(initialJournals.length === 0);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+
+  useEffect(() => {
+    if (categoryParam && availableCategories.includes(categoryParam)) {
+      setActiveTab(categoryParam);
+    } else if (!categoryParam) {
+      setActiveTab('All');
+    }
+  }, [categoryParam, availableCategories]);
+
+  const handleTabClick = (cat: string) => {
+    setActiveTab(cat);
+    if (cat === 'All') {
+      navigate('/journals');
+    } else {
+      navigate(`/journals?category=${encodeURIComponent(cat)}`);
+    }
+  };
 
   useEffect(() => {
     const fetchJournals = async () => {
@@ -94,7 +117,7 @@ const Journals: React.FC = () => {
           {availableCategories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveTab(cat)}
+              onClick={() => handleTabClick(cat)}
               className={`px-4 py-2 text-[12px] font-medium transition-colors ${
                 activeTab === cat
                   ? 'bg-primary text-white'

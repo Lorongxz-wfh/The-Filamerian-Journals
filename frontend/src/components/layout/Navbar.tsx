@@ -1,12 +1,22 @@
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Menu, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const path = location.pathname;
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropdownCategories, setDropdownCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem('categories_cache') || '["All", "Science", "Education", "Arts", "Multidisciplinary"]');
+      setDropdownCategories(cached.filter((c: string) => c !== 'All'));
+    } catch {
+      setDropdownCategories(["Science", "Education", "Arts", "Multidisciplinary"]);
+    }
+  }, [path]);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -51,17 +61,24 @@ const Navbar = () => {
             </Link>
             
             {/* UP Diliman Style Dropdown */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto">
-              <div className="flex flex-col py-2">
-                <Link to="/journals?category=Science" className="px-6 py-4 text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest border-b border-white/10 last:border-0">
-                  Science
-                </Link>
-                <Link to="/journals?category=Education" className="px-6 py-4 text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest border-b border-white/10 last:border-0">
-                  Education
-                </Link>
-                <Link to="/journals?category=Arts" className="px-6 py-4 text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest border-b border-white/10 last:border-0">
-                  Arts
-                </Link>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-48 w-max max-w-2xl bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto">
+              <div 
+                className="grid bg-white/10 gap-px" 
+                style={{ 
+                  gridTemplateColumns: dropdownCategories.length > 10 ? 'repeat(3, minmax(180px, 1fr))' : 
+                                       dropdownCategories.length > 5 ? 'repeat(2, minmax(180px, 1fr))' : 
+                                       '1fr' 
+                }}
+              >
+                {dropdownCategories.map(cat => (
+                  <Link 
+                    key={cat}
+                    to={`/journals?category=${encodeURIComponent(cat)}`} 
+                    className="flex px-6 py-4 bg-primary text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest"
+                  >
+                    {cat}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
