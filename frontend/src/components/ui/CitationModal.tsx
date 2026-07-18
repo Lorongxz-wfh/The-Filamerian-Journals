@@ -19,14 +19,17 @@ const CitationModal: React.FC<CitationModalProps> = ({
 
   // --- Formatting Helpers ---
   const parseAuthor = (fullName: string) => {
+    // Remove common titles
+    const cleanName = fullName.replace(/\b(dr|mr|mrs|ms|mx|prof|rev|engr|atty)\b\.?\s*/gi, '').trim();
+    
     let last = '';
     let first = '';
-    if (fullName.includes(',')) {
-      const parts = fullName.split(',');
+    if (cleanName.includes(',')) {
+      const parts = cleanName.split(',');
       last = parts[0].trim();
       first = parts.slice(1).join(',').trim();
     } else {
-      const parts = fullName.trim().split(/\s+/);
+      const parts = cleanName.trim().split(/\s+/);
       if (parts.length === 1) return { last: parts[0], first: '' };
       last = parts.pop() || '';
       first = parts.join(' ');
