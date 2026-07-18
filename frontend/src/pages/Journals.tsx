@@ -163,7 +163,7 @@ const Journals: React.FC = () => {
   return (
     <PageWrapper className="flex flex-col">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <h1 className="text-2xl uppercase tracking-wider font-bold">Our Journals</h1>
 
         <div className="relative w-full md:w-72">
