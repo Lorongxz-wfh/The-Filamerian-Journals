@@ -119,11 +119,11 @@ const Home: React.FC = () => {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-9 xl:gap-[60px] items-start">
           {/* Journals Grid */}
           <div className="lg:col-span-9 flex flex-col">
-            <div className="flex items-center justify-between border-b border-border mb-4 overflow-x-auto h-[40px]">
+            <div className="flex items-center justify-between border-b border-border mb-4 overflow-x-auto dark-scrollbar min-h-[40px] pb-2 gap-4">
               <h2 className="text-lg font-bold uppercase tracking-wider shrink-0">
                 Academic Journals
               </h2>
-              <div className="flex gap-6 shrink-0">
+              <div className="flex gap-4 sm:gap-6 shrink-0">
                 {availableCategories.map((cat) => (
                   <button
                     key={cat}

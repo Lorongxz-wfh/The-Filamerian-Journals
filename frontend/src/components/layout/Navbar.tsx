@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, X, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
 import api from '@/services/api';
@@ -16,6 +17,7 @@ const Navbar = () => {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownCategories, setDropdownCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -157,10 +159,106 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Trigger */}
-        <button className="md:hidden h-9 w-9 flex items-center justify-center border border-white/20 text-white/70 hover:text-white transition-colors">
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="md:hidden h-9 w-9 flex items-center justify-center border border-white/20 text-white/70 hover:text-white transition-colors"
+        >
           <Menu className="h-5 w-5" />
         </button>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/60 z-[100] md:hidden"
+            />
+            
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface z-[101] md:hidden flex flex-col shadow-2xl border-l border-border"
+            >
+              <div className="h-16 flex items-center justify-between px-6 border-b border-border bg-primary text-white shrink-0">
+                <span className="font-display font-bold text-secondary uppercase tracking-widest text-sm">
+                  Menu
+                </span>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col gap-6">
+                {/* Mobile Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setIsMobileMenuOpen(false);
+                        handleSearch(e);
+                      }
+                    }}
+                    className="w-full pl-10 pr-4 py-3 bg-background border border-border text-[13px] text-primary focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path === '/' ? 'text-secondary' : 'text-primary'}`}>
+                    Home <ChevronRight className="h-4 w-4 opacity-50" />
+                  </Link>
+                  <Link to="/journals" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/journals') ? 'text-secondary' : 'text-primary'}`}>
+                    Journals <ChevronRight className="h-4 w-4 opacity-50" />
+                  </Link>
+                  <Link to="/archives" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/archives') ? 'text-secondary' : 'text-primary'}`}>
+                    Archives <ChevronRight className="h-4 w-4 opacity-50" />
+                  </Link>
+                  <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/about') ? 'text-secondary' : 'text-primary'}`}>
+                    About <ChevronRight className="h-4 w-4 opacity-50" />
+                  </Link>
+                  <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/contact') ? 'text-secondary' : 'text-primary'}`}>
+                    Contact <ChevronRight className="h-4 w-4 opacity-50" />
+                  </Link>
+                </div>
+
+                <div className="mt-auto pt-8">
+                  {localStorage.getItem('token') ? (
+                    <Link
+                      to="/dashboard"
+                      className="flex w-full items-center justify-center py-3 bg-primary text-white text-[13px] font-semibold tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/login"
+                      className="flex w-full items-center justify-center py-3 bg-secondary text-primary text-[13px] font-bold tracking-widest uppercase hover:bg-secondary/90 transition-colors"
+                    >
+                      Portal Login
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
