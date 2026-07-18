@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils';
 import api from '@/services/api';
 import { Outlet } from 'react-router';
 import SplashLoader from '@/components/ui/SplashLoader';
+import { useDebounce } from '@/hooks/useDebounce';
+import SearchDropdown from '@/components/ui/SearchDropdown';
 
 interface DashboardLayoutProps {}
 
@@ -38,14 +40,54 @@ interface Notification {
 const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const path = location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  const [searchResults, setSearchResults] = useState<{ journals: any[]; articles: any[] } | null>(null);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setSearchResults(null);
+      setIsDropdownOpen(false);
+      return;
+    }
+    
+    const fetchResults = async () => {
+      setIsSearchLoading(true);
+      setIsDropdownOpen(true);
+      try {
+        const res = await api.get(`/public/search?q=${encodeURIComponent(debouncedSearch)}`);
+        setSearchResults(res.data.data);
+      } catch (err) {
+        console.error('Live search failed', err);
+      } finally {
+        setIsSearchLoading(false);
+      }
+    };
+    fetchResults();
+  }, [debouncedSearch]);
+  
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      setIsDropdownOpen(false);
+      navigate(`/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   const menuItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Admin'] },
@@ -56,11 +98,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   ];
 
   const adminItems = [
-    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
+    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'], inDev: true },
     { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },
-    { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
+    { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'], inDev: true },
   ];
 
   const handleLogout = async () => {
@@ -126,25 +168,34 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const visibleMenuItems = menuItems.filter(item => hasAccess(item.roles));
   const visibleAdminItems = adminItems.filter(item => hasAccess(item.roles));
 
+  const allPortalItems = [...menuItems, ...adminItems].filter(item => 
+    item.roles.includes(user.role || 'Member')
+  );
+
+  const pageResults = debouncedSearch.trim()
+    ? allPortalItems.filter(item => item.label.toLowerCase().includes(debouncedSearch.toLowerCase()))
+    : [];
+
   const SidebarContent = () => (
     <>
-      {/* Brand */}
-      <div className="px-6 py-5 border-b border-white/10 shrink-0">
-        <Link to="/" className="flex items-center">
-          <span className="font-display font-normal text-secondary text-base tracking-wider uppercase leading-none">
-            Filamerian
-          </span>
-          <span className="ml-2 text-[11px] font-medium text-white/50 uppercase tracking-wider">
-            Portal
-          </span>
+      <div className="h-14 flex items-center px-6 border-b border-white/10 shrink-0">
+        <Link to="/" className="flex items-center gap-3 group">
+          <BookOpen className="h-5 w-5 text-secondary group-hover:text-white transition-colors" />
+          <div className="flex flex-col">
+            <span className="text-[13px] font-bold text-white uppercase tracking-[0.15em] group-hover:text-secondary transition-colors leading-none">
+              The Filamerian
+            </span>
+            <span className="text-[9px] font-semibold text-white/50 uppercase tracking-[0.3em] mt-0.5">
+              Portal
+            </span>
+          </div>
         </Link>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-grow px-4 py-6 space-y-6 overflow-y-auto dark-scrollbar">
+      <nav className="flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-6 dark-scrollbar">
         <div className="space-y-1">
           <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
-            Main Menu
+            Navigation
           </span>
           {visibleMenuItems.map((item) => (
             <Link
@@ -181,15 +232,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
                     : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
                 )}
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3 flex-grow">
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </div>
+                {(item as any).inDev && (
+                  <span className="text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 uppercase tracking-widest shrink-0">
+                    Dev
+                  </span>
+                )}
               </Link>
             ))}
           </div>
         )}
       </nav>
 
-      {/* User Info & Logout */}
       <div className="px-4 py-4 border-t border-white/10 shrink-0 mt-auto">
         <div className="flex items-center gap-3 px-3 py-3 mb-2">
           <div className="h-8 w-8 bg-secondary flex items-center justify-center text-primary font-semibold text-sm shrink-0">
@@ -209,17 +266,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           disabled={isLoggingOut}
           className="w-full flex items-center justify-center gap-3 px-3 py-2.5 text-white/40 hover:text-red-300 hover:bg-red-500/10 transition-colors text-[13px] disabled:opacity-50"
         >
-          {isLoggingOut ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Signing Out...
-            </>
-          ) : (
-            <>
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </>
-          )}
+          {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+          <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
         </button>
       </div>
     </>
@@ -247,7 +295,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   }
 
   return (
-    <div className="h-screen bg-background flex overflow-hidden">
+    <div className="h-screen bg-surface flex text-primary font-sans overflow-hidden">
       <SplashLoader />
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -271,14 +319,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
         >
           <X className="h-5 w-5" />
         </button>
-        <SidebarContent />
+        {SidebarContent()}
       </aside>
 
       {/* Main Content */}
       <div className="flex-grow flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Dashboard Header */}
         <header className="h-14 bg-surface border-b border-border flex items-center justify-between px-6 shrink-0">
-          <div className="flex items-center gap-4">
+          
+          <div className="flex items-center min-w-[40px]">
             {/* Mobile hamburger */}
             <button
               className="lg:hidden h-8 w-8 flex items-center justify-center text-muted hover:text-primary"
@@ -286,18 +335,35 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             >
               <Menu className="h-5 w-5" />
             </button>
+          </div>
 
-            <div className="relative w-72 hidden sm:block">
+          {/* Center Search */}
+          <div className="hidden sm:block flex-1 max-w-md px-4">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="w-full pl-9 pr-4 py-2 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors"
+                placeholder="Global search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim()) setIsDropdownOpen(true);
+                }}
+                onKeyDown={handleSearch}
+                className="w-full pl-9 pr-4 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
+              />
+              <SearchDropdown 
+                query={debouncedSearch}
+                results={searchResults}
+                pages={pageResults}
+                loading={isSearchLoading}
+                isOpen={isDropdownOpen}
+                onClose={() => setIsDropdownOpen(false)}
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-end min-w-[40px] gap-4">
             <div className="relative" ref={notifRef}>
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}

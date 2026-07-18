@@ -88,8 +88,8 @@ const ManageAnnouncements: React.FC = () => {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-xl uppercase tracking-wider">Announcements</h1>
-          <p className="text-[13px] text-muted mt-1">Manage public news and updates</p>
+          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Announcements</h1>
+
         </div>
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
           <Plus className="h-4 w-4" /> New Announcement

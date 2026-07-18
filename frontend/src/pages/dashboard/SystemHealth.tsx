@@ -75,8 +75,8 @@ const SystemHealth: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h1 className="text-2xl font-display text-primary">System Health</h1>
-        <p className="text-muted text-sm mt-1">Real-time status of backend services and infrastructure.</p>
+        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">System Health</h1>
+
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

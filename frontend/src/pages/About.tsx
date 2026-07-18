@@ -54,7 +54,7 @@ const About: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col">
-      <div className="border-b border-border pb-6">
+      <div className="border-b border-border pb-6 mb-8">
         <h1 className="text-2xl uppercase tracking-wider font-bold">About</h1>
       </div>
 

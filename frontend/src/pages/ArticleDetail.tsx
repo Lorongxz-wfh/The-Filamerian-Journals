@@ -127,7 +127,7 @@ const ArticleDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <PageWrapper className="container-custom items-center justify-center">
+      <PageWrapper className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
         <Spinner text="Loading article..." />
       </PageWrapper>
     );
@@ -169,7 +169,7 @@ const ArticleDetail: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col w-full">
-      <Link to={article.volume?.journal?.slug ? `/journals/${article.volume.journal.slug}` : "/journals"} className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors">
+      <Link to={article.volume?.journal?.slug ? `/journals/${article.volume.journal.slug}` : "/journals"} className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-3">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to {article.volume?.journal?.title || 'Journal'}
       </Link>
 

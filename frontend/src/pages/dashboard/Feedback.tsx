@@ -63,8 +63,8 @@ const Feedback: React.FC = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-border pb-4">
-        <h1 className="text-xl uppercase tracking-wider">Feedback</h1>
-        <p className="text-[13px] text-muted mt-1">Messages and inquiries from users</p>
+        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Feedback</h1>
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">

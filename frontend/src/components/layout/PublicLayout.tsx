@@ -12,7 +12,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans antialiased">
       <SplashLoader />
       <Navbar />
-      <main className="w-full min-h-screen flex-grow flex flex-col px-[15vw] py-[4vh]">
+      <main className="w-full min-h-screen flex-grow flex flex-col px-[12vw] py-[4vh]">
         <div className="w-full flex-1 bg-white flex flex-col">
           {children}
         </div>

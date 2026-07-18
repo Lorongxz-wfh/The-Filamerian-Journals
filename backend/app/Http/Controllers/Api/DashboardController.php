@@ -29,6 +29,38 @@ class DashboardController extends Controller
                 ];
             });
 
+        $now = \Carbon\Carbon::now();
+        $thirtyDaysAgo = $now->copy()->subDays(30);
+        $sixtyDaysAgo = $now->copy()->subDays(60);
+
+        $calculateTrend = function($model) use ($thirtyDaysAgo, $sixtyDaysAgo) {
+            $recent = $model::where('created_at', '>=', $thirtyDaysAgo)->count();
+            $previous = $model::whereBetween('created_at', [$sixtyDaysAgo, $thirtyDaysAgo])->count();
+
+            if ($previous == 0) {
+                if ($recent == 0) return ['trend' => 'Stable', 'isPositive' => true];
+                return ['trend' => '+100%', 'isPositive' => true];
+            }
+
+            $diff = $recent - $previous;
+            $percentage = round(($diff / $previous) * 100);
+
+            if ($percentage > 0) return ['trend' => '+' . $percentage . '%', 'isPositive' => true];
+            if ($percentage < 0) return ['trend' => $percentage . '%', 'isPositive' => false];
+            return ['trend' => 'Stable', 'isPositive' => true];
+        };
+
+        $activityCounts = \App\Models\ActivityLog::where('created_at', '>=', $thirtyDaysAgo->copy()->startOfDay())
+            ->selectRaw('DATE(created_at) as date, count(*) as count')
+            ->groupBy('date')
+            ->pluck('count', 'date');
+
+        $chartData = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i)->format('Y-m-d');
+            $chartData[] = $activityCounts[$date] ?? 0;
+        }
+
         return response()->json([
             'journals' => Journal::count(),
             'articles' => Article::count(),
@@ -36,6 +68,13 @@ class DashboardController extends Controller
             'users' => User::count(),
             'announcements' => Announcement::count(),
             'recentActivity' => $recentActivity,
+            'trends' => [
+                'journals' => $calculateTrend(Journal::class),
+                'articles' => $calculateTrend(Article::class),
+                'authors' => $calculateTrend(Author::class),
+                'users' => $calculateTrend(User::class),
+            ],
+            'chartData' => $chartData
         ]);
     }
 

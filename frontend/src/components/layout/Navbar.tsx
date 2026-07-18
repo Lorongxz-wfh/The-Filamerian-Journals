@@ -1,12 +1,21 @@
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Menu, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
+import SearchDropdown from '@/components/ui/SearchDropdown';
+import api from '@/services/api';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const path = location.pathname;
+  
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  const [searchResults, setSearchResults] = useState<{ journals: any[]; articles: any[] } | null>(null);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
   const [dropdownCategories, setDropdownCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -18,8 +27,31 @@ const Navbar = () => {
     }
   }, [path]);
 
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setSearchResults(null);
+      setIsDropdownOpen(false);
+      return;
+    }
+    
+    const fetchResults = async () => {
+      setIsSearchLoading(true);
+      setIsDropdownOpen(true);
+      try {
+        const res = await api.get(`/public/search?q=${encodeURIComponent(debouncedSearch)}`);
+        setSearchResults(res.data.data);
+      } catch (err) {
+        console.error('Live search failed', err);
+      } finally {
+        setIsSearchLoading(false);
+      }
+    };
+    fetchResults();
+  }, [debouncedSearch]);
+
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
+      setIsDropdownOpen(false);
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
@@ -37,14 +69,25 @@ const Navbar = () => {
         {/* Search — center, fills available space */}
         <div className="hidden md:block flex-grow max-w-md">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
             <input
               type="text"
               placeholder="Search journals, articles, authors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => {
+                if (searchQuery.trim()) setIsDropdownOpen(true);
+              }}
               onKeyDown={handleSearch}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-white text-[13px] text-primary placeholder:text-muted/50 focus:outline-none focus:border-border transition-colors"
+              className="w-full pl-10 pr-4 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
+            />
+            
+            <SearchDropdown 
+              query={debouncedSearch}
+              results={searchResults}
+              loading={isSearchLoading}
+              isOpen={isDropdownOpen}
+              onClose={() => setIsDropdownOpen(false)}
             />
           </div>
         </div>

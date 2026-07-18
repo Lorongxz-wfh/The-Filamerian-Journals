@@ -7,7 +7,8 @@ const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    category: 'General',
+    category: 'Journal Suggestion',
+    otherCategory: '',
     subject: '',
     message: ''
   });
@@ -24,10 +25,18 @@ const Contact: React.FC = () => {
     setLoading(true);
     setError('');
     
+    const submitData = {
+      name: formData.name,
+      email: formData.email,
+      category: formData.category === 'Other' ? (formData.otherCategory || 'Other') : formData.category,
+      subject: formData.subject,
+      message: formData.message
+    };
+
     try {
-      await api.post('/public/feedbacks', formData);
+      await api.post('/public/feedbacks', submitData);
       setSuccess(true);
-      setFormData({ name: '', email: '', category: 'General', subject: '', message: '' });
+      setFormData({ name: '', email: '', category: 'Journal Suggestion', otherCategory: '', subject: '', message: '' });
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
       console.error('Failed to submit message', err);
@@ -40,9 +49,9 @@ const Contact: React.FC = () => {
   return (
     <PageWrapper className="flex flex-col">
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto space-y-4">
-        <h1 className="text-3xl uppercase tracking-wider">Contact Us</h1>
-        <p className="text-[14px] text-muted leading-relaxed">
+      <div className="border-b border-border pb-6 mb-8">
+        <h1 className="text-2xl uppercase tracking-wider font-bold mb-4">Contact Us</h1>
+        <p className="text-[14px] text-muted leading-relaxed max-w-3xl">
           Have a question about submissions, indexing, or want to join our editorial board? 
           Send us a message and our editorial team will get back to you shortly.
         </p>
@@ -145,8 +154,19 @@ const Contact: React.FC = () => {
                 >
                   <option value="Journal Suggestion">Journal Suggestion</option>
                   <option value="System Issue">System Issue</option>
-                  <option value="Other">Other</option>
+                  <option value="Other">Other (Please specify)</option>
                 </select>
+                {formData.category === 'Other' && (
+                  <input 
+                    type="text" 
+                    name="otherCategory"
+                    value={formData.otherCategory}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 mt-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors animate-in fade-in slide-in-from-top-2"
+                    placeholder="Please specify category..."
+                  />
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Subject</label>

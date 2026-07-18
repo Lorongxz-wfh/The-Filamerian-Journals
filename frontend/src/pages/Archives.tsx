@@ -98,7 +98,7 @@ const Archives: React.FC = () => {
     <PageWrapper className="flex flex-col w-full">
       <div className="w-full space-y-10 flex flex-col">
         {/* Header */}
-        <div className="border-b border-border pb-6">
+        <div className="border-b border-border pb-6 mb-8">
         <h1 className="text-2xl uppercase tracking-wider font-bold">Archives</h1>
       </div>
 

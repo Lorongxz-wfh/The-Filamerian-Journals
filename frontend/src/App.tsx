@@ -72,6 +72,7 @@ function App() {
           <Route path="logs" element={<ActivityLogs />} />
           <Route path="website" element={<WebsiteSettings />} />
           <Route path="settings" element={<SystemSettings />} />
+          <Route path="search" element={<Search />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
 

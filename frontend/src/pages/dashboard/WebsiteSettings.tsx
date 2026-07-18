@@ -144,8 +144,8 @@ const WebsiteSettings: React.FC = () => {
   const filteredResources = resources.filter(r => r.title.toLowerCase().includes(filter.toLowerCase()));
 
   // --- Tab Contents ---
-  const generalSettingsContent = (
-    <div className="space-y-8 max-w-4xl pt-4">
+  const homeTabContent = (
+    <div className="space-y-8 w-full">
       {loadingSettings ? (
         <FormSkeleton rows={6} />
       ) : (
@@ -153,7 +153,7 @@ const WebsiteSettings: React.FC = () => {
           <div className="border border-border bg-surface p-6 space-y-5">
             <div className="flex items-center gap-3 border-b border-border pb-3">
               <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">General Information</h2>
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Home Page Settings</h2>
             </div>
             <div className="space-y-4">
               <Input 
@@ -165,17 +165,6 @@ const WebsiteSettings: React.FC = () => {
                 label="Tagline" 
                 value={settings.tagline} 
                 onChange={(e) => handleSettingsChange('tagline', e.target.value)}
-              />
-              <Input 
-                label="Contact Email" type="email"
-                value={settings.contact_email} 
-                onChange={(e) => handleSettingsChange('contact_email', e.target.value)}
-              />
-              <Input 
-                label="Journal Categories" hint="Comma Separated"
-                value={settings.journal_categories} 
-                onChange={(e) => handleSettingsChange('journal_categories', e.target.value)}
-                placeholder="Science, Education, Arts"
               />
               <div className="pt-2">
                 <label className="block text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">Home About Us (HTML Supported)</label>
@@ -203,61 +192,146 @@ const WebsiteSettings: React.FC = () => {
     </div>
   );
 
-  const resourcesContent = (
-    <div className="space-y-8 pt-4">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h2 className="text-[14px] font-semibold text-primary uppercase tracking-wider">Public Resource Pages</h2>
-          <p className="text-[13px] text-muted mt-1">Manage public informational pages (e.g. Terms, Guidelines)</p>
-        </div>
-        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> New Resource
-        </Button>
-      </div>
-
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
-        <input
-          type="text"
-          placeholder="Filter resources..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary"
-        />
-      </div>
-
-      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
-        <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
-          <div className="col-span-1 text-center">Order</div>
-          <div className="col-span-5">Title</div>
-          <div className="col-span-4">Slug</div>
-          <div className="col-span-2"></div>
-        </div>
-        
-        {loadingResources ? (
-          <ListSkeleton colSpans={[1, 5, 4, 2]} rows={5} />
-        ) : filteredResources.length === 0 ? (
-          <EmptyState title="No resources" description="No resources found." className="border-0 bg-transparent py-16" />
-        ) : (
-          filteredResources.map((item) => (
-            <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-background transition-colors group cursor-default items-center">
-              <div className="col-span-1 text-center text-[13px] text-muted">{item.order}</div>
-              <div className="col-span-5 flex items-center gap-3">
-                <FileText className="h-4 w-4 text-primary/30 shrink-0" />
-                <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
-              </div>
-              <div className="col-span-4 text-[12px] text-muted truncate">{item.slug}</div>
-              <div className="col-span-2 flex justify-end gap-2">
-                <button onClick={() => handleOpenModal(item)} className="text-muted/60 hover:text-primary hover:bg-black/5 rounded h-7 w-7 flex items-center justify-center transition-all">
-                  <Edit2 className="h-4 w-4" />
-                </button>
-                <button onClick={() => handleDeleteResource(item.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 rounded h-7 w-7 flex items-center justify-center transition-all">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+  const journalsTabContent = (
+    <div className="space-y-8 w-full">
+      {loadingSettings ? (
+        <FormSkeleton rows={2} />
+      ) : (
+        <>
+          <div className="border border-border bg-surface p-6 space-y-5">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <Globe className="h-4 w-4 text-primary/40" />
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Journals Page Settings</h2>
             </div>
-          ))
-        )}
+            <div className="space-y-4">
+              <Input 
+                label="Journal Categories" hint="Comma Separated"
+                value={settings.journal_categories} 
+                onChange={(e) => handleSettingsChange('journal_categories', e.target.value)}
+                placeholder="Science, Education, Arts"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button 
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+              className="px-6 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
+              {savingSettings ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const archivesTabContent = (
+    <div className="space-y-8 w-full">
+      <div className="border border-border bg-surface p-6 space-y-5">
+        <div className="flex items-center gap-3 border-b border-border pb-3">
+          <Globe className="h-4 w-4 text-primary/40" />
+          <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Archives Page Settings</h2>
+        </div>
+        <EmptyState title="Coming Soon" description="Settings for the archives page are empty for now." className="border-0 bg-transparent py-8" />
+      </div>
+    </div>
+  );
+
+  const contactTabContent = (
+    <div className="space-y-8 w-full">
+      {loadingSettings ? (
+        <FormSkeleton rows={2} />
+      ) : (
+        <>
+          <div className="border border-border bg-surface p-6 space-y-5">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <Globe className="h-4 w-4 text-primary/40" />
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Contact Page Settings</h2>
+            </div>
+            <div className="space-y-4">
+              <Input 
+                label="Contact Email" type="email"
+                value={settings.contact_email} 
+                onChange={(e) => handleSettingsChange('contact_email', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button 
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+              className="px-6 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
+              {savingSettings ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  const resourcesContent = (
+    <div className="space-y-8 w-full">
+      <div className="border border-border bg-surface p-6 space-y-5">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="flex items-center gap-3">
+            <Globe className="h-4 w-4 text-primary/40" />
+            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">About Page Resources</h2>
+          </div>
+          <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2 h-8 text-[11px] px-3">
+            <Plus className="h-3 w-3" /> New Resource
+          </Button>
+        </div>
+
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
+          <input
+            type="text"
+            placeholder="Filter resources..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
+          />
+        </div>
+
+        <div className="border border-border bg-background overflow-x-auto max-h-[500px] overflow-y-auto relative">
+          <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
+            <div className="col-span-1 text-center">Order</div>
+            <div className="col-span-5">Title</div>
+            <div className="col-span-4">Slug</div>
+            <div className="col-span-2"></div>
+          </div>
+          
+          {loadingResources ? (
+            <ListSkeleton colSpans={[1, 5, 4, 2]} rows={5} />
+          ) : filteredResources.length === 0 ? (
+            <EmptyState title="No resources" description="No resources found." className="border-0 bg-transparent py-16" />
+          ) : (
+            filteredResources.map((item) => (
+              <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-surface transition-colors group cursor-default items-center">
+                <div className="col-span-1 text-center text-[13px] text-muted">{item.order}</div>
+                <div className="col-span-5 flex items-center gap-3">
+                  <FileText className="h-4 w-4 text-primary/30 shrink-0" />
+                  <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
+                </div>
+                <div className="col-span-4 text-[12px] text-muted truncate">{item.slug}</div>
+                <div className="col-span-2 flex justify-end gap-2">
+                  <button onClick={() => handleOpenModal(item)} className="text-muted/60 hover:text-primary hover:bg-black/5 rounded h-7 w-7 flex items-center justify-center transition-all">
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => handleDeleteResource(item.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 rounded h-7 w-7 flex items-center justify-center transition-all">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => !isSubmittingResource && setIsModalOpen(false)} title={editingItem ? 'Edit Resource' : 'New Resource'} className="max-w-3xl">
@@ -298,14 +372,17 @@ const WebsiteSettings: React.FC = () => {
   return (
     <div className="space-y-2">
       <div className="border-b border-border pb-4 mb-2">
-        <h1 className="text-xl uppercase tracking-wider">Website Settings</h1>
-        <p className="text-[13px] text-muted mt-1">Configure public-facing information and resources</p>
+        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Website Settings</h1>
+
       </div>
 
       <Tabs 
         tabs={[
-          { id: 'general', label: 'General Info', content: generalSettingsContent },
-          { id: 'resources', label: 'Resources Pages', content: resourcesContent }
+          { id: 'home', label: 'Home', content: homeTabContent },
+          { id: 'journals', label: 'Journals', content: journalsTabContent },
+          { id: 'archives', label: 'Archives', content: archivesTabContent },
+          { id: 'about', label: 'About', content: resourcesContent },
+          { id: 'contact', label: 'Contact', content: contactTabContent }
         ]}
       />
     </div>

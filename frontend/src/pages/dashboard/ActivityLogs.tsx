@@ -50,8 +50,8 @@ const ActivityLogs: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display uppercase tracking-wider text-primary">System Activity Logs</h1>
-          <p className="text-sm text-muted mt-1">Audit trail of all authenticated actions performed across the platform.</p>
+          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">System Activity Logs</h1>
+
         </div>
         <Button
           onClick={() => fetchLogs(currentPage)}

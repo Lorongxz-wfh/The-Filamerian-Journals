@@ -110,7 +110,7 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       {aboutUsHtml && (
         <div 
-          className="w-full px-[10%] text-center space-y-1.5 border-b border-border mb-5 pb-3"
+          className="w-full px-[10%] text-center space-y-1.5 border-b border-border mb-5 pb-5"
           dangerouslySetInnerHTML={{ __html: aboutUsHtml }} 
         />
       )}

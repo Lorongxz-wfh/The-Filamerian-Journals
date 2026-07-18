@@ -76,7 +76,7 @@ const JournalDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <PageWrapper className="container-custom items-center justify-center">
+      <PageWrapper className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
         <Spinner text="Loading journal..." />
       </PageWrapper>
     );
@@ -100,12 +100,12 @@ const JournalDetail: React.FC = () => {
   return (
     <PageWrapper className="flex flex-col">
       {/* Back button and metadata header */}
-      <Link to="/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors">
+      <Link to="/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-3">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
       </Link>
 
       {/* Header */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-6">
         <div className="lg:col-span-3">
           {journal.cover_image ? (
             <img src={`${STORAGE_URL}${journal.cover_image}`} alt={journal.title} className="w-full max-w-[280px] aspect-[3/4] object-cover border border-border" />
@@ -115,17 +115,17 @@ const JournalDetail: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="lg:col-span-9 space-y-4">
+        <div className="lg:col-span-9 flex flex-col h-full">
           <div>
             <span className="inline-block text-[11px] font-semibold text-secondary bg-primary px-3 py-1 uppercase tracking-wider mb-3">
               {journal.category || 'Uncategorized'}
             </span>
-            <h1 className="text-2xl uppercase tracking-wider font-bold">{journal.title}</h1>
+            <h1 className="text-2xl uppercase tracking-wider font-bold mb-4">{journal.title}</h1>
           </div>
           <p className="text-[14px] text-muted leading-relaxed max-w-4xl">{journal.description || 'No description available.'}</p>
 
           {/* Metadata Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border mt-auto">
             {[
               { label: 'ISSN', value: journal.issn || '-' },
               { label: 'Frequency', value: journal.frequency || '-' },

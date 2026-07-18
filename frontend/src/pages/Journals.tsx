@@ -163,10 +163,8 @@ const Journals: React.FC = () => {
   return (
     <PageWrapper className="flex flex-col">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-3">
-        <div>
-          <h1 className="text-2xl uppercase tracking-wider font-bold">Our Journals</h1>
-        </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6 mb-8">
+        <h1 className="text-2xl uppercase tracking-wider font-bold">Our Journals</h1>
 
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
@@ -288,16 +286,19 @@ const Journals: React.FC = () => {
 
             {/* Sort + View Controls */}
             <div className="flex items-center gap-3 shrink-0">
+            <div className="relative">
               <select 
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
-                className="border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-primary focus:outline-none focus:border-primary transition-colors h-[34px] cursor-pointer"
+                className="appearance-none border border-border bg-surface pl-3 pr-8 py-1.5 text-[12px] font-medium text-primary focus:outline-none focus:border-primary transition-colors h-[34px] cursor-pointer"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="a-z">Title (A-Z)</option>
                 <option value="z-a">Title (Z-A)</option>
               </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary pointer-events-none" />
+            </div>
 
               <div className="inline-flex items-center border border-border bg-surface rounded-sm h-[34px]">
                 <button
@@ -319,7 +320,7 @@ const Journals: React.FC = () => {
           </div>
 
           {/* Grid / List */}
-          <div className="flex-1 flex flex-col mb-[55px]">
+          <div className="flex-1 flex flex-col">
             {loading ? (
               <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
                 <Spinner text="Loading journals..." />

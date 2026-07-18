@@ -183,8 +183,8 @@ const MyJournals: React.FC = () => {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-xl uppercase tracking-wider">My Journals</h1>
-          <p className="text-[13px] text-muted mt-1">Manage your journal publications</p>
+          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">My Journals</h1>
+
         </div>
         <button 
           onClick={() => handleOpenModal()}

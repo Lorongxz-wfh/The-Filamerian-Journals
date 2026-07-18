@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router';
-import { FileText, BookOpen, ExternalLink, Quote } from 'lucide-react';
+import { useSearchParams, Link, useNavigate } from 'react-router';
+import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
@@ -44,14 +44,24 @@ const Search: React.FC = () => {
     fetchResults();
   }, [query]);
 
+  const navigate = useNavigate();
+
   return (
     <PageWrapper className="flex flex-col">
       {/* Search Header */}
-      <div className="border-b border-border pb-6 space-y-2">
-        <h1 className="text-2xl uppercase tracking-wider font-bold">Search Results</h1>
-        <p className="text-[14px] text-muted">
-          Showing results for: <span className="font-semibold text-primary">"{query}"</span>
-        </p>
+      <div className="border-b border-border pb-6 mb-8 space-y-4">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to previous page
+        </button>
+        <div className="space-y-2">
+          <h1 className="text-2xl uppercase tracking-wider font-bold">Search Results</h1>
+          <p className="text-[14px] text-muted">
+            Showing results for: <span className="font-semibold text-primary">"{query}"</span>
+          </p>
+        </div>
       </div>
 
       {loading ? (
@@ -67,7 +77,7 @@ const Search: React.FC = () => {
                 <BookOpen className="h-4 w-4 text-primary" />
                 <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider">Journals ({results.journals.length})</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="flex flex-col gap-4">
                 {results.journals.map((j) => (
                   <JournalCard
                     key={j.id}
