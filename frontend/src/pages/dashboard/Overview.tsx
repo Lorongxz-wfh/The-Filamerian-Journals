@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, FileText, Users, ArrowRight, Settings, Plus, BarChart2, Activity, Globe } from 'lucide-react';
+import { BookOpen, FileText, Users, ArrowRight, Settings, BarChart2, Activity, Globe } from 'lucide-react';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router';
@@ -73,7 +73,7 @@ const Overview: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, idx) => (
+        {stats.map((stat) => (
           <div key={stat.label} className="border border-border bg-surface p-5 relative overflow-hidden group hover:border-primary/30 transition-colors">
             <div className="flex items-start justify-between mb-6">
               <div className="p-2 bg-background border border-border">
@@ -116,7 +116,7 @@ const Overview: React.FC = () => {
               </div>
             </div>
             <div className="h-48 flex items-end justify-between gap-1 sm:gap-1.5 pt-4">
-               {websiteChartData.map((val, i) => {
+               {websiteChartData.map((val: number, i: number) => {
                  const height = Math.max((val / maxWebsiteChartValue) * 100, 2); 
                  return (
                  <div key={i} className="w-full bg-secondary/30 hover:bg-secondary/60 transition-colors relative group" style={{ height: `${height}%` }}>

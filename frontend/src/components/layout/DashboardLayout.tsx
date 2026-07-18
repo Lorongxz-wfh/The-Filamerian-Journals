@@ -40,15 +40,12 @@ interface Notification {
 const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const path = location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
-  const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');

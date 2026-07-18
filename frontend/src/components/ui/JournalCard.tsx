@@ -29,7 +29,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
   viewMode = 'list',
 }) => {
   const [showFloating, setShowFloating] = useState(false);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
     hoverTimeoutRef.current = setTimeout(() => {
