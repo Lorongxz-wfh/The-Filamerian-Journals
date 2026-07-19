@@ -302,7 +302,7 @@ const Journals: React.FC = () => {
           {/* Results Header: Active Chips + Sort + View */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4 mb-6">
             {/* Active Filter Chips */}
-            <div className="flex items-center gap-2 flex-wrap min-h-[32px] overflow-x-auto dark-scrollbar pb-4">
+            <div className="flex items-center gap-2 flex-wrap min-h-[32px] overflow-x-auto pb-4">
               {selectedCategories.map(cat => (
                 <span
                   key={cat}
