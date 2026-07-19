@@ -202,7 +202,7 @@ const Archives: React.FC = () => {
                                       setIsPdfModalOpen(true);
                                       setPdfViewUrl(null);
                                       try {
-                                        const res = await api.get(`/articles/${article.id}/download-url`);
+                                        const res = await api.get(`/public/articles/${article.id}/download-url`);
                                         let url = res.data.url;
                                         if (url.includes('/storage/')) {
                                           const path = url.split('/storage/')[1];

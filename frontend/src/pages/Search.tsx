@@ -285,7 +285,7 @@ const Search: React.FC = () => {
                           <button 
                             onClick={async () => {
                               try {
-                                const res = await api.get(`/articles/${article.id}/download-url`);
+                                const res = await api.get(`/public/articles/${article.id}/download-url`);
                                 window.open(res.data.url + '#toolbar=0', '_blank');
                               } catch (err) {
                                 console.error('Failed to get download URL', err);

@@ -175,10 +175,24 @@ class ArticleController extends Controller
     {
         $article->increment('downloads_count');
         
-        \Illuminate\Support\Facades\DB::table('article_metrics')->updateOrInsert(
-            ['article_id' => $article->id, 'type' => 'download', 'date' => now()->toDateString()],
-            ['count' => \Illuminate\Support\Facades\DB::raw('count + 1'), 'updated_at' => now()]
-        );
+        $metric = \Illuminate\Support\Facades\DB::table('article_metrics')
+            ->where('article_id', $article->id)
+            ->where('type', 'download')
+            ->where('date', now()->toDateString())
+            ->first();
+
+        if ($metric) {
+            \Illuminate\Support\Facades\DB::table('article_metrics')->where('id', $metric->id)->increment('count');
+        } else {
+            \Illuminate\Support\Facades\DB::table('article_metrics')->insert([
+                'article_id' => $article->id,
+                'type' => 'download',
+                'date' => now()->toDateString(),
+                'count' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         if (!$article->pdf_path) {
             return response()->json(['message' => 'PDF not found.'], 404);
@@ -193,10 +207,24 @@ class ArticleController extends Controller
     {
         $article->increment('views_count');
         
-        \Illuminate\Support\Facades\DB::table('article_metrics')->updateOrInsert(
-            ['article_id' => $article->id, 'type' => 'view', 'date' => now()->toDateString()],
-            ['count' => \Illuminate\Support\Facades\DB::raw('count + 1'), 'updated_at' => now()]
-        );
+        $metric = \Illuminate\Support\Facades\DB::table('article_metrics')
+            ->where('article_id', $article->id)
+            ->where('type', 'view')
+            ->where('date', now()->toDateString())
+            ->first();
+
+        if ($metric) {
+            \Illuminate\Support\Facades\DB::table('article_metrics')->where('id', $metric->id)->increment('count');
+        } else {
+            \Illuminate\Support\Facades\DB::table('article_metrics')->insert([
+                'article_id' => $article->id,
+                'type' => 'view',
+                'date' => now()->toDateString(),
+                'count' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         return response()->json(['message' => 'View tracked']);
     }
