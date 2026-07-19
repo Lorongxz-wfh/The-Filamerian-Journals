@@ -81,6 +81,8 @@ Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementContr
 Route::get('/public/resources', [\App\Http\Controllers\Api\ResourceController::class, 'index']);
 Route::get('/public/resources/{resource:slug}', [\App\Http\Controllers\Api\ResourceController::class, 'show']);
 Route::get('/public/articles/{article}', [\App\Http\Controllers\Api\ArticleController::class, 'showPublic']);
+Route::get('/public/articles/{article}/download-url', [\App\Http\Controllers\Api\ArticleController::class, 'getDownloadUrl']);
+Route::post('/public/articles/{article}/view', [\App\Http\Controllers\Api\ArticleController::class, 'trackView']);
 
 // Settings & Feedbacks
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);

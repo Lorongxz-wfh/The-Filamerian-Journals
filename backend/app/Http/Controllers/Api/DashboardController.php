@@ -55,10 +55,28 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->pluck('count', 'date');
 
+        $metricsData = \Illuminate\Support\Facades\DB::table('article_metrics')
+            ->where('date', '>=', $thirtyDaysAgo->copy()->startOfDay())
+            ->selectRaw('date, type, sum(count) as total')
+            ->groupBy('date', 'type')
+            ->get();
+
+        $metricsByDate = [];
+        foreach ($metricsData as $metric) {
+            $metricsByDate[$metric->date][$metric->type] = $metric->total;
+        }
+
         $chartData = [];
+        $websiteChartData = [];
         for ($i = 29; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i)->format('Y-m-d');
             $chartData[] = $activityCounts[$date] ?? 0;
+            
+            $websiteChartData[] = [
+                'date' => \Carbon\Carbon::parse($date)->format('M d'),
+                'views' => $metricsByDate[$date]['view'] ?? 0,
+                'downloads' => $metricsByDate[$date]['download'] ?? 0,
+            ];
         }
 
         return response()->json([
@@ -74,7 +92,8 @@ class DashboardController extends Controller
                 'authors' => $calculateTrend(Author::class),
                 'users' => $calculateTrend(User::class),
             ],
-            'chartData' => $chartData
+            'chartData' => $chartData,
+            'websiteChartData' => $websiteChartData
         ]);
     }
 

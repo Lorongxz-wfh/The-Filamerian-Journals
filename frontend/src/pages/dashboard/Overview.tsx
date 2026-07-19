@@ -4,6 +4,7 @@ import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 const Overview: React.FC = () => {
   const [data, setData] = useState<{
@@ -20,6 +21,7 @@ const Overview: React.FC = () => {
       users: { trend: string; isPositive: boolean };
     };
     chartData?: number[];
+    websiteChartData?: Array<{ date: string; views: number; downloads: number }>;
   }>({ journals: 0, articles: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -43,11 +45,13 @@ const Overview: React.FC = () => {
     { label: 'System Users', value: data.users.toString(), icon: Users, trend: data.trends?.users.trend || 'Stable', isPositive: data.trends?.users.isPositive ?? true },
   ];
 
-  const chartData = data.chartData || Array(30).fill(0);
-  const maxChartValue = Math.max(...chartData, 10); // Ensure a baseline for division
+  const chartDataRaw = data.chartData || Array(30).fill(0);
+  const portalChartData = chartDataRaw.map((val, i) => ({
+    name: `Day ${30 - i}`,
+    actions: val
+  }));
 
-  const websiteChartData = (data as any).websiteChartData || chartData.map(v => (v || 1) * 3 + Math.floor(Math.random() * 10));
-  const maxWebsiteChartValue = Math.max(...websiteChartData, 50);
+  const websiteChartData = data.websiteChartData || [];
 
   const getActivityIcon = (action: string) => {
     const act = action.toLowerCase();
@@ -115,17 +119,30 @@ const Overview: React.FC = () => {
                 </h2>
               </div>
             </div>
-            <div className="h-48 flex items-end justify-between gap-1 sm:gap-1.5 pt-4">
-               {websiteChartData.map((val: number, i: number) => {
-                 const height = Math.max((val / maxWebsiteChartValue) * 100, 2); 
-                 return (
-                 <div key={i} className="w-full bg-secondary/30 hover:bg-secondary/60 transition-colors relative group" style={{ height: `${height}%` }}>
-                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-md">
-                     {val} visits
-                   </div>
-                 </div>
-                 );
-               })}
+            <div className="h-64 pt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={websiteChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorDownloads" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+                    itemStyle={{ color: '#111827' }}
+                  />
+                  <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Views" />
+                  <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="Downloads" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
@@ -139,17 +156,19 @@ const Overview: React.FC = () => {
                 </h2>
               </div>
             </div>
-            <div className="h-48 flex items-end justify-between gap-1 sm:gap-1.5 pt-4">
-               {chartData.map((val, i) => {
-                 const height = Math.max((val / maxChartValue) * 100, 2); // Minimum 2% height for empty days to act as baseline tick
-                 return (
-                 <div key={i} className="w-full bg-primary/10 hover:bg-primary/40 transition-colors relative group" style={{ height: `${height}%` }}>
-                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-md">
-                     {val} actions
-                   </div>
-                 </div>
-                 );
-               })}
+            <div className="h-64 pt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={portalChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={false} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+                    cursor={{ fill: '#f3f4f6' }}
+                  />
+                  <Bar dataKey="actions" fill="#0f172a" radius={[2, 2, 0, 0]} name="Actions" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 

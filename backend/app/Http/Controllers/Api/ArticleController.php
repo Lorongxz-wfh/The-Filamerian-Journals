@@ -174,6 +174,11 @@ class ArticleController extends Controller
     public function getDownloadUrl(Article $article)
     {
         $article->increment('downloads_count');
+        
+        \Illuminate\Support\Facades\DB::table('article_metrics')->updateOrInsert(
+            ['article_id' => $article->id, 'type' => 'download', 'date' => now()->toDateString()],
+            ['count' => \Illuminate\Support\Facades\DB::raw('count + 1'), 'updated_at' => now()]
+        );
 
         if (!$article->pdf_path) {
             return response()->json(['message' => 'PDF not found.'], 404);
@@ -182,5 +187,17 @@ class ArticleController extends Controller
         return response()->json([
             'url' => \Illuminate\Support\Facades\Storage::disk('public')->url($article->pdf_path)
         ]);
+    }
+
+    public function trackView(Article $article)
+    {
+        $article->increment('views_count');
+        
+        \Illuminate\Support\Facades\DB::table('article_metrics')->updateOrInsert(
+            ['article_id' => $article->id, 'type' => 'view', 'date' => now()->toDateString()],
+            ['count' => \Illuminate\Support\Facades\DB::raw('count + 1'), 'updated_at' => now()]
+        );
+
+        return response()->json(['message' => 'View tracked']);
     }
 }

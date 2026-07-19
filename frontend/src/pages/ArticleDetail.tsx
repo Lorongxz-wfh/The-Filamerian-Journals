@@ -51,6 +51,9 @@ const ArticleDetail: React.FC = () => {
       try {
         const res = await api.get(`/public/articles/${id}`);
         setArticle(res.data.data);
+        
+        // Track the view silently
+        api.post(`/public/articles/${id}/view`).catch(e => console.error(e));
       } catch (err) {
         console.error('Failed to fetch article', err);
       } finally {
