@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Database, Shield, Loader2 } from 'lucide-react';
+import { Mail, Database, Shield } from 'lucide-react';
 import api from '@/services/api';
 import { FormSkeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';

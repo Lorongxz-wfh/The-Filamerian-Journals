@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Phone, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mail, MapPin, Phone, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';

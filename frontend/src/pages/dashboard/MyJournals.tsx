@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { BookOpen, Plus, Search, Settings2, Edit2, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
-import { toast } from 'sonner';
+
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
 import SearchInput from '@/components/ui/SearchInput';

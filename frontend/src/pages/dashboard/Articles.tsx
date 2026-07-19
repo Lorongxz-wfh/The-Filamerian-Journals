@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Edit2, Trash2, Eye, X } from 'lucide-react';
+import { FileText, Plus, Edit2, Trash2, Eye, X } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'sonner';

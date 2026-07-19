@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Loader2, FileText, Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Globe, FileText, Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import Input from '@/components/ui/Input';
 import { FormSkeleton, ListSkeleton } from '@/components/ui/Skeleton';
