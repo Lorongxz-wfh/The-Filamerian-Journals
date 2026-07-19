@@ -27,8 +27,12 @@ class ArticleController extends Controller
             'status' => 'nullable|string|in:Published,Pending,Revision,Draft',
             'author_ids' => 'nullable|array',
             'author_ids.*' => 'exists:authors,id',
+            'author_names' => 'nullable|array',
+            'author_names.*' => 'string|max:255',
             'keyword_ids' => 'nullable|array',
             'keyword_ids.*' => 'exists:keywords,id',
+            'keyword_names' => 'nullable|array',
+            'keyword_names.*' => 'string|max:255',
         ]);
 
         if ($request->hasFile('pdf_path')) {
@@ -40,9 +44,15 @@ class ArticleController extends Controller
 
         $authorIds = $request->input('author_ids', []);
 
-        if ($request->has('author_name')) {
-            $authorName = $request->input('author_name') ?: 'The Filamerian Journals';
-            $author = \App\Models\Author::firstOrCreate(['name' => $authorName]);
+        if ($request->has('author_names') && is_array($request->input('author_names'))) {
+            foreach ($request->input('author_names') as $authorName) {
+                if (trim($authorName) !== '') {
+                    $author = \App\Models\Author::firstOrCreate(['name' => trim($authorName)]);
+                    $authorIds[] = $author->id;
+                }
+            }
+        } elseif (empty($authorIds)) {
+            $author = \App\Models\Author::firstOrCreate(['name' => 'The Filamerian Journals']);
             $authorIds[] = $author->id;
         }
 
@@ -50,8 +60,19 @@ class ArticleController extends Controller
             $article->authors()->sync($authorIds);
         }
 
-        if ($request->has('keyword_ids')) {
-            $article->keywords()->sync($request->keyword_ids);
+        $keywordIds = $request->input('keyword_ids', []);
+        
+        if ($request->has('keyword_names') && is_array($request->input('keyword_names'))) {
+            foreach ($request->input('keyword_names') as $keywordName) {
+                if (trim($keywordName) !== '') {
+                    $keyword = \App\Models\Keyword::firstOrCreate(['name' => trim($keywordName)]);
+                    $keywordIds[] = $keyword->id;
+                }
+            }
+        }
+
+        if (count($keywordIds) > 0 || $request->has('keyword_names') || $request->has('keyword_ids')) {
+            $article->keywords()->sync($keywordIds);
         }
 
         \App\Services\ActivityLogger::log('Created Article', "Created article: {$article->title}", get_class($article), $article->id);
@@ -83,8 +104,12 @@ class ArticleController extends Controller
             'status' => 'nullable|string|in:Published,Pending,Revision,Draft',
             'author_ids' => 'nullable|array',
             'author_ids.*' => 'exists:authors,id',
+            'author_names' => 'nullable|array',
+            'author_names.*' => 'string|max:255',
             'keyword_ids' => 'nullable|array',
             'keyword_ids.*' => 'exists:keywords,id',
+            'keyword_names' => 'nullable|array',
+            'keyword_names.*' => 'string|max:255',
         ]);
 
         if ($request->hasFile('pdf_path')) {
@@ -100,18 +125,35 @@ class ArticleController extends Controller
 
         $authorIds = $request->input('author_ids', []);
 
-        if ($request->has('author_name')) {
-            $authorName = $request->input('author_name') ?: 'The Filamerian Journals';
-            $author = \App\Models\Author::firstOrCreate(['name' => $authorName]);
+        if ($request->has('author_names') && is_array($request->input('author_names'))) {
+            foreach ($request->input('author_names') as $authorName) {
+                if (trim($authorName) !== '') {
+                    $author = \App\Models\Author::firstOrCreate(['name' => trim($authorName)]);
+                    $authorIds[] = $author->id;
+                }
+            }
+        } elseif (empty($authorIds)) {
+            $author = \App\Models\Author::firstOrCreate(['name' => 'The Filamerian Journals']);
             $authorIds[] = $author->id;
         }
 
-        if (count($authorIds) > 0 || $request->has('author_name') || $request->has('author_ids')) {
+        if (count($authorIds) > 0 || $request->has('author_names') || $request->has('author_ids')) {
             $article->authors()->sync($authorIds);
         }
 
-        if ($request->has('keyword_ids')) {
-            $article->keywords()->sync($request->keyword_ids);
+        $keywordIds = $request->input('keyword_ids', []);
+        
+        if ($request->has('keyword_names') && is_array($request->input('keyword_names'))) {
+            foreach ($request->input('keyword_names') as $keywordName) {
+                if (trim($keywordName) !== '') {
+                    $keyword = \App\Models\Keyword::firstOrCreate(['name' => trim($keywordName)]);
+                    $keywordIds[] = $keyword->id;
+                }
+            }
+        }
+
+        if (count($keywordIds) > 0 || $request->has('keyword_names') || $request->has('keyword_ids')) {
+            $article->keywords()->sync($keywordIds);
         }
 
         return new ArticleResource($article->load(['authors', 'keywords', 'issue.volume.journal']));

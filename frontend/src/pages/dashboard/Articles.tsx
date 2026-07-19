@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Edit2, Trash2, Eye } from 'lucide-react';
+import { FileText, Plus, Search, Edit2, Trash2, Eye, X } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -17,6 +17,7 @@ interface Article {
   doi: string | null;
   pdf_url: string | null;
   authors: any[];
+  keywords?: any[];
   volume: any;
   created_at: string;
 }
@@ -54,7 +55,8 @@ const Articles: React.FC = () => {
     abstract: '',
     doi: '',
     status: 'Pending',
-    author_name: '',
+    author_names: [''] as string[],
+    keyword_names: [] as string[],
     page_start: '',
     page_end: ''
   });
@@ -89,7 +91,8 @@ const Articles: React.FC = () => {
         abstract: article.abstract || '',
         doi: article.doi || '',
         status: article.status || 'Pending',
-        author_name: article.authors?.[0]?.name || '',
+        author_names: article.authors && article.authors.length > 0 ? article.authors.map((a: any) => a.name) : [''],
+        keyword_names: article.keywords && article.keywords.length > 0 ? article.keywords.map((k: any) => k.name) : [],
         page_start: '', // Omitted for brevity in edit mode for now, or fetch if available
         page_end: ''
       });
@@ -100,7 +103,8 @@ const Articles: React.FC = () => {
         abstract: '',
         doi: '',
         status: 'Pending',
-        author_name: '',
+        author_names: [''],
+        keyword_names: [],
         page_start: '',
         page_end: ''
       });
@@ -114,6 +118,22 @@ const Articles: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleArrayChange = (field: 'author_names' | 'keyword_names', index: number, value: string) => {
+    setFormData(prev => {
+      const newArray = [...prev[field]];
+      newArray[index] = value;
+      return { ...prev, [field]: newArray };
+    });
+  };
+
+  const addArrayItem = (field: 'author_names' | 'keyword_names') => {
+    setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
+  };
+
+  const removeArrayItem = (field: 'author_names' | 'keyword_names', index: number) => {
+    setFormData(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -125,7 +145,13 @@ const Articles: React.FC = () => {
       payload.append('abstract', formData.abstract);
       payload.append('doi', formData.doi);
       payload.append('status', formData.status);
-      payload.append('author_name', formData.author_name);
+      
+      formData.author_names.forEach(name => {
+        if (name.trim()) payload.append('author_names[]', name.trim());
+      });
+      formData.keyword_names.forEach(name => {
+        if (name.trim()) payload.append('keyword_names[]', name.trim());
+      });
       
       if (pdfFile) {
         payload.append('pdf_path', pdfFile);
@@ -340,10 +366,59 @@ const Articles: React.FC = () => {
               </Select>
             </div>
 
-            <div className="md:col-span-2">
-              <Input 
-                label="Author" hint='Defaults to "The Filamerian Journals" if empty' name="author_name" value={formData.author_name} onChange={handleInputChange} placeholder="Honorific: Mr./Ms./Mrs./Dr./Mx.; Last Name, First Name, MI"
-              />
+            <div className="md:col-span-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Authors</label>
+                <button type="button" onClick={() => addArrayItem('author_names')} className="text-[11px] font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                  <Plus className="h-3 w-3" /> Add Author
+                </button>
+              </div>
+              {formData.author_names.map((author, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <div className="flex-grow">
+                    <input 
+                      type="text" 
+                      value={author}
+                      onChange={(e) => handleArrayChange('author_names', idx, e.target.value)}
+                      placeholder="e.g. Juan Dela Cruz"
+                      className="w-full px-3 py-2 border border-border text-[13px] bg-background focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  {formData.author_names.length > 1 && (
+                    <button type="button" onClick={() => removeArrayItem('author_names', idx)} className="p-2 text-red-500 hover:bg-red-50 transition-colors">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="md:col-span-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Keywords</label>
+                <button type="button" onClick={() => addArrayItem('keyword_names')} className="text-[11px] font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                  <Plus className="h-3 w-3" /> Add Keyword
+                </button>
+              </div>
+              {formData.keyword_names.map((kw, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <div className="flex-grow">
+                    <input 
+                      type="text" 
+                      value={kw}
+                      onChange={(e) => handleArrayChange('keyword_names', idx, e.target.value)}
+                      placeholder="e.g. Machine Learning"
+                      className="w-full px-3 py-2 border border-border text-[13px] bg-background focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-2 text-red-500 hover:bg-red-50 transition-colors">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {formData.keyword_names.length === 0 && (
+                 <div className="text-[12px] text-muted italic border border-dashed border-border p-3 text-center">No keywords added.</div>
+              )}
             </div>
 
             <div>
