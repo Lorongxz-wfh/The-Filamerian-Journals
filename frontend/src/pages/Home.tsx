@@ -5,8 +5,9 @@ import { ChevronRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
-import Spinner from '@/components/ui/Spinner';
+import { Seo } from '@/components/ui/Seo';
 import PageWrapper from '@/components/layout/PageWrapper';
+import Spinner from '@/components/ui/Spinner';
 
 // Dynamic categories fetched from API
 
@@ -108,6 +109,8 @@ const Home: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col">
+  <Seo title="Home" description="Home page of The Filamerian Journals" />
+  {/* Hero Section */}
       {/* Hero Section */}
       {aboutUsHtml && (
         <div 

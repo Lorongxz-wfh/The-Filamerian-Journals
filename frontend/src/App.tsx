@@ -28,6 +28,7 @@ import WebsiteSettings from '@/pages/dashboard/WebsiteSettings';
 import Toaster from '@/components/ui/Toaster';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -37,7 +38,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <Router>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <Router>
       <ScrollToTop />
       <Routes>
         {/* Public Website Routes */}
@@ -82,7 +84,8 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster position="bottom-right" />
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
 

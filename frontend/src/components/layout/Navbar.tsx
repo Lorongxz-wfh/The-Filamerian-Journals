@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
+
 import api from '@/services/api';
 
 const Navbar = () => {
@@ -147,7 +148,8 @@ const Navbar = () => {
           </Link>
           
           <div className="flex items-center h-full ml-2">
-            <span className="w-px h-5 bg-white/20 mr-6" />
+
+            <span className="w-px h-5 bg-white/20 mx-4" />
             {localStorage.getItem('token') ? (
               <Link
                 to="/dashboard"

@@ -12,13 +12,13 @@
 
 @theme {
   /* Client-specified palette */
-  --color-primary: #002d72;
-  --color-secondary: #fdb515;
-  --color-background: #ffffff;
-  --color-foreground: #1a1a1a;
-  --color-surface: #f8f8f7;
-  --color-border: #d4d4d4;
-  --color-muted: #6b7280;
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
 
   /* Three font families max */
   --font-display: "Cinzel", serif;
@@ -38,8 +38,28 @@
 }
 
 @layer base {
+  :root {
+    --primary: #002d72;
+    --secondary: #fdb515;
+    --background: #ffffff;
+    --foreground: #1a1a1a;
+    --surface: #f8f8f7;
+    --border: #d4d4d4;
+    --muted: #6b7280;
+  }
+  
+  .dark {
+    --primary: #60a5fa; /* Lighter blue for dark mode */
+    --secondary: #fdb515; /* Gold stays same */
+    --background: #0f172a; /* Slate 900 */
+    --foreground: #f1f5f9; /* Slate 100 */
+    --surface: #1e293b; /* Slate 800 */
+    --border: #334155; /* Slate 700 */
+    --muted: #94a3b8; /* Slate 400 */
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-secondary/20 selection:text-primary;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-secondary/20 selection:text-primary transition-colors duration-200;
   }
 
   /* Headings: Cinzel regular weight, NOT bold */

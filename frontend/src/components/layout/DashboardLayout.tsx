@@ -23,6 +23,7 @@ import SplashLoader from '@/components/ui/SplashLoader';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
 
+
 interface DashboardLayoutProps {}
 
 interface Notification {
@@ -361,6 +362,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           </div>
 
           <div className="flex items-center justify-end min-w-[40px] gap-4">
+
             <div className="relative" ref={notifRef}>
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
