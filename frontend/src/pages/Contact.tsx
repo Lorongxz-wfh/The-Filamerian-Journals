@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Mail, MapPin, Phone, Loader2, CheckCircle2 } from 'lucide-react';
 import api from '@/services/api';
 import PageWrapper from '@/components/layout/PageWrapper';
+import PageHeader from '@/components/ui/PageHeader';
+import Button from '@/components/ui/Button';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -49,13 +51,7 @@ const Contact: React.FC = () => {
   return (
     <PageWrapper className="flex flex-col">
       {/* Header */}
-      <div className="border-b border-border pb-6 mb-8">
-        <h1 className="text-2xl uppercase tracking-wider font-bold mb-4">Contact Us</h1>
-        <p className="text-[14px] text-muted leading-relaxed max-w-3xl">
-          Have a question about submissions, indexing, or want to join our editorial board? 
-          Send us a message and our editorial team will get back to you shortly.
-        </p>
-      </div>
+      <PageHeader title="Contact Us" />
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 w-full">
@@ -195,14 +191,13 @@ const Contact: React.FC = () => {
               />
             </div>
 
-            <button 
+            <Button 
               type="submit" 
-              disabled={loading || success}
-              className="px-8 py-3 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+              isLoading={loading}
+              disabled={success}
             >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Sending...' : 'Send Message'}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

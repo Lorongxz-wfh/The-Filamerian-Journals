@@ -27,7 +27,7 @@ interface Announcement {
   created_at: string;
 }
 
-const DEFAULT_ABOUT_US = '<h2 class="text-xl font-bold uppercase tracking-wider text-primary">About Us</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>';
+const DEFAULT_ABOUT_US = '<h2 class="text-xl font-bold uppercase tracking-wider text-primary">The Filamerian Journals</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
@@ -149,7 +149,7 @@ const Home: React.FC = () => {
                 <EmptyState title="No journals" description="No journals in this category." className="flex-1 flex flex-col items-center justify-center py-12 border border-border bg-surface mt-4 min-h-[40vh]" />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {filteredJournals.map((j) => {
+                  {filteredJournals.slice(0, 15).map((j) => {
                     const latestVol = j.volumes?.[0];
                     
                     return (
@@ -182,7 +182,7 @@ const Home: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-9">
             {/* Announcements */}
             <div className="border border-border bg-surface p-5 h-[425px] flex flex-col">
               <Link to="/announcements" className="flex items-center justify-between mb-6 pb-3 border-b border-border group">
@@ -195,8 +195,8 @@ const Home: React.FC = () => {
               {loading ? (
                 <Spinner text="Loading news..." size="sm" className="py-8" />
               ) : (
-                <div className="space-y-6">
-                  {announcements.map((item, i) => (
+                <div className="space-y-6 flex-1 relative overflow-hidden">
+                  {announcements.slice(0, 3).map((item, i) => (
                     <Link to="/announcements" key={item.id} className="group block">
                       <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
                         {new Date(item.created_at).toLocaleDateString()}
@@ -204,21 +204,56 @@ const Home: React.FC = () => {
                       <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-1">
                         {item.title}
                       </h4>
-                      {i < announcements.length - 1 && <div className="border-b border-border mt-4" />}
+                      {i < 2 && <div className="border-b border-border mt-4" />}
                     </Link>
                   ))}
                   {announcements.length === 0 && (
                     <p className="text-xs text-muted">No announcements posted.</p>
                   )}
+                  
+                  {/* Fading effect overlay at the bottom */}
+                  {announcements.length > 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-surface via-surface/90 to-transparent flex items-end justify-center pb-2 pointer-events-none">
+                       <Link to="/announcements" className="px-6 py-2 bg-[#d83526] hover:bg-red-700 text-white text-[13px] font-medium rounded-full pointer-events-auto transition-all shadow-md hover:shadow-lg">
+                         See All News
+                       </Link>
+                    </div>
+                  )}
                 </div>
               )}
+            </div>
 
-              <Link
-                to="/announcements"
-                className="w-full mt-auto text-[12px] font-medium text-muted hover:text-primary uppercase tracking-wider transition-colors text-center border-t border-border pt-4 block"
-              >
-                See All News
-              </Link>
+            {/* Quick Links */}
+            <div className="border border-border bg-surface p-5 flex flex-col">
+              <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5 pb-3 border-b border-border">
+                Quick Links
+              </h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Browse</h4>
+                  <ul className="space-y-2 text-[13px] text-muted">
+                    <li><Link to="/journals" className="hover:text-primary transition-colors">All Journals</Link></li>
+                    <li><Link to="/archives" className="hover:text-primary transition-colors">Archives & Past Volumes</Link></li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Author Corner</h4>
+                  <ul className="space-y-2 text-[13px] text-muted">
+                    <li><Link to="/dashboard" className="hover:text-primary transition-colors">Submit Materials</Link></li>
+                    <li><Link to="/login" className="hover:text-primary transition-colors">Portal Login</Link></li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">About Us</h4>
+                  <ul className="space-y-2 text-[13px] text-muted">
+                    <li><Link to="/about" className="hover:text-primary transition-colors">Policies & Information</Link></li>
+                    <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Support</Link></li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>

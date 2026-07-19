@@ -81,8 +81,16 @@ const Navbar = () => {
                 if (searchQuery.trim()) setIsDropdownOpen(true);
               }}
               onKeyDown={handleSearch}
-              className="w-full pl-10 pr-4 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
+              className="w-full pl-10 pr-10 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
             />
+            {searchQuery && (
+              <button 
+                onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
             
             <SearchDropdown 
               query={debouncedSearch}
@@ -215,8 +223,16 @@ const Navbar = () => {
                         handleSearch(e);
                       }
                     }}
-                    className="w-full pl-10 pr-4 py-3 bg-background border border-border text-[13px] text-primary focus:outline-none focus:border-primary transition-colors"
+                    className="w-full pl-10 pr-10 py-3 bg-background border border-border text-[13px] text-primary focus:outline-none focus:border-primary transition-colors"
                   />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery('')} 
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-4">

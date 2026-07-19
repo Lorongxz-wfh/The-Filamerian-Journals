@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Copy, Check } from 'lucide-react';
 
 interface CitationModalProps {
@@ -14,6 +14,16 @@ const CitationModal: React.FC<CitationModalProps> = ({
   isOpen, onClose, article, journalTitle, volumeNumber, year
 }) => {
   const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !article) return null;
 

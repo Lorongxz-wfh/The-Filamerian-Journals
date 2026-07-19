@@ -17,8 +17,11 @@ class SearchController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q', '');
+        $type = $request->query('type', 'all'); // 'all', 'journals', 'articles'
+        $category = $request->query('category', '');
+        $year = $request->query('year', '');
 
-        if (empty(trim($q))) {
+        if (empty(trim($q)) && empty($category) && empty($year)) {
             return response()->json([
                 'data' => [
                     'journals' => [],
@@ -28,28 +31,100 @@ class SearchController extends Controller
         }
 
         $term = '%' . strtolower($q) . '%';
+        $categories = !empty($category) ? array_map('trim', explode(',', $category)) : [];
+
+        $journals = collect([]);
+        $articles = collect([]);
 
         // Search Journals
-        $journals = Journal::where('title', 'ilike', $term)
-            ->orWhere('category', 'ilike', $term)
-            ->orWhere('description', 'ilike', $term)
-            ->limit(10)
-            ->get();
+        if ($type === 'all' || $type === 'journals') {
+            $journalQuery = Journal::query();
 
-        // Search Articles (including author names)
-        $articles = Article::with(['issue.volume.journal', 'authors'])
-            ->where('title', 'ilike', $term)
-            ->orWhere('abstract', 'ilike', $term)
-            ->orWhereHas('authors', function ($query) use ($term) {
-                $query->where('name', 'ilike', $term);
-            })
-            ->limit(20)
-            ->get();
+            if (!empty(trim($q))) {
+                $journalQuery->where(function ($query) use ($term) {
+                    $query->where('title', 'ilike', $term)
+                          ->orWhere('category', 'ilike', $term)
+                          ->orWhere('description', 'ilike', $term);
+                });
+            }
+
+            if (!empty($categories)) {
+                $journalQuery->whereIn('category', $categories);
+            }
+
+            // Journals don't inherently have a "year" column in this basic setup (volumes have years), 
+            // but we'll apply it if possible, or just ignore for journals.
+            if (!empty($year)) {
+                $journalQuery->whereHas('volumes', function ($query) use ($year) {
+                    $query->where('year', $year);
+                });
+            }
+
+            if ($type === 'all') {
+                $journals = $journalQuery->limit(5)->get();
+            } else {
+                $journals = $journalQuery->paginate(15);
+            }
+        }
+
+        // Search Articles
+        if ($type === 'all' || $type === 'articles') {
+            $articleQuery = Article::with(['volume.journal', 'authors']);
+
+            if (!empty(trim($q))) {
+                $articleQuery->where(function ($query) use ($term) {
+                    $query->where('title', 'ilike', $term)
+                          ->orWhere('abstract', 'ilike', $term)
+                          ->orWhereHas('authors', function ($q2) use ($term) {
+                              $q2->where('name', 'ilike', $term);
+                          });
+                });
+            }
+
+            if (!empty($categories)) {
+                $articleQuery->whereHas('volume.journal', function ($query) use ($categories) {
+                    $query->whereIn('category', $categories);
+                });
+            }
+
+            if (!empty($year)) {
+                $articleQuery->whereHas('volume', function ($query) use ($year) {
+                    $query->where('year', $year);
+                });
+            }
+
+            if ($type === 'all') {
+                $articles = $articleQuery->limit(5)->get();
+            } else {
+                $articles = $articleQuery->paginate(15);
+            }
+        }
+
+        // Format response
+        $journalsResponse = [];
+        if ($type === 'all' || $type === 'journals') {
+            if ($type === 'all') {
+                $journalsResponse = JournalResource::collection($journals);
+            } else {
+                $paginatedJournals = JournalResource::collection($journals)->response()->getData(true);
+                $journalsResponse = $paginatedJournals;
+            }
+        }
+
+        $articlesResponse = [];
+        if ($type === 'all' || $type === 'articles') {
+            if ($type === 'all') {
+                $articlesResponse = ArticleResource::collection($articles);
+            } else {
+                $paginatedArticles = ArticleResource::collection($articles)->response()->getData(true);
+                $articlesResponse = $paginatedArticles;
+            }
+        }
 
         return response()->json([
             'data' => [
-                'journals' => JournalResource::collection($journals),
-                'articles' => ArticleResource::collection($articles),
+                'journals' => $journalsResponse,
+                'articles' => $articlesResponse,
             ]
         ]);
     }

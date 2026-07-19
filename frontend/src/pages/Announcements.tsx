@@ -3,6 +3,8 @@ import { Calendar, ChevronRight } from 'lucide-react';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
+import PageWrapper from '@/components/layout/PageWrapper';
+import PageHeader from '@/components/ui/PageHeader';
 
 interface Announcement {
   id: number;
@@ -40,17 +42,14 @@ const Announcements: React.FC = () => {
   };
 
   return (
-    <div className="container-custom py-12 space-y-10">
-      <div className="border-b border-border pb-6">
-        <h1 className="text-2xl uppercase tracking-wider font-bold">Announcements</h1>
-        <p className="text-[14px] text-muted max-w-xl leading-relaxed mt-2">
-          Latest news and updates from The Filamerian Journals editorial office.
-        </p>
-      </div>
+    <PageWrapper className="flex flex-col gap-10">
+      <PageHeader title="Announcements" />
 
-      <div className="space-y-4">
+      <div className="space-y-4 flex-1 flex flex-col">
         {loading ? (
-          <Spinner text="Loading announcements..." />
+          <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+            <Spinner text="Loading announcements..." />
+          </div>
         ) : announcements.length === 0 ? (
           <EmptyState title="No announcements" description="No announcements posted yet." className="border border-border bg-surface py-20" />
         ) : (
@@ -86,7 +85,7 @@ const Announcements: React.FC = () => {
           })
         )}
       </div>
-    </div>
+    </PageWrapper>
   );
 };
 

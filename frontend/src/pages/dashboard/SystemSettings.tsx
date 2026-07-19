@@ -3,6 +3,8 @@ import { Mail, Database, Shield, Loader2 } from 'lucide-react';
 import api from '@/services/api';
 import { FormSkeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
+import DashboardHeader from '@/components/ui/DashboardHeader';
+import Button from '@/components/ui/Button';
 
 const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState<Record<string, string>>({
@@ -56,10 +58,7 @@ const SystemSettings: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-border pb-4">
-        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">System Settings</h1>
-
-      </div>
+      <DashboardHeader title="System Settings" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Email */}
@@ -139,14 +138,12 @@ const SystemSettings: React.FC = () => {
       </div>
 
       <div className="flex justify-end pt-2">
-        <button 
+        <Button 
           onClick={handleSave}
-          disabled={saving}
-          className="px-6 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+          isLoading={saving}
         >
-          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
           {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { Activity, Database, Server, HardDrive } from 'lucide-react';
+import DashboardHeader from '@/components/ui/DashboardHeader';
+import Spinner from '@/components/ui/Spinner';
 
 interface HealthData {
   status: string;
@@ -39,8 +41,8 @@ const SystemHealth: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex h-full items-center justify-center py-20">
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -74,10 +76,7 @@ const SystemHealth: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">System Health</h1>
-
-      </div>
+      <DashboardHeader title="System Health" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, i) => (

@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface ActivityLog {
   id: number;
@@ -48,11 +49,7 @@ const ActivityLogs: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">System Activity Logs</h1>
-
-        </div>
+      <DashboardHeader title="System Activity Logs">
         <Button
           onClick={() => fetchLogs(currentPage)}
           className="flex items-center gap-2"
@@ -61,7 +58,7 @@ const ActivityLogs: React.FC = () => {
           <RefreshCw className="h-4 w-4" />
           Refresh
         </Button>
-      </div>
+      </DashboardHeader>
 
       <div className="bg-surface border border-border">
         {loading ? (

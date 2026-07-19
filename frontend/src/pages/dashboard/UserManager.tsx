@@ -7,6 +7,10 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
+import { toast } from 'sonner';
+import DashboardHeader from '@/components/ui/DashboardHeader';
+import SearchInput from '@/components/ui/SearchInput';
+import IconButton from '@/components/ui/IconButton';
 
 interface User {
   id: number;
@@ -128,23 +132,17 @@ const UserManager: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">User Manager</h1>
-
-        </div>
+      <DashboardHeader title="User Manager">
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add User
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
-        <input 
-          type="text" placeholder="Search users..." value={filter} onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary" 
-        />
-      </div>
+      <SearchInput 
+        placeholder="Search users..." 
+        value={filter} 
+        onChange={(e) => setFilter(e.target.value)} 
+      />
 
       <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
         <table className="w-full min-w-[600px]">
@@ -192,16 +190,10 @@ const UserManager: React.FC = () => {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
                       {!user.is_approved && (
-                        <button onClick={() => handleApprove(user.id)} className="text-muted/60 hover:text-emerald-500 hover:bg-emerald-50 h-7 w-7 rounded flex items-center justify-center transition-all" title="Approve User">
-                          <CheckCircle className="h-4 w-4" />
-                        </button>
+                        <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
                       )}
-                      <button onClick={() => handleOpenModal(user)} className="text-muted/60 hover:text-primary hover:bg-black/5 h-7 w-7 rounded flex items-center justify-center transition-all">
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <button onClick={() => handleDelete(user.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 h-7 w-7 rounded flex items-center justify-center transition-all">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit" />
+                      <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(user.id)} title="Delete" />
                     </div>
                   </td>
                 </tr>
@@ -235,9 +227,13 @@ const UserManager: React.FC = () => {
             <option value="Editor">Editor</option>
           </Select>
 
-          <div className="flex justify-end gap-3 pt-4 mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save User'}</Button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={isSubmitting}>
+              {editingUser ? 'Save Changes' : 'Create'}
+            </Button>
           </div>
         </form>
       </Modal>

@@ -3,6 +3,7 @@ import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import PageHeader from '@/components/ui/PageHeader';
 
 interface Resource {
   id: number;
@@ -54,9 +55,7 @@ const About: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col">
-      <div className="border-b border-border pb-6 mb-8">
-        <h1 className="text-2xl uppercase tracking-wider font-bold">About</h1>
-      </div>
+      <PageHeader title="About Us" />
 
       <div className="flex-1 flex flex-col lg:flex-row gap-12">
         <div className="lg:w-1/4 shrink-0">

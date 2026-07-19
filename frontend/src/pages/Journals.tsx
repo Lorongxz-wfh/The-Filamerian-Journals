@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
-import { Search, LayoutGrid, List, ChevronDown, X } from 'lucide-react';
+import { Search, LayoutGrid, List, ChevronDown, X, Loader2 } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 
 interface Journal {
   id: number;
@@ -29,6 +31,18 @@ const Journals: React.FC = () => {
   const categoryParam = queryParams.get('category');
 
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    setIsTyping(true);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setIsTyping(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const [sortOption, setSortOption] = useState<string>('newest');
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? [categoryParam] : []
@@ -38,6 +52,15 @@ const Journals: React.FC = () => {
   const [availableCategories, setAvailableCategories] = useState<string[]>(initialCategories);
   const [loading, setLoading] = useState(initialJournals.length === 0);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategories, selectedYears, debouncedSearch]);
 
   // Accordion open/close state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -78,15 +101,32 @@ const Journals: React.FC = () => {
 
   useEffect(() => {
     const fetchJournals = async () => {
+      setLoading(true);
       try {
+        let url = `/public/journals?with_volumes=1&page=${currentPage}`;
+        if (selectedCategories.length > 0) {
+          url += `&category=${encodeURIComponent(selectedCategories.join(','))}`;
+        }
+        if (selectedYears.length > 0) {
+          url += `&year=${encodeURIComponent(selectedYears.join(','))}`;
+        }
+        if (debouncedSearch) {
+          url += `&q=${encodeURIComponent(debouncedSearch)}`; // Backend doesn't support 'q' for journals yet, but we'll leave client side filter too
+        }
+
         const [jrnRes, setRes] = await Promise.all([
-          api.get('/public/journals?with_volumes=1'),
+          api.get(url),
           api.get('/public/settings')
         ]);
         
         const newJournals = jrnRes.data.data;
         setJournals(newJournals);
-        localStorage.setItem('journals_cache', JSON.stringify(newJournals));
+        setCurrentPage(jrnRes.data.meta?.current_page || 1);
+        setLastPage(jrnRes.data.meta?.last_page || 1);
+
+        if (currentPage === 1 && selectedCategories.length === 0 && selectedYears.length === 0) {
+          localStorage.setItem('journals_cache', JSON.stringify(newJournals));
+        }
         
         const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
         const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
@@ -100,7 +140,7 @@ const Journals: React.FC = () => {
       }
     };
     fetchJournals();
-  }, []);
+  }, [currentPage, selectedCategories, selectedYears, debouncedSearch]);
 
   // Only the actual categories (without "All")
   const actualCategories = useMemo(() =>
@@ -124,8 +164,8 @@ const Journals: React.FC = () => {
   const filtered = useMemo(() => {
     let result = journals.filter((j) => {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(j.category);
-      const matchesSearch = j.title.toLowerCase().includes(search.toLowerCase()) ||
-        (j.description && j.description.toLowerCase().includes(search.toLowerCase()));
+      const matchesSearch = j.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (j.description && j.description.toLowerCase().includes(debouncedSearch.toLowerCase()));
         
       let matchesYear = true;
       if (selectedYears.length > 0) {
@@ -150,7 +190,7 @@ const Journals: React.FC = () => {
     });
     
     return result;
-  }, [journals, selectedCategories, search, selectedYears, sortOption]);
+  }, [journals, selectedCategories, debouncedSearch, selectedYears, sortOption]);
 
   const hasActiveFilters = selectedCategories.length > 0 || selectedYears.length > 0;
 
@@ -163,23 +203,29 @@ const Journals: React.FC = () => {
   return (
     <PageWrapper className="flex flex-col">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-        <h1 className="text-2xl uppercase tracking-wider font-bold">Our Journals</h1>
-
-        <div className="relative w-full md:w-72">
+      <PageHeader title="Our Journals">
+        <div className="relative w-full md:w-72 mt-4 md:mt-0 md:absolute md:right-0 md:bottom-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
           <input
             type="text"
             placeholder="Search journals..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border text-sm focus:outline-none focus:border-primary transition-colors"
+            className="w-full pl-10 pr-12 py-2.5 bg-surface border border-border text-sm focus:outline-none focus:border-primary transition-colors"
           />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {isTyping && search && <Loader2 className="h-4 w-4 animate-spin text-muted/40" />}
+            {search && !isTyping && (
+              <button onClick={() => setSearch('')} className="text-muted/40 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Main Layout: Sidebar + Results */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-8 mt-8">
+      <div className="flex-1 flex flex-col lg:flex-row gap-8">
         
         {/* ── Left Sidebar ── */}
         <aside className="w-full lg:w-[220px] shrink-0">
@@ -354,8 +400,15 @@ const Journals: React.FC = () => {
               </div>
             )}
 
-            {!loading && (
-              <p className="text-[11px] text-muted mt-8">Showing {filtered.length} of {journals.length} journals</p>
+            {!loading && lastPage > 1 && (
+              <Pagination 
+                currentPage={currentPage} 
+                lastPage={lastPage} 
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
+              />
             )}
           </div>
         </div>

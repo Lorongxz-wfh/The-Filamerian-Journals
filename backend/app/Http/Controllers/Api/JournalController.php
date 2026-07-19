@@ -17,12 +17,27 @@ class JournalController extends Controller
     {
         $query = Journal::query();
 
+        // Filters
+        $category = $request->query('category');
+        if (!empty($category)) {
+            $categories = array_map('trim', explode(',', $category));
+            $query->whereIn('category', $categories);
+        }
+
+        $year = $request->query('year');
+        if (!empty($year)) {
+            $query->whereHas('volumes', function ($q) use ($year) {
+                $q->where('year', $year);
+            });
+        }
+
         // Eager-load nested relationships when requested
         if ($request->boolean('with_volumes')) {
             $query->with(['volumes.articles.authors']);
         }
 
-        return JournalResource::collection($query->paginate(50));
+        // Standardize pagination to 15
+        return JournalResource::collection($query->paginate(15));
     }
 
     /**

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Megaphone, Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Megaphone, Plus, Edit2, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import SearchInput from '@/components/ui/SearchInput';
+import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Announcement {
   id: number;
@@ -60,8 +64,10 @@ const ManageAnnouncements: React.FC = () => {
     try {
       if (editingItem) {
         await api.put(`/announcements/${editingItem.id}`, formData);
+        toast.success('Announcement updated');
       } else {
         await api.post('/announcements', formData);
+        toast.success('Announcement created');
       }
       await fetchData();
       setIsModalOpen(false);
@@ -77,8 +83,9 @@ const ManageAnnouncements: React.FC = () => {
     try {
       await api.delete(`/announcements/${id}`);
       await fetchData();
+      toast.success('Announcement deleted');
     } catch (err) {
-      alert('Failed to delete');
+      toast.error('Failed to delete');
     }
   };
 
@@ -86,24 +93,17 @@ const ManageAnnouncements: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Announcements</h1>
-
-        </div>
+      <DashboardHeader title="Announcements">
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
           <Plus className="h-4 w-4" /> New Announcement
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
-        <input
-          type="text"
-          placeholder="Filter announcements..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary"
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <SearchInput 
+          placeholder="Search announcements..." 
+          value={filter} 
+          onChange={(e) => setFilter(e.target.value)} 
         />
       </div>
 
@@ -127,12 +127,8 @@ const ManageAnnouncements: React.FC = () => {
               </div>
               <div className="col-span-3 text-[12px] text-muted">{new Date(item.created_at).toLocaleDateString()}</div>
               <div className="col-span-1 flex justify-end gap-2">
-                <button onClick={() => handleOpenModal(item)} className="text-muted/60 hover:text-primary hover:bg-black/5 rounded h-7 w-7 flex items-center justify-center transition-all">
-                  <Edit2 className="h-4 w-4" />
-                </button>
-                <button onClick={() => handleDelete(item.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 rounded h-7 w-7 flex items-center justify-center transition-all">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <IconButton icon={Edit2} onClick={() => handleOpenModal(item)} title="Edit" />
+                <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(item.id)} title="Delete" />
               </div>
             </div>
           ))
@@ -148,9 +144,13 @@ const ManageAnnouncements: React.FC = () => {
           <Textarea 
             label="Content" required rows={6} value={formData.body} onChange={e => setFormData({...formData, body: e.target.value})}
           />
-          <div className="flex justify-end gap-3 pt-4 mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Announcement'}</Button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={isSubmitting}>
+              {editingItem ? 'Save Changes' : 'Create'}
+            </Button>
           </div>
         </form>
       </Modal>

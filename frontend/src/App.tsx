@@ -26,6 +26,7 @@ import About from '@/pages/About';
 
 import WebsiteSettings from '@/pages/dashboard/WebsiteSettings';
 import Toaster from '@/components/ui/Toaster';
+import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -37,6 +38,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Public Website Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />

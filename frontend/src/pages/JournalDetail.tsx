@@ -107,13 +107,20 @@ const JournalDetail: React.FC = () => {
       {/* Header */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-6">
         <div className="lg:col-span-3">
-          {journal.cover_image ? (
-            <img src={`${STORAGE_URL}${journal.cover_image}`} alt={journal.title} className="w-full max-w-[280px] aspect-[3/4] object-cover border border-border" />
-          ) : (
-            <div className="w-full max-w-[280px] aspect-[3/4] bg-surface border border-border flex items-center justify-center">
-              <span className="text-muted text-[13px]">No Cover</span>
-            </div>
+          {journal.cover_image && (
+            <img 
+              src={`${STORAGE_URL}${journal.cover_image}`} 
+              alt={journal.title} 
+              className="w-full max-w-[280px] aspect-[3/4] object-cover border border-border"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
           )}
+          <div className={`w-full max-w-[280px] aspect-[3/4] bg-surface border border-border flex items-center justify-center ${journal.cover_image ? 'hidden' : ''}`}>
+            <span className="text-muted text-[13px]">No Cover</span>
+          </div>
         </div>
         <div className="lg:col-span-9 flex flex-col h-full">
           <div>

@@ -111,16 +111,9 @@ const Login: React.FC = () => {
           <Button
             type="submit"
             className="w-full py-3 text-[13px] font-medium"
-            disabled={loading}
+            isLoading={loading}
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Authenticating...
-              </span>
-            ) : (
-              'Sign In'
-            )}
+            {loading ? 'Authenticating...' : 'Sign In'}
           </Button>
         </form>
 

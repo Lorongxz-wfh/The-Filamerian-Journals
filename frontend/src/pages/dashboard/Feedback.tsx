@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageSquare, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import { MessageListSkeleton } from '@/components/ui/Skeleton';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface FeedbackItem {
   id: number;
@@ -62,10 +63,7 @@ const Feedback: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-border pb-4">
-        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Feedback</h1>
-
-      </div>
+      <DashboardHeader title="Feedback" />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
         {/* Message List */}

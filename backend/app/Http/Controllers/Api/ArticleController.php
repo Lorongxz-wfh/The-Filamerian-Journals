@@ -156,7 +156,7 @@ class ArticleController extends Controller
             $article->keywords()->sync($keywordIds);
         }
 
-        return new ArticleResource($article->load(['authors', 'keywords', 'issue.volume.journal']));
+        return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
     }
 
     public function destroy(Article $article)

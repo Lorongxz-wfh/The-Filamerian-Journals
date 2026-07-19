@@ -9,6 +9,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
 import EmptyState from '@/components/ui/EmptyState';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Resource {
   id: number;
@@ -178,14 +179,12 @@ const WebsiteSettings: React.FC = () => {
           </div>
 
           <div className="flex justify-end pt-2">
-            <button 
+            <Button 
               onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="px-6 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+              isLoading={savingSettings}
             >
-              {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
               {savingSettings ? 'Saving...' : 'Save Changes'}
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -214,14 +213,12 @@ const WebsiteSettings: React.FC = () => {
           </div>
 
           <div className="flex justify-end pt-2">
-            <button 
+            <Button 
               onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="px-6 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+              isLoading={savingSettings}
             >
-              {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
               {savingSettings ? 'Saving...' : 'Save Changes'}
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -261,14 +258,12 @@ const WebsiteSettings: React.FC = () => {
           </div>
 
           <div className="flex justify-end pt-2">
-            <button 
+            <Button 
               onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className="px-6 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+              isLoading={savingSettings}
             >
-              {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
               {savingSettings ? 'Saving...' : 'Save Changes'}
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -371,10 +366,7 @@ const WebsiteSettings: React.FC = () => {
 
   return (
     <div className="space-y-2">
-      <div className="border-b border-border pb-4 mb-2">
-        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Website Settings</h1>
-
-      </div>
+      <DashboardHeader title="Website Settings" className="mb-2" />
 
       <Tabs 
         tabs={[

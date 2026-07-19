@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
-import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft } from 'lucide-react';
+import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft, ChevronDown } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 
 interface SearchResults {
   journals: any[];
@@ -20,20 +22,79 @@ const Search: React.FC = () => {
   const [results, setResults] = useState<SearchResults>({ journals: [], articles: [] });
   const [loading, setLoading] = useState(false);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+
+  // Filters State
+  const [type, setType] = useState('all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [year, setYear] = useState('');
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
+  // Accordion open/close state
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    type: true,
+    subject: true,
+    year: true,
+  });
+
+  const toggleSection = (key: string) => {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
 
   useEffect(() => {
+    // Fetch categories on load
+    const fetchSettings = async () => {
+      try {
+        const res = await api.get('/public/settings');
+        const catsString = res.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+        const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
+        setAvailableCategories(catsArray);
+      } catch (e) {
+        console.error('Failed to fetch settings', e);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, type, selectedCategories, year]);
+
+  useEffect(() => {
     const fetchResults = async () => {
-      if (!query.trim()) {
+      if (!query.trim() && selectedCategories.length === 0 && !year.trim()) {
         setResults({ journals: [], articles: [] });
         return;
       }
       
       setLoading(true);
       try {
-        const res = await api.get(`/public/search?q=${encodeURIComponent(query)}`);
-        setResults(res.data.data);
+        const categoryParam = selectedCategories.length > 0 ? selectedCategories.join(',') : '';
+        const res = await api.get(`/public/search?q=${encodeURIComponent(query)}&type=${type}&category=${encodeURIComponent(categoryParam)}&year=${encodeURIComponent(year)}&page=${currentPage}`);
+        
+        const data = res.data.data;
+        if (type === 'all') {
+          setResults({ journals: data.journals || [], articles: data.articles || [] });
+          setLastPage(1);
+        } else if (type === 'journals') {
+          setResults({ journals: data.journals?.data || [], articles: [] });
+          setLastPage(data.journals?.meta?.last_page || 1);
+        } else if (type === 'articles') {
+          setResults({ journals: [], articles: data.articles?.data || [] });
+          setLastPage(data.articles?.meta?.last_page || 1);
+        }
       } catch (err) {
         console.error('Search failed', err);
       } finally {
@@ -42,35 +103,122 @@ const Search: React.FC = () => {
     };
 
     fetchResults();
-  }, [query]);
+  }, [query, type, selectedCategories, year, currentPage]);
 
   const navigate = useNavigate();
 
   return (
     <PageWrapper className="flex flex-col">
       {/* Search Header */}
-      <div className="border-b border-border pb-6 mb-8 space-y-4">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to previous page
-        </button>
-        <div className="space-y-2">
-          <h1 className="text-2xl uppercase tracking-wider font-bold">Search Results</h1>
-          <p className="text-[14px] text-muted">
-            Showing results for: <span className="font-semibold text-primary">"{query}"</span>
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Search Results"
+        className="mb-8"
+        preTitle={
+          <button 
+            onClick={() => navigate(-1)} 
+            className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to previous page
+          </button>
+        }
+      >
+        <p className="text-[14px] text-muted">
+          Showing results for: <span className="font-semibold text-primary">"{query}"</span>
+        </p>
+      </PageHeader>
 
-      {loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center space-y-4 min-h-[40vh]">
-          <Spinner size="lg" text="Searching database..." />
-        </div>
-      ) : (
-        <div className="space-y-12">
-          {/* Journals Section */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-8">
+        {/* Sidebar Filters */}
+        <aside className="w-full lg:w-[220px] shrink-0">
+          <div className="sticky top-24 space-y-1">
+            <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest mb-4">Advanced Filters</h3>
+
+            {/* Content Type */}
+            <div className="border border-border">
+              <button
+                onClick={() => toggleSection('type')}
+                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
+              >
+                Content Type
+                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.type ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections.type && (
+                <div className="px-4 pb-4 space-y-2.5">
+                  {['all', 'journals', 'articles'].map(t => (
+                    <label key={t} className="flex items-center gap-2.5 cursor-pointer group">
+                      <input
+                        type="radio"
+                        name="contentType"
+                        checked={type === t}
+                        onChange={() => setType(t)}
+                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                      />
+                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors capitalize">{t}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Subject / Discipline */}
+            <div className="border border-border">
+              <button
+                onClick={() => toggleSection('subject')}
+                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
+              >
+                Subject / Discipline
+                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.subject ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections.subject && (
+                <div className="px-4 pb-4 space-y-2.5">
+                  {availableCategories.map(cat => (
+                    <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat)}
+                        onChange={() => toggleCategory(cat)}
+                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                      />
+                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{cat}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Publication Year */}
+            <div className="border border-border">
+              <button
+                onClick={() => toggleSection('year')}
+                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
+              >
+                Publication Year
+                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.year ? 'rotate-180' : ''}`} />
+              </button>
+              {openSections.year && (
+                <div className="px-4 pb-4">
+                  <input
+                    type="number"
+                    placeholder="e.g. 2024"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className="w-full px-3 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
+
+        {/* Results */}
+        <div className="flex-1 space-y-12">
+          {loading ? (
+            <div className="flex-1 flex flex-col items-center justify-center space-y-4 min-h-[40vh]">
+              <Spinner size="lg" text="Searching database..." />
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {/* Journals Section */}
           {results.journals.length > 0 && (
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-border">
@@ -173,16 +321,29 @@ const Search: React.FC = () => {
             </div>
           )}
 
-          {/* Empty State */}
-          {!loading && query && results.journals.length === 0 && results.articles.length === 0 && (
-            <EmptyState 
-              title={`No results found for "${query}"`} 
-              description="Try adjusting your keywords or searching for a specific author." 
-              className="py-20 border border-border bg-surface" 
-            />
+              {/* Empty State */}
+              {!loading && results.journals.length === 0 && results.articles.length === 0 && (
+                <EmptyState 
+                  title={query ? `No results found for "${query}"` : "No results found"} 
+                  description="Try adjusting your keywords or filters to find what you're looking for." 
+                  className="py-20 border border-border bg-surface" 
+                />
+              )}
+              
+              {!loading && type !== 'all' && lastPage > 1 && (
+                <Pagination 
+                  currentPage={currentPage} 
+                  lastPage={lastPage} 
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
+                />
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
 
       <CitationModal 
         isOpen={!!citationArticle}

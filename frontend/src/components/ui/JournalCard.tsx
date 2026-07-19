@@ -29,6 +29,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
   viewMode = 'list',
 }) => {
   const [showFloating, setShowFloating] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
@@ -74,10 +75,11 @@ const JournalCard: React.FC<JournalCardProps> = ({
       >
         <FloatingCard />
         <div className="relative mx-auto w-full max-w-[80px] overflow-hidden mb-6 bg-background shadow-sm hover:shadow-md transition-shadow aspect-[3/4] border border-border shrink-0">
-          {image ? (
+          {image && !imgError ? (
             <img
               src={image}
               alt={title}
+              onError={() => setImgError(true)}
               className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
@@ -121,10 +123,11 @@ const JournalCard: React.FC<JournalCardProps> = ({
       <FloatingCard />
       {/* Image (Portrait) */}
       <div className="relative w-[120px] md:w-[140px] shrink-0 overflow-hidden bg-background border border-border">
-        {image ? (
+        {image && !imgError ? (
           <img
             src={image}
             alt={title}
+            onError={() => setImgError(true)}
             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-[1.02]"
           />
         ) : (

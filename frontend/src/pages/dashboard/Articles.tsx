@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Edit2, Trash2, Eye, X } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import Modal from '@/components/ui/Modal';
+import { toast } from 'sonner';
+import DashboardHeader from '@/components/ui/DashboardHeader';
+import SearchInput from '@/components/ui/SearchInput';
+import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -16,6 +20,7 @@ interface Article {
   abstract: string | null;
   doi: string | null;
   pdf_url: string | null;
+  pdf_path: string | null;
   authors: any[];
   keywords?: any[];
   volume: any;
@@ -186,8 +191,9 @@ const Articles: React.FC = () => {
     try {
       await api.delete(`/articles/${id}`);
       await fetchData();
+      toast.success('Article deleted successfully');
     } catch (err) {
-      alert('Failed to delete article');
+      toast.error('Failed to delete article');
     }
   };
 
@@ -225,15 +231,11 @@ const Articles: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Articles</h1>
-
-        </div>
+      <DashboardHeader title="Articles">
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
           <Plus className="h-4 w-4" /> Submit Article
         </Button>
-      </div>
+      </DashboardHeader>
 
       {/* Tabs + Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -250,16 +252,11 @@ const Articles: React.FC = () => {
             </button>
           ))}
         </div>
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
-          <input
-            type="text"
-            placeholder="Search articles..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-          />
-        </div>
+        <SearchInput
+          placeholder="Search articles..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
       </div>
 
       {/* Table */}
@@ -313,21 +310,11 @@ const Articles: React.FC = () => {
                   <td className="px-5 py-4 text-[12px] text-muted">{new Date(article.created_at).toLocaleDateString()}</td>
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {article.pdf_url && (
-                        <button 
-                          onClick={() => viewPdf(article)}
-                          className="text-muted/40 hover:text-secondary h-6 w-6 flex items-center justify-center"
-                          title="View PDF"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </button>
+                      {article.pdf_path && (
+                        <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
                       )}
-                      <button onClick={() => handleOpenModal(article)} className="text-muted/40 hover:text-primary h-6 w-6 flex items-center justify-center" title="Edit Article">
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => handleDelete(article.id)} className="text-muted/40 hover:text-red-500 h-6 w-6 flex items-center justify-center" title="Delete Article">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
+                      <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(article.id)} title="Delete Article" />
                     </div>
                   </td>
                 </tr>
@@ -461,9 +448,13 @@ const Articles: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Article'}</Button>
+          <div className="flex justify-end gap-3 pt-6 border-t border-border">
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={isSubmitting}>
+              {editingArticle ? 'Save Changes' : 'Create Article'}
+            </Button>
           </div>
         </form>
       </Modal>

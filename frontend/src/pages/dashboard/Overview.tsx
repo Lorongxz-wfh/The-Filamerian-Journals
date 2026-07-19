@@ -3,6 +3,7 @@ import { BookOpen, FileText, Users, ArrowRight, Settings, BarChart2, Activity, G
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 const Overview: React.FC = () => {
   const [data, setData] = useState<{
@@ -60,16 +61,15 @@ const Overview: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="border-b border-border pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Overview</h1>
-          <p className="text-[13px] text-muted mt-1">Welcome back, {user.first_name || 'Admin'}. Here is your system snapshot.</p>
-        </div>
+      <DashboardHeader 
+        title="Overview" 
+        description={`Welcome back, ${user.first_name || 'Admin'}. Here is your system snapshot.`}
+      >
         <div className="text-[11px] font-medium text-muted uppercase tracking-wider bg-surface border border-border px-4 py-2 self-start md:self-auto flex items-center gap-2 shadow-sm">
           <Activity className="h-3 w-3 text-emerald-600" />
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
         </div>
-      </div>
+      </DashboardHeader>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -3,6 +3,7 @@ import { Check, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import { useNavigate } from 'react-router';
 import { MessageListSkeleton } from '@/components/ui/Skeleton';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Notification {
   id: string;
@@ -71,11 +72,7 @@ const Notifications: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">Notifications</h1>
-
-        </div>
+      <DashboardHeader title="Notifications">
         <button 
           onClick={markAllAsRead}
           className="flex items-center gap-2 px-4 py-2.5 bg-background border border-border text-primary text-[13px] font-medium hover:border-primary/50 transition-colors shrink-0"
@@ -83,7 +80,7 @@ const Notifications: React.FC = () => {
           <Check className="h-4 w-4" />
           Mark all as read
         </button>
-      </div>
+      </DashboardHeader>
 
       <div className="border border-border bg-surface">
         {loading ? (

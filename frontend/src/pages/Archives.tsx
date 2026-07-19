@@ -7,6 +7,8 @@ import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 
 interface Author {
   id: number;
@@ -46,6 +48,10 @@ const Archives: React.FC = () => {
   const [journals, setJournals] = useState<Journal[]>(initialArchives);
   const [loading, setLoading] = useState(initialArchives.length === 0);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
   const [citationContext, setCitationContext] = useState<any>({});
@@ -61,14 +67,15 @@ const Archives: React.FC = () => {
 
   useEffect(() => {
     const fetchJournals = async () => {
+      setLoading(true);
       try {
-        const res = await api.get('/public/journals?with_volumes=1');
-        const data = res.data.data;
-        setJournals(data);
-        localStorage.setItem('archives_cache', JSON.stringify(data));
-        
-        if (data.length > 0 && !expandedJournal) {
-          setExpandedJournal(data[0].id);
+        const res = await api.get(`/public/journals?with_volumes=1&page=${currentPage}`);
+        setJournals(res.data.data);
+        setCurrentPage(res.data.meta?.current_page || 1);
+        setLastPage(res.data.meta?.last_page || 1);
+
+        if (currentPage === 1) {
+          localStorage.setItem('archives_cache', JSON.stringify(res.data.data));
         }
       } catch (err) {
         console.error('Failed to fetch archives', err);
@@ -77,7 +84,7 @@ const Archives: React.FC = () => {
       }
     };
     fetchJournals();
-  }, [expandedJournal]);
+  }, [currentPage]);
 
   const toggleJournal = (id: number) => {
     setExpandedJournal(expandedJournal === id ? null : id);
@@ -98,9 +105,7 @@ const Archives: React.FC = () => {
     <PageWrapper className="flex flex-col w-full">
       <div className="w-full space-y-10 flex flex-col">
         {/* Header */}
-        <div className="border-b border-border pb-6 mb-8">
-        <h1 className="text-2xl uppercase tracking-wider font-bold">Archives</h1>
-      </div>
+        <PageHeader title="Archives" />
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 sm:grid-cols-3 gap-px bg-border border border-border">
@@ -214,7 +219,7 @@ const Archives: React.FC = () => {
                                     <div className="flex items-start justify-between gap-4">
                                       {article.cover_path && (
                                         <div className="shrink-0 w-12 h-16 border border-border bg-surface overflow-hidden">
-                                          <img src={`${STORAGE_URL}${article.cover_path}`} alt="Cover" className="w-full h-full object-cover" />
+                                          <img src={`${STORAGE_URL}${article.cover_path}`} alt="Cover" className="w-full h-full object-cover" onError={(e) => e.currentTarget.style.display = 'none'} />
                                         </div>
                                       )}
                                       <div className="min-w-0">
@@ -280,6 +285,17 @@ const Archives: React.FC = () => {
           })
         )}
       </div>
+
+      {!loading && lastPage > 1 && (
+        <Pagination 
+          currentPage={currentPage} 
+          lastPage={lastPage} 
+          onPageChange={(page) => {
+            setCurrentPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }} 
+        />
+      )}
       
       </div>
 

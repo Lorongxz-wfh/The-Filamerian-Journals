@@ -4,8 +4,10 @@ import { ArrowLeft, Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import { ListSkeleton } from '@/components/ui/Skeleton';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Volume {
   id: number;
@@ -95,20 +97,18 @@ const ManageJournal: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="border-b border-border pb-4">
-        <Link to="/dashboard/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-4">
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
-        </Link>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary line-clamp-1">{journal?.title || 'Loading...'}</h1>
-
-          </div>
-          <Button onClick={() => handleOpenVolModal()} disabled={!journal} className="shrink-0 flex items-center gap-2">
-            <Plus className="h-4 w-4" /> New Volume
-          </Button>
-        </div>
-      </div>
+      <DashboardHeader
+        title={<span className="line-clamp-1">{journal?.title || 'Loading...'}</span>}
+        preTitle={
+          <Link to="/dashboard/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-4">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
+          </Link>
+        }
+      >
+        <Button onClick={() => handleOpenVolModal()} disabled={!journal} className="shrink-0 flex items-center gap-2">
+          <Plus className="h-4 w-4" /> New Volume
+        </Button>
+      </DashboardHeader>
 
       {/* Volumes List */}
       <div className="space-y-4">
@@ -134,12 +134,8 @@ const ManageJournal: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => handleOpenVolModal(vol)} className="text-muted/40 hover:text-primary transition-colors h-7 w-7 flex items-center justify-center">
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button onClick={() => deleteVolume(vol.id)} className="text-muted/40 hover:text-red-500 transition-colors h-7 w-7 flex items-center justify-center">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <IconButton icon={Edit2} onClick={() => handleOpenVolModal(vol)} title="Edit" />
+                    <IconButton icon={Trash2} variant="danger" onClick={() => deleteVolume(vol.id)} title="Delete" />
                   </div>
                 </div>
               </div>
@@ -158,8 +154,8 @@ const ManageJournal: React.FC = () => {
             label="Year" required type="number" value={volFormData.year} onChange={e => setVolFormData({...volFormData, year: e.target.value})}
           />
           <div className="flex justify-end gap-3 pt-4 mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsVolModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Volume'}</Button>
+            <Button type="button" variant="ghost" onClick={() => setIsVolModalOpen(false)}>Cancel</Button>
+            <Button type="submit" isLoading={isSubmitting}>{editingVol ? 'Save Changes' : 'Create Volume'}</Button>
           </div>
         </form>
       </Modal>

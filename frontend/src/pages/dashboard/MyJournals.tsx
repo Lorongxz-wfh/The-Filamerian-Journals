@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router';
 import { BookOpen, Plus, Search, Settings2, Edit2, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
+import { toast } from 'sonner';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
+import SearchInput from '@/components/ui/SearchInput';
+import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
@@ -181,31 +185,22 @@ const MyJournals: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">My Journals</h1>
-
-        </div>
-        <button 
+      <DashboardHeader title="My Journals">
+        <Button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-[13px] font-medium hover:bg-primary/90 transition-colors shrink-0"
+          className="shrink-0 flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           New Journal
-        </button>
-      </div>
+        </Button>
+      </DashboardHeader>
 
       {/* Search */}
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
-        <input
-          type="text"
-          placeholder="Filter journals..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-        />
-      </div>
+      <SearchInput 
+        placeholder="Filter journals..."
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
 
       {/* Table */}
       <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
@@ -242,27 +237,22 @@ const MyJournals: React.FC = () => {
                 {journal.editor || '-'}
               </div>
               <div className="col-span-1 flex justify-end gap-2">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/journals/${journal.slug}`); }}
-                  className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-primary hover:bg-black/5 transition-all rounded"
-                  title="Manage Volumes"
-                >
-                  <Settings2 className="h-4 w-4" />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); handleOpenModal(journal); }}
-                  className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-primary hover:bg-black/5 transition-all rounded"
-                  title="Edit"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); handleDelete(journal.slug); }}
-                  className="h-7 w-7 flex items-center justify-center text-muted/60 hover:text-red-500 hover:bg-red-500/10 transition-all rounded"
-                  title="Delete"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <IconButton 
+                  icon={Settings2} 
+                  onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/journals/${journal.slug}`); }} 
+                  title="Manage Volumes" 
+                />
+                <IconButton 
+                  icon={Edit2} 
+                  onClick={(e) => { e.stopPropagation(); handleOpenModal(journal); }} 
+                  title="Edit" 
+                />
+                <IconButton 
+                  icon={Trash2} 
+                  variant="danger" 
+                  onClick={(e) => { e.stopPropagation(); handleDelete(journal.slug); }} 
+                  title="Delete" 
+                />
               </div>
             </div>
           ))
@@ -371,11 +361,11 @@ const MyJournals: React.FC = () => {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : (editingJournal ? 'Update Journal' : 'Create Journal')}
+            <Button type="submit" isLoading={isSubmitting}>
+              {editingJournal ? 'Update Journal' : 'Create Journal'}
             </Button>
           </div>
         </form>
