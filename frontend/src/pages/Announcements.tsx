@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -74,9 +75,10 @@ const Announcements: React.FC = () => {
                 <h2 className="text-[15px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mb-2">
                   {item.title}
                 </h2>
-                <p className={`text-[13px] text-muted leading-relaxed whitespace-pre-wrap ${!isExpanded ? 'line-clamp-3' : ''}`}>
-                  {item.body}
-                </p>
+                <div 
+                  className={`prose prose-sm max-w-none text-[13px] text-muted leading-relaxed ${!isExpanded ? 'line-clamp-3' : ''}`}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
+                />
                 <div className="flex items-center gap-1 mt-3 text-[12px] font-medium text-primary/50 group-hover:text-primary transition-colors">
                   {isExpanded ? 'Show less' : 'Read more'} <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>

@@ -140,7 +140,7 @@ const Overview: React.FC = () => {
                     itemStyle={{ color: '#111827' }}
                   />
                   <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Views" />
-                  <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="Downloads" />
+                  <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="PDF Reads" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -141,8 +141,10 @@ const ManageAnnouncements: React.FC = () => {
           <Input 
             label="Title" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
           />
-          <Textarea 
-            label="Content" required rows={6} value={formData.body} onChange={e => setFormData({...formData, body: e.target.value})}
+          <RichTextEditor 
+            label="Content" 
+            value={formData.body} 
+            onChange={value => setFormData({...formData, body: value})}
           />
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>

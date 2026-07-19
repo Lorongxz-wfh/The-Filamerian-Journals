@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { BookOpen, Plus, Settings2, Edit2, Trash2 } from 'lucide-react';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 
@@ -10,7 +11,6 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import Textarea from '@/components/ui/Textarea';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -328,8 +328,10 @@ const MyJournals: React.FC = () => {
             </div>
 
             <div className="md:col-span-2">
-              <Textarea 
-                label="Description" name="description" value={formData.description} onChange={handleInputChange} rows={3} placeholder="Brief description of the journal's scope and focus..."
+              <RichTextEditor 
+                label="Description" 
+                value={formData.description} 
+                onChange={(value) => setFormData({...formData, description: value})} 
               />
             </div>
             

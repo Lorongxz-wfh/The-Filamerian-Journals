@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -204,6 +205,10 @@ const Home: React.FC = () => {
                       <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-1">
                         {item.title}
                       </h4>
+                      <div 
+                        className="text-[12px] text-muted line-clamp-2 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
+                      />
                       {i < 2 && <div className="border-b border-border mt-4" />}
                     </Link>
                   ))}

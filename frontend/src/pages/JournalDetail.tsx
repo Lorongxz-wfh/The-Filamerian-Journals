@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, ChevronDown } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
+import DOMPurify from 'dompurify';
 import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -129,7 +130,10 @@ const JournalDetail: React.FC = () => {
             </span>
             <h1 className="text-2xl uppercase tracking-wider font-bold mb-4">{journal.title}</h1>
           </div>
-          <p className="text-[14px] text-muted leading-relaxed max-w-4xl">{journal.description || 'No description available.'}</p>
+          <div 
+            className="text-[14px] text-muted leading-relaxed max-w-4xl prose prose-sm" 
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(journal.description || 'No description available.') }}
+          />
 
           {/* Metadata Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border mt-auto">

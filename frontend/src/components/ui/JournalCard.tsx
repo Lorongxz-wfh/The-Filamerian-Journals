@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { BookOpen, ArrowRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 interface JournalCardProps {
   slug: string;
@@ -54,9 +55,10 @@ const JournalCard: React.FC<JournalCardProps> = ({
         <h4 className="text-[13px] font-bold text-primary uppercase tracking-wider mb-2 leading-tight">
           {title}
         </h4>
-        <p className="text-[12px] text-muted line-clamp-4 leading-relaxed mb-3">
-          {description}
-        </p>
+        <div 
+          className="text-[12px] text-muted line-clamp-4 leading-relaxed mb-3 prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+        />
         <div className="flex flex-col gap-1 text-[11px] text-muted/80">
           {publisher && <span><strong className="text-gray-900">Year:</strong> {publisher}</span>}
           {volume && <span><strong className="text-gray-900">Vols:</strong> {volume}</span>}
@@ -154,9 +156,10 @@ const JournalCard: React.FC<JournalCardProps> = ({
           {title}
         </h3>
 
-        <p className="text-[14.5px] text-muted line-clamp-2 leading-relaxed mb-5 max-w-3xl">
-          {description}
-        </p>
+        <div 
+          className="text-[14.5px] text-muted line-clamp-2 leading-relaxed mb-5 max-w-3xl prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+        />
         
         {publisher && (
           <div className="text-[12px] text-muted/80 mb-4">
