@@ -246,7 +246,7 @@ const ManageVolume: React.FC = () => {
                     {article.status}
                   </span>
                   <div className="flex items-center gap-2">
-                    {article.pdf_path && (
+                    {article.pdf_url && (
                       <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
                     )}
                     <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(article.id)} title="Delete" />

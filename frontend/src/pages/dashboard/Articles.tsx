@@ -226,7 +226,7 @@ const Articles: React.FC = () => {
                   <td className="px-5 py-4 text-[12px] text-muted">{new Date(article.created_at).toLocaleDateString()}</td>
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
-                      {article.pdf_path && (
+                      {article.pdf_url && (
                         <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
                       )}
                       <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
