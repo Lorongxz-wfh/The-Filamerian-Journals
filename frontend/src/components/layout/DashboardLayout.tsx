@@ -199,7 +199,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             <Link
               key={item.path}
               to={item.path}
-              onClick={() => setSidebarOpen(false)}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
                 location.pathname === item.path
@@ -222,7 +221,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={() => setSidebarOpen(false)}
+                // onClick removed to keep sidebar open after navigation
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
                   location.pathname === item.path
