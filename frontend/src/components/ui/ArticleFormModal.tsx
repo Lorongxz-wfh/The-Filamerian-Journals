@@ -38,7 +38,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
     title: '',
     abstract: '',
     doi: '',
-    status: 'Pending',
+    status: 'Draft',
     authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }] as AuthorData[],
     keyword_names: [] as string[],
     page_start: '',
@@ -58,7 +58,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           title: editingArticle.title || '',
           abstract: editingArticle.abstract || '',
           doi: editingArticle.doi || '',
-          status: editingArticle.status || 'Pending',
+          status: editingArticle.status || 'Draft',
           authors: editingArticle.authors && editingArticle.authors.length > 0 
             ? editingArticle.authors.map((a: any) => ({
                 first_name: a.first_name || '',
@@ -77,7 +77,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           title: '',
           abstract: '',
           doi: '',
-          status: 'Pending',
+          status: 'Draft',
           authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
           keyword_names: [],
           page_start: '',
@@ -272,8 +272,6 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
               onChange={(val) => handleInputChange({ target: { name: 'status', value: val } } as any)}
               options={[
                 { value: "Draft", label: "Draft" },
-                { value: "Pending", label: "Pending" },
-                { value: "Revision", label: "Revision" },
                 { value: "Published", label: "Published" },
               ]}
             />
