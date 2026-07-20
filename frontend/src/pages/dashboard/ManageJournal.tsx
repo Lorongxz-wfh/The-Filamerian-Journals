@@ -140,7 +140,7 @@ const ManageJournal: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <BookOpen className="h-4 w-4 text-primary/30" />
                   <span className="text-[14px] font-medium text-primary">
-                    Volume {vol.volume_number} ({vol.year})
+                    {vol.volume_number} ({vol.year})
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -159,7 +159,7 @@ const ManageJournal: React.FC = () => {
       <Modal isOpen={isVolModalOpen} onClose={() => !isSubmitting && setIsVolModalOpen(false)} title={editingVol ? 'Edit Volume' : 'New Volume'}>
         <form onSubmit={submitVolume} className="space-y-4">
           <Input 
-            label="Volume Name/Number" required type="text" value={volFormData.volume_number} onChange={e => setVolFormData({...volFormData, volume_number: e.target.value})}
+            label="Volume Name (e.g. 'Vol. 1 Issue 1' or 'CCS Volume 2')" required type="text" value={volFormData.volume_number} onChange={e => setVolFormData({...volFormData, volume_number: e.target.value})}
           />
           <Input 
             label="Year" required type="number" value={volFormData.year} onChange={e => setVolFormData({...volFormData, year: e.target.value})}
