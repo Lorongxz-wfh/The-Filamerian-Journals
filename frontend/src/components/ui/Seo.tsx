@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface SeoProps {
   title?: string;
@@ -9,8 +10,9 @@ interface SeoProps {
 }
 
 export const Seo: React.FC<SeoProps> = ({ title, description, url, image, type = 'website' }) => {
-  const defaultTitle = 'The Filamerian Journals';
-  const defaultDescription = 'Official online database of published journals, theses, case studies, and research papers from Filamer Christian University.';
+  const { settings } = useSettings();
+  const defaultTitle = settings.site_title || 'The Filamerian Journals';
+  const defaultDescription = settings.tagline || 'Official online database of published journals, theses, case studies, and research papers from Filamer Christian University.';
   const defaultUrl = window.location.origin;
   const defaultImage = `${window.location.origin}/og-image.png`;
 

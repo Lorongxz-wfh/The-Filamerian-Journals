@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
+import { useSettings } from '@/contexts/SettingsContext';
 
 import api from '@/services/api';
 
@@ -11,6 +12,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const path = location.pathname;
+  const { settings } = useSettings();
   
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -65,7 +67,7 @@ const Navbar = () => {
         {/* Brand — flush left */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
           <span className="font-display font-normal text-secondary text-xl tracking-wider uppercase leading-none">
-            The Filamerian Journals
+            {settings.site_title}
           </span>
         </Link>
 

@@ -8,6 +8,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Seo } from '@/components/ui/Seo';
 import PageWrapper from '@/components/layout/PageWrapper';
 import Spinner from '@/components/ui/Spinner';
+import { useSettings } from '@/contexts/SettingsContext';
 
 // Dynamic categories fetched from API
 
@@ -38,8 +39,7 @@ const Home: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
-  const [aboutUsHtml, setAboutUsHtml] = useState<string>(DEFAULT_ABOUT_US);
+  const { settings } = useSettings();
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -103,35 +103,25 @@ const Home: React.FC = () => {
       const cachedHome = localStorage.getItem('filamerian_home_cache');
       if (cachedHome) {
         try {
-          const { journals: cJournals, latest: cLatest, announcements: cAnn, settings: cSettings } = JSON.parse(cachedHome);
+          const { journals: cJournals, latest: cLatest, announcements: cAnn } = JSON.parse(cachedHome);
           if (cJournals) setJournals(cJournals);
           if (cLatest) setLatestArticles(cLatest);
           if (cAnn) setAnnouncements(cAnn);
-          if (cSettings) {
-            const catsString = cSettings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-            const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
-            setAvailableCategories(['All', ...catsArray]);
-            if (cSettings.home_about_us !== undefined) {
-              setAboutUsHtml(cSettings.home_about_us);
-            }
-          }
           setLoading(false); // Stop loading spinner instantly if cache exists
         } catch(e) {}
       }
 
       // 2. Fetch fresh data in the background
       try {
-        const [jrnRes, latestRes, annRes, setRes] = await Promise.all([
+        const [jrnRes, latestRes, annRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/articles/latest'),
-          api.get('/public/announcements'),
-          api.get('/public/settings')
+          api.get('/public/announcements')
         ]);
         
         const freshJournals = jrnRes.data.data;
         const freshLatest = latestRes.data.data;
         const freshAnnouncements = annRes.data.data.slice(0, 3);
-        const freshSettings = setRes.data.data;
 
         setJournals(freshJournals);
         setLatestArticles(freshLatest);
@@ -141,19 +131,8 @@ const Home: React.FC = () => {
         localStorage.setItem('filamerian_home_cache', JSON.stringify({
           journals: freshJournals,
           latest: freshLatest,
-          announcements: freshAnnouncements,
-          settings: freshSettings
+          announcements: freshAnnouncements
         }));
-
-        const catsString = freshSettings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-        const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
-        setAvailableCategories(['All', ...catsArray]);
-        
-        if (freshSettings.home_about_us !== undefined) {
-          setAboutUsHtml(freshSettings.home_about_us);
-        } else {
-          setAboutUsHtml(DEFAULT_ABOUT_US);
-        }
       } catch (err) {
         console.error('Failed to fetch public data', err);
       } finally {
@@ -162,6 +141,10 @@ const Home: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  const catsString = settings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+  const availableCategories = ['All', ...catsString.split(',').map((s: string) => s.trim()).filter(Boolean)];
+  const aboutUsHtml = settings.home_about_us || DEFAULT_ABOUT_US;
 
   const filteredJournals = activeTab === 'All'
     ? journals

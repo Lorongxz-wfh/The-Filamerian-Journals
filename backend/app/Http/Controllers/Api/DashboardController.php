@@ -70,7 +70,10 @@ class DashboardController extends Controller
         $websiteChartData = [];
         for ($i = 29; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i)->format('Y-m-d');
-            $chartData[] = $activityCounts[$date] ?? 0;
+            $chartData[] = [
+                'date' => \Carbon\Carbon::parse($date)->format('M d'),
+                'actions' => $activityCounts[$date] ?? 0
+            ];
             
             $websiteChartData[] = [
                 'date' => \Carbon\Carbon::parse($date)->format('M d'),
@@ -81,7 +84,8 @@ class DashboardController extends Controller
 
         return response()->json([
             'journals' => Journal::count(),
-            'articles' => Article::count(),
+            'articles' => Article::where('status', 'Published')->count(),
+            'drafts' => Article::where('status', 'Draft')->count(),
             'authors' => Author::count(),
             'users' => User::count(),
             'announcements' => Announcement::count(),

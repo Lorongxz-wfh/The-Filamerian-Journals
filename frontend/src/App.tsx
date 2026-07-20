@@ -28,7 +28,7 @@ import WebsiteSettings from '@/pages/dashboard/WebsiteSettings';
 import Toaster from '@/components/ui/Toaster';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
-// ThemeProvider removed
+import { SettingsProvider } from '@/contexts/SettingsContext';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -38,7 +38,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-
+    <SettingsProvider>
       <Router>
       <ScrollToTop />
       <Routes>
@@ -85,7 +85,7 @@ function App() {
       </Routes>
       <Toaster position="bottom-right" />
       </Router>
-
+    </SettingsProvider>
   );
 }
 

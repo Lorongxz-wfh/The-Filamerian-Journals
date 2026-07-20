@@ -10,6 +10,7 @@ const Overview: React.FC = () => {
   const [data, setData] = useState<{
     journals: number;
     articles: number;
+    drafts: number;
     authors: number;
     users: number;
     announcements: number;
@@ -20,34 +21,39 @@ const Overview: React.FC = () => {
       authors: { trend: string; isPositive: boolean };
       users: { trend: string; isPositive: boolean };
     };
-    chartData?: number[];
+    chartData?: Array<{ date: string; actions: number }>;
     websiteChartData?: Array<{ date: string; views: number; downloads: number }>;
-  }>({ journals: 0, articles: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
+  }>({ journals: 0, articles: 0, drafts: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
+
+  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/dashboard/stats');
-        setData(res.data);
+        const statsRes = await api.get('/dashboard/stats');
+        setData(statsRes.data);
+        
+        if (user.role === 'Super Admin') {
+          const healthRes = await api.get('/system/health');
+          setSystemHealth(healthRes.data);
+        }
       } catch (err) {
         console.error(err);
       }
     };
-    fetchStats();
+    fetchData();
   }, []);
 
   const stats = [
     { label: 'Journals', value: data.journals.toString(), icon: BookOpen, trend: data.trends?.journals.trend || 'Stable', isPositive: data.trends?.journals.isPositive ?? true },
-    { label: 'Articles', value: data.articles.toString(), icon: FileText, trend: data.trends?.articles.trend || 'Stable', isPositive: data.trends?.articles.isPositive ?? true },
+    { label: 'Published Articles', value: data.articles.toString(), icon: FileText, trend: data.trends?.articles.trend || 'Stable', isPositive: data.trends?.articles.isPositive ?? true },
+    { label: 'Draft Articles', value: data.drafts.toString(), icon: FileText, trend: '-', isPositive: false, color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { label: 'Authors', value: data.authors.toString(), icon: Users, trend: data.trends?.authors.trend || 'Stable', isPositive: data.trends?.authors.isPositive ?? true },
     { label: 'System Users', value: data.users.toString(), icon: Users, trend: data.trends?.users.trend || 'Stable', isPositive: data.trends?.users.isPositive ?? true },
   ];
 
-  const chartDataRaw = data.chartData || Array(30).fill(0);
-  const portalChartData = chartDataRaw.map((val, i) => ({
-    name: `Day ${30 - i}`,
-    actions: val
-  }));
+  const portalChartData = data.chartData || [];
 
   const websiteChartData = data.websiteChartData || [];
 
@@ -71,14 +77,14 @@ const Overview: React.FC = () => {
       </DashboardHeader>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat) => (
           <div key={stat.label} className="border border-border bg-surface p-5 relative overflow-hidden group hover:border-primary/30 transition-colors">
             <div className="flex items-start justify-between mb-6">
               <div className="p-2 bg-background border border-border">
                 <stat.icon className="h-4 w-4 text-primary/70" />
               </div>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${stat.isPositive ? 'text-emerald-600 bg-emerald-500/10' : 'text-amber-600 bg-amber-500/10'}`}>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${stat.color ? `${stat.color} ${stat.bg}` : (stat.isPositive ? 'text-emerald-600 bg-emerald-500/10' : 'text-amber-600 bg-amber-500/10')}`}>
                 {stat.trend}
               </span>
             </div>
@@ -155,7 +161,7 @@ const Overview: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={portalChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={false} />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
@@ -236,32 +242,40 @@ const Overview: React.FC = () => {
             </div>
           </div>
 
-          {/* System Info */}
-          <div className="border border-border bg-surface p-5 shadow-sm">
-            <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5">
-              System Status
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] text-muted">
-                  <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> API Services
+          {/* System Info - Super Admin Only */}
+          {user.role === 'Super Admin' && (
+            <div className="border border-border bg-surface p-5 shadow-sm">
+              <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5">
+                System Status
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[13px] text-muted">
+                    <div className={`h-1.5 w-1.5 rounded-full ${systemHealth?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`} /> API Services
+                  </div>
+                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 ${systemHealth?.status === 'Operational' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'}`}>
+                    {systemHealth?.status || 'Loading...'}
+                  </span>
                 </div>
-                <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">Online</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] text-muted">
-                  <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> Cloud Storage
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[13px] text-muted">
+                    <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> Cloud Storage
+                  </div>
+                  <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">
+                    {systemHealth?.storage_disk ? systemHealth.storage_disk.toUpperCase() : 'Loading...'}
+                  </span>
                 </div>
-                <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">Online</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] text-muted">
-                  <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> Primary DB
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[13px] text-muted">
+                    <div className={`h-1.5 w-1.5 rounded-full ${systemHealth?.database === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`} /> Primary DB
+                  </div>
+                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 ${systemHealth?.database === 'Connected' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'}`}>
+                    {systemHealth?.database || 'Loading...'}
+                  </span>
                 </div>
-                <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">Online</span>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
       </div>

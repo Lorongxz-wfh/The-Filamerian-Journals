@@ -1,6 +1,8 @@
 import React from 'react';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Footer: React.FC = () => {
+  const { settings } = useSettings();
   return (
     <footer className="bg-primary text-white">
       {/* Main footer content */}
@@ -40,7 +42,7 @@ const Footer: React.FC = () => {
           {/* Journal Info */}
           <div className="space-y-4">
             <h4 className="text-[12px] font-semibold text-white/80 uppercase tracking-wider">
-              The Filamerian Journals
+              {settings.site_title}
             </h4>
             <ul className="space-y-2">
               {['Submission Guidelines', 'Editorial Board', 'Publication Ethics', 'Open Access Policy', 'Contact Editorial Office'].map((item) => (
