@@ -268,16 +268,16 @@ const Home: React.FC = () => {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-9 xl:gap-[60px] items-start">
           {/* Journals Grid */}
           <div className="lg:col-span-9 flex flex-col">
-            <div className="flex items-center justify-between border-b border-border mb-4 overflow-x-auto min-h-[40px] pb-2 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border mb-4 min-h-[40px] pb-2 gap-4">
               <h2 className="text-lg font-bold uppercase tracking-wider shrink-0">
                 Academic Journals
               </h2>
-              <div className="flex gap-4 sm:gap-6 shrink-0">
+              <div className="flex items-center overflow-x-auto max-w-full sm:max-w-[60%] md:max-w-[70%] gap-4 sm:gap-6 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {availableCategories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setActiveTab(cat)}
-                    className={`text-[12px] font-medium pb-1 transition-colors ${
+                    className={`text-[12px] font-medium pb-1 transition-colors whitespace-nowrap shrink-0 ${
                       activeTab === cat
                         ? 'font-semibold text-primary border-b-2 border-primary'
                         : 'text-muted hover:text-primary'
