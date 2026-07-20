@@ -13,7 +13,7 @@ class Journal extends Model
         'title',
         'slug',
         'description',
-        'category',
+        'category_id',
         'issn',
         'frequency',
         'editor',
@@ -33,5 +33,10 @@ class Journal extends Model
     public function volumes()
     {
         return $this->hasMany(Volume::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

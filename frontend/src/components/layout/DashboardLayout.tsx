@@ -97,6 +97,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
   const adminItems = [
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'], inDev: true },
+    { path: '/dashboard/categories', label: 'Categories', icon: BookOpen, roles: ['Super Admin', 'Admin'] },
     { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },

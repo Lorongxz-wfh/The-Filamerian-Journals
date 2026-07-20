@@ -22,7 +22,8 @@ interface Journal {
   title: string;
   slug: string;
   description: string;
-  category: string;
+  category: any;
+  category_id: number | null;
   publisher: string | null;
   issn: string;
   frequency: string;
@@ -48,7 +49,7 @@ const MyJournals: React.FC = () => {
     title: '',
     slug: '',
     description: '',
-    category: '',
+    category_id: '',
     publisher: '',
     issn: '',
     frequency: '',
@@ -59,25 +60,17 @@ const MyJournals: React.FC = () => {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([
-    'Science', 'Education', 'Arts', 'Multidisciplinary'
-  ]);
+  const [availableCategories, setAvailableCategories] = useState<any[]>([]);
 
   const fetchJournals = async () => {
     try {
       setLoading(true);
-      const [journalsRes, settingsRes] = await Promise.all([
+      const [journalsRes, categoriesRes] = await Promise.all([
         api.get('/journals?with_volumes=1'),
-        api.get('/public/settings')
+        api.get('/categories')
       ]);
       setJournals(journalsRes.data.data);
-      const data = settingsRes.data?.data || {};
-      const catsString = data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-      const catsArray = typeof catsString === 'string' 
-        ? catsString.split(',').map((s: string) => s.trim()).filter(Boolean)
-        : ['Science', 'Education', 'Arts', 'Multidisciplinary'];
-      
-      setAvailableCategories(catsArray.length > 0 ? catsArray : ['Science', 'Education', 'Arts', 'Multidisciplinary']);
+      setAvailableCategories(categoriesRes.data.data || []);
     } catch (err) {
       console.error('Failed to fetch journals or settings:', err);
     } finally {
@@ -97,7 +90,7 @@ const MyJournals: React.FC = () => {
         title: journal.title || '',
         slug: journal.slug || '',
         description: journal.description || '',
-        category: journal.category || '',
+        category_id: journal.category_id ? String(journal.category_id) : '',
         publisher: journal.publisher || '',
         issn: journal.issn || '',
         frequency: journal.frequency || '',
@@ -109,7 +102,7 @@ const MyJournals: React.FC = () => {
         title: '',
         slug: '',
         description: '',
-        category: '',
+        category_id: '',
         publisher: '',
         issn: '',
         frequency: '',
@@ -136,7 +129,7 @@ const MyJournals: React.FC = () => {
       payload.append('title', formData.title);
       payload.append('slug', formData.slug);
       payload.append('description', formData.description);
-      payload.append('category', formData.category);
+      payload.append('category_id', formData.category_id);
       payload.append('publisher', formData.publisher);
       payload.append('issn', formData.issn);
       payload.append('frequency', formData.frequency);
@@ -237,7 +230,7 @@ const MyJournals: React.FC = () => {
                 <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">{journal.title}</span>
               </div>
               <div className="col-span-2 text-[13px] text-muted truncate">
-                {journal.category || '-'}
+                {journal.category?.name || '-'}
               </div>
               <div className="col-span-2 text-center text-[13px] text-muted">
                 {journal.volumes?.length || 0}
@@ -303,13 +296,13 @@ const MyJournals: React.FC = () => {
 
             <div>
               <Select 
-                label="Category" required name="category" 
-                value={formData.category} 
-                onChange={(val) => handleInputChange({ target: { name: 'category', value: val } } as any)}
+                label="Category" required name="category_id" 
+                value={formData.category_id} 
+                onChange={(val) => handleInputChange({ target: { name: 'category_id', value: val } } as any)}
                 options={[
                   { value: "", label: "Select Category" },
                   ...availableCategories.map(cat => ({
-                    value: cat, label: cat
+                    value: cat.id, label: cat.name
                   }))
                 ]}
               />

@@ -39,7 +39,7 @@ interface Journal {
   id: number;
   slug: string;
   title: string;
-  category: string;
+  category: any;
   issn: string;
   volumes: Volume[];
 }
@@ -154,7 +154,7 @@ const Archives: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-4">
-                    <span className="text-[11px] text-muted bg-background px-2 py-0.5">{journal.category || 'Uncategorized'}</span>
+                    <span className="text-[11px] text-muted bg-background px-2 py-0.5">{journal.category?.name || 'Uncategorized'}</span>
                     <ChevronDown className={`h-4 w-4 text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                   </div>
                 </button>

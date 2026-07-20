@@ -15,7 +15,7 @@ interface Journal {
   slug: string;
   title: string;
   description: string;
-  category: string;
+  category: any;
   publisher: string | null;
   cover_image: string | null;
   volumes?: any[];
@@ -117,9 +117,8 @@ const Journals: React.FC = () => {
           url += `&q=${encodeURIComponent(debouncedSearch)}`; // Backend doesn't support 'q' for journals yet, but we'll leave client side filter too
         }
 
-        const [jrnRes, setRes] = await Promise.all([
-          api.get(url),
-          api.get('/public/settings')
+        const [jrnRes] = await Promise.all([
+          api.get(url)
         ]);
         
         const newJournals = jrnRes.data.data;
@@ -131,8 +130,8 @@ const Journals: React.FC = () => {
           localStorage.setItem('journals_cache', JSON.stringify(newJournals));
         }
         
-        const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-        const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
+        const categoriesRes = await api.get('/categories');
+        const catsArray = categoriesRes.data.data.map((c: any) => c.slug) || [];
         const newCategories = ['All', ...catsArray];
         setAvailableCategories(newCategories);
         localStorage.setItem('categories_cache', JSON.stringify(newCategories));
@@ -166,7 +165,7 @@ const Journals: React.FC = () => {
 
   const filtered = useMemo(() => {
     let result = journals.filter((j) => {
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(j.category);
+      const matchesCategory = selectedCategories.length === 0 || (j.category && selectedCategories.includes(j.category.slug));
       const matchesSearch = j.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         (j.description && j.description.toLowerCase().includes(debouncedSearch.toLowerCase()));
         
@@ -393,7 +392,7 @@ const Journals: React.FC = () => {
                       date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
                       volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
                       image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
-                      category={j.category}
+                      category={j.category?.name}
                       publisher={j.publisher || undefined}
                       viewMode={viewMode}
                       className={viewMode === 'grid' ? "h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] mx-auto w-full min-h-[320px]" : ""}

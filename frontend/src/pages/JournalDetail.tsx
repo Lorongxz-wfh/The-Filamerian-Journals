@@ -37,7 +37,7 @@ interface Journal {
   slug: string;
   title: string;
   description: string;
-  category: string;
+  category: any;
   issn: string;
   frequency: string;
   editor: string;
@@ -126,7 +126,7 @@ const JournalDetail: React.FC = () => {
         <div className="lg:col-span-9 flex flex-col h-full">
           <div>
             <span className="inline-block text-[11px] font-semibold text-secondary bg-primary px-3 py-1 uppercase tracking-wider mb-3">
-              {journal.category || 'Uncategorized'}
+              {journal.category?.name || 'Uncategorized'}
             </span>
             <h1 className="text-2xl uppercase tracking-wider font-bold mb-4">{journal.title}</h1>
           </div>

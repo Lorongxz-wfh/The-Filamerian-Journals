@@ -195,6 +195,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
             <Select 
               label="Target Volume" required name="volume_id" 
               value={formData.volume_id} 
+              disabled={!!initialVolumeId}
               onChange={(val) => handleInputChange({ target: { name: 'volume_id', value: val } } as any)}
               options={[
                 { value: "", label: "Select Journal / Volume" },
@@ -207,6 +208,11 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
                 )
               ]}
             />
+            {initialVolumeId && (
+              <p className="text-[10px] text-muted mt-1.5 ml-1">
+                Volume is locked because you are creating this article directly inside it.
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-2 space-y-2">

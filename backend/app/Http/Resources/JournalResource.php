@@ -19,7 +19,20 @@ class JournalResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'description' => $this->description,
-            'category' => $this->category,
+            'category_id' => $this->category_id,
+            'category' => $this->whenLoaded('category', function () {
+                return $this->category ? [
+                    'id' => $this->category->id,
+                    'name' => $this->category->name,
+                    'slug' => $this->category->slug,
+                ] : null;
+            }, function() {
+                return $this->category ? [
+                    'id' => $this->category->id,
+                    'name' => $this->category->name,
+                    'slug' => $this->category->slug,
+                ] : null;
+            }),
             'publisher' => $this->publisher,
             'issn' => $this->issn,
             'frequency' => $this->frequency,

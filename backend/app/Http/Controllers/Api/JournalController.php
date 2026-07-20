@@ -15,13 +15,16 @@ class JournalController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Journal::query();
+        $query = Journal::with('category');
 
         // Filters
         $category = $request->query('category');
         if (!empty($category)) {
             $categories = array_map('trim', explode(',', $category));
-            $query->whereIn('category', $categories);
+            $query->whereHas('category', function($q) use ($categories) {
+                $q->whereIn('slug', $categories)
+                  ->orWhereIn('name', $categories);
+            });
         }
 
         $year = $request->query('year');
@@ -54,7 +57,7 @@ class JournalController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:journals,slug',
             'description' => 'nullable|string',
-            'category' => 'nullable|string|max:100',
+            'category_id' => 'nullable|exists:categories,id',
             'publisher' => 'nullable|string|max:255',
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
@@ -91,7 +94,7 @@ class JournalController extends Controller
      */
     public function show(Request $request, Journal $journal)
     {
-        $journal->load(['volumes.articles' => function ($q) use ($request) {
+        $journal->load(['category', 'volumes.articles' => function ($q) use ($request) {
             if ($request->is('api/public/*')) {
                 $q->where('status', 'Published');
             }
@@ -110,7 +113,7 @@ class JournalController extends Controller
             'title' => 'string|max:255',
             'slug' => 'string|max:255|unique:journals,slug,' . $journal->id,
             'description' => 'nullable|string',
-            'category' => 'nullable|string|max:100',
+            'category_id' => 'nullable|exists:categories,id',
             'publisher' => 'nullable|string|max:255',
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',

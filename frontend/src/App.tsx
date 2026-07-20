@@ -9,6 +9,7 @@ import Login from '@/pages/Login';
 import PendingVerification from '@/pages/PendingVerification';
 import Overview from '@/pages/dashboard/Overview';
 import MyJournals from '@/pages/dashboard/MyJournals';
+import Categories from '@/pages/dashboard/Categories';
 import ManageJournal from '@/pages/dashboard/ManageJournal';
 import ManageVolume from '@/pages/dashboard/ManageVolume';
 import Articles from '@/pages/dashboard/Articles';
@@ -68,6 +69,7 @@ function App() {
           <Route index element={<Overview />} />
           <Route path="health" element={<SystemHealth />} />
           <Route path="journals" element={<MyJournals />} />
+          <Route path="categories" element={<Categories />} />
           <Route path="journals/:slug" element={<ManageJournal />} />
           <Route path="volumes/:id" element={<ManageVolume />} />
           <Route path="articles" element={<Articles />} />
