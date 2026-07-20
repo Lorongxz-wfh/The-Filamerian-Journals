@@ -88,8 +88,11 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
     );
   }
 
+  const hasData = author.first_name || author.last_name || author.middle_name || author.suffix;
+  const isComplete = author.first_name || author.last_name;
+
   return (
-    <div ref={containerRef} className="flex items-start gap-2 mb-2 bg-secondary/5 p-3 border border-secondary/20 relative">
+    <div ref={containerRef} className="flex items-start gap-2 mb-2 bg-slate-50/50 p-3 border border-border relative">
       <div className="flex-grow grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div>
           <input 
@@ -100,7 +103,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onKeyDown={handleKeyDown}
             placeholder="First Name *"
             autoFocus={isInitialEmpty}
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-secondary"
+            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -111,7 +114,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Middle (Opt)"
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-secondary"
+            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -122,7 +125,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Last Name *"
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-secondary"
+            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
         <div>
@@ -133,25 +136,33 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Suffix (e.g. Jr.)"
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-secondary"
+            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
       </div>
       
       <div className="flex flex-col gap-1">
-        <button 
-          type="button" 
-          onClick={() => setIsEditing(false)} 
-          disabled={!author.first_name && !author.last_name}
-          className="p-1.5 bg-secondary text-white hover:bg-secondary/90 transition-colors disabled:opacity-50"
-          title="Done"
-        >
-          <Check className="h-3 w-3" />
-        </button>
-        {onRemove && (
-          <button type="button" onClick={onRemove} className="p-1.5 bg-red-100 text-red-600 hover:bg-red-200 transition-colors" title="Remove">
+        {(!hasData && onRemove) ? (
+          <button type="button" onClick={onRemove} className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100" title="Remove">
             <X className="h-3 w-3" />
           </button>
+        ) : (
+          <>
+            <button 
+              type="button" 
+              onClick={() => setIsEditing(false)} 
+              disabled={!isComplete}
+              className="p-1.5 bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500"
+              title="Done"
+            >
+              <Check className="h-3 w-3" />
+            </button>
+            {onRemove && (
+              <button type="button" onClick={onRemove} className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100" title="Remove">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
