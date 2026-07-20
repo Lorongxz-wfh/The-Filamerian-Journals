@@ -45,8 +45,20 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
     page_end: ''
   });
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      setPdfFile(file);
+    } else if (file) {
+      toast.error('Only PDF files are accepted.');
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -281,7 +293,14 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
             <label className="block text-[12px] font-medium text-primary mb-2 uppercase tracking-wider">PDF File</label>
             <label
               htmlFor="pdf-upload"
-              className="group relative flex flex-col items-center justify-center w-full border-2 border-dashed border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02] transition-all cursor-pointer p-6 gap-3"
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              className={`group relative flex flex-col items-center justify-center w-full border-2 border-dashed transition-all cursor-pointer p-6 gap-3
+                ${ isDragging
+                  ? 'border-primary bg-primary/5 scale-[1.01]'
+                  : 'border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02]'
+                }`}
             >
               <input
                 id="pdf-upload"
@@ -290,12 +309,17 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
                 onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
                 className="sr-only"
               />
-              {pdfFile ? (
+              {isDragging ? (
+                <>
+                  <Upload className="h-8 w-8 text-primary animate-bounce" />
+                  <p className="text-[13px] font-semibold text-primary">Drop PDF here</p>
+                </>
+              ) : pdfFile ? (
                 <>
                   <CheckCircle2 className="h-8 w-8 text-green-500" />
                   <div className="text-center">
                     <p className="text-[13px] font-semibold text-primary">{pdfFile.name}</p>
-                    <p className="text-[11px] text-muted mt-0.5">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB — Click to change</p>
+                    <p className="text-[11px] text-muted mt-0.5">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB — Click or drag to change</p>
                   </div>
                 </>
               ) : editingArticle?.pdf_url ? (
@@ -303,14 +327,14 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
                   <FileText className="h-8 w-8 text-primary/40" />
                   <div className="text-center">
                     <p className="text-[13px] font-semibold text-primary">PDF already uploaded</p>
-                    <p className="text-[11px] text-muted mt-0.5">Click to replace with a new file</p>
+                    <p className="text-[11px] text-muted mt-0.5">Click or drag a new file to replace it</p>
                   </div>
                 </>
               ) : (
                 <>
                   <Upload className="h-8 w-8 text-muted group-hover:text-primary transition-colors" />
                   <div className="text-center">
-                    <p className="text-[13px] font-semibold text-primary">Click to upload PDF</p>
+                    <p className="text-[13px] font-semibold text-primary">Click or drag & drop PDF</p>
                     <p className="text-[11px] text-muted mt-0.5">PDF files only</p>
                   </div>
                 </>
