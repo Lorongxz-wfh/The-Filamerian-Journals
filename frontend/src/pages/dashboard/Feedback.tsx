@@ -3,6 +3,7 @@ import { MessageSquare, Trash2 } from 'lucide-react';
 import api from '@/services/api';
 import { MessageListSkeleton } from '@/components/ui/Skeleton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import Pagination from '@/components/ui/Pagination';
 
 interface FeedbackItem {
   id: number;
@@ -19,11 +20,15 @@ const Feedback: React.FC = () => {
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
 
   const fetchFeedbacks = async () => {
     try {
-      const res = await api.get('/feedbacks');
+      setLoading(true);
+      const res = await api.get(`/feedbacks?page=${page}`);
       setFeedbacks(res.data.data);
+      setLastPage(res.data.last_page || 1);
     } catch (err) {
       console.error('Failed to fetch feedbacks', err);
     } finally {
@@ -33,7 +38,7 @@ const Feedback: React.FC = () => {
 
   useEffect(() => {
     fetchFeedbacks();
-  }, []);
+  }, [page]);
 
   const handleSelect = async (id: number) => {
     setSelected(id);
@@ -67,42 +72,55 @@ const Feedback: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
         {/* Message List */}
-        <div className="lg:col-span-5 border border-border bg-surface divide-y divide-border overflow-auto max-h-[600px]">
-          {loading ? (
-            <MessageListSkeleton rows={6} />
-          ) : feedbacks.length === 0 ? (
-            <div className="p-8 text-center text-muted text-[13px]">
-              No messages found.
+        <div className="lg:col-span-5 border border-border bg-surface flex flex-col max-h-[600px]">
+          <div className="divide-y divide-border overflow-auto flex-grow">
+            {loading ? (
+              <MessageListSkeleton rows={6} />
+            ) : feedbacks.length === 0 ? (
+              <div className="p-8 text-center text-muted text-[13px]">
+                No messages found.
+              </div>
+            ) : (
+              feedbacks.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleSelect(item.id)}
+                  className={`w-full text-left px-5 py-4 transition-colors ${
+                    selected === item.id
+                      ? 'bg-primary/5 border-l-2 border-l-primary'
+                      : 'hover:bg-background border-l-2 border-l-transparent'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-[13px] truncate ${!item.is_read ? 'font-semibold text-primary' : 'font-medium text-primary/70'}`}>
+                      {item.name}
+                    </span>
+                    <span className="text-[11px] text-muted shrink-0 ml-3">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className={`text-[12px] truncate ${!item.is_read ? 'text-primary/80 font-medium' : 'text-muted'}`}>
+                    {item.subject}
+                  </p>
+                </button>
+              ))
+            )}
+          </div>
+          
+          {!loading && lastPage > 1 && (
+            <div className="border-t border-border p-4 bg-background/50">
+              <Pagination
+                currentPage={page}
+                lastPage={lastPage}
+                onPageChange={setPage}
+                className="mt-0"
+              />
             </div>
-          ) : (
-            feedbacks.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleSelect(item.id)}
-                className={`w-full text-left px-5 py-4 transition-colors ${
-                  selected === item.id
-                    ? 'bg-primary/5 border-l-2 border-l-primary'
-                    : 'hover:bg-background border-l-2 border-l-transparent'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className={`text-[13px] truncate ${!item.is_read ? 'font-semibold text-primary' : 'font-medium text-primary/70'}`}>
-                    {item.name}
-                  </span>
-                  <span className="text-[11px] text-muted shrink-0 ml-3">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className={`text-[12px] truncate ${!item.is_read ? 'text-primary/80 font-medium' : 'text-muted'}`}>
-                  {item.subject}
-                </p>
-              </button>
-            ))
           )}
         </div>
 
         {/* Message Detail */}
-        <div className="lg:col-span-7 border border-border bg-surface p-6 flex flex-col h-full">
+        <div className="lg:col-span-7 border border-border bg-surface p-6 flex flex-col h-full min-h-[400px]">
           {selectedItem ? (
             <div className="space-y-6 flex-grow flex flex-col">
               <div className="border-b border-border pb-4 space-y-3">

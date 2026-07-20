@@ -17,6 +17,11 @@ class JournalController extends Controller
     {
         $query = Journal::with('category');
 
+        if ($request->filled('search')) {
+            $search = strtolower($request->query('search'));
+            $query->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
+        }
+
         // Filters
         $category = $request->query('category');
         if (!empty($category)) {

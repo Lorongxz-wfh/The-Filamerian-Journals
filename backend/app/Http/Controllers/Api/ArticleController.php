@@ -9,9 +9,25 @@ use Illuminate\Http\Request;
 
 class ArticleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return ArticleResource::collection(Article::with(['volume.journal', 'authors', 'keywords'])->paginate(50));
+        $query = Article::with(['volume.journal', 'authors', 'keywords']);
+
+        if ($request->filled('search')) {
+            $search = strtolower($request->query('search'));
+            $query->where(function($q) use ($search) {
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(doi) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
+        if ($request->filled('status') && $request->query('status') !== 'all') {
+            $query->where('status', $request->query('status'));
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        return ArticleResource::collection($query->paginate(50));
     }
 
     public function store(Request $request)

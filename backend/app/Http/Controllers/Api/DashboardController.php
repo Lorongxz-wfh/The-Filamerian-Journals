@@ -104,11 +104,19 @@ class DashboardController extends Controller
     /**
      * Return paginated activity logs for the admin table.
      */
-    public function logs()
+    public function logs(\Illuminate\Http\Request $request)
     {
-        $logs = \App\Models\ActivityLog::with('user')
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
+        $query = \App\Models\ActivityLog::with('user');
+
+        if ($request->filled('search')) {
+            $search = strtolower($request->query('search'));
+            $query->where(function($q) use ($search) {
+                $q->whereRaw('LOWER(action) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
+        $logs = $query->orderBy('created_at', 'desc')->paginate(50);
 
         return response()->json($logs);
     }

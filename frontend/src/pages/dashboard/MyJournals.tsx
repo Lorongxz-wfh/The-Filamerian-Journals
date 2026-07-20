@@ -11,11 +11,13 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { ListSkeleton } from '@/components/ui/Skeleton';
+import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import FileUploadZone from '@/components/ui/FileUploadZone';
 import { toast } from 'sonner';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import Pagination from '@/components/ui/Pagination';
 
 interface Journal {
   id: number;
@@ -39,7 +41,10 @@ const MyJournals: React.FC = () => {
   const navigate = useNavigate();
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
   const [filter, setFilter] = useState('');
+  const [debouncedFilter, setDebouncedFilter] = useState('');
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,14 +67,28 @@ const MyJournals: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilter(filter);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [filter]);
+
   const fetchJournals = async () => {
     try {
       setLoading(true);
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('with_volumes', '1');
+      if (debouncedFilter) params.append('search', debouncedFilter);
+
       const [journalsRes, categoriesRes] = await Promise.all([
-        api.get('/journals?with_volumes=1'),
+        api.get(`/journals?${params.toString()}`),
         api.get('/categories')
       ]);
       setJournals(journalsRes.data.data);
+      setLastPage(journalsRes.data.meta?.last_page || 1);
       setAvailableCategories(categoriesRes.data.data || []);
     } catch (err) {
       console.error('Failed to fetch journals or settings:', err);
@@ -80,7 +99,7 @@ const MyJournals: React.FC = () => {
 
   useEffect(() => {
     fetchJournals();
-  }, []);
+  }, [page, debouncedFilter]);
 
   const handleOpenModal = (journal: Journal | null = null) => {
     setError(null);
@@ -181,10 +200,6 @@ const MyJournals: React.FC = () => {
     }
   };
 
-  const filtered = journals.filter((j) =>
-    j.title.toLowerCase().includes(filter.toLowerCase())
-  );
-
   return (
     <div className="space-y-8">
       <DashboardHeader title="My Journals">
@@ -197,71 +212,90 @@ const MyJournals: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      {/* Search */}
-      <SearchInput 
-        placeholder="Filter journals..."
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-      />
-
-      {/* Table */}
-      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
-        <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
-          <div className="col-span-5">Title</div>
-          <div className="col-span-2">Category</div>
-          <div className="col-span-2 text-center">Volumes</div>
-          <div className="col-span-2">Editor</div>
-          <div className="col-span-1"></div>
-        </div>
-
-        {loading ? (
-          <ListSkeleton colSpans={[5, 2, 2, 2, 1]} rows={5} />
-        ) : filtered.length === 0 ? (
-          <EmptyState title="No journals" description="No journals found." className="border-0 bg-transparent py-16" />
-        ) : (
-          filtered.map((journal) => (
-            <div
-              key={journal.id}
-              onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
-              className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 items-center hover:bg-background transition-colors group cursor-pointer"
-            >
-              <div className="col-span-5 flex items-center gap-3 min-w-0">
-                <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
-                <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">{journal.title}</span>
-              </div>
-              <div className="col-span-2 text-[13px] text-muted truncate">
-                {journal.category?.name || '-'}
-              </div>
-              <div className="col-span-2 text-center text-[13px] text-muted">
-                {journal.volumes?.length || 0}
-              </div>
-              <div className="col-span-2 text-[13px] text-muted truncate">
-                {journal.editor || '-'}
-              </div>
-              <div className="col-span-1 flex justify-end gap-2">
-                <IconButton 
-                  icon={Settings2} 
-                  onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/journals/${journal.slug}`); }} 
-                  title="Manage Volumes" 
-                />
-                <IconButton 
-                  icon={Edit2} 
-                  onClick={(e) => { e.stopPropagation(); handleOpenModal(journal); }} 
-                  title="Edit" 
-                />
-                <IconButton 
-                  icon={Trash2} 
-                  variant="danger" 
-                  onClick={(e) => { e.stopPropagation(); handleDelete(journal.slug); }} 
-                  title="Delete" 
-                />
-              </div>
-            </div>
-          ))
-        )}
+      <div className="flex justify-end">
+        <SearchInput 
+          placeholder="Search journals by title..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
       </div>
 
-      <p className="text-[11px] text-muted">Showing {filtered.length} of {journals.length} journals</p>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead className="text-center">Volumes</TableHead>
+            <TableHead>Editor</TableHead>
+            <TableHead className="w-28 text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRowSkeleton columns={5} rows={5} />
+          ) : journals.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="h-32 text-center">
+                <EmptyState title="No journals" description="No journals match your criteria." className="bg-transparent border-0 py-16" />
+              </TableCell>
+            </TableRow>
+          ) : (
+            journals.map((journal) => (
+              <TableRow
+                key={journal.id}
+                onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
+                className="group cursor-pointer"
+              >
+                <TableCell>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
+                    <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
+                      {journal.title}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted truncate">
+                  {journal.category?.name || '-'}
+                </TableCell>
+                <TableCell className="text-center text-muted">
+                  {journal.volumes?.length || 0}
+                </TableCell>
+                <TableCell className="text-muted truncate">
+                  {journal.editor || '-'}
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <IconButton 
+                      icon={Settings2} 
+                      onClick={() => navigate(`/dashboard/journals/${journal.slug}`)} 
+                      title="Manage Volumes" 
+                    />
+                    <IconButton 
+                      icon={Edit2} 
+                      onClick={() => handleOpenModal(journal)} 
+                      title="Edit Journal" 
+                    />
+                    <IconButton 
+                      icon={Trash2} 
+                      variant="danger" 
+                      onClick={() => handleDelete(journal.slug)} 
+                      title="Delete Journal" 
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+
+      {!loading && lastPage > 1 && (
+        <Pagination
+          currentPage={page}
+          lastPage={lastPage}
+          onPageChange={setPage}
+        />
+      )}
 
       {/* Modal Form */}
       <Modal 
@@ -302,7 +336,7 @@ const MyJournals: React.FC = () => {
                 options={[
                   { value: "", label: "Select Category" },
                   ...availableCategories.map(cat => ({
-                    value: cat.id, label: cat.name
+                    value: String(cat.id), label: cat.name
                   }))
                 ]}
               />
@@ -375,6 +409,7 @@ const MyJournals: React.FC = () => {
           </div>
         </form>
       </Modal>
+
       <ConfirmDialog 
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}

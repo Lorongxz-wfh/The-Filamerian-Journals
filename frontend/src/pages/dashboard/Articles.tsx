@@ -12,6 +12,9 @@ import Button from '@/components/ui/Button';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import Badge from '@/components/ui/Badge';
+import Pagination from '@/components/ui/Pagination';
 
 interface Article {
   id: number;
@@ -27,11 +30,14 @@ interface Article {
   created_at: string;
 }
 
-const statusColor: Record<string, string> = {
-  Published: 'text-emerald-600 bg-emerald-50',
-  Pending: 'text-amber-600 bg-amber-50',
-  Revision: 'text-rose-600 bg-rose-50',
-  Draft: 'text-gray-600 bg-gray-50',
+const getStatusVariant = (status: string) => {
+  switch (status) {
+    case 'Published': return 'success';
+    case 'Pending': return 'secondary';
+    case 'Revision': return 'destructive';
+    case 'Draft': return 'default';
+    default: return 'outline';
+  }
 };
 
 const articleHasPdf = (article: Article) => !!article.pdf_url;
@@ -39,32 +45,56 @@ const articleHasPdf = (article: Article) => !!article.pdf_url;
 const Articles: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [articles, setArticles] = useState<Article[]>([]);
-  const [journalsData, setJournalsData] = useState<any[]>([]); // For the issue selector
+  const [journalsData, setJournalsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
   const [filter, setFilter] = useState('');
+  const [debouncedFilter, setDebouncedFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'Published' | 'Draft'>('all');
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   
-  // PDF Viewer Modal
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-
   const [initialVolumeId, setInitialVolumeId] = useState<string>('');
+
+  // Debounce search filter
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilter(filter);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [filter]);
+
+  // Reset page when tab changes
+  useEffect(() => {
+    setPage(1);
+  }, [tab]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      if (debouncedFilter) params.append('search', debouncedFilter);
+      if (tab !== 'all') params.append('status', tab);
+
       const [artRes, jrnRes] = await Promise.all([
-        api.get('/articles'),
+        api.get(`/articles?${params.toString()}`),
         api.get('/journals?with_volumes=1')
       ]);
+      
       setArticles(artRes.data.data);
+      setLastPage(artRes.data.meta?.last_page || 1);
       setJournalsData(jrnRes.data.data);
     } catch (err) {
       console.error('Failed to fetch data:', err);
+      toast.error('Failed to load articles');
     } finally {
       setLoading(false);
     }
@@ -72,7 +102,7 @@ const Articles: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, debouncedFilter, tab]);
 
   const handleOpenModal = (article: Article | null = null, initialOverrides: any = {}) => {
     setEditingArticle(article);
@@ -86,7 +116,6 @@ const Articles: React.FC = () => {
     if (action === 'new' && volId) {
       handleOpenModal(null, { volume_id: volId });
     } else if (action === 'edit' && searchParams.get('article_id')) {
-      // Find the article and open edit modal
       const artId = Number(searchParams.get('article_id'));
       if (articles.length > 0) {
         const target = articles.find(a => a.id === artId);
@@ -133,16 +162,10 @@ const Articles: React.FC = () => {
     }
   };
 
-  const filtered = articles.filter((a) => {
-    const matchesSearch = a.title.toLowerCase().includes(filter.toLowerCase());
-    const matchesTab = tab === 'all' || a.status === tab;
-    return matchesSearch && matchesTab;
-  });
-
   const tabs = [
-    { key: 'all' as const, label: 'All', count: articles.length },
-    { key: 'Published' as const, label: 'Published', count: articles.filter((a) => a.status === 'Published').length },
-    { key: 'Draft' as const, label: 'Draft', count: articles.filter((a) => a.status === 'Draft').length },
+    { key: 'all' as const, label: 'All' },
+    { key: 'Published' as const, label: 'Published' },
+    { key: 'Draft' as const, label: 'Draft' },
   ];
 
   return (
@@ -153,7 +176,6 @@ const Articles: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      {/* Tabs + Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex gap-1 border border-border bg-surface">
           {tabs.map((t) => (
@@ -164,7 +186,7 @@ const Articles: React.FC = () => {
                 tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
             >
-              {t.label} <span className="ml-1 opacity-60">{t.count}</span>
+              {t.label}
             </button>
           ))}
         </div>
@@ -175,70 +197,75 @@ const Articles: React.FC = () => {
         />
       </div>
 
-      {/* Table */}
-      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
-        <table className="w-full min-w-[700px]">
-          <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
-            <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
-              <th className="px-5 py-3">Title</th>
-              <th className="px-5 py-3">Journal</th>
-              <th className="px-5 py-3">Authors</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3">Submitted</th>
-              <th className="px-5 py-3 w-20"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {loading ? (
-              <TableRowSkeleton columns={6} rows={5} />
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-0">
-                  <EmptyState title="No articles found" description="There are no articles matching your criteria." className="bg-transparent border-0 py-16" />
-                </td>
-              </tr>
-            ) : (
-              filtered.map((article) => (
-                <tr 
-                  key={article.id} 
-                  className={`border-b border-border last:border-b-0 hover:bg-background transition-colors group ${articleHasPdf(article) ? 'cursor-pointer' : 'cursor-default'}`}
-                  onClick={() => articleHasPdf(article) && viewPdf(article)}
-                >
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="h-4 w-4 text-primary/20 shrink-0" />
-                      <span className="text-[13px] font-medium text-primary truncate max-w-[260px]">
-                        {article.title}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-[12px] text-muted truncate max-w-[180px]">
-                    {article.volume?.journal?.title || '-'}
-                  </td>
-                  <td className="px-5 py-4 text-[12px] text-muted">
-                    {article.authors?.map(a => a.name).join(', ') || '-'}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`text-[11px] font-semibold px-2 py-1 ${statusColor[article.status] || statusColor['Pending']}`}>
-                      {article.status}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Journal</TableHead>
+            <TableHead>Authors</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Submitted</TableHead>
+            <TableHead className="w-24 text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRowSkeleton columns={6} rows={5} />
+          ) : articles.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="h-32 text-center">
+                <EmptyState title="No articles found" description="There are no articles matching your criteria." className="bg-transparent border-0" />
+              </TableCell>
+            </TableRow>
+          ) : (
+            articles.map((article) => (
+              <TableRow 
+                key={article.id} 
+                className={`group ${articleHasPdf(article) ? 'cursor-pointer' : ''}`}
+                onClick={() => articleHasPdf(article) && viewPdf(article)}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="h-4 w-4 text-primary/20 shrink-0" />
+                    <span className="text-[13px] font-medium text-primary truncate max-w-[260px]">
+                      {article.title}
                     </span>
-                  </td>
-                  <td className="px-5 py-4 text-[12px] text-muted">{new Date(article.created_at).toLocaleDateString()}</td>
-                  <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-2">
-                      {article.pdf_url && (
-                        <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
-                      )}
-                      <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
-                      <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(article.id)} title="Delete Article" />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted truncate max-w-[180px]">
+                  {article.volume?.journal?.title || '-'}
+                </TableCell>
+                <TableCell className="text-muted">
+                  {article.authors?.map(a => a.name).join(', ') || '-'}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={getStatusVariant(article.status)}>
+                    {article.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted">{new Date(article.created_at).toLocaleDateString()}</TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {article.pdf_url && (
+                      <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
+                    )}
+                    <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
+                    <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(article.id)} title="Delete Article" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+
+      {!loading && lastPage > 1 && (
+        <Pagination
+          currentPage={page}
+          lastPage={lastPage}
+          onPageChange={setPage}
+        />
+      )}
 
       <ArticleFormModal
         isOpen={isModalOpen}
@@ -256,7 +283,6 @@ const Articles: React.FC = () => {
         allowDownload={true}
       />
 
-      {/* Delete Confirmation */}
       <ConfirmDialog 
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}

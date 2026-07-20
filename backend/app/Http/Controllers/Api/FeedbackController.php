@@ -8,11 +8,10 @@ use App\Models\Feedback;
 
 class FeedbackController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json([
-            'data' => Feedback::orderBy('created_at', 'desc')->get()
-        ]);
+        $query = Feedback::orderBy('created_at', 'desc');
+        return response()->json($query->paginate(50));
     }
 
     public function store(Request $request)

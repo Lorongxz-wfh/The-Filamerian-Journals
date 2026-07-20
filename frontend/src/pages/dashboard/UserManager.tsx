@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, CheckCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle, Users } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -12,6 +12,9 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { toast } from 'sonner';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import Badge from '@/components/ui/Badge';
+import Pagination from '@/components/ui/Pagination';
 
 interface User {
   id: number;
@@ -22,16 +25,22 @@ interface User {
   created_at: string;
 }
 
-const roleColor: Record<string, string> = {
-  'Super Admin': 'text-rose-600 bg-rose-50',
-  'Editor': 'text-blue-600 bg-blue-50',
-  'Staff': 'text-emerald-600 bg-emerald-50',
+const getRoleVariant = (role: string) => {
+  switch (role) {
+    case 'Super Admin': return 'destructive';
+    case 'Editor': return 'secondary';
+    case 'Staff': return 'success';
+    default: return 'default';
+  }
 };
 
 const UserManager: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
   const [filter, setFilter] = useState('');
+  const [debouncedFilter, setDebouncedFilter] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -47,13 +56,27 @@ const UserManager: React.FC = () => {
     role: 'Editor'
   });
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilter(filter);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [filter]);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/users');
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      if (debouncedFilter) params.append('search', debouncedFilter);
+
+      const res = await api.get(`/users?${params.toString()}`);
       setUsers(res.data.data);
+      setLastPage(res.data.last_page || 1);
     } catch (err) {
       console.error(err);
+      toast.error('Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -61,7 +84,7 @@ const UserManager: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page, debouncedFilter]);
 
   const handleOpenModal = (user: User | null = null) => {
     setError(null);
@@ -101,6 +124,7 @@ const UserManager: React.FC = () => {
       }
       await fetchUsers();
       setIsModalOpen(false);
+      toast.success(editingUser ? 'User updated successfully' : 'User created successfully');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to save user.');
     } finally {
@@ -137,11 +161,6 @@ const UserManager: React.FC = () => {
     }
   };
 
-  const filtered = users.filter((u) =>
-    u.name.toLowerCase().includes(filter.toLowerCase()) ||
-    u.email.toLowerCase().includes(filter.toLowerCase())
-  );
-
   return (
     <div className="space-y-8">
       <DashboardHeader title="User Manager">
@@ -150,75 +169,83 @@ const UserManager: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <SearchInput 
-        placeholder="Search users..." 
-        value={filter} 
-        onChange={(e) => setFilter(e.target.value)} 
-      />
-
-      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
-        <table className="w-full min-w-[600px]">
-          <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
-            <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
-              <th className="px-5 py-3">Name</th>
-              <th className="px-5 py-3">Email</th>
-              <th className="px-5 py-3">Role</th>
-              <th className="px-5 py-3 w-20"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <TableRowSkeleton columns={4} rows={5} />
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="p-0">
-                  <EmptyState title="No users found" description="No users match your criteria." className="bg-transparent border-0 py-16" />
-                </td>
-              </tr>
-            ) : (
-              filtered.map((user) => (
-                <tr key={user.id} className="border-b border-border last:border-b-0 hover:bg-background transition-colors group">
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0">
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-[13px] font-medium text-primary">{user.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-[12px] text-muted">{user.email}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-col gap-1">
-                      <span className={`w-max text-[11px] font-semibold px-2 py-1 ${roleColor[user.roles?.[0]?.name || ''] || 'text-muted bg-gray-50'}`}>
-                        {user.roles?.[0]?.name || 'No Role'}
-                      </span>
-                      {!user.is_approved && (
-                        <span className="w-max text-[10px] font-semibold px-2 py-0.5 text-amber-600 bg-amber-50 rounded-sm">
-                          Pending Approval
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      {!user.is_approved && (
-                        <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
-                      )}
-                      <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit" />
-                      <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(user.id)} title="Delete" />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="flex justify-end">
+        <SearchInput 
+          placeholder="Search users by name or email..." 
+          value={filter} 
+          onChange={(e) => setFilter(e.target.value)} 
+        />
       </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead className="w-24 text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRowSkeleton columns={4} rows={5} />
+          ) : users.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="h-32 text-center">
+                <EmptyState icon={Users} title="No users found" description="No users match your criteria." className="bg-transparent border-0" />
+              </TableCell>
+            </TableRow>
+          ) : (
+            users.map((user) => (
+              <TableRow key={user.id} className="group">
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-[13px] font-medium text-primary">{user.name}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted">{user.email}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col items-start gap-1">
+                    <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')}>
+                      {user.roles?.[0]?.name || 'No Role'}
+                    </Badge>
+                    {!user.is_approved && (
+                      <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
+                        Pending Approval
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!user.is_approved && (
+                      <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
+                    )}
+                    <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit" />
+                    <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(user.id)} title="Delete" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+
+      {!loading && lastPage > 1 && (
+        <Pagination
+          currentPage={page}
+          lastPage={lastPage}
+          onPageChange={setPage}
+        />
+      )}
 
       {/* Modal */}
       <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingUser ? 'Edit User' : 'New User'}>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="p-3 bg-red-50 text-red-700 text-[13px]">{error}</div>}
+          {error && <div className="p-3 bg-red-50 text-red-700 text-[13px] rounded">{error}</div>}
           
           <Input 
             label="Full Name" required name="name" value={formData.name} onChange={handleInputChange}
@@ -252,6 +279,7 @@ const UserManager: React.FC = () => {
           </div>
         </form>
       </Modal>
+
       <ConfirmDialog 
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
@@ -259,6 +287,7 @@ const UserManager: React.FC = () => {
         title="Delete User"
         message="Are you sure you want to delete this user? This action cannot be undone."
       />
+      
       <ConfirmDialog 
         isOpen={!!approveTarget}
         onClose={() => setApproveTarget(null)}

@@ -14,6 +14,14 @@ class UserController extends Controller
     {
         $query = User::with('roles')->orderBy('name');
         
+        if ($request->filled('search')) {
+            $search = strtolower($request->query('search'));
+            $query->where(function($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
         if ($request->has('pending_only')) {
             $query->where('is_approved', false);
         }
