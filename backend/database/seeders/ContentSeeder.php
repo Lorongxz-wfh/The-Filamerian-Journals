@@ -92,7 +92,7 @@ class ContentSeeder extends Seeder
                 [
                     'volume_id' => $volume->id,
                     'abstract' => "This paper explores the critical aspects of {$data['article']} within the context of {$data['category']}. Through quantitative and qualitative analysis, the study presents significant findings that contribute to the ongoing discourse in the field.",
-                    'status' => 'published',
+                    'status' => 'Published',
                     'page_start' => ($i * 10) + 1,
                     'page_end' => ($i * 10) + 15,
                     'doi' => "10.1234/fcu.2024.00{$i}"
