@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, BookOpen, Quote, Maximize, Minimize } from 'lucide-react';
+import { ArrowLeft, BookOpen, Quote } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import PdfViewer from '@/components/ui/PdfViewer';
 
 interface Author {
   id: number;
@@ -45,26 +46,6 @@ const ArticleDetail: React.FC = () => {
   // PDF Viewer Modal State
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const pdfContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      pdfContainerRef.current?.requestFullscreen().catch(err => {
-        console.error("Error attempting to enable fullscreen:", err);
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  };
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -178,7 +159,7 @@ const ArticleDetail: React.FC = () => {
         const path = url.split('/storage/')[1];
         url = `${STORAGE_URL}${path}`;
       }
-      setPdfViewUrl(url + '#toolbar=0');
+      setPdfViewUrl(url);
     } catch (err) {
       console.error('Failed to get download URL', err);
       alert('Could not load PDF document.');
@@ -267,28 +248,13 @@ const ArticleDetail: React.FC = () => {
       )}
 
       <Modal isOpen={isPdfModalOpen} onClose={() => setIsPdfModalOpen(false)} title={article.title} className="max-w-5xl h-[90vh]">
-        <div ref={pdfContainerRef} className="h-full w-full bg-muted/10 p-0 sm:p-4 sm:pt-0 relative group">
-          {pdfViewUrl ? (
-            <>
-              <button 
-                onClick={toggleFullscreen}
-                className="absolute top-2 right-6 sm:top-4 sm:right-8 z-10 bg-surface/90 hover:bg-surface border border-border text-primary p-2 rounded shadow-md opacity-50 group-hover:opacity-100 transition-all"
-                title="Toggle Fullscreen"
-              >
-                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-              </button>
-              <iframe
-                src={pdfViewUrl}
-                className="w-full h-full border-0 sm:rounded bg-white shadow-sm"
-                title={`PDF viewer for ${article.title}`}
-              />
-            </>
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-muted gap-3">
-              <Spinner text="Loading document viewer..." />
-            </div>
-          )}
-        </div>
+        {pdfViewUrl ? (
+          <PdfViewer fileUrl={pdfViewUrl} />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-muted gap-3 p-4">
+            <Spinner text="Loading document viewer..." />
+          </div>
+        )}
       </Modal>
     </PageWrapper>
   );
