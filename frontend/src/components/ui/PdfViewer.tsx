@@ -124,7 +124,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
     <div ref={containerRef} className={`flex flex-col w-full h-full bg-surface border border-border ${isFullscreen ? 'p-0' : 'sm:rounded'}`}>
       
       {/* Custom Toolbar */}
-      <div className="flex flex-wrap items-center justify-between p-3 bg-background border-b border-border shrink-0 z-20 shadow-sm gap-4 relative">
+      <div className="flex flex-wrap items-center justify-between p-2 bg-background border-b border-border shrink-0 z-20 shadow-sm gap-2 relative">
         
         {/* Left Side: Sidebar Toggle & Page Indicator */}
         <div className="flex items-center gap-4">
@@ -234,7 +234,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
         )}
 
         {/* PDF Document Container */}
-        <div ref={documentContainerRef} className="flex-1 overflow-auto bg-muted/10 p-4 flex justify-center items-start">
+        <div ref={documentContainerRef} className="flex-1 overflow-auto bg-muted/10 p-2 flex justify-center items-start">
           <Document
             file={fileUrl}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -253,7 +253,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
             }
           >
             {numPages && (
-              <div className="flex flex-col gap-6 pb-8 items-center">
+              <div className="flex flex-col gap-4 pb-4 items-center">
                 {Array.from(new Array(numPages), (_, index) => (
                   <div 
                     key={`page_${index + 1}`} 

@@ -234,7 +234,13 @@ const ArticleDetail: React.FC = () => {
         />
       )}
 
-      <Modal isOpen={isPdfModalOpen} onClose={() => setIsPdfModalOpen(false)} title={article.title} className="max-w-5xl h-[90vh]">
+      <Modal 
+        isOpen={isPdfModalOpen} 
+        onClose={() => setIsPdfModalOpen(false)} 
+        title={article.title} 
+        className="max-w-[95vw] sm:max-w-6xl h-[95vh]"
+        bodyClassName="p-0 overflow-hidden flex-grow flex flex-col"
+      >
         {pdfViewUrl ? (
           <PdfViewer fileUrl={pdfViewUrl} />
         ) : (
