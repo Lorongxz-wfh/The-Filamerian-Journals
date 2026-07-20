@@ -130,7 +130,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => setShowSidebar(!showSidebar)}
-            className={`p-1.5 rounded transition-colors ${showSidebar ? 'bg-primary text-primary-foreground' : 'text-muted hover:text-primary hover:bg-surface'}`}
+            className={`p-1.5 rounded transition-colors ${showSidebar ? 'bg-primary/10 text-primary' : 'text-muted hover:text-primary hover:bg-surface'}`}
             title="Toggle Thumbnails"
           >
             <PanelLeft className="h-4 w-4" />
@@ -211,24 +211,26 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
         
         {/* Thumbnails Sidebar */}
         {showSidebar && (
-          <div className="w-48 bg-surface border-r border-border shrink-0 overflow-y-auto flex flex-col items-center py-4 gap-4 z-10 shadow-sm">
+          <div className="w-48 bg-surface border-r border-border shrink-0 overflow-y-auto py-4 z-10 shadow-sm">
             <Document file={fileUrl}>
-              {numPages && Array.from(new Array(numPages), (_, index) => (
-                <div 
-                  key={`thumb_${index + 1}`}
-                  onClick={() => scrollToPage(index + 1)}
-                  className={`cursor-pointer transition-all border-2 ${currentPage === index + 1 ? 'border-primary shadow-md scale-105' : 'border-transparent hover:border-border shadow-sm'}`}
-                >
-                  <Page 
-                    pageNumber={index + 1} 
-                    width={120} 
-                    rotate={rotation}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                  />
-                  <div className="text-center text-[10px] text-muted mt-1">{index + 1}</div>
-                </div>
-              ))}
+              <div className="flex flex-col items-center gap-6">
+                {numPages && Array.from(new Array(numPages), (_, index) => (
+                  <div 
+                    key={`thumb_${index + 1}`}
+                    onClick={() => scrollToPage(index + 1)}
+                    className={`cursor-pointer transition-all border-2 p-1 ${currentPage === index + 1 ? 'border-primary shadow-md scale-105 bg-primary/5' : 'border-transparent hover:border-border shadow-sm bg-white'}`}
+                  >
+                    <Page 
+                      pageNumber={index + 1} 
+                      width={120} 
+                      rotate={rotation}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                    />
+                    <div className="text-center text-[10px] text-muted mt-2 font-medium">{index + 1}</div>
+                  </div>
+                ))}
+              </div>
             </Document>
           </div>
         )}
