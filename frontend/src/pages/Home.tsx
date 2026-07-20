@@ -134,26 +134,41 @@ const Home: React.FC = () => {
                 Latest Publications
               </h2>
             </div>
-            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <div className="flex flex-col border-t border-border">
               {latestArticles.map((article) => (
-                <Link key={article.id} to={`/articles/${article.id}`} className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px] flex flex-col border border-border bg-surface p-6 hover:border-primary/40 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 snap-start h-[260px] group relative overflow-hidden">
-                  {/* Subtle accent line on hover */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                  
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
+                <Link 
+                  key={article.id} 
+                  to={`/articles/${article.id}`} 
+                  className="group flex flex-col md:flex-row md:items-start justify-between py-8 border-b border-border hover:bg-surface/40 transition-colors duration-300 relative px-4 -mx-4"
+                >
+                  {/* Left Side: Title & Abstract (Hidden by default) */}
+                  <div className="md:w-2/3 md:pr-12">
+                    <h3 className="text-lg md:text-2xl font-bold text-primary uppercase tracking-wide group-hover:text-secondary transition-colors leading-tight">
+                      {article.title}
+                    </h3>
+                    
+                    {/* Abstract with smooth expand animation */}
+                    <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                      <div className="overflow-hidden">
+                        <p className="text-[14px] text-muted leading-relaxed line-clamp-3 mt-5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-150">
+                          {article.abstract || 'No abstract available.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side: Metadata */}
+                  <div className="md:w-1/3 flex flex-col items-start md:items-end mt-5 md:mt-0 text-left md:text-right shrink-0">
+                    <span className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-1.5">
                       {article.volume?.journal?.title || 'Unknown Journal'}
                     </span>
-                  </div>
-                  <h3 className="text-[15px] font-bold text-primary uppercase tracking-wider mb-3 line-clamp-2 group-hover:text-secondary transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-[13px] text-muted leading-relaxed line-clamp-3 mb-5 flex-grow">
-                    {article.abstract || 'No abstract available.'}
-                  </p>
-                  <div className="flex items-center justify-between text-[11px] text-muted uppercase tracking-wider truncate pt-4 border-t border-border">
-                    <span className="truncate pr-4">{article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}</span>
-                    <span className="shrink-0 group-hover:translate-x-1 transition-transform">→</span>
+                    <span className="text-[12px] text-muted uppercase tracking-wider mb-4 max-w-[250px] truncate">
+                      {article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}
+                    </span>
+                    
+                    <span className="text-[12px] font-semibold text-primary uppercase tracking-widest mt-auto group-hover:translate-x-2 transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center gap-2">
+                      Read Paper <span className="text-secondary text-lg leading-none">→</span>
+                    </span>
                   </div>
                 </Link>
               ))}
