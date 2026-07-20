@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '@/services/api';
 
-interface SettingsData {
-  site_title: string;
-  tagline: string;
-  contact_email: string;
-  journal_categories: string;
-  home_about_us: string;
+export interface SettingsData {
+  site_title?: string;
+  tagline?: string;
+  contact_email?: string;
+  journal_categories?: string;
+  home_about_us?: string;
+  show_tagline?: string;
+  show_about_us?: string;
+  [key: string]: any;
 }
 
 interface SettingsContextType {

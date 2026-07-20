@@ -28,6 +28,8 @@ const WebsiteSettings: React.FC = () => {
     contact_email: 'journals@filamer.edu.ph',
     journal_categories: 'Science, Education, Arts, Multidisciplinary',
     home_about_us: '<div class="text-center max-w-4xl mx-auto space-y-4 pb-4 border-b border-border mb-4">\n  <h2 class="text-lg font-bold uppercase tracking-wider text-primary">The Filamerian Journals</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>\n</div>',
+    show_tagline: 'true',
+    show_about_us: 'true',
   });
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -175,12 +177,26 @@ const WebsiteSettings: React.FC = () => {
                 value={settings.tagline} 
                 onChange={(e) => handleSettingsChange('tagline', e.target.value)}
               />
-              <div className="pt-2">
-                <label className="block text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">Home (HTML Supported)</label>
+              <div className="pt-2 border-t border-border mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <label className="block text-[11px] font-semibold text-primary uppercase tracking-wider">Show Tagline on Home Page</label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={settings.show_tagline !== 'false'} onChange={(e) => handleSettingsChange('show_tagline', e.target.checked ? 'true' : 'false')} />
+                    <div className="w-9 h-5 bg-muted/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-4 after:w-4 after:transition-all peer-checked:bg-primary border border-border"></div>
+                  </label>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-[11px] font-semibold text-primary uppercase tracking-wider">Show Home Text (About Us)</label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={settings.show_about_us !== 'false'} onChange={(e) => handleSettingsChange('show_about_us', e.target.checked ? 'true' : 'false')} />
+                    <div className="w-9 h-5 bg-muted/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-4 after:w-4 after:transition-all peer-checked:bg-primary border border-border"></div>
+                  </label>
+                </div>
                 <textarea 
                   value={settings.home_about_us}
                   onChange={(e) => handleSettingsChange('home_about_us', e.target.value)}
-                  className="w-full px-3 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors min-h-[160px] font-mono"
+                  disabled={settings.show_about_us === 'false'}
+                  className="w-full px-3 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors min-h-[160px] font-mono disabled:opacity-50"
                 />
               </div>
             </div>
