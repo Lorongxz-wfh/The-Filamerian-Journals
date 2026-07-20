@@ -125,7 +125,9 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             disabled={disabled} 
             required={required} 
             name={name}
-            className="hidden"
+            className="absolute opacity-0 inset-0 w-full h-full -z-10"
+            tabIndex={-1}
+            aria-hidden="true"
             {...props}
           >
             {options.map((opt) => (
