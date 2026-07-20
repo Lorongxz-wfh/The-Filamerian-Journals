@@ -134,22 +134,26 @@ const Home: React.FC = () => {
                 Latest Publications
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               {latestArticles.map((article) => (
-                <Link key={article.id} to={`/articles/${article.id}`} className="flex flex-col border border-border bg-surface p-5 hover:border-primary/30 transition-colors h-full">
-                  <div className="flex items-center gap-2 mb-3">
+                <Link key={article.id} to={`/articles/${article.id}`} className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px] flex flex-col border border-border bg-surface p-6 hover:border-primary/40 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 snap-start h-[260px] group relative overflow-hidden">
+                  {/* Subtle accent line on hover */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  
+                  <div className="flex items-center gap-2 mb-4">
                     <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
                       {article.volume?.journal?.title || 'Unknown Journal'}
                     </span>
                   </div>
-                  <h3 className="text-[14px] font-semibold text-primary uppercase tracking-wider mb-2 line-clamp-2">
+                  <h3 className="text-[15px] font-bold text-primary uppercase tracking-wider mb-3 line-clamp-2 group-hover:text-secondary transition-colors">
                     {article.title}
                   </h3>
-                  <p className="text-[12px] text-muted leading-relaxed line-clamp-3 mb-4 flex-grow">
+                  <p className="text-[13px] text-muted leading-relaxed line-clamp-3 mb-5 flex-grow">
                     {article.abstract || 'No abstract available.'}
                   </p>
-                  <div className="text-[11px] text-muted uppercase tracking-wider truncate pt-3 border-t border-border">
-                    {article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}
+                  <div className="flex items-center justify-between text-[11px] text-muted uppercase tracking-wider truncate pt-4 border-t border-border">
+                    <span className="truncate pr-4">{article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}</span>
+                    <span className="shrink-0 group-hover:translate-x-1 transition-transform">→</span>
                   </div>
                 </Link>
               ))}
