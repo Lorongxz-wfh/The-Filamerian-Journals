@@ -5,8 +5,10 @@ import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const Contact: React.FC = () => {
+  const { settings } = useSettings();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,8 +79,8 @@ const Contact: React.FC = () => {
 
               <div className="flex items-center gap-4">
                 <Mail className="h-5 w-5 text-secondary shrink-0" />
-                <a href="mailto:journals@filamer.edu.ph" className="text-[13px] font-medium text-primary hover:text-secondary transition-colors">
-                  journals@filamer.edu.ph
+                <a href={`mailto:${settings.contact_email || 'journals@filamer.edu.ph'}`} className="text-[13px] font-medium text-primary hover:text-secondary transition-colors">
+                  {settings.contact_email || 'journals@filamer.edu.ph'}
                 </a>
               </div>
 
