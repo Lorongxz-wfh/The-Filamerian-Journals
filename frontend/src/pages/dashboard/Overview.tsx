@@ -24,8 +24,6 @@ const Overview: React.FC = () => {
     websiteChartData?: Array<{ date: string; views: number; downloads: number }>;
   }>({ journals: 0, articles: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -63,12 +61,9 @@ const Overview: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Page Header */}
-      <DashboardHeader 
-        title="Overview" 
-        description={`Welcome back, ${user.first_name || 'Admin'}. Here is your system snapshot.`}
-      >
+      <DashboardHeader title="Overview">
         <div className="text-[11px] font-medium text-muted uppercase tracking-wider bg-surface border border-border px-4 py-2 self-start md:self-auto flex items-center gap-2 shadow-sm">
           <Activity className="h-3 w-3 text-emerald-600" />
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
