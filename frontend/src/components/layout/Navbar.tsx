@@ -21,15 +21,23 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [dropdownCategories, setDropdownCategories] = useState<string[]>([]);
+  interface Category {
+    id: number;
+    name: string;
+    slug: string;
+  }
+  const [dropdownCategories, setDropdownCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem('categories_cache') || '["All", "Science", "Education", "Arts", "Multidisciplinary"]');
-      setDropdownCategories(cached.filter((c: string) => c !== 'All'));
-    } catch {
-      setDropdownCategories(["Science", "Education", "Arts", "Multidisciplinary"]);
-    }
+    const fetchCats = async () => {
+      try {
+        const res = await api.get('/categories');
+        setDropdownCategories(res.data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch navbar categories', err);
+      }
+    };
+    fetchCats();
   }, [path]);
 
   useEffect(() => {
@@ -128,11 +136,11 @@ const Navbar = () => {
               >
                 {dropdownCategories.map(cat => (
                   <Link 
-                    key={cat}
-                    to={`/journals?category=${encodeURIComponent(cat)}`} 
+                    key={cat.id}
+                    to={`/journals?category=${encodeURIComponent(cat.slug)}`} 
                     className="flex px-6 py-4 bg-primary text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest"
                   >
-                    {cat}
+                    {cat.name}
                   </Link>
                 ))}
               </div>
