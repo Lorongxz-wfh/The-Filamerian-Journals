@@ -184,7 +184,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
               The Filamerian
             </span>
             <span className="text-[9px] font-semibold text-white/50 uppercase tracking-[0.3em] mt-0.5">
-              Portal
+              Dashboard
             </span>
           </div>
         </Link>
