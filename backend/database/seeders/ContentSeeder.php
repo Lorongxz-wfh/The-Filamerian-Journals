@@ -25,7 +25,11 @@ class ContentSeeder extends Seeder
                 'category' => 'Education',
                 'description' => 'A peer-reviewed open-access journal dedicated to publishing high-quality research in education, pedagogical innovations, and curriculum development.',
                 'article' => 'The Impact of Blended Learning on Student Engagement in Post-Pandemic Education',
-                'authors' => ['Maria Clara Santos', 'Jose Rizal', 'Apolinario Mabini'],
+                'authors' => [
+                    ['first_name' => 'Maria Clara', 'last_name' => 'Santos'],
+                    ['first_name' => 'Jose', 'last_name' => 'Rizal'],
+                    ['first_name' => 'Apolinario', 'last_name' => 'Mabini']
+                ],
                 'keywords' => ['Blended Learning', 'Student Engagement', 'Pedagogy'],
             ],
             [
@@ -33,7 +37,10 @@ class ContentSeeder extends Seeder
                 'category' => 'Nursing',
                 'description' => 'An official publication focused on evidence-based practice, clinical nursing research, and public health innovations.',
                 'article' => 'Evaluating the Efficacy of Telehealth Nursing in Rural Communities',
-                'authors' => ['Juan Dela Cruz', 'Teresa Magbanua'],
+                'authors' => [
+                    ['first_name' => 'Juan', 'last_name' => 'Dela Cruz'],
+                    ['first_name' => 'Teresa', 'last_name' => 'Magbanua']
+                ],
                 'keywords' => ['Telehealth', 'Rural Health', 'Nursing Practice'],
             ],
             [
@@ -41,7 +48,9 @@ class ContentSeeder extends Seeder
                 'category' => 'Business',
                 'description' => 'A multidisciplinary journal covering applied economics, strategic management, accounting, and organizational behavior.',
                 'article' => 'Strategic Resiliency of Micro-Enterprises During Economic Uncertainty',
-                'authors' => ['Pedro Penduko'],
+                'authors' => [
+                    ['first_name' => 'Pedro', 'last_name' => 'Penduko']
+                ],
                 'keywords' => ['Micro-Enterprises', 'Economic Resiliency', 'Strategic Management'],
             ],
             [
@@ -49,7 +58,10 @@ class ContentSeeder extends Seeder
                 'category' => 'Information Technology',
                 'description' => 'Publishing cutting-edge research on software engineering, artificial intelligence, data science, and information systems.',
                 'article' => 'Machine Learning Approaches for Predictive Analytics in Educational Data',
-                'authors' => ['Emilio Aguinaldo', 'Andres Bonifacio'],
+                'authors' => [
+                    ['first_name' => 'Emilio', 'last_name' => 'Aguinaldo'],
+                    ['first_name' => 'Andres', 'last_name' => 'Bonifacio']
+                ],
                 'keywords' => ['Machine Learning', 'Predictive Analytics', 'Educational Data Mining'],
             ]
         ];
@@ -86,11 +98,18 @@ class ContentSeeder extends Seeder
                 ]
             );
 
-            // Authors (No Honorifics)
-            foreach ($data['authors'] as $authorName) {
+            // Authors
+            foreach ($data['authors'] as $authorData) {
+                $fullName = $authorData['first_name'] . ' ' . $authorData['last_name'];
                 $author = Author::firstOrCreate(
-                    ['email' => strtolower(str_replace(' ', '.', $authorName)) . "@fcu.edu.ph"],
-                    ['name' => $authorName]
+                    ['email' => strtolower(str_replace(' ', '.', $fullName)) . "@fcu.edu.ph"],
+                    [
+                        'name' => $fullName,
+                        'first_name' => $authorData['first_name'],
+                        'last_name' => $authorData['last_name'],
+                        'middle_name' => $authorData['middle_name'] ?? null,
+                        'suffix' => $authorData['suffix'] ?? null,
+                    ]
                 );
                 $article->authors()->syncWithoutDetaching([$author->id]);
             }

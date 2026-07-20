@@ -29,6 +29,11 @@ class ArticleController extends Controller
             'author_ids.*' => 'exists:authors,id',
             'author_names' => 'nullable|array',
             'author_names.*' => 'string|max:255',
+            'authors' => 'nullable|array',
+            'authors.*.first_name' => 'required_with:authors|string|max:255',
+            'authors.*.last_name' => 'required_with:authors|string|max:255',
+            'authors.*.middle_name' => 'nullable|string|max:255',
+            'authors.*.suffix' => 'nullable|string|max:255',
             'keyword_ids' => 'nullable|array',
             'keyword_ids.*' => 'exists:keywords,id',
             'keyword_names' => 'nullable|array',
@@ -44,7 +49,28 @@ class ArticleController extends Controller
 
         $authorIds = $request->input('author_ids', []);
 
-        if ($request->has('author_names') && is_array($request->input('author_names'))) {
+        if ($request->has('authors') && is_array($request->input('authors'))) {
+            foreach ($request->input('authors') as $authorData) {
+                if (!empty($authorData['first_name']) && !empty($authorData['last_name'])) {
+                    $fullName = trim($authorData['first_name']) . ' ' . trim($authorData['last_name']);
+                    
+                    // Decode json if stringified form data (in case frontend sends it weirdly)
+                    // We assume it's already an array due to validation
+                    $author = \App\Models\Author::firstOrCreate(
+                        [
+                            'first_name' => trim($authorData['first_name']),
+                            'last_name' => trim($authorData['last_name'])
+                        ],
+                        [
+                            'name' => $fullName,
+                            'middle_name' => isset($authorData['middle_name']) ? trim($authorData['middle_name']) : null,
+                            'suffix' => isset($authorData['suffix']) ? trim($authorData['suffix']) : null,
+                        ]
+                    );
+                    $authorIds[] = $author->id;
+                }
+            }
+        } elseif ($request->has('author_names') && is_array($request->input('author_names'))) {
             foreach ($request->input('author_names') as $authorName) {
                 if (trim($authorName) !== '') {
                     $author = \App\Models\Author::firstOrCreate(['name' => trim($authorName)]);
@@ -132,6 +158,11 @@ class ArticleController extends Controller
             'author_ids.*' => 'exists:authors,id',
             'author_names' => 'nullable|array',
             'author_names.*' => 'string|max:255',
+            'authors' => 'nullable|array',
+            'authors.*.first_name' => 'required_with:authors|string|max:255',
+            'authors.*.last_name' => 'required_with:authors|string|max:255',
+            'authors.*.middle_name' => 'nullable|string|max:255',
+            'authors.*.suffix' => 'nullable|string|max:255',
             'keyword_ids' => 'nullable|array',
             'keyword_ids.*' => 'exists:keywords,id',
             'keyword_names' => 'nullable|array',
@@ -151,7 +182,26 @@ class ArticleController extends Controller
 
         $authorIds = $request->input('author_ids', []);
 
-        if ($request->has('author_names') && is_array($request->input('author_names'))) {
+        if ($request->has('authors') && is_array($request->input('authors'))) {
+            foreach ($request->input('authors') as $authorData) {
+                if (!empty($authorData['first_name']) && !empty($authorData['last_name'])) {
+                    $fullName = trim($authorData['first_name']) . ' ' . trim($authorData['last_name']);
+                    
+                    $author = \App\Models\Author::firstOrCreate(
+                        [
+                            'first_name' => trim($authorData['first_name']),
+                            'last_name' => trim($authorData['last_name'])
+                        ],
+                        [
+                            'name' => $fullName,
+                            'middle_name' => isset($authorData['middle_name']) ? trim($authorData['middle_name']) : null,
+                            'suffix' => isset($authorData['suffix']) ? trim($authorData['suffix']) : null,
+                        ]
+                    );
+                    $authorIds[] = $author->id;
+                }
+            }
+        } elseif ($request->has('author_names') && is_array($request->input('author_names'))) {
             foreach ($request->input('author_names') as $authorName) {
                 if (trim($authorName) !== '') {
                     $author = \App\Models\Author::firstOrCreate(['name' => trim($authorName)]);

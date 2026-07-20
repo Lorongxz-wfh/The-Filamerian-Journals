@@ -12,6 +12,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
+import AuthorInput, { type AuthorData } from '@/components/ui/AuthorInput';
 
 interface Article {
   id: number;
@@ -60,7 +61,7 @@ const Articles: React.FC = () => {
     abstract: '',
     doi: '',
     status: 'Pending',
-    author_names: [''] as string[],
+    authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }] as AuthorData[],
     keyword_names: [] as string[],
     page_start: '',
     page_end: ''
@@ -96,7 +97,14 @@ const Articles: React.FC = () => {
         abstract: article.abstract || '',
         doi: article.doi || '',
         status: article.status || 'Pending',
-        author_names: article.authors && article.authors.length > 0 ? article.authors.map((a: any) => a.name) : [''],
+        authors: article.authors && article.authors.length > 0 
+          ? article.authors.map((a: any) => ({
+              first_name: a.first_name || '',
+              middle_name: a.middle_name || '',
+              last_name: a.last_name || '',
+              suffix: a.suffix || ''
+            }))
+          : [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
         keyword_names: article.keywords && article.keywords.length > 0 ? article.keywords.map((k: any) => k.name) : [],
         page_start: '', // Omitted for brevity in edit mode for now, or fetch if available
         page_end: ''
@@ -108,7 +116,7 @@ const Articles: React.FC = () => {
         abstract: '',
         doi: '',
         status: 'Pending',
-        author_names: [''],
+        authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
         keyword_names: [],
         page_start: '',
         page_end: ''
@@ -123,7 +131,7 @@ const Articles: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayChange = (field: 'author_names' | 'keyword_names', index: number, value: string) => {
+  const handleArrayChange = (field: 'keyword_names', index: number, value: string) => {
     setFormData(prev => {
       const newArray = [...prev[field]];
       newArray[index] = value;
@@ -131,11 +139,27 @@ const Articles: React.FC = () => {
     });
   };
 
-  const addArrayItem = (field: 'author_names' | 'keyword_names') => {
+  const handleAuthorChange = (index: number, author: AuthorData) => {
+    setFormData(prev => {
+      const newAuthors = [...prev.authors];
+      newAuthors[index] = author;
+      return { ...prev, authors: newAuthors };
+    });
+  };
+
+  const addAuthor = () => {
+    setFormData(prev => ({ ...prev, authors: [...prev.authors, { first_name: '', middle_name: '', last_name: '', suffix: '' }] }));
+  };
+
+  const removeAuthor = (index: number) => {
+    setFormData(prev => ({ ...prev, authors: prev.authors.filter((_, i) => i !== index) }));
+  };
+
+  const addArrayItem = (field: 'keyword_names') => {
     setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
   };
 
-  const removeArrayItem = (field: 'author_names' | 'keyword_names', index: number) => {
+  const removeArrayItem = (field: 'keyword_names', index: number) => {
     setFormData(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
   };
 
@@ -151,8 +175,13 @@ const Articles: React.FC = () => {
       payload.append('doi', formData.doi);
       payload.append('status', formData.status);
       
-      formData.author_names.forEach(name => {
-        if (name.trim()) payload.append('author_names[]', name.trim());
+      formData.authors.forEach((author, index) => {
+        if (author.first_name || author.last_name) {
+          payload.append(`authors[${index}][first_name]`, author.first_name);
+          payload.append(`authors[${index}][last_name]`, author.last_name);
+          if (author.middle_name) payload.append(`authors[${index}][middle_name]`, author.middle_name);
+          if (author.suffix) payload.append(`authors[${index}][suffix]`, author.suffix);
+        }
       });
       formData.keyword_names.forEach(name => {
         if (name.trim()) payload.append('keyword_names[]', name.trim());
@@ -353,30 +382,21 @@ const Articles: React.FC = () => {
               </Select>
             </div>
 
-            <div className="md:col-span-2 space-y-3">
-              <div className="flex items-center justify-between">
+            <div className="md:col-span-2 space-y-2">
+              <div className="flex items-center justify-between mb-1">
                 <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Authors</label>
-                <button type="button" onClick={() => addArrayItem('author_names')} className="text-[11px] font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                <button type="button" onClick={addAuthor} className="text-[11px] font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
                   <Plus className="h-3 w-3" /> Add Author
                 </button>
               </div>
-              {formData.author_names.map((author, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <div className="flex-grow">
-                    <input 
-                      type="text" 
-                      value={author}
-                      onChange={(e) => handleArrayChange('author_names', idx, e.target.value)}
-                      placeholder="e.g. Juan Dela Cruz"
-                      className="w-full px-3 py-2 border border-border text-[13px] bg-background focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                  {formData.author_names.length > 1 && (
-                    <button type="button" onClick={() => removeArrayItem('author_names', idx)} className="p-2 text-red-500 hover:bg-red-50 transition-colors">
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
+              {formData.authors.map((author, idx) => (
+                <AuthorInput 
+                  key={idx}
+                  author={author}
+                  onChange={(updatedAuthor) => handleAuthorChange(idx, updatedAuthor)}
+                  onRemove={formData.authors.length > 1 ? () => removeAuthor(idx) : undefined}
+                  isInitialEmpty={!author.first_name && !author.last_name}
+                />
               ))}
             </div>
 
