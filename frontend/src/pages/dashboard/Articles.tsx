@@ -12,6 +12,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import AuthorInput, { type AuthorData } from '@/components/ui/AuthorInput';
 
 interface Article {
@@ -54,6 +55,7 @@ const Articles: React.FC = () => {
   // PDF Viewer Modal
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     volume_id: '',
@@ -215,14 +217,20 @@ const Articles: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this article?')) return;
+  const handleDelete = (id: number) => {
+    setDeleteTarget(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/articles/${id}`);
+      await api.delete(`/articles/${deleteTarget}`);
       await fetchData();
       toast.success('Article deleted successfully');
     } catch (err) {
       toast.error('Failed to delete article');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -240,8 +248,8 @@ const Articles: React.FC = () => {
       }
       setPdfViewUrl(url + '#toolbar=0');
     } catch (err) {
-      console.error('Failed to get download URL', err);
-      alert('Could not load PDF document.');
+      console.error('Failed to get PDF URL:', err);
+      toast.error('Could not load PDF document.');
     }
   };
 
@@ -339,7 +347,7 @@ const Articles: React.FC = () => {
                   </td>
                   <td className="px-5 py-4 text-[12px] text-muted">{new Date(article.created_at).toLocaleDateString()}</td>
                   <td className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2">
                       {article.pdf_path && (
                         <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
                       )}
@@ -505,6 +513,14 @@ const Articles: React.FC = () => {
           )}
         </div>
       </Modal>
+      {/* Delete Confirmation */}
+      <ConfirmDialog 
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete Article"
+        message="Are you sure you want to delete this article? This action cannot be undone."
+      />
     </div>
   );
 };

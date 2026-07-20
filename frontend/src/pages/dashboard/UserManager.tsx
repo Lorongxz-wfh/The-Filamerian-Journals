@@ -7,8 +7,9 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
-
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { toast } from 'sonner';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 
@@ -36,6 +37,8 @@ const UserManager: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [approveTarget, setApproveTarget] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -105,23 +108,32 @@ const UserManager: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this user?')) return;
+  const handleDelete = (id: number) => setDeleteTarget(id);
+  const handleApprove = (id: number) => setApproveTarget(id);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/users/${id}`);
+      await api.delete(`/users/${deleteTarget}`);
       await fetchUsers();
+      toast.success('User deleted successfully');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete user.');
+      toast.error(err.response?.data?.message || 'Failed to delete user.');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
-  const handleApprove = async (id: number) => {
-    if (!window.confirm('Approve this user account?')) return;
+  const confirmApprove = async () => {
+    if (!approveTarget) return;
     try {
-      await api.post(`/users/${id}/approve`);
+      await api.post(`/users/${approveTarget}/approve`);
       await fetchUsers();
+      toast.success('User approved successfully');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to approve user.');
+      toast.error(err.response?.data?.message || 'Failed to approve user.');
+    } finally {
+      setApproveTarget(null);
     }
   };
 
@@ -240,6 +252,22 @@ const UserManager: React.FC = () => {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog 
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+      />
+      <ConfirmDialog 
+        isOpen={!!approveTarget}
+        onClose={() => setApproveTarget(null)}
+        onConfirm={confirmApprove}
+        title="Approve User"
+        message="Are you sure you want to approve this user's account?"
+        confirmText="Approve"
+        isDestructive={false}
+      />
     </div>
   );
 };

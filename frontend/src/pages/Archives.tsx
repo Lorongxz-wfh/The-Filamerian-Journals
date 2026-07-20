@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { ChevronDown, BookOpen, FileText, Quote } from 'lucide-react';
+import { toast } from 'sonner';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
@@ -211,7 +212,7 @@ const Archives: React.FC = () => {
                                         setPdfViewUrl(url + '#toolbar=0');
                                       } catch (err) {
                                         console.error('Failed to get download URL', err);
-                                        alert('Could not load PDF document.');
+                                        toast.error('Could not load PDF document.');
                                         setIsPdfModalOpen(false);
                                       }
                                     }}

@@ -11,6 +11,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface Announcement {
   id: number;
@@ -29,6 +30,7 @@ const ManageAnnouncements: React.FC = () => {
   const [formData, setFormData] = useState({ title: '', body: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const fetchData = async () => {
     try {
@@ -78,14 +80,20 @@ const ManageAnnouncements: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Delete this announcement?')) return;
+  const handleDelete = (id: number) => {
+    setDeleteTarget(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/announcements/${id}`);
+      await api.delete(`/announcements/${deleteTarget}`);
       await fetchData();
       toast.success('Announcement deleted');
     } catch (err) {
       toast.error('Failed to delete');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -156,6 +164,13 @@ const ManageAnnouncements: React.FC = () => {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog 
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete Announcement"
+        message="Are you sure you want to delete this announcement? This action cannot be undone."
+      />
     </div>
   );
 };

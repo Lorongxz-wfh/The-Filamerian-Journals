@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -8,6 +9,7 @@ import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface Volume {
   id: number;
@@ -32,6 +34,7 @@ const ManageJournal: React.FC = () => {
   const [isVolModalOpen, setIsVolModalOpen] = useState(false);
   const [editingVol, setEditingVol] = useState<Volume | null>(null);
   const [volFormData, setVolFormData] = useState({ volume_number: '', year: '' });
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,20 +78,28 @@ const ManageJournal: React.FC = () => {
       }
       await fetchJournal();
       setIsVolModalOpen(false);
+      toast.success('Volume saved successfully');
     } catch (err) {
-      alert('Failed to save volume');
+      toast.error('Failed to save volume');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const deleteVolume = async (volId: number) => {
-    if (!window.confirm('Delete volume and all its issues?')) return;
+  const deleteVolume = (volId: number) => {
+    setDeleteTarget(volId);
+  };
+
+  const confirmDeleteVolume = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/volumes/${volId}`);
+      await api.delete(`/volumes/${deleteTarget}`);
       await fetchJournal();
+      toast.success('Volume deleted successfully');
     } catch (err) {
-      alert('Failed to delete volume');
+      toast.error('Failed to delete volume');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -159,6 +170,14 @@ const ManageJournal: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog 
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteVolume}
+        title="Delete Volume"
+        message="Are you sure you want to delete this volume and all its issues? This action cannot be undone."
+      />
     </div>
   );
 };

@@ -13,6 +13,8 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { toast } from 'sonner';
 
 interface Journal {
   id: number;
@@ -39,6 +41,7 @@ const MyJournals: React.FC = () => {
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [editingJournal, setEditingJournal] = useState<Journal | null>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -166,16 +169,21 @@ const MyJournals: React.FC = () => {
     }
   };
 
-  const handleDelete = async (slug: string) => {
-    if (!window.confirm('Are you sure you want to delete this journal? This action cannot be undone.')) {
-      return;
-    }
+  const handleDelete = (slug: string) => {
+    setDeleteTarget(slug);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/journals/${slug}`);
+      await api.delete(`/journals/${deleteTarget}`);
       await fetchJournals();
+      toast.success('Journal deleted successfully');
     } catch (err) {
       console.error('Delete failed:', err);
-      alert('Failed to delete journal.');
+      toast.error('Failed to delete journal.');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -375,6 +383,13 @@ const MyJournals: React.FC = () => {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog 
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete Journal"
+        message="Are you sure you want to delete this journal? This action cannot be undone."
+      />
     </div>
   );
 };

@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface Resource {
   id: number;
@@ -41,6 +42,7 @@ const WebsiteSettings: React.FC = () => {
   const [formData, setFormData] = useState({ title: '', slug: '', content: '', order: '0' });
   const [isSubmittingResource, setIsSubmittingResource] = useState(false);
   const [resourceError, setResourceError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   useEffect(() => {
     fetchSettings();
@@ -131,14 +133,20 @@ const WebsiteSettings: React.FC = () => {
     }
   };
 
-  const handleDeleteResource = async (id: number) => {
-    if (!window.confirm('Delete this resource page?')) return;
+  const handleDeleteResource = (id: number) => {
+    setDeleteTarget(id);
+  };
+
+  const confirmDeleteResource = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/resources/${id}`);
+      await api.delete(`/resources/${deleteTarget}`);
       toast.success('Resource deleted!');
       await fetchResources();
     } catch (err) {
       toast.error('Failed to delete resource');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -376,6 +384,13 @@ const WebsiteSettings: React.FC = () => {
           { id: 'about', label: 'About', content: resourcesContent },
           { id: 'contact', label: 'Contact', content: contactTabContent }
         ]}
+      />
+      <ConfirmDialog 
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteResource}
+        title="Delete Resource Page"
+        message="Are you sure you want to delete this resource page? This action cannot be undone."
       />
     </div>
   );
