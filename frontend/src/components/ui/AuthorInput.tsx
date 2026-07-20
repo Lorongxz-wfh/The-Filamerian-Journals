@@ -93,18 +93,22 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
 
   return (
     <div ref={containerRef} className="flex items-start gap-2 mb-2 bg-slate-50/50 p-3 border border-border relative">
-      <div className="flex-grow grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <div>
+      <div className="flex-grow grid grid-cols-1 sm:grid-cols-[3fr_2.5fr_2.5fr_1fr] gap-2">
+        <div className="relative">
           <input 
             type="text" 
             name="first_name"
             value={author.first_name}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="First Name *"
             autoFocus={isInitialEmpty}
             className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
+          {!author.first_name && (
+            <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
+              <span className="text-[12px] text-gray-400">First Name <span className="text-red-500">*</span></span>
+            </div>
+          )}
         </div>
         <div>
           <input 
@@ -113,20 +117,24 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             value={author.middle_name}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="Middle (Opt)"
+            placeholder="Middle Name / Initial"
             className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
-        <div>
+        <div className="relative">
           <input 
             type="text" 
             name="last_name"
             value={author.last_name}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="Last Name *"
             className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
+          {!author.last_name && (
+            <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
+              <span className="text-[12px] text-gray-400">Last Name <span className="text-red-500">*</span></span>
+            </div>
+          )}
         </div>
         <div>
           <input 
@@ -135,7 +143,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             value={author.suffix}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="Suffix (e.g. Jr.)"
+            placeholder="Suffix (Jr.)"
             className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
