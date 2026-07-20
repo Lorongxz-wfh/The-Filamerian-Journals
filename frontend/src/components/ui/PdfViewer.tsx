@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Maximize, Minimize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Maximize, Minimize, ZoomIn, ZoomOut, Loader2 } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -16,10 +16,30 @@ interface PdfViewerProps {
 
 const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const documentContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = documentContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        // zoom in on scroll up, zoom out on scroll down
+        if (e.deltaY < 0) {
+          setScale(prev => Math.min(prev + 0.1, 3.0));
+        } else if (e.deltaY > 0) {
+          setScale(prev => Math.max(prev - 0.1, 0.5));
+        }
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, []);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -41,15 +61,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
-    setPageNumber(1);
   };
-
-  const changePage = (offset: number) => {
-    setPageNumber(prevPageNumber => prevPageNumber + offset);
-  };
-
-  const previousPage = () => changePage(-1);
-  const nextPage = () => changePage(1);
   
   const zoomIn = () => setScale(prev => Math.min(prev + 0.2, 3.0));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5));
@@ -58,32 +70,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
     <div ref={containerRef} className={`flex flex-col w-full h-full bg-surface border border-border ${isFullscreen ? 'p-0' : 'sm:rounded'}`}>
       
       {/* Custom Toolbar */}
-      <div className="flex flex-wrap items-center justify-between p-3 bg-background border-b border-border shrink-0 z-10 shadow-sm gap-4">
-        
-        {/* Pagination Controls */}
-        <div className="flex items-center gap-2">
-          <button 
-            disabled={pageNumber <= 1} 
-            onClick={previousPage}
-            className="p-1.5 text-muted hover:text-primary hover:bg-surface rounded transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
-            title="Previous Page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          
-          <span className="text-[12px] font-medium text-primary tabular-nums min-w-[80px] text-center">
-            {pageNumber} <span className="text-muted font-normal">/ {numPages || '--'}</span>
-          </span>
-          
-          <button 
-            disabled={numPages === null || pageNumber >= numPages} 
-            onClick={nextPage}
-            className="p-1.5 text-muted hover:text-primary hover:bg-surface rounded transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
-            title="Next Page"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+      <div className="flex flex-wrap items-center justify-end p-3 bg-background border-b border-border shrink-0 z-10 shadow-sm gap-4">
 
         {/* Zoom Controls */}
         <div className="flex items-center gap-1 bg-surface border border-border rounded p-0.5">
@@ -121,7 +108,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
       </div>
 
       {/* PDF Document Container */}
-      <div className="flex-1 overflow-auto bg-muted/10 relative p-4 flex justify-center items-start">
+      <div ref={documentContainerRef} className="flex-1 overflow-auto bg-muted/10 relative p-4 flex justify-center items-start">
         <Document
           file={fileUrl}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -140,18 +127,22 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
           }
         >
           {numPages && (
-            <div className="shadow-lg border border-border/50 bg-white">
-               <Page 
-                pageNumber={pageNumber} 
-                scale={scale} 
-                loading={
-                  <div className="w-[600px] h-[800px] flex items-center justify-center bg-white">
-                     <Loader2 className="h-5 w-5 animate-spin text-muted/50" />
-                  </div>
-                }
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-              />
+            <div className="flex flex-col gap-6 pb-8">
+              {Array.from(new Array(numPages), (_, index) => (
+                <div key={`page_${index + 1}`} className="shadow-lg border border-border/50 bg-white">
+                  <Page 
+                    pageNumber={index + 1} 
+                    scale={scale} 
+                    loading={
+                      <div className="w-[600px] h-[800px] flex items-center justify-center bg-white">
+                         <Loader2 className="h-5 w-5 animate-spin text-muted/50" />
+                      </div>
+                    }
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </Document>
