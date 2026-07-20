@@ -44,58 +44,66 @@ const Home: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const observerRef = React.useRef<ResizeObserver | null>(null);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, clientWidth } = scrollContainerRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+      const { clientWidth } = scrollContainerRef.current;
+      scrollContainerRef.current.scrollBy({ left: direction === 'left' ? -clientWidth : clientWidth, behavior: 'smooth' });
     }
   };
 
-  const calculatePages = () => {
-    if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const maxScroll = container.scrollWidth - container.clientWidth;
-      // If no scrolling is needed
-      if (maxScroll <= 0) {
-        setTotalPages(1);
-        return;
-      }
-      // Calculate how many "pages" of clientWidth fit in the total scrollable area
-      const pages = Math.ceil(container.scrollWidth / container.clientWidth);
-      setTotalPages(pages > 0 ? pages : 1);
+  const calculatePages = React.useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    if (maxScroll <= 1) {
+      setTotalPages(1);
+      return;
     }
-  };
+    // Count pages as how many full clientWidths fit, capped at number of articles
+    const pages = Math.ceil(container.scrollWidth / container.clientWidth);
+    setTotalPages(Math.max(1, pages));
+  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
     const maxScroll = container.scrollWidth - container.clientWidth;
-    if (maxScroll > 0 && totalPages > 1) {
+    if (maxScroll > 0) {
       const scrollRatio = container.scrollLeft / maxScroll;
-      const active = Math.round(scrollRatio * (totalPages - 1));
+      const active = Math.min(Math.round(scrollRatio * (totalPages - 1)), totalPages - 1);
       setActiveScrollIndex(active);
     }
   };
 
   const scrollToDot = (index: number) => {
-    if (scrollContainerRef.current && totalPages > 1) {
-      const container = scrollContainerRef.current;
-      const maxScroll = container.scrollWidth - container.clientWidth;
-      const targetScroll = (maxScroll / (totalPages - 1)) * index;
-      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
-    }
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    if (maxScroll <= 0 || totalPages <= 1) return;
+    const targetScroll = (maxScroll / (totalPages - 1)) * index;
+    container.scrollTo({ left: targetScroll, behavior: 'smooth' });
   };
 
+  // Use ResizeObserver to reliably detect when the container's scroll size changes
+  // (fires after paint, unlike setTimeout which often fires before DOM is laid out)
   useEffect(() => {
-    // Recalculate pages when articles load or window resizes
-    const timer = setTimeout(calculatePages, 100);
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    observerRef.current?.disconnect();
+    observerRef.current = new ResizeObserver(() => {
+      calculatePages();
+    });
+    observerRef.current.observe(container);
+
+    // Also recalculate on window resize
     window.addEventListener('resize', calculatePages);
     return () => {
-      clearTimeout(timer);
+      observerRef.current?.disconnect();
       window.removeEventListener('resize', calculatePages);
     };
-  }, [latestArticles]);
+  }, [latestArticles, calculatePages]);
 
   useEffect(() => {
     const fetchData = async () => {
