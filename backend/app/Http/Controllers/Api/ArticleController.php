@@ -91,6 +91,20 @@ class ArticleController extends Controller
         return new ArticleResource($article->load(['volume.journal', 'authors', 'keywords']));
     }
 
+    public function getRelated(Article $article)
+    {
+        // Fetch up to 4 other articles from the same volume
+        $related = Article::with(['volume.journal', 'authors'])
+            ->where('volume_id', $article->volume_id)
+            ->where('id', '!=', $article->id)
+            ->where('status', 'Published') // Assuming we only show published
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+            
+        return ArticleResource::collection($related);
+    }
+
     public function update(Request $request, Article $article)
     {
         $validated = $request->validate([

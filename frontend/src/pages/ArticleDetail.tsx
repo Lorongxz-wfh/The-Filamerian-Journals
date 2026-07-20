@@ -21,6 +21,7 @@ interface Article {
   page_start: number | null;
   page_end: number | null;
   pdf_url: string | null;
+  views_count: number;
   authors: Author[];
   volume: {
     volume_number: string;
@@ -47,11 +48,18 @@ const ArticleDetail: React.FC = () => {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
 
+  // Related Articles State
+  const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
+
   useEffect(() => {
     const fetchArticle = async () => {
       try {
         const res = await api.get(`/public/articles/${id}`);
         setArticle(res.data.data);
+        
+        // Fetch related
+        const relatedRes = await api.get(`/public/articles/${id}/related`);
+        setRelatedArticles(relatedRes.data.data);
         
         // Track the view silently
         api.post(`/public/articles/${id}/view`).catch(e => console.error(e));
@@ -176,6 +184,7 @@ const ArticleDetail: React.FC = () => {
               <div className="flex flex-wrap items-center gap-6 text-[13px] text-muted">
                 {article.volume?.year && <p><span className="font-medium text-primary">Year:</span> {article.volume.year}</p>}
                 {article.doi && <p><span className="font-medium text-primary">DOI:</span> {article.doi}</p>}
+                <p className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary"/> <span className="font-medium text-primary">{article.views_count}</span> Views</p>
               </div>
             </div>
           </div>
@@ -221,6 +230,31 @@ const ArticleDetail: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Related Articles */}
+      {relatedArticles.length > 0 && (
+        <div className="mt-12 space-y-6">
+          <div className="flex items-center gap-2 pb-2 border-b border-border">
+            <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider">More from Volume {article.volume?.volume_number}</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {relatedArticles.map((rel) => (
+              <Link key={rel.id} to={`/articles/${rel.id}`} className="block border border-border bg-surface p-6 hover:border-primary/30 transition-colors">
+                <h4 className="text-[14px] font-semibold text-primary uppercase tracking-wider mb-2">
+                  {rel.title}
+                </h4>
+                <p className="text-[13px] text-muted leading-relaxed line-clamp-2 mb-4">
+                  {rel.abstract || 'No abstract available.'}
+                </p>
+                <div className="flex items-center gap-4 text-[11px] text-muted uppercase tracking-wider">
+                  <span>{rel.authors?.map(a => a.name).join(', ') || 'Unknown'}</span>
+                  <span className="flex items-center gap-1"><BookOpen className="h-3 w-3"/> {rel.views_count}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {citationArticle && (

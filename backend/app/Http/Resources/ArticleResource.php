@@ -27,6 +27,7 @@ class ArticleResource extends JsonResource
             'volume' => new VolumeResource($this->whenLoaded('volume')),
             'authors' => AuthorResource::collection($this->whenLoaded('authors')),
             'keywords' => KeywordResource::collection($this->whenLoaded('keywords')),
+            'views_count' => $this->views_count,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
