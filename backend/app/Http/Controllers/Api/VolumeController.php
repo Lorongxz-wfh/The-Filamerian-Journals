@@ -31,7 +31,25 @@ class VolumeController extends Controller
 
     public function show(Volume $volume)
     {
-        return new VolumeResource($volume->load('journal'));
+        return new VolumeResource($volume->load(['journal', 'articles' => function($query) {
+            $query->orderBy('order', 'asc')->with('authors', 'keywords');
+        }]));
+    }
+
+    public function reorderArticles(Request $request, Volume $volume)
+    {
+        $validated = $request->validate([
+            'article_ids' => 'required|array',
+            'article_ids.*' => 'exists:articles,id',
+        ]);
+
+        foreach ($validated['article_ids'] as $index => $id) {
+            \App\Models\Article::where('id', $id)->where('volume_id', $volume->id)->update(['order' => $index]);
+        }
+
+        \App\Services\ActivityLogger::log('Reordered Articles', "Reordered articles in volume {$volume->volume_number}", get_class($volume), $volume->id);
+
+        return response()->json(['message' => 'Articles reordered successfully']);
     }
 
     public function update(Request $request, Volume $volume)

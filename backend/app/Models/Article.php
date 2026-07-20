@@ -18,6 +18,7 @@ class Article extends Model
         'page_end',
         'doi',
         'status',
+        'order',
     ];
 
     public function volume()

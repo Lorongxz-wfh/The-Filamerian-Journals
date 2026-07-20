@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Write operations restricted to Super Admin and Admin
     Route::middleware('role:Super Admin|Admin')->group(function () {
         Route::apiResource('journals', \App\Http\Controllers\Api\JournalController::class)->only(['store', 'update', 'destroy']);
+        Route::post('volumes/{volume}/reorder', [\App\Http\Controllers\Api\VolumeController::class, 'reorderArticles']);
         Route::apiResource('volumes', \App\Http\Controllers\Api\VolumeController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('articles', \App\Http\Controllers\Api\ArticleController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('authors', \App\Http\Controllers\Api\AuthorController::class)->only(['store', 'update', 'destroy']);

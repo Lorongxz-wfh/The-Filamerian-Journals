@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 import { FileText, Plus, Edit2, Trash2, Eye, X } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -40,6 +41,7 @@ const statusColor: Record<string, string> = {
 const articleHasPdf = (article: Article) => !!article.pdf_url;
 
 const Articles: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [articles, setArticles] = useState<Article[]>([]);
   const [journalsData, setJournalsData] = useState<any[]>([]); // For the issue selector
   const [loading, setLoading] = useState(true);
@@ -89,7 +91,7 @@ const Articles: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleOpenModal = (article: Article | null = null) => {
+  const handleOpenModal = (article: Article | null = null, initialOverrides: any = {}) => {
     setError(null);
     setEditingArticle(article);
     if (article) {
@@ -108,8 +110,9 @@ const Articles: React.FC = () => {
             }))
           : [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
         keyword_names: article.keywords && article.keywords.length > 0 ? article.keywords.map((k: any) => k.name) : [],
-        page_start: '', // Omitted for brevity in edit mode for now, or fetch if available
-        page_end: ''
+        page_start: '',
+        page_end: '',
+        ...initialOverrides
       });
     } else {
       setFormData({
@@ -121,12 +124,21 @@ const Articles: React.FC = () => {
         authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
         keyword_names: [],
         page_start: '',
-        page_end: ''
+        page_end: '',
+        ...initialOverrides
       });
     }
     setPdfFile(null); // Reset file input
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const volId = searchParams.get('volume_id');
+    if (action === 'new' && volId) {
+      handleOpenModal(null, { volume_id: volId });
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

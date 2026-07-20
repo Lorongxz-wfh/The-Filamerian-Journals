@@ -10,6 +10,7 @@ import PendingVerification from '@/pages/PendingVerification';
 import Overview from '@/pages/dashboard/Overview';
 import MyJournals from '@/pages/dashboard/MyJournals';
 import ManageJournal from '@/pages/dashboard/ManageJournal';
+import ManageVolume from '@/pages/dashboard/ManageVolume';
 import Articles from '@/pages/dashboard/Articles';
 import ManageAnnouncements from '@/pages/dashboard/ManageAnnouncements';
 import Notifications from '@/pages/dashboard/Notifications';
@@ -68,6 +69,7 @@ function App() {
           <Route path="health" element={<SystemHealth />} />
           <Route path="journals" element={<MyJournals />} />
           <Route path="journals/:slug" element={<ManageJournal />} />
+          <Route path="volumes/:id" element={<ManageVolume />} />
           <Route path="articles" element={<Articles />} />
           <Route path="announcements" element={<ManageAnnouncements />} />
           <Route path="notifications" element={<Notifications />} />

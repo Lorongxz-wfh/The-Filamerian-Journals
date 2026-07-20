@@ -132,10 +132,9 @@ const ManageJournal: React.FC = () => {
         ) : (
           journal?.volumes?.map((vol) => (
             <div key={vol.id} className="border border-border bg-surface">
-              {/* Volume Header */}
               <div 
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-background transition-colors cursor-pointer"
-                onClick={() => setExpandedVol(expandedVol === vol.id ? null : vol.id)}
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-background/50 transition-colors"
+                onClick={() => window.location.href = `/dashboard/volumes/${vol.id}`}
               >
                 <div className="flex items-center gap-3">
                   <BookOpen className="h-4 w-4 text-primary/30" />
