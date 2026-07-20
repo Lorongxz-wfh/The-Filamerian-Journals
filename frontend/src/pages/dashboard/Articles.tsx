@@ -407,22 +407,22 @@ const Articles: React.FC = () => {
                   <Plus className="h-3 w-3" /> Add Keyword
                 </button>
               </div>
-              {formData.keyword_names.map((kw, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <div className="flex-grow">
+              <div className="flex flex-wrap gap-2">
+                {formData.keyword_names.map((kw, idx) => (
+                  <div key={idx} className="flex items-center gap-1 bg-white border border-border pr-1 focus-within:border-primary transition-colors">
                     <input 
                       type="text" 
                       value={kw}
                       onChange={(e) => handleArrayChange('keyword_names', idx, e.target.value)}
                       placeholder="e.g. Machine Learning"
-                      className="w-full px-3 py-2 border border-border text-[13px] bg-background focus:outline-none focus:border-primary"
+                      className="w-40 sm:w-48 px-3 py-1.5 text-[13px] bg-transparent focus:outline-none placeholder:text-muted/60"
                     />
+                    <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-1 text-red-500 hover:bg-red-50 transition-colors shrink-0">
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
-                  <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-2 text-red-500 hover:bg-red-50 transition-colors">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
               {formData.keyword_names.length === 0 && (
                  <div className="text-[12px] text-muted italic border border-dashed border-border p-3 text-center">No keywords added.</div>
               )}

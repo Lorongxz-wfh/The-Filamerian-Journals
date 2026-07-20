@@ -89,10 +89,10 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
   }
 
   const hasData = author.first_name || author.last_name || author.middle_name || author.suffix;
-  const isComplete = author.first_name || author.last_name;
+  const isComplete = author.first_name && author.last_name;
 
   return (
-    <div ref={containerRef} className="flex items-start gap-2 mb-2 bg-slate-50/50 p-3 border border-border relative">
+    <div ref={containerRef} className="flex items-start gap-2 mb-3 pb-3 border-b border-border/50 relative last:border-b-0 last:pb-0 last:mb-0">
       <div className="flex-grow grid grid-cols-1 sm:grid-cols-[3fr_2.5fr_2.5fr_1fr] gap-2">
         <div className="relative">
           <input 
