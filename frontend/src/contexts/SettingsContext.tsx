@@ -19,7 +19,7 @@ const defaultSettings: SettingsData = {
   tagline: 'Scholarly Excellence In Every Discipline',
   contact_email: 'journals@filamer.edu.ph',
   journal_categories: 'Science, Education, Arts, Multidisciplinary',
-  home_about_us: '<div class="text-center max-w-4xl mx-auto space-y-4 pb-4 border-b border-border mb-4">\n  <h2 class="text-lg font-bold uppercase tracking-wider text-primary">About Us</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>\n</div>',
+  home_about_us: '<div class="text-center max-w-4xl mx-auto space-y-4 pb-4 border-b border-border mb-4">\n  <h2 class="text-lg font-bold uppercase tracking-wider text-primary">The Filamerian Journals</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>\n</div>',
 };
 
 const SettingsContext = createContext<SettingsContextType>({

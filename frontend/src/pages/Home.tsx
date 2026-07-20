@@ -157,11 +157,20 @@ const Home: React.FC = () => {
   <Seo title="Home" description="Home page of The Filamerian Journals" />
   {/* Hero Section */}
       {/* Hero Section */}
-      {aboutUsHtml && (
-        <div 
-          className="w-full px-[10%] text-center space-y-1.5 border-b border-border mb-5 pb-5"
-          dangerouslySetInnerHTML={{ __html: aboutUsHtml }} 
-        />
+      {(settings.tagline || aboutUsHtml) && (
+        <div className="w-full px-[10%] text-center border-b border-border mb-5 pb-5 flex flex-col items-center">
+          {settings.tagline && (
+            <div className="mb-4 text-[12px] font-bold text-secondary uppercase tracking-widest bg-primary px-4 py-1.5 inline-block">
+              {settings.tagline}
+            </div>
+          )}
+          {aboutUsHtml && (
+            <div 
+              className="space-y-1.5 w-full"
+              dangerouslySetInnerHTML={{ __html: aboutUsHtml }} 
+            />
+          )}
+        </div>
       )}
 
       <div className="w-full flex-1 flex flex-col">
