@@ -81,16 +81,18 @@ const Journals: React.FC = () => {
   }, [categoryParam]);
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories(prev => {
-      const next = prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat];
-      // Update URL
-      if (next.length === 0) {
-        navigate('/journals');
-      } else {
-        navigate(`/journals?category=${next.map(c => encodeURIComponent(c)).join(',')}`);
-      }
-      return next;
-    });
+    const next = selectedCategories.includes(cat) 
+      ? selectedCategories.filter(c => c !== cat) 
+      : [...selectedCategories, cat];
+      
+    setSelectedCategories(next);
+    
+    // Update URL
+    if (next.length === 0) {
+      navigate('/journals');
+    } else {
+      navigate(`/journals?category=${next.map(c => encodeURIComponent(c)).join(',')}`);
+    }
   };
 
   const toggleYear = (year: string) => {
