@@ -97,7 +97,7 @@ class ArticleController extends Controller
         $related = Article::with(['volume.journal', 'authors'])
             ->where('volume_id', $article->volume_id)
             ->where('id', '!=', $article->id)
-            ->where('status', 'Published') // Assuming we only show published
+            ->where('status', 'published') // Assuming we only show published
             ->inRandomOrder()
             ->take(4)
             ->get();
@@ -109,7 +109,7 @@ class ArticleController extends Controller
     {
         // Fetch the 6 most recently published articles
         $latest = Article::with(['volume.journal', 'authors'])
-            ->where('status', 'Published')
+            ->where('status', 'published')
             ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
