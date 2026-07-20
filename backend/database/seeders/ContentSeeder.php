@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Journal;
+use App\Models\Category;
 use App\Models\Volume;
 use App\Models\Article;
 use App\Models\Author;
@@ -69,13 +70,18 @@ class ContentSeeder extends Seeder
         foreach ($journalsData as $index => $data) {
             $i = $index + 1;
             
+            $category = Category::firstOrCreate(
+                ['name' => $data['category']],
+                ['slug' => Str::slug($data['category'])]
+            );
+
             // Journal — updateOrCreate so re-seeding always reflects latest data
             $journal = Journal::updateOrCreate(
                 ['slug' => Str::slug($data['title'])],
                 [
                     'title' => $data['title'],
                     'description' => $data['description'],
-                    'category' => $data['category'],
+                    'category_id' => $category->id,
                     'publisher' => 'Filamer Christian University'
                 ]
             );
