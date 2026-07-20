@@ -368,19 +368,20 @@ const Articles: React.FC = () => {
             
             <div className="md:col-span-2">
               <Select 
-                label="Target Volume" required name="volume_id" value={formData.volume_id} onChange={handleInputChange}
-              >
-                <option value="">Select Journal / Volume</option>
-                {journalsData.map(journal => (
-                  <optgroup key={`j-${journal.id}`} label={journal.title}>
-                    {journal.volumes?.map((vol: any) => (
-                      <option key={vol.id} value={vol.id}>
-                        Vol {vol.volume_number} ({vol.year})
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </Select>
+                label="Target Volume" required name="volume_id" 
+                value={formData.volume_id} 
+                onChange={(val) => handleInputChange({ target: { name: 'volume_id', value: val } } as any)}
+                options={[
+                  { value: "", label: "Select Journal / Volume" },
+                  ...journalsData.flatMap((journal: any) => 
+                    journal.volumes?.map((vol: any) => ({
+                      value: vol.id,
+                      label: `Vol ${vol.volume_number} (${vol.year})`,
+                      group: journal.title
+                    })) || []
+                  )
+                ]}
+              />
             </div>
 
             <div className="md:col-span-2 space-y-2">
@@ -434,11 +435,14 @@ const Articles: React.FC = () => {
 
             <div>
               <Select 
-                label="Status" name="status" value={formData.status} onChange={handleInputChange}
-              >
-                <option value="Draft">Draft</option>
-                <option value="Published">Published</option>
-              </Select>
+                label="Status" name="status" 
+                value={formData.status} 
+                onChange={(val) => handleInputChange({ target: { name: 'status', value: val } } as any)}
+                options={[
+                  { value: "Draft", label: "Draft" },
+                  { value: "Published", label: "Published" }
+                ]}
+              />
             </div>
 
             <div>

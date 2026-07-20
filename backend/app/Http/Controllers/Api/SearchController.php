@@ -69,7 +69,7 @@ class SearchController extends Controller
 
         // Search Articles
         if ($type === 'all' || $type === 'articles') {
-            $articleQuery = Article::with(['volume.journal', 'authors']);
+            $articleQuery = Article::with(['volume.journal', 'authors'])->where('status', 'Published');
 
             if (!empty(trim($q))) {
                 $articleQuery->where(function ($query) use ($term) {

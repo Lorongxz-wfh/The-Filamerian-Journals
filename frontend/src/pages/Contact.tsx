@@ -4,6 +4,7 @@ import api from '@/services/api';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -142,16 +143,16 @@ const Contact: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Category</label>
-                <select 
+                <Select 
                   name="category"
                   value={formData.category}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                >
-                  <option value="Journal Suggestion">Journal Suggestion</option>
-                  <option value="System Issue">System Issue</option>
-                  <option value="Other">Other (Please specify)</option>
-                </select>
+                  onChange={(val) => handleChange({ target: { name: 'category', value: val } } as any)}
+                  options={[
+                    { value: "Journal Suggestion", label: "Journal Suggestion" },
+                    { value: "System Issue", label: "System Issue" },
+                    { value: "Other", label: "Other (Please specify)" }
+                  ]}
+                />
                 {formData.category === 'Other' && (
                   <input 
                     type="text" 

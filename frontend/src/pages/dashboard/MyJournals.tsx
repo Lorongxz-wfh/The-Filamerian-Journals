@@ -294,13 +294,16 @@ const MyJournals: React.FC = () => {
 
             <div>
               <Select 
-                label="Category" required name="category" value={formData.category} onChange={handleInputChange}
-              >
-                <option value="">Select Category</option>
-                {availableCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </Select>
+                label="Category" required name="category" 
+                value={formData.category} 
+                onChange={(val) => handleInputChange({ target: { name: 'category', value: val } } as any)}
+                options={[
+                  { value: "", label: "Select Category" },
+                  ...availableCategories.map(cat => ({
+                    value: cat, label: cat
+                  }))
+                ]}
+              />
             </div>
             
             <div>

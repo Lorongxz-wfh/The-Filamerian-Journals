@@ -33,7 +33,12 @@ class JournalController extends Controller
 
         // Eager-load nested relationships when requested
         if ($request->boolean('with_volumes')) {
-            $query->with(['volumes.articles.authors']);
+            $query->with(['volumes.articles' => function ($q) use ($request) {
+                if ($request->is('api/public/*')) {
+                    $q->where('status', 'Published');
+                }
+                $q->with('authors');
+            }]);
         }
 
         // Standardize pagination to 15
@@ -84,9 +89,14 @@ class JournalController extends Controller
      * Display the specified resource.
      * Supports both ID and slug lookups.
      */
-    public function show(Journal $journal)
+    public function show(Request $request, Journal $journal)
     {
-        $journal->load(['volumes.articles.authors']);
+        $journal->load(['volumes.articles' => function ($q) use ($request) {
+            if ($request->is('api/public/*')) {
+                $q->where('status', 'Published');
+            }
+            $q->with('authors');
+        }]);
 
         return new JournalResource($journal);
     }

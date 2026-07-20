@@ -4,6 +4,7 @@ import JournalCard from '@/components/ui/JournalCard';
 import { Search, LayoutGrid, List, ChevronDown, X, Loader2 } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
+import Select from '@/components/ui/Select';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
@@ -334,18 +335,18 @@ const Journals: React.FC = () => {
 
             {/* Sort + View Controls */}
             <div className="flex items-center gap-3 shrink-0">
-            <div className="relative">
-              <select 
+            <div className="w-40">
+              <Select 
                 value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="appearance-none border border-border bg-surface pl-3 pr-8 py-1.5 text-[12px] font-medium text-primary focus:outline-none focus:border-primary transition-colors h-[34px] cursor-pointer"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="a-z">Title (A-Z)</option>
-                <option value="z-a">Title (Z-A)</option>
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary pointer-events-none" />
+                onChange={(val) => setSortOption(val as string)}
+                className="py-1.5 h-[34px]"
+                options={[
+                  { value: "newest", label: "Newest First" },
+                  { value: "oldest", label: "Oldest First" },
+                  { value: "a-z", label: "Title (A-Z)" },
+                  { value: "z-a", label: "Title (Z-A)" }
+                ]}
+              />
             </div>
 
               <div className="inline-flex items-center border border-border bg-surface rounded-sm h-[34px]">

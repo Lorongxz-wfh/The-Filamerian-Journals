@@ -221,11 +221,14 @@ const UserManager: React.FC = () => {
           />
 
           <Select 
-            label="Role" required name="role" value={formData.role} onChange={handleInputChange}
-          >
-            <option value="Super Admin">Super Admin</option>
-            <option value="Editor">Editor</option>
-          </Select>
+            label="Role" required name="role" 
+            value={formData.role} 
+            onChange={(val) => handleInputChange({ target: { name: 'role', value: val } } as any)}
+            options={[
+              { value: "Super Admin", label: "Super Admin" },
+              { value: "Editor", label: "Editor" }
+            ]}
+          />
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
