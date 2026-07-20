@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, Upload, FileText, CheckCircle2 } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -8,6 +8,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import AuthorInput from '@/components/ui/AuthorInput';
 import Button from '@/components/ui/Button';
+import FileUploadZone from '@/components/ui/FileUploadZone';
 
 interface AuthorData {
   first_name: string;
@@ -45,20 +46,8 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
     page_end: ''
   });
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
-    } else if (file) {
-      toast.error('Only PDF files are accepted.');
-    }
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -290,56 +279,14 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-[12px] font-medium text-primary mb-2 uppercase tracking-wider">PDF File</label>
-            <label
-              htmlFor="pdf-upload"
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              className={`group relative flex flex-col items-center justify-center w-full border-2 border-dashed transition-all cursor-pointer p-6 gap-3
-                ${ isDragging
-                  ? 'border-primary bg-primary/5 scale-[1.01]'
-                  : 'border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02]'
-                }`}
-            >
-              <input
-                id="pdf-upload"
-                type="file"
-                accept=".pdf"
-                onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
-                className="sr-only"
-              />
-              {isDragging ? (
-                <>
-                  <Upload className="h-8 w-8 text-primary animate-bounce" />
-                  <p className="text-[13px] font-semibold text-primary">Drop PDF here</p>
-                </>
-              ) : pdfFile ? (
-                <>
-                  <CheckCircle2 className="h-8 w-8 text-green-500" />
-                  <div className="text-center">
-                    <p className="text-[13px] font-semibold text-primary">{pdfFile.name}</p>
-                    <p className="text-[11px] text-muted mt-0.5">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB — Click or drag to change</p>
-                  </div>
-                </>
-              ) : editingArticle?.pdf_url ? (
-                <>
-                  <FileText className="h-8 w-8 text-primary/40" />
-                  <div className="text-center">
-                    <p className="text-[13px] font-semibold text-primary">PDF already uploaded</p>
-                    <p className="text-[11px] text-muted mt-0.5">Click or drag a new file to replace it</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Upload className="h-8 w-8 text-muted group-hover:text-primary transition-colors" />
-                  <div className="text-center">
-                    <p className="text-[13px] font-semibold text-primary">Click or drag & drop PDF</p>
-                    <p className="text-[11px] text-muted mt-0.5">PDF files only</p>
-                  </div>
-                </>
-              )}
-            </label>
+            <FileUploadZone
+              label="PDF File"
+              accept=".pdf,application/pdf"
+              iconType="pdf"
+              selectedFile={pdfFile}
+              existingUrl={editingArticle?.pdf_url}
+              onFileSelect={(file) => setPdfFile(file)}
+            />
           </div>
         </div>
 

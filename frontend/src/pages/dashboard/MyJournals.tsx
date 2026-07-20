@@ -14,6 +14,7 @@ import Select from '@/components/ui/Select';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import FileUploadZone from '@/components/ui/FileUploadZone';
 import { toast } from 'sonner';
 
 interface Journal {
@@ -347,28 +348,26 @@ const MyJournals: React.FC = () => {
             </div>
             
             <div className="md:col-span-1">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider flex justify-between items-center mb-1.5">
-                <span>PDF Document</span>
-                <span className="text-[10px] text-muted normal-case tracking-normal">Max size: 10MB</span>
-              </label>
-              <input 
-                type="file" 
-                accept="application/pdf"
-                onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
-                className="w-full px-4 py-2 bg-background border border-border text-[13px] text-muted file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer"
+              <FileUploadZone
+                label="PDF Document"
+                hint="Max size: 10MB"
+                accept=".pdf,application/pdf"
+                iconType="pdf"
+                selectedFile={pdfFile}
+                existingUrl={editingJournal?.pdf_url}
+                onFileSelect={(file) => setPdfFile(file)}
               />
             </div>
 
             <div className="md:col-span-1">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider flex justify-between items-center mb-1.5">
-                <span>Cover Image</span>
-                <span className="text-[10px] text-muted normal-case tracking-normal">Format: JPG/PNG, Max: 5MB</span>
-              </label>
-              <input 
-                type="file" 
+              <FileUploadZone
+                label="Cover Image"
+                hint="Format: JPG/PNG, Max: 5MB"
                 accept="image/*"
-                onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
-                className="w-full px-4 py-2 bg-background border border-border text-[13px] text-muted file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary cursor-pointer"
+                iconType="image"
+                selectedFile={coverImage}
+                existingUrl={editingJournal?.cover_image}
+                onFileSelect={(file) => setCoverImage(file)}
               />
             </div>
           </div>
