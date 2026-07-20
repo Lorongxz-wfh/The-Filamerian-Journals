@@ -41,6 +41,7 @@ const Home: React.FC = () => {
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
   const [aboutUsHtml, setAboutUsHtml] = useState<string>(DEFAULT_ABOUT_US);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -52,22 +53,49 @@ const Home: React.FC = () => {
     }
   };
 
+  const calculatePages = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      // If no scrolling is needed
+      if (maxScroll <= 0) {
+        setTotalPages(1);
+        return;
+      }
+      // Calculate how many "pages" of clientWidth fit in the total scrollable area
+      const pages = Math.ceil(container.scrollWidth / container.clientWidth);
+      setTotalPages(pages > 0 ? pages : 1);
+    }
+  };
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
-    if (latestArticles.length > 0) {
-      const cardWidth = container.scrollWidth / latestArticles.length;
-      const active = Math.round(container.scrollLeft / cardWidth);
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    if (maxScroll > 0 && totalPages > 1) {
+      const scrollRatio = container.scrollLeft / maxScroll;
+      const active = Math.round(scrollRatio * (totalPages - 1));
       setActiveScrollIndex(active);
     }
   };
 
   const scrollToDot = (index: number) => {
-    if (scrollContainerRef.current && latestArticles.length > 0) {
+    if (scrollContainerRef.current && totalPages > 1) {
       const container = scrollContainerRef.current;
-      const cardWidth = container.scrollWidth / latestArticles.length;
-      container.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const targetScroll = (maxScroll / (totalPages - 1)) * index;
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+    // Recalculate pages when articles load or window resizes
+    const timer = setTimeout(calculatePages, 100);
+    window.addEventListener('resize', calculatePages);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', calculatePages);
+    };
+  }, [latestArticles]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -211,9 +239,9 @@ const Home: React.FC = () => {
             </div>
 
             {/* Dots Indicator */}
-            {latestArticles.length > 1 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-2">
-                {latestArticles.map((_, i) => (
+                {Array.from({ length: totalPages }).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => scrollToDot(i)}
