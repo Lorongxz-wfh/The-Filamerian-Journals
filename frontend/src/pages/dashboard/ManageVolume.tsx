@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router';
+import { useParams, Link } from 'react-router';
 import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import ArticleFormModal from '@/components/ui/ArticleFormModal';
 
 interface Author {
   id: number;
@@ -43,7 +44,6 @@ const statusColor: Record<string, string> = {
 
 const ManageVolume: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [volume, setVolume] = useState<Volume | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -53,6 +53,11 @@ const ManageVolume: React.FC = () => {
   const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [journalsData, setJournalsData] = useState<any[]>([]);
 
   const fetchVolume = async () => {
     try {
@@ -73,7 +78,17 @@ const ManageVolume: React.FC = () => {
 
   useEffect(() => {
     fetchVolume();
+    
+    // Fetch journals for the modal dropdown
+    api.get('/journals?with_volumes=1')
+      .then(res => setJournalsData(res.data.data))
+      .catch(err => console.error('Failed to load journals', err));
   }, [id]);
+
+  const handleOpenModal = (article: Article | null = null) => {
+    setEditingArticle(article);
+    setIsModalOpen(true);
+  };
 
   const moveUp = (index: number) => {
     if (index === 0) return;
@@ -137,7 +152,7 @@ const ManageVolume: React.FC = () => {
           </div>
         }
       >
-        <Button onClick={() => navigate(`/dashboard/articles?action=new&volume_id=${id}`)} className="shrink-0 flex items-center gap-2">
+        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add Article
         </Button>
       </DashboardHeader>
@@ -164,9 +179,13 @@ const ManageVolume: React.FC = () => {
         ) : (
           <div className="divide-y divide-border">
             {articles.map((article, index) => (
-              <div key={article.id} className="flex items-center justify-between px-5 py-3 hover:bg-background/50 transition-colors">
+              <div 
+                key={article.id} 
+                className="flex items-center justify-between px-5 py-3 hover:bg-background/50 transition-colors cursor-pointer"
+                onClick={() => handleOpenModal(article)}
+              >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="flex flex-col gap-1 items-center shrink-0 w-8">
+                  <div className="flex flex-col gap-1 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
                     <button 
                       onClick={() => moveUp(index)} 
                       disabled={index === 0}
@@ -192,7 +211,7 @@ const ManageVolume: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 shrink-0 pl-4">
+                <div className="flex items-center gap-4 shrink-0 pl-4" onClick={(e) => e.stopPropagation()}>
                   <span className={`px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
                     {article.status}
                   </span>
@@ -207,8 +226,17 @@ const ManageVolume: React.FC = () => {
       </div>
       
       <div className="text-[12px] text-muted text-center pt-2">
-        To edit an article's content or authors, please use the <Link to={`/dashboard/articles?volume_id=${id}`} className="text-primary hover:underline font-semibold">Articles page</Link>.
+        You can now edit articles directly by clicking on them! Advanced management is still available in the <Link to={`/dashboard/articles?volume_id=${id}`} className="text-primary hover:underline font-semibold">Articles page</Link>.
       </div>
+
+      <ArticleFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        editingArticle={editingArticle}
+        journalsData={journalsData}
+        initialVolumeId={id}
+        onSuccess={fetchVolume}
+      />
 
       <ConfirmDialog 
         isOpen={!!deleteTarget}
