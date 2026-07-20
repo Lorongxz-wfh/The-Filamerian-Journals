@@ -408,23 +408,25 @@ const Articles: React.FC = () => {
                   <Plus className="h-3 w-3" /> Add Keyword
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.keyword_names.map((kw, idx) => (
-                  <div key={idx} className="flex items-center gap-1 bg-white border border-border pr-1 focus-within:border-primary transition-colors rounded-sm">
-                    <input 
-                      type="text" 
-                      value={kw}
-                      onChange={(e) => handleArrayChange('keyword_names', idx, e.target.value)}
-                      placeholder="Keyword"
-                      style={{ width: `${Math.max(kw.length + 1, 9)}ch` }}
-                      className="px-2 py-1 text-[13px] bg-transparent focus:outline-none placeholder:text-muted/60 max-w-full"
-                    />
-                    <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-1 text-red-500 hover:bg-red-50 transition-colors shrink-0 rounded-sm">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {formData.keyword_names.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.keyword_names.map((kw, idx) => (
+                    <div key={idx} className="flex items-center gap-1 bg-white border border-border pr-1 focus-within:border-primary transition-colors rounded-sm">
+                      <input 
+                        type="text" 
+                        value={kw}
+                        onChange={(e) => handleArrayChange('keyword_names', idx, e.target.value)}
+                        placeholder="Keyword"
+                        style={{ width: `${Math.max(kw.length + 1, 9)}ch` }}
+                        className="px-2 py-1 text-[13px] bg-transparent focus:outline-none placeholder:text-muted/60 max-w-full"
+                      />
+                      <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-1 text-red-500 hover:bg-red-50 transition-colors shrink-0 rounded-sm">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               {formData.keyword_names.length === 0 && (
                  <div className="text-[12px] text-muted italic border border-dashed border-border p-3 text-center">No keywords added.</div>
               )}
@@ -435,8 +437,6 @@ const Articles: React.FC = () => {
                 label="Status" name="status" value={formData.status} onChange={handleInputChange}
               >
                 <option value="Draft">Draft</option>
-                <option value="Pending">Pending Review</option>
-                <option value="Revision">Revision</option>
                 <option value="Published">Published</option>
               </Select>
             </div>
