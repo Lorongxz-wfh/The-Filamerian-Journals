@@ -17,7 +17,7 @@ interface Journal {
   slug: string;
   title: string;
   description: string;
-  category: string;
+  category: any;
   cover_image: string | null;
   volumes?: any[];
   created_at: string;
@@ -37,6 +37,7 @@ const Home: React.FC = () => {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { settings } = useSettings();
@@ -121,19 +122,22 @@ const Home: React.FC = () => {
 
       // 2. Fetch fresh data in the background
       try {
-        const [jrnRes, latestRes, annRes] = await Promise.all([
+        const [jrnRes, latestRes, annRes, catRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/articles/latest'),
-          api.get('/public/announcements')
+          api.get('/public/announcements'),
+          api.get('/categories')
         ]);
         
         const freshJournals = jrnRes.data.data;
         const freshLatest = latestRes.data.data;
         const freshAnnouncements = annRes.data.data.slice(0, 3);
+        const freshCategories = (catRes.data.data || []).map((c: any) => c.name);
 
         setJournals(freshJournals);
         setLatestArticles(freshLatest);
         setAnnouncements(freshAnnouncements);
+        setCategoriesList(freshCategories);
         
         // Update Local Cache
         localStorage.setItem('filamerian_home_cache', JSON.stringify({
@@ -150,8 +154,7 @@ const Home: React.FC = () => {
     fetchData();
   }, []);
 
-  const catsString = settings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-  const availableCategories = ['All', ...catsString.split(',').map((s: string) => s.trim()).filter(Boolean)];
+  const availableCategories = ['All', ...categoriesList];
   
   const showTagline = settings.show_tagline !== 'false';
   const showAboutUs = settings.show_about_us !== 'false';
@@ -159,9 +162,10 @@ const Home: React.FC = () => {
 
   const filteredJournals = activeTab === 'All'
     ? journals
-    : journals.filter((j) =>
-        j.category === activeTab || (activeTab === 'All')
-      );
+    : journals.filter((j) => {
+        const catName = typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category;
+        return catName === activeTab;
+      });
 
   return (
     <PageWrapper className="flex flex-col">
@@ -306,7 +310,7 @@ const Home: React.FC = () => {
                         date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
                         volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
                         image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
-                        category={j.category}
+                        category={typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
                         viewMode="grid"
                         className="h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] max-w-[260px] mx-auto w-full min-h-[320px]"
                       />

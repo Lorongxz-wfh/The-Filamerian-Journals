@@ -239,7 +239,7 @@ const Search: React.FC = () => {
                     description={j.description}
                     date={new Date(j.created_at).getFullYear().toString()}
                     image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
-                    category={j.category}
+                    category={j.category?.name}
                   />
                 ))}
               </div>

@@ -23,7 +23,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const listboxRef = useRef<HTMLUListElement>(null);
 
-    const selectedOption = options.find(opt => opt.value === value) || options[0];
+    const selectedOption = options.find(opt => String(opt.value) === String(value)) || options[0];
 
     // Handle outside click
     useEffect(() => {
@@ -39,7 +39,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     // Reset focused index when opened
     useEffect(() => {
       if (isOpen) {
-        const index = options.findIndex(opt => opt.value === value);
+        const index = options.findIndex(opt => String(opt.value) === String(value));
         setFocusedIndex(index >= 0 ? index : 0);
       }
     }, [isOpen, value, options]);

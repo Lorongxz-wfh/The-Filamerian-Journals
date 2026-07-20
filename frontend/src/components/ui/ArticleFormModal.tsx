@@ -74,7 +74,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
         });
       } else {
         setFormData({
-          volume_id: initialVolumeId || '',
+          volume_id: initialVolumeId ? String(initialVolumeId) : '',
           title: '',
           abstract: '',
           doi: '',
@@ -201,8 +201,8 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
                 { value: "", label: "Select Journal / Volume" },
                 ...journalsData.flatMap((journal: any) => 
                   journal.volumes?.map((vol: any) => ({
-                    value: vol.id,
-                    label: `Vol ${vol.volume_number} (${vol.year})`,
+                    value: String(vol.id),
+                    label: `Vol ${vol.volume_number}${vol.issue_number ? `, Issue ${vol.issue_number}` : ''} (${vol.year})`,
                     group: journal.title
                   })) || []
                 )

@@ -10,7 +10,7 @@ interface JournalCardProps {
   description: string;
   image?: string;
   volume?: string;
-  category?: string;
+  category?: string | any;
   publisher?: string;
   date?: string;
   className?: string;
@@ -29,6 +29,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
   className,
   viewMode = 'list',
 }) => {
+  const categoryName = typeof category === 'object' && category !== null ? category.name : category;
   const [showFloating, setShowFloating] = useState(false);
   const [imgError, setImgError] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,10 +97,10 @@ const JournalCard: React.FC<JournalCardProps> = ({
           </h3>
 
           <div className="flex flex-col items-center gap-1 text-[13px]">
-            {category && (
+            {categoryName && (
               <div className="flex flex-col items-center">
                 <span className="font-bold text-gray-900">Category</span>
-                <span className="text-[#0077cc]">{category}</span>
+                <span className="text-[#0077cc]">{categoryName}</span>
               </div>
             )}
             {publisher && (
@@ -145,9 +146,9 @@ const JournalCard: React.FC<JournalCardProps> = ({
           <span className="text-[13px] font-semibold text-primary uppercase tracking-wider">
             {date || 'March 2024'}
           </span>
-          {category && (
+          {categoryName && (
             <span className="text-[11px] font-medium text-muted bg-surface border border-border px-2 py-0.5 uppercase tracking-wider">
-              {category}
+              {categoryName}
             </span>
           )}
         </div>

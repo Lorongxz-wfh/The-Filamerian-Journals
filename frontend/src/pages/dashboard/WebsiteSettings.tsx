@@ -220,39 +220,6 @@ const WebsiteSettings: React.FC = () => {
     </div>
   );
 
-  const journalsTabContent = (
-    <div className="space-y-8 w-full">
-      {loadingSettings ? (
-        <FormSkeleton rows={2} />
-      ) : (
-        <>
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Journals Page Settings</h2>
-            </div>
-            <div className="space-y-4">
-              <Input 
-                label="Journal Categories" hint="Comma Separated"
-                value={settings.journal_categories} 
-                onChange={(e) => handleSettingsChange('journal_categories', e.target.value)}
-                placeholder="Science, Education, Arts"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button 
-              onClick={handleSaveSettings}
-              isLoading={savingSettings}
-            >
-              {savingSettings ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
-  );
 
   const archivesTabContent = (
     <div className="space-y-8 w-full">
@@ -400,7 +367,6 @@ const WebsiteSettings: React.FC = () => {
       <Tabs 
         tabs={[
           { id: 'home', label: 'Home', content: homeTabContent },
-          { id: 'journals', label: 'Journals', content: journalsTabContent },
           { id: 'archives', label: 'Archives', content: archivesTabContent },
           { id: 'about', label: 'About', content: resourcesContent },
           { id: 'contact', label: 'Contact', content: contactTabContent }
