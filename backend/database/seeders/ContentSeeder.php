@@ -69,8 +69,8 @@ class ContentSeeder extends Seeder
         foreach ($journalsData as $index => $data) {
             $i = $index + 1;
             
-            // Journal
-            $journal = Journal::firstOrCreate(
+            // Journal — updateOrCreate so re-seeding always reflects latest data
+            $journal = Journal::updateOrCreate(
                 ['slug' => Str::slug($data['title'])],
                 [
                     'title' => $data['title'],
@@ -80,16 +80,17 @@ class ContentSeeder extends Seeder
                 ]
             );
 
-            // Volume
-            $volume = Volume::firstOrCreate(
-                ['journal_id' => $journal->id, 'volume_number' => "Vol. 1 Issue " . $i],
+            // Volume — one volume per journal, labelled "Vol. 1"
+            $volume = Volume::updateOrCreate(
+                ['journal_id' => $journal->id, 'volume_number' => 'Vol. 1'],
                 ['year' => 2024]
             );
 
-            // Article
-            $article = Article::firstOrCreate(
-                ['title' => $data['article'], 'volume_id' => $volume->id],
+            // Article — updateOrCreate so status is always correctly set to 'published'
+            $article = Article::updateOrCreate(
+                ['title' => $data['article']],
                 [
+                    'volume_id' => $volume->id,
                     'abstract' => "This paper explores the critical aspects of {$data['article']} within the context of {$data['category']}. Through quantitative and qualitative analysis, the study presents significant findings that contribute to the ongoing discourse in the field.",
                     'status' => 'published',
                     'page_start' => ($i * 10) + 1,
@@ -101,7 +102,7 @@ class ContentSeeder extends Seeder
             // Authors
             foreach ($data['authors'] as $authorData) {
                 $fullName = $authorData['first_name'] . ' ' . $authorData['last_name'];
-                $author = Author::firstOrCreate(
+                $author = Author::updateOrCreate(
                     ['email' => strtolower(str_replace(' ', '.', $fullName)) . "@fcu.edu.ph"],
                     [
                         'name' => $fullName,
