@@ -31,6 +31,7 @@ import Toaster from '@/components/ui/Toaster';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -41,9 +42,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <SettingsProvider>
-      <Router>
-      <ScrollToTop />
-      <Routes>
+      <ErrorBoundary>
+        <Router>
+        <ScrollToTop />
+        <Routes>
         {/* Public Website Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/search" element={<PublicLayout><Search /></PublicLayout>} />
@@ -87,8 +89,9 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Toaster position="bottom-right" />
-      </Router>
+        <Toaster position="bottom-right" />
+        </Router>
+      </ErrorBoundary>
     </SettingsProvider>
   );
 }

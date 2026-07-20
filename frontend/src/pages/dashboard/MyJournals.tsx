@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { BookOpen, Plus, Settings2, Edit2, Trash2 } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api from '@/services/api';
@@ -37,8 +40,23 @@ interface Journal {
   updated_at: string;
 }
 
+const journalFormSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters'),
+  slug: z.string().optional(),
+  description: z.string().optional(),
+  category_id: z.string().min(1, 'Category is required'),
+  publisher: z.string().optional(),
+  issn: z.string().optional(),
+  frequency: z.string().optional(),
+  editor: z.string().optional(),
+});
+
+type JournalFormData = z.infer<typeof journalFormSchema>;
+
 const MyJournals: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -50,22 +68,35 @@ const MyJournals: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [editingJournal, setEditingJournal] = useState<Journal | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    category_id: '',
-    publisher: '',
-    issn: '',
-    frequency: '',
-    editor: ''
-  });
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<JournalFormData>({
+    resolver: zodResolver(journalFormSchema),
+    defaultValues: {
+      title: '',
+      slug: '',
+      description: '',
+      category_id: '',
+      publisher: '',
+      issn: '',
+      frequency: '',
+      editor: ''
+    }
+  });
+
+  const selectedCategoryId = watch('category_id');
+  const descriptionValue = watch('description') || '';
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -101,11 +132,26 @@ const MyJournals: React.FC = () => {
     fetchJournals();
   }, [page, debouncedFilter]);
 
-  const handleOpenModal = (journal: Journal | null = null) => {
-    setError(null);
+  // URL Sync
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const slug = searchParams.get('journal_slug');
+    if (action === 'new') {
+      handleOpenModal(null, false);
+    } else if (action === 'edit' && slug && journals.length > 0) {
+      const target = journals.find(j => j.slug === slug);
+      if (target) {
+        handleOpenModal(target, false);
+      }
+    }
+  }, [searchParams, journals]);
+
+  const handleOpenModal = (journal: Journal | null = null, updateUrl = true) => {
+    setServerError(null);
     if (journal) {
       setEditingJournal(journal);
-      setFormData({
+      if (updateUrl) setSearchParams({ action: 'edit', journal_slug: journal.slug });
+      reset({
         title: journal.title || '',
         slug: journal.slug || '',
         description: journal.description || '',
@@ -117,7 +163,8 @@ const MyJournals: React.FC = () => {
       });
     } else {
       setEditingJournal(null);
-      setFormData({
+      if (updateUrl) setSearchParams({ action: 'new' });
+      reset({
         title: '',
         slug: '',
         description: '',
@@ -133,26 +180,27 @@ const MyJournals: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('action');
+    newParams.delete('journal_slug');
+    setSearchParams(newParams);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+  const onSubmit = async (data: JournalFormData) => {
+    setServerError(null);
 
     try {
       const payload = new FormData();
-      payload.append('title', formData.title);
-      payload.append('slug', formData.slug);
-      payload.append('description', formData.description);
-      payload.append('category_id', formData.category_id);
-      payload.append('publisher', formData.publisher);
-      payload.append('issn', formData.issn);
-      payload.append('frequency', formData.frequency);
-      payload.append('editor', formData.editor);
+      payload.append('title', data.title);
+      payload.append('slug', data.slug || '');
+      payload.append('description', data.description || '');
+      payload.append('category_id', data.category_id);
+      payload.append('publisher', data.publisher || '');
+      payload.append('issn', data.issn || '');
+      payload.append('frequency', data.frequency || '');
+      payload.append('editor', data.editor || '');
 
       if (pdfFile) {
         payload.append('pdf_path', pdfFile);
@@ -163,7 +211,7 @@ const MyJournals: React.FC = () => {
       }
 
       if (editingJournal) {
-        payload.append('_method', 'PUT'); // Laravel requirement for multipart PUT
+        payload.append('_method', 'PUT');
         await api.post(`/journals/${editingJournal.slug}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -173,12 +221,11 @@ const MyJournals: React.FC = () => {
         });
       }
       await fetchJournals();
-      setIsModalOpen(false);
+      handleCloseModal();
+      toast.success(editingJournal ? 'Journal updated successfully' : 'Journal created successfully');
     } catch (err: any) {
       console.error('Save failed:', err);
-      setError(err.response?.data?.message || 'Failed to save journal.');
-    } finally {
-      setIsSubmitting(false);
+      setServerError(err.response?.data?.message || 'Failed to save journal.');
     }
   };
 
@@ -300,14 +347,14 @@ const MyJournals: React.FC = () => {
       {/* Modal Form */}
       <Modal 
         isOpen={isModalOpen} 
-        onClose={() => !isSubmitting && setIsModalOpen(false)}
+        onClose={() => !isSubmitting && handleCloseModal()}
         title={editingJournal ? 'Edit Journal' : 'Create New Journal'}
         className="max-w-2xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px]">
-              {error}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {serverError && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px] rounded">
+              {serverError}
             </div>
           )}
           
@@ -318,21 +365,30 @@ const MyJournals: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <Input 
-                label="Title" required name="title" value={formData.title} onChange={handleInputChange} placeholder="e.g. FCU Multidisciplinary Research Journal"
+                label="Title" 
+                required 
+                placeholder="e.g. FCU Multidisciplinary Research Journal"
+                error={errors.title?.message}
+                {...register('title')}
               />
             </div>
             
             <div>
               <Input 
-                label="Slug" hint="Auto-generated if empty" name="slug" value={formData.slug} onChange={handleInputChange} placeholder="Auto-generated if empty"
+                label="Slug" 
+                hint="Auto-generated if empty" 
+                placeholder="Auto-generated if empty"
+                error={errors.slug?.message}
+                {...register('slug')}
               />
             </div>
 
             <div>
               <Select 
-                label="Category" required name="category_id" 
-                value={formData.category_id} 
-                onChange={(val) => handleInputChange({ target: { name: 'category_id', value: val } } as any)}
+                label="Category" 
+                required 
+                value={selectedCategoryId} 
+                onChange={(val) => setValue('category_id', String(val), { shouldValidate: true })}
                 options={[
                   { value: "", label: "Select Category" },
                   ...availableCategories.map(cat => ({
@@ -340,37 +396,52 @@ const MyJournals: React.FC = () => {
                   }))
                 ]}
               />
+              {errors.category_id && (
+                <p className="text-[11px] text-red-600 mt-1 font-medium">{errors.category_id.message}</p>
+              )}
             </div>
             
             <div>
               <Input 
-                label="Year Published" name="publisher" value={formData.publisher} onChange={handleInputChange} placeholder="e.g. 2024"
+                label="Year Published" 
+                placeholder="e.g. 2024"
+                error={errors.publisher?.message}
+                {...register('publisher')}
               />
             </div>
 
             <div>
               <Input 
-                label="ISSN" name="issn" value={formData.issn} onChange={handleInputChange} placeholder="e.g. 2651-7701"
+                label="ISSN" 
+                placeholder="e.g. 2651-7701"
+                error={errors.issn?.message}
+                {...register('issn')}
               />
             </div>
 
             <div>
               <Input 
-                label="Frequency" name="frequency" value={formData.frequency} onChange={handleInputChange} placeholder="e.g. Biannual, Quarterly"
+                label="Frequency" 
+                placeholder="e.g. Biannual, Quarterly"
+                error={errors.frequency?.message}
+                {...register('frequency')}
               />
             </div>
             
             <div className="md:col-span-2">
               <Input 
-                label="Editor in Chief" name="editor" value={formData.editor} onChange={handleInputChange} placeholder="e.g. Dr. Julian Santos"
+                label="Editor in Chief" 
+                placeholder="e.g. Dr. Julian Santos"
+                error={errors.editor?.message}
+                {...register('editor')}
               />
             </div>
 
             <div className="md:col-span-2">
               <RichTextEditor 
                 label="Description" 
-                value={formData.description} 
-                onChange={(value) => setFormData({...formData, description: value})} 
+                value={descriptionValue} 
+                onChange={(value) => setValue('description', value)} 
               />
             </div>
             
@@ -400,7 +471,7 @@ const MyJournals: React.FC = () => {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="ghost" onClick={handleCloseModal}>
               Cancel
             </Button>
             <Button type="submit" isLoading={isSubmitting}>

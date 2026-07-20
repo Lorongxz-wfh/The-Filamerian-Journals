@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Plus, Edit2, Trash2, CheckCircle, Users } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -25,6 +29,15 @@ interface User {
   created_at: string;
 }
 
+const userFormSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().optional(),
+  role: z.string().min(1, 'Role is required')
+});
+
+type UserFormData = z.infer<typeof userFormSchema>;
+
 const getRoleVariant = (role: string) => {
   switch (role) {
     case 'Super Admin': return 'destructive';
@@ -35,6 +48,7 @@ const getRoleVariant = (role: string) => {
 };
 
 const UserManager: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -44,17 +58,28 @@ const UserManager: React.FC = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [approveTarget, setApproveTarget] = useState<number | null>(null);
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'Editor'
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<UserFormData>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      role: 'Editor'
+    }
   });
+
+  const selectedRole = watch('role');
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -86,18 +111,35 @@ const UserManager: React.FC = () => {
     fetchUsers();
   }, [page, debouncedFilter]);
 
-  const handleOpenModal = (user: User | null = null) => {
-    setError(null);
+  // URL modal sync
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const userId = searchParams.get('user_id');
+    if (action === 'new') {
+      handleOpenModal(null, false);
+    } else if (action === 'edit' && userId && users.length > 0) {
+      const target = users.find(u => u.id === Number(userId));
+      if (target) {
+        handleOpenModal(target, false);
+      }
+    }
+  }, [searchParams, users]);
+
+  const handleOpenModal = (user: User | null = null, updateUrl = true) => {
+    setServerError(null);
     setEditingUser(user);
+
     if (user) {
-      setFormData({
+      if (updateUrl) setSearchParams({ action: 'edit', user_id: String(user.id) });
+      reset({
         name: user.name,
         email: user.email,
         password: '',
         role: user.roles?.[0]?.name || 'Staff'
       });
     } else {
-      setFormData({
+      if (updateUrl) setSearchParams({ action: 'new' });
+      reset({
         name: '',
         email: '',
         password: '',
@@ -107,28 +149,34 @@ const UserManager: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('action');
+    newParams.delete('user_id');
+    setSearchParams(newParams);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+  const onSubmit = async (data: UserFormData) => {
+    setServerError(null);
+    
+    // Validate password for new users
+    if (!editingUser && (!data.password || data.password.length < 6)) {
+      setServerError('Password must be at least 6 characters for new users.');
+      return;
+    }
+
     try {
       if (editingUser) {
-        await api.put(`/users/${editingUser.id}`, formData);
+        await api.put(`/users/${editingUser.id}`, data);
       } else {
-        await api.post('/users', formData);
+        await api.post('/users', data);
       }
       await fetchUsers();
-      setIsModalOpen(false);
+      handleCloseModal();
       toast.success(editingUser ? 'User updated successfully' : 'User created successfully');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save user.');
-    } finally {
-      setIsSubmitting(false);
+      setServerError(err.response?.data?.message || 'Failed to save user.');
     }
   };
 
@@ -242,39 +290,53 @@ const UserManager: React.FC = () => {
         />
       )}
 
-      {/* Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingUser ? 'Edit User' : 'New User'}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="p-3 bg-red-50 text-red-700 text-[13px] rounded">{error}</div>}
+      {/* Modal with Zod & React Hook Form */}
+      <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && handleCloseModal()} title={editingUser ? 'Edit User' : 'New User'}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {serverError && <div className="p-3 bg-red-50 text-red-700 text-[13px] rounded">{serverError}</div>}
           
           <Input 
-            label="Full Name" required name="name" value={formData.name} onChange={handleInputChange}
+            label="Full Name" 
+            required 
+            error={errors.name?.message}
+            {...register('name')}
           />
           
           <Input 
-            label="Email Address" type="email" required name="email" value={formData.email} onChange={handleInputChange}
+            label="Email Address" 
+            type="email" 
+            required 
+            error={errors.email?.message}
+            {...register('email')}
           />
 
           <Input 
-            label="Password" hint={editingUser ? 'Leave blank to keep' : undefined} type="password" required={!editingUser} name="password" value={formData.password} onChange={handleInputChange}
+            label="Password" 
+            hint={editingUser ? 'Leave blank to keep current' : undefined} 
+            type="password" 
+            required={!editingUser} 
+            error={errors.password?.message}
+            {...register('password')}
           />
 
           <Select 
-            label="Role" required name="role" 
-            value={formData.role} 
-            onChange={(val) => handleInputChange({ target: { name: 'role', value: val } } as any)}
+            label="Role" 
+            required 
+            value={selectedRole} 
+            onChange={(val) => setValue('role', String(val), { shouldValidate: true })}
             options={[
               { value: "Super Admin", label: "Super Admin" },
-              { value: "Editor", label: "Editor" }
+              { value: "Editor", label: "Editor" },
+              { value: "Staff", label: "Staff" }
             ]}
           />
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="ghost" onClick={handleCloseModal}>
               Cancel
             </Button>
             <Button type="submit" isLoading={isSubmitting}>
-              {editingUser ? 'Save Changes' : 'Create'}
+              {editingUser ? 'Save Changes' : 'Create User'}
             </Button>
           </div>
         </form>
