@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Upload, FileText, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -277,19 +277,45 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
             />
           </div>
 
-          <div className="md:col-span-2 border border-border p-4 bg-background">
+          <div className="md:col-span-2">
             <label className="block text-[12px] font-medium text-primary mb-2 uppercase tracking-wider">PDF File</label>
-            <input 
-              type="file" 
-              accept=".pdf"
-              onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
-              className="text-[13px] w-full"
-            />
-            {editingArticle?.pdf_url && !pdfFile && (
-              <div className="text-[12px] text-muted mt-2">
-                Current PDF uploaded. Select a new file to replace it.
-              </div>
-            )}
+            <label
+              htmlFor="pdf-upload"
+              className="group relative flex flex-col items-center justify-center w-full border-2 border-dashed border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02] transition-all cursor-pointer p-6 gap-3"
+            >
+              <input
+                id="pdf-upload"
+                type="file"
+                accept=".pdf"
+                onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                className="sr-only"
+              />
+              {pdfFile ? (
+                <>
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                  <div className="text-center">
+                    <p className="text-[13px] font-semibold text-primary">{pdfFile.name}</p>
+                    <p className="text-[11px] text-muted mt-0.5">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB — Click to change</p>
+                  </div>
+                </>
+              ) : editingArticle?.pdf_url ? (
+                <>
+                  <FileText className="h-8 w-8 text-primary/40" />
+                  <div className="text-center">
+                    <p className="text-[13px] font-semibold text-primary">PDF already uploaded</p>
+                    <p className="text-[11px] text-muted mt-0.5">Click to replace with a new file</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-8 w-8 text-muted group-hover:text-primary transition-colors" />
+                  <div className="text-center">
+                    <p className="text-[13px] font-semibold text-primary">Click to upload PDF</p>
+                    <p className="text-[11px] text-muted mt-0.5">PDF files only</p>
+                  </div>
+                </>
+              )}
+            </label>
           </div>
         </div>
 
