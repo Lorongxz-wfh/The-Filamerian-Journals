@@ -305,7 +305,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       {/* Sidebar — hidden on mobile, visible on lg+ */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 w-64 bg-primary text-white flex flex-col z-50 transition-transform duration-200 lg:static lg:translate-x-0 lg:z-auto',
+          'fixed inset-y-0 left-0 w-64 min-w-[16rem] shrink-0 bg-primary text-white flex flex-col z-50 transition-transform duration-200 lg:static lg:translate-x-0 lg:z-auto',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
