@@ -151,20 +151,7 @@ const ArticleDetail: React.FC = () => {
   const handleReadPDF = async () => {
     if (!article.pdf_url) return;
     setIsPdfModalOpen(true);
-    setPdfViewUrl(null);
-    try {
-      const res = await api.get(`/public/articles/${article.id}/download-url`);
-      let url = res.data.url;
-      if (url.includes('/storage/')) {
-        const path = url.split('/storage/')[1];
-        url = `${STORAGE_URL}${path}`;
-      }
-      setPdfViewUrl(url);
-    } catch (err) {
-      console.error('Failed to get download URL', err);
-      alert('Could not load PDF document.');
-      setIsPdfModalOpen(false);
-    }
+    setPdfViewUrl(`${api.defaults.baseURL}/public/articles/${article.id}/pdf`);
   };
 
   return (

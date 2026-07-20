@@ -203,6 +203,20 @@ class ArticleController extends Controller
         ]);
     }
 
+    public function servePdf(Article $article)
+    {
+        if (!$article->pdf_path || !\Illuminate\Support\Facades\Storage::disk('public')->exists($article->pdf_path)) {
+            abort(404, 'PDF not found.');
+        }
+
+        $path = \Illuminate\Support\Facades\Storage::disk('public')->path($article->pdf_path);
+        
+        return response()->file($path, [
+            'Access-Control-Allow-Origin' => '*',
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
     public function trackView(Article $article)
     {
         $article->increment('views_count');
