@@ -102,11 +102,11 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             autoFocus={isInitialEmpty}
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
           />
           {!author.first_name && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
-              <span className="text-[12px] text-gray-400">First Name <span className="text-red-500">*</span></span>
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <span className="text-[13px] text-gray-400">First Name <span className="text-red-500">*</span></span>
             </div>
           )}
         </div>
@@ -118,7 +118,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Middle Name / Initial"
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
         <div className="relative">
@@ -128,11 +128,11 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             value={author.last_name}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
           />
           {!author.last_name && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
-              <span className="text-[12px] text-gray-400">Last Name <span className="text-red-500">*</span></span>
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <span className="text-[13px] text-gray-400">Last Name <span className="text-red-500">*</span></span>
             </div>
           )}
         </div>
@@ -144,15 +144,15 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Suffix (Jr.)"
-            className="w-full px-2 py-1.5 border border-border text-[12px] bg-white focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
           />
         </div>
       </div>
       
-      <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         {(!hasData && onRemove) ? (
-          <button type="button" onClick={onRemove} className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100" title="Remove">
-            <X className="h-3 w-3" />
+          <button type="button" onClick={onRemove} className="p-2 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100 h-[36px]" title="Remove">
+            <X className="h-4 w-4" />
           </button>
         ) : (
           <>
@@ -160,14 +160,14 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
               type="button" 
               onClick={() => setIsEditing(false)} 
               disabled={!isComplete}
-              className="p-1.5 bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500"
+              className="p-2 bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 h-[36px]"
               title="Done"
             >
-              <Check className="h-3 w-3" />
+              <Check className="h-4 w-4" />
             </button>
             {onRemove && (
-              <button type="button" onClick={onRemove} className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100" title="Remove">
-                <X className="h-3 w-3" />
+              <button type="button" onClick={onRemove} className="p-2 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100 h-[36px]" title="Remove">
+                <X className="h-4 w-4" />
               </button>
             )}
           </>

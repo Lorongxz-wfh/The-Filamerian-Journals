@@ -43,7 +43,7 @@ const Articles: React.FC = () => {
   const [journalsData, setJournalsData] = useState<any[]>([]); // For the issue selector
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  const [tab, setTab] = useState<'all' | 'Published' | 'Pending' | 'Revision'>('all');
+  const [tab, setTab] = useState<'all' | 'Published' | 'Draft'>('all');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -251,11 +251,12 @@ const Articles: React.FC = () => {
     return matchesSearch && matchesTab;
   });
 
+
+
   const tabs = [
     { key: 'all' as const, label: 'All', count: articles.length },
     { key: 'Published' as const, label: 'Published', count: articles.filter((a) => a.status === 'Published').length },
-    { key: 'Pending' as const, label: 'Pending', count: articles.filter((a) => a.status === 'Pending').length },
-    { key: 'Revision' as const, label: 'Revision', count: articles.filter((a) => a.status === 'Revision').length },
+    { key: 'Draft' as const, label: 'Draft', count: articles.filter((a) => a.status === 'Draft').length },
   ];
 
   return (
@@ -409,15 +410,16 @@ const Articles: React.FC = () => {
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.keyword_names.map((kw, idx) => (
-                  <div key={idx} className="flex items-center gap-1 bg-white border border-border pr-1 focus-within:border-primary transition-colors">
+                  <div key={idx} className="flex items-center gap-1 bg-white border border-border pr-1 focus-within:border-primary transition-colors rounded-sm">
                     <input 
                       type="text" 
                       value={kw}
                       onChange={(e) => handleArrayChange('keyword_names', idx, e.target.value)}
-                      placeholder="e.g. Machine Learning"
-                      className="w-40 sm:w-48 px-3 py-1.5 text-[13px] bg-transparent focus:outline-none placeholder:text-muted/60"
+                      placeholder="Keyword"
+                      style={{ width: `${Math.max(kw.length + 1, 9)}ch` }}
+                      className="px-2 py-1 text-[13px] bg-transparent focus:outline-none placeholder:text-muted/60 max-w-full"
                     />
-                    <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-1 text-red-500 hover:bg-red-50 transition-colors shrink-0">
+                    <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-1 text-red-500 hover:bg-red-50 transition-colors shrink-0 rounded-sm">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
