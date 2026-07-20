@@ -125,9 +125,9 @@ const Navbar = () => {
             </Link>
             
             {/* UP Diliman Style Dropdown */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-48 w-max max-w-2xl bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-56 w-max max-w-2xl bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto flex flex-col">
               <div 
-                className="grid bg-white/10 gap-px" 
+                className="grid bg-white/10 gap-px max-h-[340px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-secondary/40 [&::-webkit-scrollbar-track]:bg-primary" 
                 style={{ 
                   gridTemplateColumns: dropdownCategories.length > 10 ? 'repeat(3, minmax(180px, 1fr))' : 
                                        dropdownCategories.length > 5 ? 'repeat(2, minmax(180px, 1fr))' : 
@@ -144,6 +144,13 @@ const Navbar = () => {
                   </Link>
                 ))}
               </div>
+              <Link
+                to="/journals"
+                className="flex items-center justify-between px-6 py-3 bg-[#001d36] text-[11px] font-bold text-secondary hover:text-white border-t border-white/10 transition-colors uppercase tracking-widest"
+              >
+                <span>All Categories</span>
+                <span>→</span>
+              </Link>
             </div>
           </div>
 
