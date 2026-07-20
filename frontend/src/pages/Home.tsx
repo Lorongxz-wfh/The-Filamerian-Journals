@@ -173,7 +173,7 @@ const Home: React.FC = () => {
   {/* Hero Section */}
       {/* Hero Section */}
       {((settings.tagline && showTagline) || (aboutUsHtml && showAboutUs)) && (
-        <div className="w-full px-[10%] text-center border-b border-border mb-5 pb-5 flex flex-col items-center">
+        <div className="w-full px-[10%] text-center mb-5 flex flex-col items-center">
           {settings.tagline && showTagline && (
             <div className="mb-4 text-[12px] font-bold text-secondary uppercase tracking-widest bg-primary px-4 py-1.5 inline-block">
               {settings.tagline}
@@ -194,7 +194,7 @@ const Home: React.FC = () => {
           <div className="mb-12 relative group/carousel">
             <div className="flex items-center justify-between border-b border-border mb-6 overflow-x-auto min-h-[40px] pb-2 gap-4">
               <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 text-primary flex items-center gap-3">
-                Latest Publications
+                Latest Articles
               </h2>
               
               {/* Scroll Indicators / Buttons */}
