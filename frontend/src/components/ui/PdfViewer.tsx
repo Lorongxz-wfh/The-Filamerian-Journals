@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Maximize, Minimize, ZoomIn, ZoomOut, Loader2, RotateCw, PanelLeft, LayoutList, LayoutTemplate } from 'lucide-react';
+import { Maximize, Minimize, ZoomIn, ZoomOut, Loader2, RotateCw, PanelLeft, LayoutList, LayoutTemplate, Download } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -12,9 +12,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 interface PdfViewerProps {
   fileUrl: string;
+  allowDownload?: boolean;
+  downloadUrl?: string;
 }
 
-const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
+const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl, allowDownload = false, downloadUrl = '' }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [scale, setScale] = useState(1.0);
   const [rotation, setRotation] = useState(0);
@@ -189,6 +191,17 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
 
         {/* Right Side: Utilities */}
         <div className="flex items-center gap-1">
+          {allowDownload && downloadUrl && (
+            <a href={downloadUrl} download target="_blank" rel="noopener noreferrer" className="mr-2">
+              <button 
+                className="flex items-center gap-2 px-3 py-1.5 text-[12px] font-semibold text-white bg-primary hover:bg-primary/90 rounded transition-colors"
+                title="Download PDF"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Download</span>
+              </button>
+            </a>
+          )}
           <button 
             onClick={rotate}
             className="p-1.5 text-muted hover:text-primary hover:bg-surface rounded transition-colors"

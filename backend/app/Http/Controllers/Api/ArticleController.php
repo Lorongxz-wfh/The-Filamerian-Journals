@@ -275,7 +275,7 @@ class ArticleController extends Controller
         }
 
         return response()->json([
-            'url' => \Illuminate\Support\Facades\Storage::disk('public')->url($article->pdf_path)
+            'url' => url('/api/public/articles/' . $article->id . '/pdf')
         ]);
     }
 

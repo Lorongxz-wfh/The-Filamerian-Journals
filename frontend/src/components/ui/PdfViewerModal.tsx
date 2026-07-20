@@ -1,7 +1,5 @@
 import React from 'react';
-import { Download } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
 import PdfViewer from '@/components/ui/PdfViewer';
 
 interface PdfViewerModalProps {
@@ -22,18 +20,9 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({ isOpen, onClose, pdfUrl
       className="max-w-[95vw] sm:max-w-6xl h-[95vh]"
       bodyClassName="p-0 flex flex-col overflow-hidden"
     >
-      {allowDownload && pdfUrl && (
-        <div className="flex justify-end p-2 bg-surface border-b border-border shrink-0 z-10 relative">
-          <a href={downloadUrl} download target="_blank" rel="noopener noreferrer">
-            <Button size="sm" className="flex items-center gap-2">
-              <Download className="h-4 w-4" /> Download PDF
-            </Button>
-          </a>
-        </div>
-      )}
       <div className="w-full h-full flex flex-col flex-grow bg-white overflow-hidden relative">
         {pdfUrl ? (
-          <PdfViewer fileUrl={pdfUrl} />
+          <PdfViewer fileUrl={pdfUrl} allowDownload={allowDownload} downloadUrl={downloadUrl} />
         ) : (
           <div className="flex items-center justify-center flex-grow text-muted">Loading document...</div>
         )}
