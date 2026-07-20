@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams, Link, useNavigate } from 'react-router';
 import { ArrowLeft, Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -26,6 +26,7 @@ interface Journal {
 
 const ManageJournal: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [journal, setJournal] = useState<Journal | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedVol, setExpandedVol] = useState<number | null>(null);
@@ -134,7 +135,7 @@ const ManageJournal: React.FC = () => {
             <div key={vol.id} className="border border-border bg-surface">
               <div 
                 className="flex items-center justify-between p-4 cursor-pointer hover:bg-background/50 transition-colors"
-                onClick={() => window.location.href = `/dashboard/volumes/${vol.id}`}
+                onClick={() => navigate(`/dashboard/volumes/${vol.id}`)}
               >
                 <div className="flex items-center gap-3">
                   <BookOpen className="h-4 w-4 text-primary/30" />
