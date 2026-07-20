@@ -75,7 +75,7 @@ const SystemHealth: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-8">
       <DashboardHeader title="System Health" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -83,13 +83,13 @@ const SystemHealth: React.FC = () => {
           <div key={i} className="bg-surface border border-border p-5 flex flex-col items-center text-center">
             <card.icon className={`h-8 w-8 mb-4 ${card.color}`} strokeWidth={1.5} />
             <h3 className="text-xs font-medium text-muted uppercase tracking-wider mb-1">{card.title}</h3>
-            <p className="text-lg font-semibold text-white">{card.value}</p>
+            <p className="text-lg font-semibold text-primary">{card.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-surface border border-border p-6 mt-8">
-        <h3 className="text-sm font-semibold text-white mb-4">Diagnostic Information</h3>
+      <div className="bg-surface border border-border p-6">
+        <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-4">Diagnostic Information</h3>
         <div className="space-y-3 font-mono text-xs text-muted">
           <div className="flex justify-between border-b border-border pb-2">
             <span>Last Ping</span>
