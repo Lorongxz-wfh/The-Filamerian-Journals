@@ -107,11 +107,11 @@ class ArticleController extends Controller
 
     public function getLatest()
     {
-        // Fetch the 6 most recently published articles
+        // Fetch the 10 most recently published articles for the carousel
         $latest = Article::with(['volume.journal', 'authors'])
             ->where('status', 'published')
             ->orderBy('created_at', 'desc')
-            ->take(6)
+            ->take(10)
             ->get();
             
         return ArticleResource::collection($latest);

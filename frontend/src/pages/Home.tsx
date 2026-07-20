@@ -40,6 +40,7 @@ const Home: React.FC = () => {
 
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
   const [aboutUsHtml, setAboutUsHtml] = useState<string>(DEFAULT_ABOUT_US);
+  const [activeScrollIndex, setActiveScrollIndex] = useState(0);
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,23 @@ const Home: React.FC = () => {
       const { scrollLeft, clientWidth } = scrollContainerRef.current;
       const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
       scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    if (latestArticles.length > 0) {
+      const cardWidth = container.scrollWidth / latestArticles.length;
+      const active = Math.round(container.scrollLeft / cardWidth);
+      setActiveScrollIndex(active);
+    }
+  };
+
+  const scrollToDot = (index: number) => {
+    if (scrollContainerRef.current && latestArticles.length > 0) {
+      const container = scrollContainerRef.current;
+      const cardWidth = container.scrollWidth / latestArticles.length;
+      container.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
     }
   };
 
@@ -142,7 +160,6 @@ const Home: React.FC = () => {
             <div className="flex items-center justify-between border-b border-border mb-6 overflow-x-auto min-h-[40px] pb-2 gap-4">
               <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 text-primary flex items-center gap-3">
                 Latest Publications
-                <span className="text-[10px] bg-secondary/10 text-secondary px-2 py-0.5 rounded-full lowercase tracking-normal font-medium hidden sm:inline-block">Swipe to explore</span>
               </h2>
               
               {/* Scroll Indicators / Buttons */}
@@ -164,12 +181,9 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Gradient Overlays for scroll hint (Hidden on very small screens if needed, but good for indicating scroll) */}
-            <div className="absolute top-[70px] bottom-0 left-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300" />
-            <div className="absolute top-[70px] bottom-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-
             <div 
               ref={scrollContainerRef}
+              onScroll={handleScroll}
               className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] relative"
             >
               {latestArticles.map((article) => (
@@ -195,6 +209,24 @@ const Home: React.FC = () => {
                 </Link>
               ))}
             </div>
+
+            {/* Dots Indicator */}
+            {latestArticles.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-2">
+                {latestArticles.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => scrollToDot(i)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      activeScrollIndex === i 
+                        ? 'w-6 bg-secondary' 
+                        : 'w-2 bg-border hover:bg-muted'
+                    }`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
