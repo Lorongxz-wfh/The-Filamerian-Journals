@@ -34,6 +34,7 @@ const DEFAULT_ABOUT_US = '<h2 class="text-xl font-bold uppercase tracking-wider 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
   const [journals, setJournals] = useState<Journal[]>([]);
+  const [latestArticles, setLatestArticles] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,8 +47,9 @@ const Home: React.FC = () => {
       const cachedHome = localStorage.getItem('filamerian_home_cache');
       if (cachedHome) {
         try {
-          const { journals: cJournals, announcements: cAnn, settings: cSettings } = JSON.parse(cachedHome);
+          const { journals: cJournals, latest: cLatest, announcements: cAnn, settings: cSettings } = JSON.parse(cachedHome);
           if (cJournals) setJournals(cJournals);
+          if (cLatest) setLatestArticles(cLatest);
           if (cAnn) setAnnouncements(cAnn);
           if (cSettings) {
             const catsString = cSettings.journal_categories || 'Science, Education, Arts, Multidisciplinary';
@@ -63,22 +65,26 @@ const Home: React.FC = () => {
 
       // 2. Fetch fresh data in the background
       try {
-        const [jrnRes, annRes, setRes] = await Promise.all([
+        const [jrnRes, latestRes, annRes, setRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
+          api.get('/public/articles/latest'),
           api.get('/public/announcements'),
           api.get('/public/settings')
         ]);
         
         const freshJournals = jrnRes.data.data;
+        const freshLatest = latestRes.data.data;
         const freshAnnouncements = annRes.data.data.slice(0, 3);
         const freshSettings = setRes.data.data;
 
         setJournals(freshJournals);
+        setLatestArticles(freshLatest);
         setAnnouncements(freshAnnouncements);
         
         // Update Local Cache
         localStorage.setItem('filamerian_home_cache', JSON.stringify({
           journals: freshJournals,
+          latest: freshLatest,
           announcements: freshAnnouncements,
           settings: freshSettings
         }));
@@ -120,6 +126,37 @@ const Home: React.FC = () => {
       )}
 
       <div className="w-full flex-1 flex flex-col">
+        {/* Latest Publications */}
+        {latestArticles.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between border-b border-border mb-6 overflow-x-auto min-h-[40px] pb-2 gap-4">
+              <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 text-primary">
+                Latest Publications
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {latestArticles.map((article) => (
+                <Link key={article.id} to={`/articles/${article.id}`} className="flex flex-col border border-border bg-surface p-5 hover:border-primary/30 transition-colors h-full">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
+                      {article.volume?.journal?.title || 'Unknown Journal'}
+                    </span>
+                  </div>
+                  <h3 className="text-[14px] font-semibold text-primary uppercase tracking-wider mb-2 line-clamp-2">
+                    {article.title}
+                  </h3>
+                  <p className="text-[12px] text-muted leading-relaxed line-clamp-3 mb-4 flex-grow">
+                    {article.abstract || 'No abstract available.'}
+                  </p>
+                  <div className="text-[11px] text-muted uppercase tracking-wider truncate pt-3 border-t border-border">
+                    {article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-9 xl:gap-[60px] items-start">
           {/* Journals Grid */}
           <div className="lg:col-span-9 flex flex-col">

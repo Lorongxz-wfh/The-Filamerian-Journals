@@ -105,6 +105,18 @@ class ArticleController extends Controller
         return ArticleResource::collection($related);
     }
 
+    public function getLatest()
+    {
+        // Fetch the 6 most recently published articles
+        $latest = Article::with(['volume.journal', 'authors'])
+            ->where('status', 'Published')
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
+            
+        return ArticleResource::collection($latest);
+    }
+
     public function update(Request $request, Article $article)
     {
         $validated = $request->validate([
