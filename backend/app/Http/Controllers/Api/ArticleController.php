@@ -279,7 +279,7 @@ class ArticleController extends Controller
         ]);
     }
 
-    public function servePdf(Article $article)
+    public function servePdf(Article $article, \Illuminate\Http\Request $request)
     {
         if (!$article->pdf_path || !\Illuminate\Support\Facades\Storage::disk('public')->exists($article->pdf_path)) {
             abort(404, 'PDF not found.');
@@ -287,10 +287,16 @@ class ArticleController extends Controller
 
         $path = \Illuminate\Support\Facades\Storage::disk('public')->path($article->pdf_path);
         
-        return response()->file($path, [
+        $headers = [
             'Access-Control-Allow-Origin' => '*',
             'Content-Type' => 'application/pdf',
-        ]);
+        ];
+
+        if ($request->query('download')) {
+            return response()->download($path, $article->title . '.pdf', $headers);
+        }
+
+        return response()->file($path, $headers);
     }
 
     public function trackView(Article $article)

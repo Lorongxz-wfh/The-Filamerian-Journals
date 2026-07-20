@@ -192,7 +192,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl, allowDownload = false, d
         {/* Right Side: Utilities */}
         <div className="flex items-center gap-1">
           {allowDownload && downloadUrl && (
-            <a href={downloadUrl} download target="_blank" rel="noopener noreferrer" className="mr-2">
+            <a href={`${downloadUrl}?download=1`} download target="_blank" rel="noopener noreferrer" className="mr-2">
               <button 
                 className="flex items-center gap-2 px-3 py-1.5 text-[12px] font-semibold text-white bg-primary hover:bg-primary/90 rounded transition-colors"
                 title="Download PDF"
@@ -221,67 +221,63 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl, allowDownload = false, d
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden relative">
-        
-        {/* Thumbnails Sidebar */}
-        {showSidebar && (
-          <div className="w-48 bg-surface border-r border-border shrink-0 overflow-y-auto py-4 z-10 shadow-sm">
-            <Document file={fileUrl}>
-              <div className="flex flex-col items-center gap-6">
-                {numPages && Array.from(new Array(numPages), (_, index) => (
-                  <div 
-                    key={`thumb_${index + 1}`}
-                    onClick={() => scrollToPage(index + 1)}
-                    className={`cursor-pointer transition-all border-2 p-1 ${currentPage === index + 1 ? 'border-primary shadow-md scale-105 bg-primary/5' : 'border-transparent hover:border-border shadow-sm bg-white'}`}
-                  >
-                    <Page 
-                      pageNumber={index + 1} 
-                      width={120} 
-                      rotate={rotation}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                    />
-                    <div className="text-center text-[10px] text-muted mt-2 font-medium">{index + 1}</div>
-                  </div>
-                ))}
-              </div>
-            </Document>
+        <Document
+          file={fileUrl}
+          onLoadSuccess={onDocumentLoadSuccess}
+          loading={
+            <div className="flex flex-col items-center justify-center h-full text-muted gap-3 w-full absolute inset-0 z-50 bg-white">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <p className="text-[12px] uppercase tracking-wider">Loading Document...</p>
+            </div>
+          }
+          error={
+            <div className="flex items-center justify-center h-full text-red-400 w-full absolute inset-0 z-50 bg-white">
+              <p className="text-[13px] bg-red-500/10 border border-red-500/20 px-4 py-2 rounded">
+                Failed to load PDF.
+              </p>
+            </div>
+          }
+          className="flex w-full h-full"
+        >
+          {/* Thumbnails Sidebar */}
+          <div className={`w-48 bg-surface border-r border-border shrink-0 overflow-y-auto py-4 z-10 shadow-sm ${!showSidebar ? 'hidden' : ''}`}>
+            <div className="flex flex-col items-center gap-6">
+              {numPages && Array.from(new Array(numPages), (_, index) => (
+                <div 
+                  key={`thumb_${index + 1}`}
+                  onClick={() => scrollToPage(index + 1)}
+                  className={`cursor-pointer transition-all border-2 p-1 ${currentPage === index + 1 ? 'border-primary shadow-md scale-105 bg-primary/5' : 'border-transparent hover:border-border shadow-sm bg-white'}`}
+                >
+                  <Page 
+                    pageNumber={index + 1} 
+                    width={120} 
+                    rotate={rotation}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                  />
+                  <div className="text-center text-[10px] text-muted mt-2 font-medium">{index + 1}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
 
-        {/* PDF Document Container */}
-        <div ref={documentContainerRef} className="flex-1 overflow-auto bg-muted/10 p-2 flex justify-center items-start">
-          <Document
-            file={fileUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            loading={
-              <div className="flex flex-col items-center justify-center h-64 text-muted gap-3 w-full">
-                <Loader2 className="h-6 w-6 animate-spin" />
-                <p className="text-[12px] uppercase tracking-wider">Loading Document...</p>
-              </div>
-            }
-            error={
-              <div className="flex items-center justify-center h-64 text-red-400 w-full">
-                <p className="text-[13px] bg-red-500/10 border border-red-500/20 px-4 py-2 rounded">
-                  Failed to load PDF.
-                </p>
-              </div>
-            }
-          >
+          {/* PDF Pages Container */}
+          <div ref={documentContainerRef} className="flex-1 overflow-auto bg-muted/10 p-2 flex justify-center items-start">
             {numPages && (
-              <div className="flex flex-col gap-4 pb-4 items-center">
+              <div className="flex flex-col gap-4 pb-4 items-center w-full">
                 {Array.from(new Array(numPages), (_, index) => (
                   <div 
                     key={`page_${index + 1}`} 
                     ref={el => { pageRefs.current[index] = el; }}
                     data-page-number={index + 1}
-                    className="shadow-lg border border-border/50 bg-white transition-all origin-top"
+                    className="shadow-lg border border-border/50 bg-white transition-all origin-top max-w-full"
                   >
                     <Page 
                       pageNumber={index + 1} 
                       scale={scale} 
                       rotate={rotation}
                       loading={
-                        <div className="w-[600px] h-[800px] flex items-center justify-center bg-white">
+                        <div className="w-[600px] h-[800px] max-w-full flex items-center justify-center bg-white">
                            <Loader2 className="h-5 w-5 animate-spin text-muted/50" />
                         </div>
                       }
@@ -292,8 +288,8 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl, allowDownload = false, d
                 ))}
               </div>
             )}
-          </Document>
-        </div>
+          </div>
+        </Document>
       </div>
     </div>
   );

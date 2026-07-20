@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, ChevronDown } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import DOMPurify from 'dompurify';
-import Modal from '@/components/ui/Modal';
+import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -254,25 +254,12 @@ const JournalDetail: React.FC = () => {
 
 
       {/* PDF Viewer Modal */}
-      <Modal 
+      <PdfViewerModal 
         isOpen={isPdfModalOpen} 
         onClose={() => setIsPdfModalOpen(false)} 
-        title="Document Viewer" 
-        className="max-w-4xl h-[95vh]"
-        bodyClassName="p-3"
-      >
-        <div className="w-full h-full flex flex-col">
-          {pdfViewUrl ? (
-            <iframe 
-              src={pdfViewUrl} 
-              className="w-full flex-grow border-0 bg-white" 
-              title="PDF Document Viewer"
-            />
-          ) : (
-            <div className="flex items-center justify-center flex-grow text-muted">Loading document...</div>
-          )}
-        </div>
-      </Modal>
+        pdfUrl={pdfViewUrl}
+        allowDownload={true}
+      />
     </PageWrapper>
   );
 };

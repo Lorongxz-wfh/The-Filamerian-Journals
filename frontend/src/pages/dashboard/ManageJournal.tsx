@@ -74,12 +74,13 @@ const ManageJournal: React.FC = () => {
     try {
       if (editingVol) {
         await api.put(`/volumes/${editingVol.id}`, volFormData);
+        toast.success('Volume updated successfully');
       } else {
         await api.post('/volumes', { ...volFormData, journal_id: journal?.id });
+        toast.success('Volume created successfully');
       }
       await fetchJournal();
       setIsVolModalOpen(false);
-      toast.success('Volume saved successfully');
     } catch (err) {
       toast.error('Failed to save volume');
     } finally {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
@@ -156,10 +157,12 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
         await api.post(`/articles/${editingArticle.id}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
+        toast.success('Article updated successfully');
       } else {
         await api.post('/articles', payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
+        toast.success('Article created successfully');
       }
       onSuccess();
       onClose();
