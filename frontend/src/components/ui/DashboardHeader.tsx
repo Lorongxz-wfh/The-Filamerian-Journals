@@ -13,7 +13,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title, preTitl
     <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-4 ${className}`}>
       <div>
         {preTitle}
-        <h1 className="text-2xl font-bold uppercase tracking-[0.15em] text-primary">{title}</h1>
+        <h1 className="text-2xl font-bold font-sans uppercase tracking-[0.15em] text-primary">{title}</h1>
         {description && <p className="text-[14px] text-muted leading-relaxed mt-2">{description}</p>}
       </div>
       {children}
