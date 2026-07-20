@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import { FileText, Plus, Edit2, Trash2, Eye } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
-import Modal from '@/components/ui/Modal';
+import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
@@ -249,26 +249,13 @@ const Articles: React.FC = () => {
         onSuccess={fetchData}
       />
 
-      {/* PDF Viewer Modal */}
-      <Modal 
-        isOpen={isPdfModalOpen} 
-        onClose={() => setIsPdfModalOpen(false)} 
-        title="Document Viewer" 
-        className="max-w-4xl h-[95vh]"
-        bodyClassName="p-3"
-      >
-        <div className="w-full h-full flex flex-col">
-          {pdfViewUrl ? (
-            <iframe 
-              src={pdfViewUrl} 
-              className="w-full flex-grow border-0 bg-white" 
-              title="PDF Document Viewer"
-            />
-          ) : (
-            <div className="flex items-center justify-center flex-grow text-muted">Loading document...</div>
-          )}
-        </div>
-      </Modal>
+      <PdfViewerModal 
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={pdfViewUrl}
+        allowDownload={true}
+      />
+
       {/* Delete Confirmation */}
       <ConfirmDialog 
         isOpen={!!deleteTarget}

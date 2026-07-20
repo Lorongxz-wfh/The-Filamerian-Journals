@@ -8,6 +8,8 @@ import IconButton from '@/components/ui/IconButton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
+import PdfViewerModal from '@/components/ui/PdfViewerModal';
+import { Eye } from 'lucide-react';
 
 interface Author {
   id: number;
@@ -24,6 +26,8 @@ interface Article {
   status: string;
   order: number;
   authors: Author[];
+  pdf_url?: string | null;
+  pdf_path?: string | null;
 }
 
 interface Volume {
@@ -59,6 +63,10 @@ const ManageVolume: React.FC = () => {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [journalsData, setJournalsData] = useState<any[]>([]);
 
+  // PDF Viewer Modal
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
+
   const fetchVolume = async () => {
     try {
       setLoading(true);
@@ -88,6 +96,28 @@ const ManageVolume: React.FC = () => {
   const handleOpenModal = (article: Article | null = null) => {
     setEditingArticle(article);
     setIsModalOpen(true);
+  };
+
+  const viewPdf = async (article: Article) => {
+    if (!article.pdf_url) return;
+    setPdfViewUrl(null);
+    setIsPdfModalOpen(true);
+    
+    try {
+      const res = await api.get(`/public/articles/${article.id}/download-url`);
+      let url = res.data.url;
+      // Convert to storage url if necessary
+      if (url.includes('/storage/')) {
+        const path = url.split('/storage/')[1];
+        // Ensure you have STORAGE_URL imported, but wait, STORAGE_URL is not imported here.
+        // Actually, we can just use the url directly or import STORAGE_URL.
+        url = `${import.meta.env.VITE_STORAGE_URL || 'http://127.0.0.1:8000/storage'}/${path}`;
+      }
+      setPdfViewUrl(url + '#toolbar=0');
+    } catch (err) {
+      console.error('Failed to get PDF URL:', err);
+      toast.error('Could not load PDF document.');
+    }
   };
 
   const moveUp = (index: number) => {
@@ -215,7 +245,10 @@ const ManageVolume: React.FC = () => {
                   <span className={`px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
                     {article.status}
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
+                    {article.pdf_path && (
+                      <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
+                    )}
                     <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(article.id)} title="Delete" />
                   </div>
                 </div>
@@ -236,6 +269,13 @@ const ManageVolume: React.FC = () => {
         journalsData={journalsData}
         initialVolumeId={id}
         onSuccess={fetchVolume}
+      />
+
+      <PdfViewerModal 
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={pdfViewUrl}
+        allowDownload={true}
       />
 
       <ConfirmDialog 

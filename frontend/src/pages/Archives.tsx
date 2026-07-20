@@ -4,7 +4,7 @@ import { ChevronDown, BookOpen, FileText, Quote } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
-import Modal from '@/components/ui/Modal';
+import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -309,26 +309,12 @@ const Archives: React.FC = () => {
         year={citationContext.year}
       />
 
-      {/* PDF Viewer Modal */}
-      <Modal 
-        isOpen={isPdfModalOpen} 
-        onClose={() => setIsPdfModalOpen(false)} 
-        title="Document Viewer" 
-        className="max-w-4xl h-[95vh]"
-        bodyClassName="p-3"
-      >
-        <div className="w-full h-full flex flex-col">
-          {pdfViewUrl ? (
-            <iframe 
-              src={pdfViewUrl} 
-              className="w-full flex-grow border-0 bg-white" 
-              title="PDF Document Viewer"
-            />
-          ) : (
-            <div className="flex items-center justify-center flex-grow text-muted">Loading document...</div>
-          )}
-        </div>
-      </Modal>
+      <PdfViewerModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={pdfViewUrl}
+        allowDownload={false}
+      />
     </PageWrapper>
   );
 };

@@ -4,6 +4,7 @@ import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft, ChevronDown } from 
 import api, { STORAGE_URL } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
+import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -51,6 +52,10 @@ const Search: React.FC = () => {
 
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
+
+  // PDF Viewer Modal State
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch categories on load
@@ -285,10 +290,18 @@ const Search: React.FC = () => {
                           <button 
                             onClick={async () => {
                               try {
+                                setIsPdfModalOpen(true);
+                                setPdfViewUrl(null);
                                 const res = await api.get(`/public/articles/${article.id}/download-url`);
-                                window.open(res.data.url + '#toolbar=0', '_blank');
+                                let url = res.data.url;
+                                if (url.includes('/storage/')) {
+                                  const path = url.split('/storage/')[1];
+                                  url = `${STORAGE_URL}${path}`;
+                                }
+                                setPdfViewUrl(url);
                               } catch (err) {
                                 console.error('Failed to get download URL', err);
+                                setIsPdfModalOpen(false);
                               }
                             }}
                             className="text-[11px] font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-wider"
@@ -352,6 +365,13 @@ const Search: React.FC = () => {
         journalTitle={citationArticle?.volume?.journal?.title}
         volumeNumber={citationArticle?.volume?.volume_number}
         year={citationArticle?.volume?.year}
+      />
+
+      <PdfViewerModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={pdfViewUrl}
+        allowDownload={false}
       />
     </PageWrapper>
   );
