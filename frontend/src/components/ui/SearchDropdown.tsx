@@ -105,14 +105,20 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
                       onClick={onClose}
                       className="flex items-start gap-3 p-3 hover:bg-background transition-colors group"
                     >
-                      <div className="w-10 h-14 bg-background border border-border shrink-0 overflow-hidden">
-                        {j.cover_image ? (
-                          <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/10">
-                            <BookOpen className="w-4 h-4 text-muted/30" />
-                          </div>
+                      <div className="w-10 h-14 bg-background border border-border shrink-0 overflow-hidden relative flex items-center justify-center">
+                        {j.cover_image && (
+                          <img 
+                            src={getFileUrl(j.cover_image)} 
+                            alt={j.title} 
+                            className="w-full h-full object-cover relative z-10" 
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
                         )}
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/5">
+                          <BookOpen className="w-4 h-4 text-primary/40" />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-[13px] font-semibold text-primary uppercase tracking-wider truncate group-hover:text-secondary transition-colors">
