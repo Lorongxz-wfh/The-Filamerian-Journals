@@ -92,6 +92,7 @@ Route::get('/public/articles/{article}/download-url', [\App\Http\Controllers\Api
 Route::get('/public/articles/{article}/pdf', [\App\Http\Controllers\Api\ArticleController::class, 'servePdf']);
 Route::post('/public/articles/{article}/view', [\App\Http\Controllers\Api\ArticleController::class, 'trackView']);
 Route::get('/public/articles/{article}/related', [\App\Http\Controllers\Api\ArticleController::class, 'getRelated']);
+Route::get('/public/categories', [\App\Http\Controllers\Api\CategoryController::class, 'index']);
 
 // Settings & Feedbacks
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);

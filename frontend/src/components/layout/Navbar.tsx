@@ -31,7 +31,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchCats = async () => {
       try {
-        const res = await api.get('/categories');
+        const res = await api.get('/public/categories');
         setDropdownCategories(res.data.data || []);
       } catch (err) {
         console.error('Failed to fetch navbar categories', err);
