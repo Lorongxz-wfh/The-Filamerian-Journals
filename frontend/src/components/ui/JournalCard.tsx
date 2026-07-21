@@ -72,42 +72,54 @@ const JournalCard: React.FC<JournalCardProps> = ({
     return (
       <Link
         to={`/journals/${slug}`}
-        className={cn('group relative flex flex-col h-full text-center transition-[color,background-color,box-shadow,transform] duration-300', className)}
+        className={cn('group bg-surface border border-border p-5 flex flex-col justify-between hover:border-primary/40 transition-colors cursor-pointer min-h-[360px] text-left relative', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <FloatingCard />
-        <div className="relative mx-auto w-full max-w-[80px] overflow-hidden mb-6 bg-background shadow-sm hover:shadow-md transition-shadow aspect-[3/4] border border-border shrink-0">
+        
+        <div className="relative mx-auto w-full max-w-[120px] aspect-[3/4] overflow-hidden mb-6 bg-background shadow-sm border border-border shrink-0">
           {image && !imgError ? (
             <img
               src={image}
               alt={title}
               onError={() => setImgError(true)}
-              className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-surface border border-border">
-              <BookOpen className="w-12 h-12 text-muted/30" />
+            <div className="flex flex-col items-center justify-center h-full space-y-2 p-2">
+              <BookOpen className="h-8 w-8 text-primary/30" />
+              <span className="text-[11px] font-bold text-primary uppercase tracking-widest line-clamp-3 text-center">
+                {title}
+              </span>
+            </div>
+          )}
+
+          {volume && volume !== 'No Volumes' && (
+            <div className="absolute top-2 left-2 bg-primary text-secondary px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
+              {volume.replace(' Volume/s', '')} VOLS
             </div>
           )}
         </div>
-        <div className="flex flex-col flex-1 justify-end mt-auto">
-          <h3 className="text-xl font-bold text-[#005a9c] uppercase tracking-wider mb-6 leading-snug">
-            {title}
-          </h3>
 
-          <div className="flex flex-col items-center gap-1 text-[13px]">
+        <div className="space-y-1.5 flex-1 flex flex-col justify-between">
+          <div>
             {categoryName && (
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-gray-900">Category</span>
-                <span className="text-[#0077cc]">{categoryName}</span>
-              </div>
+              <span className="text-[10px] font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider inline-block mb-1.5">
+                {categoryName}
+              </span>
             )}
-            {publisher && (
-              <div className="flex flex-col items-center mt-2">
-                <span className="font-bold text-gray-900">Year Published</span>
-                <span className="text-[#0077cc]">{publisher}</span>
-              </div>
+            <h3 className="text-[13px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
+              {title}
+            </h3>
+          </div>
+
+          <div className="pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted">
+            <span className="font-mono">{date || publisher || '-'}</span>
+            {volume && volume !== 'No Volumes' && (
+              <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
+                {volume.split(' ')[0]} issue(s)
+              </span>
             )}
           </div>
         </div>

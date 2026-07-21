@@ -6,6 +6,7 @@ import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { formatVolumeName } from '@/lib/utils';
 import PdfViewer from '@/components/ui/PdfViewer';
 
@@ -140,8 +141,30 @@ const ArticleDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <PageWrapper className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
-        <Spinner text="Loading article..." />
+      <PageWrapper className="flex flex-col w-full">
+        <Skeleton className="h-4 w-44 mb-3" />
+        
+        <div className="bg-surface border border-border p-8 md:p-12 space-y-6">
+          <div className="flex flex-col md:flex-row justify-between gap-8">
+            <div className="space-y-3 flex-1">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+            <div className="space-y-3 shrink-0 md:w-48">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-border space-y-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+          </div>
+        </div>
       </PageWrapper>
     );
   }

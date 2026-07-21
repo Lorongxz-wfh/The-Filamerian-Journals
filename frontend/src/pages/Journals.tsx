@@ -5,10 +5,10 @@ import { Search, LayoutGrid, List, ChevronDown, X, Loader2 } from 'lucide-react'
 import api, { STORAGE_URL } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Select from '@/components/ui/Select';
-import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Journal {
   id: number;
@@ -370,9 +370,39 @@ const Journals: React.FC = () => {
           {/* Grid / List */}
           <div className="flex-1 flex flex-col">
             {loading ? (
-              <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
-                <Spinner text="Loading journals..." />
-              </div>
+              viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="bg-surface border border-border p-5 flex flex-col justify-between min-h-[360px]">
+                      <Skeleton className="mx-auto w-[120px] aspect-[3/4]" />
+                      <div className="space-y-2 mt-4">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                      </div>
+                      <div className="pt-3 border-t border-border flex items-center justify-between mt-auto">
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-4 w-full">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex flex-col md:flex-row gap-6 p-6 border border-border bg-surface">
+                      <Skeleton className="w-[120px] aspect-[3/4] shrink-0" />
+                      <div className="flex-1 space-y-3">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-4 w-1/4 mt-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : filtered.length === 0 ? (
               <EmptyState title="No journals found" description="No journals matched your filter criteria." className="py-20 border border-border bg-surface" />
             ) : (
@@ -395,7 +425,7 @@ const Journals: React.FC = () => {
                       category={j.category?.name}
                       publisher={j.publisher || undefined}
                       viewMode={viewMode}
-                      className={viewMode === 'grid' ? "h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] mx-auto w-full min-h-[320px]" : ""}
+                      className={viewMode === 'grid' ? "w-full" : ""}
                     />
                   );
                 })}
