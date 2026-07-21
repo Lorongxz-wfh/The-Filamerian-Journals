@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { Reorder } from 'framer-motion';
+import { Reorder, useDragControls } from 'framer-motion';
 import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
@@ -48,6 +48,116 @@ const statusColor: Record<string, string> = {
   Draft: 'text-gray-600 bg-gray-50',
 };
 
+interface ArticleRowProps {
+  article: Article;
+  index: number;
+  isLast: boolean;
+  isReordering: boolean;
+  moveUp: (index: number) => void;
+  moveDown: (index: number) => void;
+  onEdit: (article: Article) => void;
+  onViewPdf: (article: Article) => void;
+  onDelete: (id: number) => void;
+  setIsReordering: (val: boolean) => void;
+}
+
+const ArticleRow: React.FC<ArticleRowProps> = ({
+  article,
+  index,
+  isLast,
+  isReordering,
+  moveUp,
+  moveDown,
+  onEdit,
+  onViewPdf,
+  onDelete,
+  setIsReordering,
+}) => {
+  const controls = useDragControls();
+
+  return (
+    <Reorder.Item
+      value={article}
+      dragListener={false}
+      dragControls={controls}
+      className="flex items-center justify-between px-5 py-3 transition-colors bg-surface hover:bg-background/50"
+      whileDrag={{ 
+        scale: 1.01,
+        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+        zIndex: 50,
+        backgroundColor: "var(--surface)"
+      }}
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Drag Handle */}
+        <div
+          className={`p-1.5 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 cursor-grab active:cursor-grabbing touch-none select-none transition-colors ${
+            isReordering ? 'bg-primary/10 text-primary' : 'hover:opacity-100'
+          }`}
+          onPointerDown={(e) => {
+            setIsReordering(true);
+            controls.start(e);
+          }}
+          title="Drag to reorder"
+        >
+          <GripVertical className="h-4 w-4 stroke-[2.5]" />
+        </div>
+
+        {/* Up / Down Arrow buttons */}
+        <div className="flex flex-col gap-0.5 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
+          <button 
+            type="button"
+            onClick={() => {
+              setIsReordering(true);
+              moveUp(index);
+            }} 
+            disabled={index === 0}
+            title="Move Up"
+            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <ArrowUp className="h-3.5 w-3.5 stroke-[2.5]" />
+          </button>
+          <button 
+            type="button"
+            onClick={() => {
+              setIsReordering(true);
+              moveDown(index);
+            }} 
+            disabled={isLast}
+            title="Move Down"
+            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <ArrowDown className="h-3.5 w-3.5 stroke-[2.5]" />
+          </button>
+        </div>
+
+        {/* Article Details */}
+        <div className="flex flex-col min-w-0 cursor-pointer" onClick={() => onEdit(article)}>
+          <span className="text-[14px] font-semibold text-primary truncate hover:underline">
+            {article.title}
+          </span>
+          <span className="text-[12px] text-muted truncate">
+            {article.authors?.map((a: any) => a.name).join(', ') || 'Unknown Authors'}
+          </span>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-4 shrink-0 pl-4" onClick={(e) => e.stopPropagation()}>
+        <span className={`px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
+          {article.status}
+        </span>
+        <div className="flex items-center gap-2">
+          {article.pdf_url && (
+            <IconButton icon={Eye} onClick={() => onViewPdf(article)} title="View PDF" />
+          )}
+          <IconButton icon={Edit2} onClick={() => onEdit(article)} title="Edit" />
+          <IconButton icon={Trash2} variant="danger" onClick={() => onDelete(article.id)} title="Delete" />
+        </div>
+      </div>
+    </Reorder.Item>
+  );
+};
+
 const ManageVolume: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [volume, setVolume] = useState<Volume | null>(null);
@@ -57,8 +167,8 @@ const ManageVolume: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [originalArticles, setOriginalArticles] = useState<Article[]>([]);
   const [hasOrderChanged, setHasOrderChanged] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
-
 
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
@@ -81,6 +191,7 @@ const ManageVolume: React.FC = () => {
       setArticles(sorted);
       setOriginalArticles(sorted);
       setHasOrderChanged(false);
+      setIsReordering(false);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load volume.');
@@ -151,6 +262,7 @@ const ManageVolume: React.FC = () => {
       toast.success('Order saved successfully!');
       setOriginalArticles(articles);
       setHasOrderChanged(false);
+      setIsReordering(false);
     } catch (err) {
       toast.error('Failed to save order.');
     } finally {
@@ -161,6 +273,7 @@ const ManageVolume: React.FC = () => {
   const cancelOrder = () => {
     setArticles(originalArticles);
     setHasOrderChanged(false);
+    setIsReordering(false);
   };
 
   const handleReorder = (newArticles: Article[]) => {
@@ -209,7 +322,7 @@ const ManageVolume: React.FC = () => {
             Articles ({loading ? '...' : articles.length})
           </h3>
           <div className="flex items-center gap-2">
-            {hasOrderChanged ? (
+            {isReordering || hasOrderChanged ? (
               <>
                 <Button 
                   variant="outline" 
@@ -230,10 +343,15 @@ const ManageVolume: React.FC = () => {
                 </Button>
               </>
             ) : (
-              <span className="text-[12px] text-muted flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-border/60 rounded">
-                <GripVertical className="h-3.5 w-3.5 text-muted/70" />
-                <span>Drag or use arrows to reorder</span>
-              </span>
+              <Button
+                variant="outline"
+                onClick={() => setIsReordering(true)}
+                size="sm"
+                className="h-8 text-[11px] px-3 flex items-center gap-1.5"
+              >
+                <GripVertical className="h-3.5 w-3.5" />
+                Edit Order
+              </Button>
             )}
           </div>
         </div>
@@ -267,60 +385,19 @@ const ManageVolume: React.FC = () => {
         ) : (
           <Reorder.Group axis="y" values={articles} onReorder={handleReorder} className="divide-y divide-border">
             {articles.map((article, index) => (
-              <Reorder.Item 
-                value={article}
-                key={article.id} 
-                className={`flex items-center justify-between px-5 py-3 transition-colors bg-surface hover:bg-background/50 cursor-grab active:cursor-grabbing`}
-                whileDrag={{ 
-                  scale: 0.98,
-                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                  zIndex: 50,
-                  borderColor: "var(--primary)"
-                }}
-                onClick={() => handleOpenModal(article)}
-              >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="flex flex-col gap-0.5 items-center shrink-0 w-9" onClick={(e) => e.stopPropagation()}>
-                    <button 
-                      onClick={() => moveUp(index)} 
-                      disabled={index === 0}
-                      title="Move Up"
-                      className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
-                    >
-                      <ArrowUp className="h-4 w-4 stroke-[2.5]" />
-                    </button>
-                    <button 
-                      onClick={() => moveDown(index)} 
-                      disabled={index === articles.length - 1}
-                      title="Move Down"
-                      className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
-                    >
-                      <ArrowDown className="h-4 w-4 stroke-[2.5]" />
-                    </button>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[14px] font-semibold text-primary truncate">
-                      {article.title}
-                    </span>
-                    <span className="text-[12px] text-muted truncate">
-                      {article.authors?.map(a => a.name).join(', ') || 'Unknown Authors'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4 shrink-0 pl-4" onClick={(e) => e.stopPropagation()}>
-                  <span className={`px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
-                    {article.status}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {article.pdf_url && (
-                      <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
-                    )}
-                    <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit" />
-                    <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(article.id)} title="Delete" />
-                  </div>
-                </div>
-              </Reorder.Item>
+              <ArticleRow
+                key={article.id}
+                article={article}
+                index={index}
+                isLast={index === articles.length - 1}
+                isReordering={isReordering || hasOrderChanged}
+                moveUp={moveUp}
+                moveDown={moveDown}
+                onEdit={handleOpenModal}
+                onViewPdf={viewPdf}
+                onDelete={(id) => setDeleteTarget(id)}
+                setIsReordering={setIsReordering}
+              />
             ))}
           </Reorder.Group>
         )}
