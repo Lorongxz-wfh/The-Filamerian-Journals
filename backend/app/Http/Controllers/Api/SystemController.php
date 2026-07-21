@@ -15,13 +15,23 @@ class SystemController extends Controller
             DB::connection()->getPdo();
             $dbStatus = 'Connected';
             
-            $dbName = DB::connection()->getDatabaseName();
-            $dbSizeResult = DB::select("
-                SELECT SUM(data_length + index_length) as size 
-                FROM information_schema.TABLES 
-                WHERE table_schema = ?
-            ", [$dbName]);
-            $dbSizeBytes = (int) ($dbSizeResult[0]->size ?? 0);
+            $driver = DB::connection()->getDriverName();
+            $dbSizeBytes = 0;
+
+            if ($driver === 'sqlite') {
+                $dbPath = DB::connection()->getDatabaseName();
+                if (File::exists($dbPath)) {
+                    $dbSizeBytes = File::size($dbPath);
+                }
+            } else if ($driver === 'mysql') {
+                $dbName = DB::connection()->getDatabaseName();
+                $dbSizeResult = DB::select("
+                    SELECT SUM(data_length + index_length) as size 
+                    FROM information_schema.TABLES 
+                    WHERE table_schema = ?
+                ", [$dbName]);
+                $dbSizeBytes = (int) ($dbSizeResult[0]->size ?? 0);
+            }
             
             $counts = [
                 'articles' => \App\Models\Article::count(),
@@ -32,7 +42,12 @@ class SystemController extends Controller
         } catch (\Exception $e) {
             $dbStatus = 'Disconnected';
             $dbSizeBytes = 0;
-            $counts = [];
+            $counts = [
+                'articles' => 0,
+                'journals' => 0,
+                'users' => 0,
+                'activity_logs' => 0,
+            ];
         }
 
         // Disk space
