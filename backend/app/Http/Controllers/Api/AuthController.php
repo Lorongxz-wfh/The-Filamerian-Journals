@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\Rules\Password;
+use App\Services\ActivityLogger;
 
 class AuthController extends Controller
 {
@@ -17,7 +19,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
 
         $user = User::create([
@@ -45,6 +47,10 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
+            if ($user) {
+                ActivityLogger::log('Failed Login Attempt', "Failed login attempt for {$request->email}", User::class, $user->id, $user->id);
+            }
+            
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -55,8 +61,16 @@ class AuthController extends Controller
                 'email' => ['Please verify your email address before logging in. Check your inbox.'],
             ]);
         }
+        
+        if (! $user->is_approved) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account is pending administrator approval.'],
+            ]);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        ActivityLogger::log('Logged In', "User logged in", User::class, $user->id, $user->id);
 
         return response()->json([
             'access_token' => $token,
@@ -67,6 +81,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        ActivityLogger::log('Logged Out', "User logged out", User::class, $request->user()->id, $request->user()->id);
+        
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

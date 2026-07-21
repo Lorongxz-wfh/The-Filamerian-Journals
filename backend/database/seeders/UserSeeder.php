@@ -10,7 +10,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = Hash::make('password'); // Default password for all dummy accounts
+        $password = Hash::make('Filamerian@2026!'); // Default password for all dummy accounts
 
         // Super Admin User (IT)
         $superAdmin = User::updateOrCreate(

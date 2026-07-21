@@ -6,11 +6,13 @@ use App\Models\ActivityLog;
 
 class ActivityLogger
 {
-    public static function log($action, $description, $targetType = null, $targetId = null)
+    public static function log($action, $description, $targetType = null, $targetId = null, $userId = null)
     {
-        if (auth()->check()) {
+        $resolvedUserId = $userId ?? (auth()->check() ? auth()->id() : null);
+        
+        if ($resolvedUserId) {
             ActivityLog::create([
-                'user_id' => auth()->id(),
+                'user_id' => $resolvedUserId,
                 'action' => $action,
                 'description' => $description,
                 'target_type' => $targetType,
