@@ -73,10 +73,13 @@ const JournalCard: React.FC<JournalCardProps> = ({
     return (
       <Link
         to={`/journals/${slug}`}
-        className={cn('group bg-surface border border-border p-5 flex flex-col justify-between hover:border-primary/40 transition-colors cursor-pointer min-h-[396px] w-[95%] mx-auto text-left relative', className)}
+        className={cn('group bg-surface border border-border p-5 flex flex-col justify-between hover:border-primary/50 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer min-h-[396px] w-[95%] mx-auto text-left relative overflow-hidden', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
+        {/* Top animated accent bar */}
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10" />
+
         <FloatingCard />
         
         <div className="relative mx-auto w-full max-w-[160px] aspect-[3/4] overflow-hidden mb-6 bg-background shadow-sm border border-border shrink-0">
@@ -114,6 +117,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
             {volume && volume !== 'No Volumes' && (
               <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
                 {volume.split(' ')[0]} volume{volume.split(' ')[0] !== '1' ? 's' : ''}
+                <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-300 text-primary" />
               </span>
             )}
           </div>
@@ -126,10 +130,13 @@ const JournalCard: React.FC<JournalCardProps> = ({
   return (
     <Link
       to={`/journals/${slug}`}
-      className={cn('group relative flex flex-col md:flex-row items-stretch gap-8 p-6 border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 transition-[color,background-color,box-shadow,transform] duration-300 mb-4', className)}
+      className={cn('group relative flex flex-col md:flex-row items-stretch gap-8 p-6 border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 transition-all duration-300 mb-4 overflow-hidden', className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Top animated accent bar */}
+      <div className="absolute top-0 left-0 w-full h-[3px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10" />
+
       <FloatingCard />
       {/* Image (Portrait) */}
       <div className="relative w-[120px] md:w-[140px] shrink-0 overflow-hidden bg-background border border-border">
