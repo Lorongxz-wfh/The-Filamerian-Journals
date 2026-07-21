@@ -286,7 +286,7 @@ const JournalDetail: React.FC = () => {
             </div>
 
             {/* RIGHT COLUMN: Selected Volume Preview (8/12 cols) */}
-            <div className="lg:col-span-8 border border-border bg-surface flex flex-col min-h-[600px]">
+            <div className="lg:col-span-8 border border-border bg-surface flex flex-col">
               {journal.volumes.find(v => v.volume_number === expandedVol) ? (
                 (() => {
                   const activeVol = journal.volumes.find(v => v.volume_number === expandedVol)!;
