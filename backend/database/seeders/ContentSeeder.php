@@ -20,128 +20,175 @@ class ContentSeeder extends Seeder
      */
     public function run(): void
     {
+        $categories = [
+            'Undergraduate',
+            'Graduate School',
+            'Institutional',
+            'Multidisciplinary'
+        ];
+
+        // Seed Categories
+        $categoryModels = [];
+        foreach ($categories as $cat) {
+            $categoryModels[$cat] = Category::firstOrCreate(
+                ['name' => $cat],
+                ['slug' => Str::slug($cat)]
+            );
+        }
+
         $journalsData = [
             [
-                'title' => 'Filamer Journal of Education and Pedagogy',
-                'category' => 'Education',
-                'description' => 'A peer-reviewed open-access journal dedicated to publishing high-quality research in education, pedagogical innovations, and curriculum development.',
-                'article' => 'The Impact of Blended Learning on Student Engagement in Post-Pandemic Education',
-                'authors' => [
-                    ['first_name' => 'Maria Clara', 'last_name' => 'Santos'],
-                    ['first_name' => 'Jose', 'last_name' => 'Rizal'],
-                    ['first_name' => 'Apolinario', 'last_name' => 'Mabini']
-                ],
-                'keywords' => ['Blended Learning', 'Student Engagement', 'Pedagogy'],
+                'title' => 'Filamer Undergraduate Research Journal',
+                'category' => 'Undergraduate',
+                'description' => 'A premier publication showcasing outstanding research and academic projects by undergraduate students across various disciplines.',
+                'issn' => '2718-9123',
+                'frequency' => 'Biannual',
+                'editor' => 'Dr. Maria Santos',
             ],
             [
-                'title' => 'Filamer Journal of Nursing and Health Sciences',
-                'category' => 'Nursing',
-                'description' => 'An official publication focused on evidence-based practice, clinical nursing research, and public health innovations.',
-                'article' => 'Evaluating the Efficacy of Telehealth Nursing in Rural Communities',
-                'authors' => [
-                    ['first_name' => 'Juan', 'last_name' => 'Dela Cruz'],
-                    ['first_name' => 'Teresa', 'last_name' => 'Magbanua']
-                ],
-                'keywords' => ['Telehealth', 'Rural Health', 'Nursing Practice'],
+                'title' => 'Filamer Arts & Sciences Student Journal',
+                'category' => 'Undergraduate',
+                'description' => 'Dedicated to publishing the best works in the humanities, social sciences, and natural sciences by degree-seeking students.',
+                'issn' => '2718-9124',
+                'frequency' => 'Annual',
+                'editor' => 'Prof. Juan Dela Cruz',
             ],
             [
-                'title' => 'Filamerian Business and Economics Review',
-                'category' => 'Business',
-                'description' => 'A multidisciplinary journal covering applied economics, strategic management, accounting, and organizational behavior.',
-                'article' => 'Strategic Resiliency of Micro-Enterprises During Economic Uncertainty',
-                'authors' => [
-                    ['first_name' => 'Pedro', 'last_name' => 'Penduko']
-                ],
-                'keywords' => ['Micro-Enterprises', 'Economic Resiliency', 'Strategic Management'],
+                'title' => 'Filamer Graduate School Review',
+                'category' => 'Graduate School',
+                'description' => 'A peer-reviewed journal publishing advanced research, theoretical perspectives, and methodological innovations from graduate scholars.',
+                'issn' => '2718-9125',
+                'frequency' => 'Biannual',
+                'editor' => 'Dr. Teresa Magbanua',
             ],
             [
-                'title' => 'Filamer Journal of Computer Studies and Technology',
-                'category' => 'Information Technology',
-                'description' => 'Publishing cutting-edge research on software engineering, artificial intelligence, data science, and information systems.',
-                'article' => 'Machine Learning Approaches for Predictive Analytics in Educational Data',
-                'authors' => [
-                    ['first_name' => 'Emilio', 'last_name' => 'Aguinaldo'],
-                    ['first_name' => 'Andres', 'last_name' => 'Bonifacio']
-                ],
-                'keywords' => ['Machine Learning', 'Predictive Analytics', 'Educational Data Mining'],
+                'title' => 'Journal of Advanced Educational Research',
+                'category' => 'Graduate School',
+                'description' => 'Focusing on cutting-edge pedagogy, curriculum development, and educational administration research at the graduate level.',
+                'issn' => '2718-9126',
+                'frequency' => 'Quarterly',
+                'editor' => 'Dr. Apolinario Mabini',
+            ],
+            [
+                'title' => 'Filamer Institutional Studies',
+                'category' => 'Institutional',
+                'description' => 'An official publication focused on institutional assessment, academic development, and strategic initiatives within the university.',
+                'issn' => '2718-9127',
+                'frequency' => 'Annual',
+                'editor' => 'Dr. Jose Rizal',
+            ],
+            [
+                'title' => 'Filamer Multidisciplinary Journal',
+                'category' => 'Multidisciplinary',
+                'description' => 'A comprehensive journal covering a wide array of topics intersecting business, technology, health, and social sciences.',
+                'issn' => '2718-9128',
+                'frequency' => 'Biannual',
+                'editor' => 'Dr. Andres Bonifacio',
             ]
         ];
 
         foreach ($journalsData as $index => $data) {
-            $i = $index + 1;
+            $jIndex = $index + 1;
             
-            $category = Category::firstOrCreate(
-                ['name' => $data['category']],
-                ['slug' => Str::slug($data['category'])]
-            );
-
-            // Journal — updateOrCreate so re-seeding always reflects latest data
+            // Journal
             $journal = Journal::updateOrCreate(
                 ['slug' => Str::slug($data['title'])],
                 [
                     'title' => $data['title'],
                     'description' => $data['description'],
-                    'category_id' => $category->id,
-                    'publisher' => 'Filamer Christian University'
+                    'category_id' => $categoryModels[$data['category']]->id,
+                    'publisher' => 'Filamer Christian University',
+                    'issn' => $data['issn'],
+                    'frequency' => $data['frequency'],
+                    'editor' => $data['editor'],
+                    'cover_image' => "journals/covers/placeholder_{$jIndex}.jpg",
+                    'pdf_path' => "journals/pdfs/placeholder_{$jIndex}.pdf",
                 ]
             );
 
-            // Volume — one volume per journal, labelled "Vol. 1"
-            $volume = Volume::updateOrCreate(
-                ['journal_id' => $journal->id, 'volume_number' => 'Vol. 1'],
-                ['year' => 2024]
-            );
-
-            // Article — updateOrCreate so status is always correctly set to 'published'
-            $article = Article::updateOrCreate(
-                ['title' => $data['article']],
-                [
-                    'volume_id' => $volume->id,
-                    'abstract' => "This paper explores the critical aspects of {$data['article']} within the context of {$data['category']}. Through quantitative and qualitative analysis, the study presents significant findings that contribute to the ongoing discourse in the field.",
-                    'status' => 'Published',
-                    'page_start' => ($i * 10) + 1,
-                    'page_end' => ($i * 10) + 15,
-                    'doi' => "10.1234/fcu.2024.00{$i}"
-                ]
-            );
-
-            // Authors
-            foreach ($data['authors'] as $authorData) {
-                $fullName = $authorData['first_name'] . ' ' . $authorData['last_name'];
-                $author = Author::updateOrCreate(
-                    ['email' => strtolower(str_replace(' ', '.', $fullName)) . "@fcu.edu.ph"],
-                    [
-                        'name' => $fullName,
-                        'first_name' => $authorData['first_name'],
-                        'last_name' => $authorData['last_name'],
-                        'middle_name' => $authorData['middle_name'] ?? null,
-                        'suffix' => $authorData['suffix'] ?? null,
-                    ]
+            // Volumes (2-3 per journal)
+            $numVolumes = rand(2, 3);
+            for ($v = 1; $v <= $numVolumes; $v++) {
+                $year = 2024 - ($numVolumes - $v); // e.g., 2022, 2023, 2024
+                $volume = Volume::updateOrCreate(
+                    ['journal_id' => $journal->id, 'volume_number' => "Vol. {$v}"],
+                    ['year' => $year]
                 );
-                $article->authors()->syncWithoutDetaching([$author->id]);
-            }
 
-            // Keywords
-            foreach ($data['keywords'] as $kw) {
-                $keyword = Keyword::firstOrCreate(['name' => $kw]);
-                $article->keywords()->syncWithoutDetaching([$keyword->id]);
+                // Articles (2-3 per volume)
+                $numArticles = rand(2, 3);
+                for ($a = 1; $a <= $numArticles; $a++) {
+                    $articleIndex = $a;
+                    $pageStart = ($articleIndex * 15) - 14;
+                    $pageEnd = ($articleIndex * 15);
+                    $articleTitle = "Exploring the Dimensions of " . $data['category'] . " Studies: Case {$v}-{$a}";
+
+                    $article = Article::updateOrCreate(
+                        ['title' => $articleTitle, 'volume_id' => $volume->id],
+                        [
+                            'abstract' => "This comprehensive study explores critical aspects of {$data['category']} disciplines. Through meticulous methodology, it presents robust findings that enrich the ongoing discourse and provide practical implications for future research and practice.",
+                            'status' => 'Published',
+                            'page_start' => $pageStart,
+                            'page_end' => $pageEnd,
+                            'doi' => "10.1234/fcu.{$year}." . str_pad($jIndex, 2, '0', STR_PAD_LEFT) . "." . str_pad($v, 2, '0', STR_PAD_LEFT) . "." . str_pad($a, 2, '0', STR_PAD_LEFT),
+                            'pdf_path' => "articles/pdfs/placeholder_v{$v}_a{$a}.pdf",
+                            'views_count' => rand(50, 500),
+                            'downloads_count' => rand(10, 200),
+                            'order' => $a,
+                        ]
+                    );
+
+                    // Authors
+                    $firstNames = ['Juan', 'Maria', 'Pedro', 'Jose', 'Andres', 'Emilio', 'Gabriela'];
+                    $lastNames = ['Dela Cruz', 'Santos', 'Penduko', 'Rizal', 'Bonifacio', 'Aguinaldo', 'Silang'];
+                    
+                    $numAuthors = rand(1, 3);
+                    $authorIds = [];
+                    for ($auth = 0; $auth < $numAuthors; $auth++) {
+                        $fn = $firstNames[array_rand($firstNames)];
+                        $ln = $lastNames[array_rand($lastNames)];
+                        $fullName = "{$fn} {$ln}";
+                        $author = Author::updateOrCreate(
+                            ['email' => strtolower(str_replace(' ', '.', $fullName)) . rand(1, 99) . "@fcu.edu.ph"],
+                            [
+                                'name' => $fullName,
+                                'first_name' => $fn,
+                                'last_name' => $ln,
+                            ]
+                        );
+                        $authorIds[] = $author->id;
+                    }
+                    $article->authors()->syncWithoutDetaching($authorIds);
+
+                    // Keywords
+                    $kws = ['Research', 'Innovation', 'Methodology', 'Analysis', 'Development', 'Education', 'Technology'];
+                    shuffle($kws);
+                    $selectedKws = array_slice($kws, 0, rand(2, 4));
+                    
+                    $keywordIds = [];
+                    foreach ($selectedKws as $kw) {
+                        $keyword = Keyword::firstOrCreate(['name' => $kw]);
+                        $keywordIds[] = $keyword->id;
+                    }
+                    $article->keywords()->syncWithoutDetaching($keywordIds);
+                }
             }
 
             // Announcement
             Announcement::firstOrCreate(
                 ['title' => "Call for Papers: {$data['title']}"],
                 [
-                    'body' => "We are currently accepting new submissions for the upcoming issue of the {$data['title']}. We invite scholars and researchers to submit their original work. Deadline is at the end of the month.",
-                    'published_at' => now()->subDays($i * 2)
+                    'body' => "We are currently accepting new submissions for the upcoming issue of {$data['title']}. We invite scholars and researchers to submit their original work. The deadline for manuscript submission is fast approaching.",
+                    'published_at' => now()->subDays(rand(2, 20))
                 ]
             );
 
             // Feedback
             Feedback::firstOrCreate(
-                ['email' => "student{$i}@fcu.edu.ph", 'subject' => "Submission Guidelines Question for {$data['category']}"],
+                ['email' => "inquiry{$jIndex}@fcu.edu.ph", 'subject' => "Submission Guidelines for {$data['title']}"],
                 [
-                    'name' => "Student {$i}",
-                    'message' => "Hello, I would like to clarify some formatting rules for my thesis submission to your journal. Thank you.",
+                    'name' => "Researcher {$jIndex}",
+                    'message' => "Hello, I am interested in publishing my work in your journal. Could you please provide the detailed formatting guidelines and submission process?",
                     'category' => 'Inquiry',
                     'is_read' => false
                 ]
