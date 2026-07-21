@@ -208,4 +208,87 @@ class ImportController extends Controller
             'suffix' => $suffix ?: null,
         ];
     }
+
+    /**
+     * Import a bulk list of journals from a JSON payload parsed by the frontend.
+     */
+    public function importJournals(Request $request)
+    {
+        $validated = $request->validate([
+            'journals' => 'required|array',
+            'journals.*.title' => 'required|string',
+            'journals.*.description' => 'nullable|string',
+            'journals.*.category' => 'nullable|string',
+            'journals.*.issn' => 'nullable|string',
+            'journals.*.frequency' => 'nullable|string',
+            'journals.*.editor' => 'nullable|string',
+            'journals.*.publisher' => 'nullable|string',
+            'journals.*.volume_number' => 'nullable|string',
+            'journals.*.volume_year' => 'nullable|numeric',
+        ]);
+
+        $importedCount = 0;
+        DB::beginTransaction();
+
+        try {
+            foreach ($validated['journals'] as $row) {
+                // Category
+                $categoryId = null;
+                if (!empty($row['category'])) {
+                    $categoryName = trim($row['category']);
+                    $category = Category::firstOrCreate(
+                        ['name' => $categoryName],
+                        ['slug' => \Illuminate\Support\Str::slug($categoryName), 'description' => '']
+                    );
+                    $categoryId = $category->id;
+                }
+
+                // Journal
+                $title = trim($row['title']);
+                $baseSlug = \Illuminate\Support\Str::slug($title);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (Journal::where('slug', $slug)->where('title', '!=', $title)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+
+                $journal = Journal::firstOrCreate(
+                    ['title' => $title],
+                    [
+                        'slug' => $slug,
+                        'description' => isset($row['description']) ? trim($row['description']) : null,
+                        'category_id' => $categoryId,
+                        'issn' => isset($row['issn']) ? trim($row['issn']) : null,
+                        'frequency' => isset($row['frequency']) ? trim($row['frequency']) : null,
+                        'editor' => isset($row['editor']) ? trim($row['editor']) : null,
+                        'publisher' => isset($row['publisher']) ? trim($row['publisher']) : null,
+                    ]
+                );
+
+                // Initial Volume creation if volume_number provided
+                if (!empty($row['volume_number'])) {
+                    Volume::firstOrCreate([
+                        'journal_id' => $journal->id,
+                        'volume_number' => trim($row['volume_number']),
+                        'year' => isset($row['volume_year']) ? intval($row['volume_year']) : date('Y'),
+                    ]);
+                }
+
+                $importedCount++;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "Successfully imported {$importedCount} journals.",
+                'count' => $importedCount
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to import journals: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

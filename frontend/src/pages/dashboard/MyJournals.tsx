@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -250,13 +250,23 @@ const MyJournals: React.FC = () => {
   return (
     <div className="space-y-8">
       <DashboardHeader title="My Journals">
-        <Button 
-          onClick={() => handleOpenModal()}
-          className="shrink-0 flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          New Journal
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => navigate('/dashboard/import?tab=journals')}
+            className="shrink-0 flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Bulk Import
+          </Button>
+          <Button 
+            onClick={() => handleOpenModal()}
+            className="shrink-0 flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            New Journal
+          </Button>
+        </div>
       </DashboardHeader>
 
       <div className="flex justify-end">

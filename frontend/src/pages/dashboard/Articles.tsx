@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router';
-import { FileText, Plus, Edit2, Trash2, Eye } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router';
+import { FileText, Plus, Edit2, Trash2, Eye, Upload } from 'lucide-react';
 import api, { STORAGE_URL } from '@/services/api';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
@@ -43,6 +43,7 @@ const getStatusVariant = (status: string) => {
 const articleHasPdf = (article: Article) => !!article.pdf_url;
 
 const Articles: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [articles, setArticles] = useState<Article[]>([]);
   const [journalsData, setJournalsData] = useState<any[]>([]);
@@ -171,9 +172,18 @@ const Articles: React.FC = () => {
   return (
     <div className="space-y-8">
       <DashboardHeader title="Articles">
-        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Submit Article
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => navigate('/dashboard/import?tab=articles')}
+            className="shrink-0 flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" /> Bulk Import
+          </Button>
+          <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
+            <Plus className="h-4 w-4" /> Submit Article
+          </Button>
+        </div>
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

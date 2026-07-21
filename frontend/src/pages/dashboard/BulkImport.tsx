@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Upload, AlertCircle, FileSpreadsheet } from 'lucide-react';
+import { useSearchParams } from 'react-router';
+import { Download, Upload, AlertCircle, FileSpreadsheet, BookOpen, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import api from '@/services/api';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -32,7 +33,22 @@ interface ParsedArticle {
   status?: string;
 }
 
+interface ParsedJournal {
+  title: string;
+  description?: string;
+  category?: string;
+  issn?: string;
+  frequency?: string;
+  editor?: string;
+  publisher?: string;
+  volume_number?: string;
+  volume_year?: number;
+}
+
 const BulkImport: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = (searchParams.get('tab') as 'articles' | 'journals') || 'articles';
+
   const [journals, setJournals] = useState<Journal[]>([]);
   const [volumes, setVolumes] = useState<Volume[]>([]);
   
@@ -40,7 +56,9 @@ const BulkImport: React.FC = () => {
   const [selectedVolume, setSelectedVolume] = useState<string>('');
   
   const [file, setFile] = useState<File | null>(null);
-  const [parsedData, setParsedData] = useState<ParsedArticle[]>([]);
+  const [parsedArticles, setParsedArticles] = useState<ParsedArticle[]>([]);
+  const [parsedJournals, setParsedJournals] = useState<ParsedJournal[]>([]);
+  
   const [isParsing, setIsParsing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,6 +74,13 @@ const BulkImport: React.FC = () => {
       setSelectedVolume('');
     }
   }, [selectedJournal]);
+
+  const handleTabChange = (tab: 'articles' | 'journals') => {
+    setSearchParams({ tab });
+    setFile(null);
+    setParsedArticles([]);
+    setParsedJournals([]);
+  };
 
   const fetchJournals = async () => {
     try {
@@ -76,30 +101,52 @@ const BulkImport: React.FC = () => {
   };
 
   const handleDownloadTemplate = () => {
-    const templateData = [
-      {
-        title: 'Example Article Title',
-        abstract: 'This is an optional abstract...',
-        authors: 'Doe, John Alexander Jr.; Jane M. Smith',
-        category: 'Computer Science',
-        keywords: 'AI, Machine Learning',
-        page_start: '10',
-        page_end: '25',
-        doi: '10.1234/example',
-        status: 'Draft'
-      }
-    ];
+    if (activeTab === 'articles') {
+      const templateData = [
+        {
+          title: 'Example Article Title',
+          abstract: 'This is an optional abstract...',
+          authors: 'Doe, John Alexander Jr.; Jane M. Smith',
+          category: 'Computer Science',
+          keywords: 'AI, Machine Learning',
+          page_start: '10',
+          page_end: '25',
+          doi: '10.1234/example',
+          status: 'Draft'
+        }
+      ];
 
-    const ws = XLSX.utils.json_to_sheet(templateData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Template');
-    XLSX.writeFile(wb, 'filamerian_import_template.xlsx');
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Articles');
+      XLSX.writeFile(wb, 'filamerian_articles_import_template.xlsx');
+    } else {
+      const templateData = [
+        {
+          title: 'Filamer Journal of Information Technology',
+          description: 'A peer-reviewed journal focused on IT and Software Engineering.',
+          category: 'Technology',
+          issn: '1234-5678',
+          frequency: 'Bi-annual',
+          editor: 'Dr. Jane Smith',
+          publisher: 'Filamer Christian University Press',
+          volume_number: 'Vol. 1 Issue 1',
+          volume_year: 2026
+        }
+      ];
+
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Journals');
+      XLSX.writeFile(wb, 'filamerian_journals_import_template.xlsx');
+    }
   };
 
   const handleFileSelect = async (selectedFile: File | null) => {
     setFile(selectedFile);
     if (!selectedFile) {
-      setParsedData([]);
+      setParsedArticles([]);
+      setParsedJournals([]);
       return;
     }
 
@@ -109,26 +156,38 @@ const BulkImport: React.FC = () => {
       const workbook = XLSX.read(data);
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      
-      // Convert to JSON
       const json = XLSX.utils.sheet_to_json(worksheet) as any[];
-      
-      const mapped: ParsedArticle[] = json.map(row => ({
-        title: row.title || row.Title || '',
-        abstract: row.abstract || row.Abstract || '',
-        authors: row.authors || row.Authors || '',
-        category: row.category || row.Category || '',
-        keywords: row.keywords || row.Keywords || '',
-        page_start: String(row.page_start || row['Page Start'] || ''),
-        page_end: String(row.page_end || row['Page End'] || ''),
-        doi: String(row.doi || row.DOI || ''),
-        status: row.status || row.Status || 'Draft',
-      })).filter(row => row.title); // Must have title
 
-      setParsedData(mapped);
-      
-      if (mapped.length === 0) {
-        toast.error('No valid rows found. Please check your file format.');
+      if (activeTab === 'articles') {
+        const mapped: ParsedArticle[] = json.map(row => ({
+          title: row.title || row.Title || '',
+          abstract: row.abstract || row.Abstract || '',
+          authors: row.authors || row.Authors || '',
+          category: row.category || row.Category || '',
+          keywords: row.keywords || row.Keywords || '',
+          page_start: String(row.page_start || row['Page Start'] || ''),
+          page_end: String(row.page_end || row['Page End'] || ''),
+          doi: String(row.doi || row.DOI || ''),
+          status: row.status || row.Status || 'Draft',
+        })).filter(row => row.title);
+
+        setParsedArticles(mapped);
+        if (mapped.length === 0) toast.error('No valid article rows found.');
+      } else {
+        const mapped: ParsedJournal[] = json.map(row => ({
+          title: row.title || row.Title || '',
+          description: row.description || row.Description || '',
+          category: row.category || row.Category || '',
+          issn: row.issn || row.ISSN || '',
+          frequency: row.frequency || row.Frequency || '',
+          editor: row.editor || row.Editor || '',
+          publisher: row.publisher || row.Publisher || '',
+          volume_number: row.volume_number || row['Volume Number'] || '',
+          volume_year: row.volume_year || row['Volume Year'] ? Number(row.volume_year || row['Volume Year']) : undefined,
+        })).filter(row => row.title);
+
+        setParsedJournals(mapped);
+        if (mapped.length === 0) toast.error('No valid journal rows found.');
       }
     } catch (err) {
       console.error(err);
@@ -140,72 +199,128 @@ const BulkImport: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedJournal || !selectedVolume) {
-      toast.error('Please select a journal and volume first.');
-      return;
-    }
-    if (parsedData.length === 0) {
-      toast.error('No data to import.');
-      return;
-    }
+    if (activeTab === 'articles') {
+      if (!selectedJournal || !selectedVolume) {
+        toast.error('Please select a journal and volume first.');
+        return;
+      }
+      if (parsedArticles.length === 0) {
+        toast.error('No article data to import.');
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        journal_id: selectedJournal,
-        volume_id: selectedVolume,
-        articles: parsedData
-      };
-      
-      const res = await api.post('/imports/articles', payload);
-      toast.success(res.data.message || 'Import successful!');
-      
-      // Reset
-      setFile(null);
-      setParsedData([]);
-      
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Import failed');
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(true);
+      try {
+        const payload = {
+          journal_id: selectedJournal,
+          volume_id: selectedVolume,
+          articles: parsedArticles
+        };
+        
+        const res = await api.post('/imports/articles', payload);
+        toast.success(res.data.message || 'Articles import successful!');
+        setFile(null);
+        setParsedArticles([]);
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || 'Import failed');
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      if (parsedJournals.length === 0) {
+        toast.error('No journal data to import.');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const payload = {
+          journals: parsedJournals
+        };
+        
+        const res = await api.post('/imports/journals', payload);
+        toast.success(res.data.message || 'Journals import successful!');
+        setFile(null);
+        setParsedJournals([]);
+        fetchJournals(); // Refresh journal list
+      } catch (err: any) {
+        toast.error(err.response?.data?.message || 'Import failed');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   return (
     <div className="space-y-8">
-      <DashboardHeader title="Bulk Import Articles">
+      <DashboardHeader title="Bulk Data Migration">
         <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2">
-          <Download className="h-4 w-4" /> Download Template
+          <Download className="h-4 w-4" /> Download {activeTab === 'articles' ? 'Articles' : 'Journals'} Template
         </Button>
       </DashboardHeader>
 
+      {/* Tabs */}
+      <div className="flex border-b border-border gap-6">
+        <button
+          onClick={() => handleTabChange('articles')}
+          className={`flex items-center gap-2 pb-3 text-sm font-semibold transition-colors relative ${
+            activeTab === 'articles'
+              ? 'text-primary border-b-2 border-primary -mb-px'
+              : 'text-muted hover:text-primary'
+          }`}
+        >
+          <FileText className="h-4 w-4" />
+          Import Articles
+        </button>
+        <button
+          onClick={() => handleTabChange('journals')}
+          className={`flex items-center gap-2 pb-3 text-sm font-semibold transition-colors relative ${
+            activeTab === 'journals'
+              ? 'text-primary border-b-2 border-primary -mb-px'
+              : 'text-muted hover:text-primary'
+          }`}
+        >
+          <BookOpen className="h-4 w-4" />
+          Import Journals & Volumes
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1 space-y-6">
-          <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-4">
-            <h3 className="text-sm font-semibold text-primary">1. Destination</h3>
-            <Select 
-              label="Select Journal"
-              required
-              value={selectedJournal}
-              onChange={(val) => setSelectedJournal(String(val))}
-              options={[
-                { value: '', label: 'Choose a journal...' },
-                ...journals.map(j => ({ value: String(j.id), label: j.title }))
-              ]}
-            />
-            
-            <Select 
-              label="Select Volume"
-              required
-              disabled={!selectedJournal}
-              value={selectedVolume}
-              onChange={(val) => setSelectedVolume(String(val))}
-              options={[
-                { value: '', label: 'Choose a volume...' },
-                ...volumes.map(v => ({ value: String(v.id), label: `${v.volume_number} (${v.year})` }))
-              ]}
-            />
-          </div>
+          {activeTab === 'articles' ? (
+            <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-4">
+              <h3 className="text-sm font-semibold text-primary">1. Destination</h3>
+              <Select 
+                label="Select Journal"
+                required
+                value={selectedJournal}
+                onChange={(val) => setSelectedJournal(String(val))}
+                options={[
+                  { value: '', label: 'Choose a journal...' },
+                  ...journals.map(j => ({ value: String(j.id), label: j.title }))
+                ]}
+              />
+              
+              <Select 
+                label="Select Volume"
+                required
+                disabled={!selectedJournal}
+                value={selectedVolume}
+                onChange={(val) => setSelectedVolume(String(val))}
+                options={[
+                  { value: '', label: 'Choose a volume...' },
+                  ...volumes.map(v => ({ value: String(v.id), label: `${v.volume_number} (${v.year})` }))
+                ]}
+              />
+            </div>
+          ) : (
+            <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-3">
+              <h3 className="text-sm font-semibold text-primary">1. Journal & Volume Creator</h3>
+              <p className="text-[12px] text-muted leading-relaxed">
+                Upload a spreadsheet with journal details. Missing categories and initial volumes will be automatically generated.
+              </p>
+            </div>
+          )}
 
           <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-4">
             <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
@@ -224,18 +339,24 @@ const BulkImport: React.FC = () => {
             <div className="bg-primary/5 p-3 rounded border border-primary/10">
               <p className="text-[12px] text-muted flex items-start gap-2 leading-relaxed">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-primary/60" />
-                <span>PDFs cannot be bulk uploaded. Import the metadata here, then attach PDFs individually via the Articles page.</span>
+                <span>
+                  {activeTab === 'articles' 
+                    ? 'PDFs cannot be bulk uploaded. Import article metadata here, then attach PDFs individually.'
+                    : 'Cover images can be assigned individually via the Journals page after import.'}
+                </span>
               </p>
             </div>
           </div>
           
           <Button 
             className="w-full flex items-center justify-center gap-2"
-            disabled={parsedData.length === 0 || !selectedVolume || isSubmitting}
+            disabled={
+              (activeTab === 'articles' ? (parsedArticles.length === 0 || !selectedVolume) : parsedJournals.length === 0) || isSubmitting
+            }
             onClick={handleSubmit}
             isLoading={isSubmitting}
           >
-            <Upload className="h-4 w-4" /> Execute Import ({parsedData.length} records)
+            <Upload className="h-4 w-4" /> Execute Import ({activeTab === 'articles' ? parsedArticles.length : parsedJournals.length} records)
           </Button>
         </div>
 
@@ -244,57 +365,98 @@ const BulkImport: React.FC = () => {
             <div className="p-4 border-b border-border flex items-center justify-between bg-background/50">
               <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
                 <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-                Data Preview
+                Data Preview ({activeTab === 'articles' ? 'Articles' : 'Journals'})
               </h3>
               <span className="text-[12px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                {parsedData.length} Valid Rows
+                {activeTab === 'articles' ? parsedArticles.length : parsedJournals.length} Valid Rows
               </span>
             </div>
             
             <div className="flex-1 overflow-auto">
-              {parsedData.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-muted p-8 text-center space-y-3">
-                  <FileSpreadsheet className="h-12 w-12 text-muted/30" />
-                  <div>
-                    <p className="text-[13px] font-medium text-primary">No data to preview</p>
-                    <p className="text-[12px]">Upload a valid spreadsheet to see a preview of the import.</p>
+              {activeTab === 'articles' ? (
+                parsedArticles.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-muted p-8 text-center space-y-3">
+                    <FileSpreadsheet className="h-12 w-12 text-muted/30" />
+                    <div>
+                      <p className="text-[13px] font-medium text-primary">No article data to preview</p>
+                      <p className="text-[12px]">Upload a valid spreadsheet to see a preview of the import.</p>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Authors</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {parsedData.map((row, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell className="font-medium text-primary truncate max-w-[200px]">
-                          {row.title}
-                        </TableCell>
-                        <TableCell className="text-muted truncate max-w-[150px]">
-                          {row.authors || '-'}
-                        </TableCell>
-                        <TableCell className="text-muted truncate max-w-[150px]">
-                          {row.category || '-'}
-                        </TableCell>
-                        <TableCell>
-                          <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${
-                            row.status === 'Published' 
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
-                              : 'bg-amber-50 text-amber-600 border border-amber-200'
-                          }`}>
-                            {row.status || 'Draft'}
-                          </span>
-                        </TableCell>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Authors</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {parsedArticles.map((row, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="font-medium text-primary truncate max-w-[200px]">
+                            {row.title}
+                          </TableCell>
+                          <TableCell className="text-muted truncate max-w-[150px]">
+                            {row.authors || '-'}
+                          </TableCell>
+                          <TableCell className="text-muted truncate max-w-[150px]">
+                            {row.category || '-'}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+                              row.status === 'Published' 
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                                : 'bg-amber-50 text-amber-600 border border-amber-200'
+                            }`}>
+                              {row.status || 'Draft'}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )
+              ) : (
+                parsedJournals.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-muted p-8 text-center space-y-3">
+                    <FileSpreadsheet className="h-12 w-12 text-muted/30" />
+                    <div>
+                      <p className="text-[13px] font-medium text-primary">No journal data to preview</p>
+                      <p className="text-[12px]">Upload a valid spreadsheet to see a preview of the import.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Journal Title</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Initial Volume</TableHead>
+                        <TableHead>Editor</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {parsedJournals.map((row, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="font-medium text-primary truncate max-w-[200px]">
+                            {row.title}
+                          </TableCell>
+                          <TableCell className="text-muted truncate max-w-[120px]">
+                            {row.category || '-'}
+                          </TableCell>
+                          <TableCell className="text-muted truncate max-w-[120px]">
+                            {row.volume_number ? `${row.volume_number} (${row.volume_year || new Date().getFullYear()})` : '-'}
+                          </TableCell>
+                          <TableCell className="text-muted truncate max-w-[120px]">
+                            {row.editor || '-'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )
               )}
             </div>
           </div>
