@@ -146,7 +146,7 @@ const Navbar = () => {
               </div>
               <Link
                 to="/journals"
-                className="flex items-center justify-between px-6 py-3 bg-[#001d36] text-[11px] font-bold text-secondary hover:text-white border-t border-white/10 transition-colors uppercase tracking-widest"
+                className="flex items-center justify-between px-6 py-3 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-secondary hover:text-white border-t border-white/10 transition-colors uppercase tracking-widest"
               >
                 <span>All Categories</span>
                 <span>→</span>

@@ -5,7 +5,7 @@ import { useLocation } from 'react-router';
 const SplashLoader: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  const isPortal = location.pathname.startsWith('/dashboard') || location.pathname === '/login';
+  const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname === '/login';
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -25,7 +25,7 @@ const SplashLoader: React.FC = () => {
         >
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-widest text-primary font-serif text-center">
-              The Filamerian {isPortal ? 'Portal' : 'Journals'}
+              The Filamerian {isDashboard ? 'Dashboard' : 'Journals'}
             </h1>
             <div className="h-0.5 w-32 bg-primary/10 overflow-hidden relative">
               <motion.div 

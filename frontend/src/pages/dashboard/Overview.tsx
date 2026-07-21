@@ -167,7 +167,7 @@ const Overview: React.FC = () => {
                     contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
                     cursor={{ fill: '#f3f4f6' }}
                   />
-                  <Bar dataKey="actions" fill="#0f172a" radius={[2, 2, 0, 0]} name="Actions" />
+                  <Bar dataKey="actions" fill="#002d72" radius={[2, 2, 0, 0]} name="Actions" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

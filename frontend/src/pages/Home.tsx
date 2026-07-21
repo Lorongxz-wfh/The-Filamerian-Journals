@@ -156,7 +156,7 @@ const Home: React.FC = () => {
 
   const availableCategories = ['All', ...categoriesList];
   
-  const showTagline = settings.show_tagline !== 'false';
+  const showTagline = settings.show_tagline === 'true';
   const showAboutUs = settings.show_about_us !== 'false';
   const aboutUsHtml = settings.home_about_us || DEFAULT_ABOUT_US;
 

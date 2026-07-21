@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SplashLoader from '@/components/ui/SplashLoader';
+import BackToTopButton from '@/components/ui/BackToTopButton';
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         </div>
       </main>
       <Footer />
+      <BackToTopButton />
     </div>
   );
 };
