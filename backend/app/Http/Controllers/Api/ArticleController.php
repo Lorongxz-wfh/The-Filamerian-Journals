@@ -297,11 +297,27 @@ class ArticleController extends Controller
 
     public function servePdf(Article $article, \Illuminate\Http\Request $request)
     {
+        if (!$article->pdf_path) {
+            abort(404, 'PDF not found.');
+        }
+
+        $rawPath = $article->pdf_path;
+        if (str_starts_with($rawPath, 'http://') || str_starts_with($rawPath, 'https://')) {
+            $parsed = parse_url($rawPath, PHP_URL_PATH);
+            $rawPath = ltrim($parsed ?? '', '/');
+        }
+        $cleanPath = ltrim(str_replace(['storage/', '/storage/'], '', $rawPath), '/');
+
         $diskName = env('FILESYSTEM_DISK', 'public');
         $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
 
-        if (!$article->pdf_path || !$disk->exists($article->pdf_path)) {
-            abort(404, 'PDF not found.');
+        if (!$disk->exists($cleanPath)) {
+            if ($diskName !== 'public' && \Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath)) {
+                $disk = \Illuminate\Support\Facades\Storage::disk('public');
+                $diskName = 'public';
+            } else {
+                abort(404, 'PDF file not found on storage server.');
+            }
         }
 
         $headers = [
@@ -311,16 +327,16 @@ class ArticleController extends Controller
 
         if ($diskName === 'r2') {
             if ($request->query('download')) {
-                return response()->streamDownload(function () use ($disk, $article) {
-                    echo $disk->get($article->pdf_path);
+                return response()->streamDownload(function () use ($disk, $cleanPath, $article) {
+                    echo $disk->get($cleanPath);
                 }, $article->title . '.pdf', $headers);
             }
-            return response()->stream(function () use ($disk, $article) {
-                echo $disk->get($article->pdf_path);
+            return response()->stream(function () use ($disk, $cleanPath) {
+                echo $disk->get($cleanPath);
             }, 200, $headers);
         }
 
-        $path = $disk->path($article->pdf_path);
+        $path = $disk->path($cleanPath);
 
         if ($request->query('download')) {
             return response()->download($path, $article->title . '.pdf', $headers);

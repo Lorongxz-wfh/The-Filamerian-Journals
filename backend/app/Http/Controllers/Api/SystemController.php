@@ -86,8 +86,8 @@ class SystemController extends Controller
         $storageType = $storageDisk === 'r2' ? 'Cloudflare R2' : 'Local Storage';
         $r2Bucket = env('R2_BUCKET', '');
 
-        // Calculate total storage size (cached for 10 mins to avoid API lag)
-        $storageSizeBytes = \Illuminate\Support\Facades\Cache::remember('storage_total_size', 600, function () use ($storageDisk) {
+        // Calculate total storage size (cached for 10 seconds for real-time updates)
+        $storageSizeBytes = \Illuminate\Support\Facades\Cache::remember('storage_total_size', 10, function () use ($storageDisk) {
             $totalSize = 0;
             try {
                 $disk = \Illuminate\Support\Facades\Storage::disk($storageDisk);
