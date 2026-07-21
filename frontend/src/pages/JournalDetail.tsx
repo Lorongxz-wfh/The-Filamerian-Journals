@@ -246,15 +246,15 @@ const JournalDetail: React.FC = () => {
           <EmptyState title="No volumes" description="No volumes published yet." className="border border-border bg-surface py-12" />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* LEFT COLUMN: Scrollable Volume List (4/12 cols) */}
-            <div className="lg:col-span-4 border border-border bg-surface flex flex-col max-h-[700px] overflow-hidden">
-              <div className="p-3.5 border-b border-border bg-background flex items-center justify-between">
+            {/* LEFT COLUMN: Sticky Volume List (4/12 cols) */}
+            <div className="lg:col-span-4 border border-border bg-surface flex flex-col lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] overflow-hidden">
+              <div className="p-3.5 border-b border-border bg-background flex items-center justify-between shrink-0">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-primary" /> Select Volume
                 </span>
                 <span className="text-[11px] font-mono text-muted">{journal.volumes.length} volume(s)</span>
               </div>
-              <div className="divide-y divide-border overflow-y-auto max-h-[640px]">
+              <div className="divide-y divide-border overflow-y-auto max-h-[640px] lg:max-h-[calc(100vh-10rem)]">
                 {journal.volumes.map((vol) => {
                   const isSelected = expandedVol === vol.volume_number;
                   return (
