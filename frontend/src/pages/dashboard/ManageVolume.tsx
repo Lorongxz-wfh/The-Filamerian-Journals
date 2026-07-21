@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { motion } from 'framer-motion';
+import { Reorder } from 'framer-motion';
 import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
@@ -56,8 +56,7 @@ const ManageVolume: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [hasOrderChanged, setHasOrderChanged] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
-  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
-  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
+
 
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
@@ -155,6 +154,12 @@ const ManageVolume: React.FC = () => {
     }
   };
 
+  const handleReorder = (newArticles: Article[]) => {
+    const updatedArticles = newArticles.map((a, idx) => ({ ...a, order: idx + 1 }));
+    setArticles(updatedArticles);
+    setHasOrderChanged(true);
+  };
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -208,59 +213,19 @@ const ManageVolume: React.FC = () => {
             No articles in this volume yet. Go to Articles to add one.
           </div>
         ) : (
-          <div className="divide-y divide-border">
+          <Reorder.Group axis="y" values={articles} onReorder={handleReorder} className="divide-y divide-border">
             {articles.map((article, index) => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              <Reorder.Item 
+                value={article}
                 key={article.id} 
-                className={`flex items-center justify-between px-5 py-3 transition-all cursor-grab active:cursor-grabbing ${
-                  draggedItemIndex === index ? 'opacity-40 border-2 border-primary/50 scale-[0.98] shadow-md z-10 relative bg-surface' : 'hover:bg-background/50'
-                } ${
-                  dragOverItemIndex === index && draggedItemIndex !== index ? 'bg-primary/5 border-t-2 border-t-primary' : ''
-                }`}
+                className={`flex items-center justify-between px-5 py-3 transition-colors bg-surface hover:bg-background/50 cursor-grab active:cursor-grabbing`}
+                whileDrag={{ 
+                  scale: 0.98,
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                  zIndex: 50,
+                  borderColor: "var(--primary)"
+                }}
                 onClick={() => handleOpenModal(article)}
-                draggable
-                onDragStart={(e: any) => {
-                  setDraggedItemIndex(index);
-                  e.dataTransfer.effectAllowed = 'move';
-                  e.dataTransfer.setData('text/plain', index.toString());
-                  // Optional: use a ghost image or just rely on default
-                }}
-                onDragEnter={(e: any) => {
-                  e.preventDefault();
-                  setDragOverItemIndex(index);
-                }}
-                onDragOver={(e: any) => {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = 'move';
-                }}
-                onDragLeave={() => {
-                  if (dragOverItemIndex === index) {
-                    setDragOverItemIndex(null);
-                  }
-                }}
-                onDragEnd={() => {
-                  setDraggedItemIndex(null);
-                  setDragOverItemIndex(null);
-                }}
-                onDrop={(e: any) => {
-                  e.preventDefault();
-                  setDragOverItemIndex(null);
-                  setDraggedItemIndex(null);
-                  const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-                  const toIndex = index;
-                  if (fromIndex !== toIndex && !isNaN(fromIndex)) {
-                    const newArticles = [...articles];
-                    const [movedArticle] = newArticles.splice(fromIndex, 1);
-                    newArticles.splice(toIndex, 0, movedArticle);
-                    const updatedArticles = newArticles.map((a, idx) => ({ ...a, order: idx + 1 }));
-                    setArticles(updatedArticles);
-                    setHasOrderChanged(true);
-                  }
-                }}
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="flex flex-col gap-1 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
@@ -301,9 +266,9 @@ const ManageVolume: React.FC = () => {
                     <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(article.id)} title="Delete" />
                   </div>
                 </div>
-              </motion.div>
+              </Reorder.Item>
             ))}
-          </div>
+          </Reorder.Group>
         )}
       </div>
 
