@@ -309,9 +309,9 @@ class ArticleController extends Controller
 
         $rawPath = $article->pdf_path;
         if (str_starts_with($rawPath, 'http://') || str_starts_with($rawPath, 'https://')) {
-            $parsed = parse_url($rawPath, PHP_URL_PATH);
-            $rawPath = ltrim($parsed ?? '', '/');
+            return redirect()->away($rawPath);
         }
+
         $cleanPath = ltrim(str_replace(['storage/', '/storage/'], '', $rawPath), '/');
 
         $diskName = env('FILESYSTEM_DISK', 'public');
@@ -331,24 +331,19 @@ class ArticleController extends Controller
             'Content-Type' => 'application/pdf',
         ];
 
-        if ($diskName === 'r2') {
-            if ($request->query('download')) {
-                return response()->streamDownload(function () use ($disk, $cleanPath, $article) {
-                    echo $disk->get($cleanPath);
-                }, $article->title . '.pdf', $headers);
-            }
+        if ($request->query('download')) {
+            return response()->streamDownload(function () use ($disk, $cleanPath, $article) {
+                echo $disk->get($cleanPath);
+            }, ($article->title ?? 'article') . '.pdf', $headers);
+        }
+
+        try {
+            return $disk->response($cleanPath, null, $headers);
+        } catch (\Throwable $e) {
             return response()->stream(function () use ($disk, $cleanPath) {
                 echo $disk->get($cleanPath);
             }, 200, $headers);
         }
-
-        $path = $disk->path($cleanPath);
-
-        if ($request->query('download')) {
-            return response()->download($path, $article->title . '.pdf', $headers);
-        }
-
-        return response()->file($path, $headers);
     }
 
     public function trackView(Article $article)
