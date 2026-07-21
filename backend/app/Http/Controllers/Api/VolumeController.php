@@ -9,9 +9,16 @@ use Illuminate\Http\Request;
 
 class VolumeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return VolumeResource::collection(Volume::with('journal')->paginate(15));
+        $query = Volume::with('journal');
+
+        if ($request->has('journal_id') && $request->journal_id) {
+            $query->where('journal_id', $request->journal_id);
+            return VolumeResource::collection($query->get());
+        }
+
+        return VolumeResource::collection($query->paginate(15));
     }
 
     public function store(Request $request)

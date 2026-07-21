@@ -20,6 +20,7 @@ import UserManager from '@/pages/dashboard/UserManager';
 import ActivityLogs from '@/pages/dashboard/ActivityLogs';
 import SystemSettings from '@/pages/dashboard/SystemSettings';
 import SystemHealth from '@/pages/dashboard/SystemHealth';
+import BulkImport from '@/pages/dashboard/BulkImport';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -75,6 +76,7 @@ function App() {
           <Route path="journals/:slug" element={<ManageJournal />} />
           <Route path="volumes/:id" element={<ManageVolume />} />
           <Route path="articles" element={<Articles />} />
+          <Route path="import" element={<BulkImport />} />
           <Route path="announcements" element={<ManageAnnouncements />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="feedback" element={<Feedback />} />
