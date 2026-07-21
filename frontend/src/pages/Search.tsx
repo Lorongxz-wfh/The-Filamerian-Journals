@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
 import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft, ChevronDown } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
@@ -238,7 +238,7 @@ const Search: React.FC = () => {
                     title={j.title}
                     description={j.description}
                     date={new Date(j.created_at).getFullYear().toString()}
-                    image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
+                    image={getFileUrl(j.cover_image)}
                     category={j.category?.name}
                   />
                 ))}
@@ -296,7 +296,7 @@ const Search: React.FC = () => {
                                 let url = res.data.url;
                                 if (url.includes('/storage/')) {
                                   const path = url.split('/storage/')[1];
-                                  url = `${STORAGE_URL}${path}`;
+                                  url = getFileUrl(path);
                                 }
                                 setPdfViewUrl(url);
                               } catch (err) {

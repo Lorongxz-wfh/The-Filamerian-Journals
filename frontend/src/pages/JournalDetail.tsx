@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, ChevronDown, FileText } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import DOMPurify from 'dompurify';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
@@ -166,7 +166,7 @@ const JournalDetail: React.FC = () => {
           <div className="relative w-full max-w-[280px] mx-auto lg:mx-0 aspect-[3/4] overflow-hidden bg-surface border border-border shadow-sm">
             {journal.cover_image ? (
               <img 
-                src={`${STORAGE_URL}${journal.cover_image}`} 
+                src={getFileUrl(journal.cover_image)} 
                 alt={journal.title} 
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -203,7 +203,7 @@ const JournalDetail: React.FC = () => {
               <button 
                 onClick={() => {
                   setIsPdfModalOpen(true);
-                  setPdfViewUrl(`${STORAGE_URL}${journal.pdf_url}#toolbar=0`);
+                  setPdfViewUrl(`${getFileUrl(journal.pdf_url)}#toolbar=0`);
                 }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-[12px] font-medium hover:bg-secondary hover:text-primary transition-colors tracking-wide shadow-sm"
               >

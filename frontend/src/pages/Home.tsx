@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Seo } from '@/components/ui/Seo';
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -309,7 +309,7 @@ const Home: React.FC = () => {
                         description={j.description}
                         date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
                         volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
-                        image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
+                        image={getFileUrl(j.cover_image)}
                         category={typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
                         viewMode="grid"
                         className="h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] max-w-[260px] mx-auto w-full min-h-[320px]"

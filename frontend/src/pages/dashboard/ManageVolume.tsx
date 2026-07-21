@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -109,9 +109,7 @@ const ManageVolume: React.FC = () => {
       // Convert to storage url if necessary
       if (url.includes('/storage/')) {
         const path = url.split('/storage/')[1];
-        // Ensure you have STORAGE_URL imported, but wait, STORAGE_URL is not imported here.
-        // Actually, we can just use the url directly or import STORAGE_URL.
-        url = `${import.meta.env.VITE_STORAGE_URL || 'http://127.0.0.1:8000/storage'}/${path}`;
+        url = getFileUrl(path);
       }
       setPdfViewUrl(url + '#toolbar=0');
     } catch (err) {

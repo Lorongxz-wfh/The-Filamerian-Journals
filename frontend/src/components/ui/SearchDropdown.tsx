@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { BookOpen, FileText, ArrowRight, Loader2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { STORAGE_URL } from '@/services/api';
+import { getFileUrl } from '@/services/api';
 
 interface SearchDropdownProps {
   query: string;
@@ -107,7 +107,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
                     >
                       <div className="w-10 h-14 bg-background border border-border shrink-0 overflow-hidden">
                         {j.cover_image ? (
-                          <img src={`${STORAGE_URL}${j.cover_image}`} alt={j.title} className="w-full h-full object-cover" />
+                          <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted/10">
                             <BookOpen className="w-4 h-4 text-muted/30" />

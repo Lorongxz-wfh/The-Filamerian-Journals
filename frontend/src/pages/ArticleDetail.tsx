@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, BookOpen, Quote } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
@@ -109,7 +109,7 @@ const ArticleDetail: React.FC = () => {
       setMetaTag('citation_lastpage', article.page_end.toString());
     }
     if (article.pdf_url) {
-      setMetaTag('citation_pdf_url', window.location.origin + STORAGE_URL + article.pdf_url);
+      setMetaTag('citation_pdf_url', getFileUrl(article.pdf_url));
     }
     
     // Handle multiple authors

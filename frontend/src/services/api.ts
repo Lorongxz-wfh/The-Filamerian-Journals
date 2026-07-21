@@ -4,6 +4,20 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0
 
 export const STORAGE_URL = API_BASE_URL.replace('/api', '') + '/storage/';
 
+export const getFileUrl = (path: string | null | undefined): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  // If it starts with /storage/
+  if (path.startsWith('/storage/')) {
+    const origin = API_BASE_URL.replace('/api', '');
+    return `${origin}${path}`;
+  }
+  // Otherwise, fallback to STORAGE_URL prefix
+  return `${STORAGE_URL}${path}`;
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

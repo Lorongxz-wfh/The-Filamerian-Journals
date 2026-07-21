@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { Search, LayoutGrid, List, ChevronDown, X, Loader2 } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Select from '@/components/ui/Select';
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -421,7 +421,7 @@ const Journals: React.FC = () => {
                       description={j.description}
                       date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
                       volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
-                      image={j.cover_image ? `${STORAGE_URL}${j.cover_image}` : undefined}
+                      image={getFileUrl(j.cover_image)}
                       category={j.category?.name}
                       publisher={j.publisher || undefined}
                       viewMode={viewMode}

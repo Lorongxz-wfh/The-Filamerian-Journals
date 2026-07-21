@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { FileText, Plus, Edit2, Trash2, Eye, Upload } from 'lucide-react';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { toast } from 'sonner';
@@ -154,7 +154,7 @@ const Articles: React.FC = () => {
       let url = res.data.url;
       if (url.includes('/storage/')) {
         const path = url.split('/storage/')[1];
-        url = `${STORAGE_URL}${path}`;
+        url = getFileUrl(path);
       }
       setPdfViewUrl(url + '#toolbar=0');
     } catch (err) {

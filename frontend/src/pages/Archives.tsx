@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
 import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, List, Columns, Calendar, Filter, Eye, Layers, Search, Grid, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
-import api, { STORAGE_URL } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import Modal from '@/components/ui/Modal';
@@ -209,7 +209,7 @@ const Archives: React.FC = () => {
       let url = res.data.url;
       if (url.includes('/storage/')) {
         const path = url.split('/storage/')[1];
-        url = `${STORAGE_URL}${path}`;
+        url = getFileUrl(path);
       }
       setPdfViewUrl(url + '#toolbar=0');
     } catch (err) {
@@ -511,7 +511,7 @@ const Archives: React.FC = () => {
                       <div className="w-24 h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-md">
                         {selectedSplitVolume.journal.cover_image ? (
                           <img
-                            src={`${STORAGE_URL}${selectedSplitVolume.journal.cover_image}`}
+                            src={getFileUrl(selectedSplitVolume.journal.cover_image)}
                             alt={selectedSplitVolume.journal.title}
                             className="w-full h-full object-cover"
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -649,7 +649,7 @@ const Archives: React.FC = () => {
                   <div className="w-full aspect-[3/4] bg-background border border-border overflow-hidden mb-4 relative flex flex-col items-center justify-center p-4 text-center">
                     {vol.journal.cover_image ? (
                       <img
-                        src={`${STORAGE_URL}${vol.journal.cover_image}`}
+                        src={getFileUrl(vol.journal.cover_image)}
                         alt={vol.journal.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
