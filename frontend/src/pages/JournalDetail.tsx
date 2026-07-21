@@ -155,10 +155,6 @@ const JournalDetail: React.FC = () => {
             <div className="pt-4 flex flex-col items-start gap-2">
               <button 
                 onClick={() => {
-                  if (!localStorage.getItem('token')) {
-                    window.location.href = '/login';
-                    return;
-                  }
                   setIsPdfModalOpen(true);
                   setPdfViewUrl(`${STORAGE_URL}${journal.pdf_url}#toolbar=0`);
                 }}
@@ -167,9 +163,6 @@ const JournalDetail: React.FC = () => {
                 <BookOpen className="h-4 w-4" />
                 Read Full Journal PDF
               </button>
-              {!localStorage.getItem('token') && (
-                <span className="text-[11px] text-muted uppercase tracking-wider">Login required to view full document</span>
-              )}
             </div>
           )}
         </div>

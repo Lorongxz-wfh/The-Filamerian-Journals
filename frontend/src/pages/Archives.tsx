@@ -196,10 +196,6 @@ const Archives: React.FC = () => {
                                     className="px-8 py-3 hover:bg-surface transition-colors group cursor-pointer"
                                     onClick={async () => {
                                       if (!article.pdf_path) return;
-                                      if (!localStorage.getItem('token')) {
-                                        window.location.href = '/login';
-                                        return;
-                                      }
                                       setIsPdfModalOpen(true);
                                       setPdfViewUrl(null);
                                       try {
@@ -239,9 +235,7 @@ const Archives: React.FC = () => {
                                           )}
                                           {article.doi && <span>DOI: {article.doi}</span>}
                                           
-                                          {!localStorage.getItem('token') && article.pdf_path && (
-                                            <span className="uppercase tracking-wider opacity-50">Login to view PDF</span>
-                                          )}
+
 
                                           <button
                                             onClick={(e) => {

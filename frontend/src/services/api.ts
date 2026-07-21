@@ -31,8 +31,8 @@ api.interceptors.response.use(
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       
-      // Redirect to login if not already there
-      if (window.location.pathname !== '/login') {
+      // Only redirect to login if the user is currently inside the protected dashboard
+      if (window.location.pathname.startsWith('/dashboard') && window.location.pathname !== '/login') {
         window.location.href = '/login?expired=1';
       }
     }
