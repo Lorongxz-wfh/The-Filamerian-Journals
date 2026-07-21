@@ -38,18 +38,22 @@ class SearchController extends Controller
 
         // Search Journals
         if ($type === 'all' || $type === 'journals') {
-            $journalQuery = Journal::query();
+            $journalQuery = Journal::with('category');
 
             if (!empty(trim($q))) {
                 $journalQuery->where(function ($query) use ($term) {
                     $query->where('title', 'ilike', $term)
-                          ->orWhere('category', 'ilike', $term)
+                          ->orWhereHas('category', function ($q2) use ($term) {
+                              $q2->where('name', 'ilike', $term);
+                          })
                           ->orWhere('description', 'ilike', $term);
                 });
             }
 
             if (!empty($categories)) {
-                $journalQuery->whereIn('category', $categories);
+                $journalQuery->whereHas('category', function ($query) use ($categories) {
+                    $query->whereIn('name', $categories);
+                });
             }
 
             // Journals don't inherently have a "year" column in this basic setup (volumes have years), 
@@ -69,21 +73,23 @@ class SearchController extends Controller
 
         // Search Articles
         if ($type === 'all' || $type === 'articles') {
-            $articleQuery = Article::with(['volume.journal', 'authors'])->where('status', 'Published');
+            $articleQuery = Article::with(['volume.journal.category', 'authors'])->where('status', 'Published');
 
             if (!empty(trim($q))) {
                 $articleQuery->where(function ($query) use ($term) {
                     $query->where('title', 'ilike', $term)
                           ->orWhere('abstract', 'ilike', $term)
                           ->orWhereHas('authors', function ($q2) use ($term) {
-                              $q2->where('name', 'ilike', $term);
+                              $q2->where('name', 'ilike', $term)
+                                 ->orWhere('first_name', 'ilike', $term)
+                                 ->orWhere('last_name', 'ilike', $term);
                           });
                 });
             }
 
             if (!empty($categories)) {
-                $articleQuery->whereHas('volume.journal', function ($query) use ($categories) {
-                    $query->whereIn('category', $categories);
+                $articleQuery->whereHas('volume.journal.category', function ($query) use ($categories) {
+                    $query->whereIn('name', $categories);
                 });
             }
 
