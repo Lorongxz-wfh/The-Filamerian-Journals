@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, FileText, Quote } from 'lucide-react';
+import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, List, Columns, Calendar, Filter, Eye, Layers, Search, Grid, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { STORAGE_URL } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
+import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
@@ -31,7 +32,7 @@ interface Article {
 
 interface Volume {
   id: number;
-  volume_number: number;
+  volume_number: number | string;
   year: number;
   articles: Article[];
 }
@@ -42,7 +43,23 @@ interface Journal {
   title: string;
   category: any;
   issn: string;
+  cover_image: string | null;
   volumes: Volume[];
+}
+
+interface VolumeItem {
+  id: number;
+  volume_number: number | string;
+  year: number;
+  journal: {
+    id: number;
+    title: string;
+    slug: string;
+    categoryName: string;
+    issn: string;
+    cover_image: string | null;
+  };
+  articles: Article[];
 }
 
 const Archives: React.FC = () => {
@@ -50,17 +67,28 @@ const Archives: React.FC = () => {
   const [journals, setJournals] = useState<Journal[]>(initialArchives);
   const [loading, setLoading] = useState(initialArchives.length === 0);
 
+  // View Mode: 'shelf' (Option 1) | 'split' (Option 2) | 'bento' (Option 3) | 'list' (Classic List)
+  const [viewMode, setViewMode] = useState<'shelf' | 'split' | 'bento' | 'list'>('shelf');
+
+  // Filters & Search
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
+  // Selected Volume for Split View and Modals
+  const [selectedSplitVolume, setSelectedSplitVolume] = useState<VolumeItem | null>(null);
+  const [activeVolumeModal, setActiveVolumeModal] = useState<VolumeItem | null>(null);
+  
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
   const [citationContext, setCitationContext] = useState<any>({});
   
-  const [expandedJournal, setExpandedJournal] = useState<number | null>(
-    initialArchives.length > 0 ? initialArchives[0].id : null
-  );
+  // Accordion state for List View & Bento View
+  const [expandedJournal, setExpandedJournal] = useState<number | null>(null);
   const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
 
   // PDF Viewer Modal State
@@ -88,214 +116,818 @@ const Archives: React.FC = () => {
     fetchJournals();
   }, [currentPage]);
 
-  const toggleJournal = (id: number) => {
-    setExpandedJournal(expandedJournal === id ? null : id);
-    setExpandedVolume(null);
-  };
+  // Extract all volume items for Shelf & Split Views
+  const allVolumes = useMemo<VolumeItem[]>(() => {
+    const list: VolumeItem[] = [];
+    journals.forEach((j) => {
+      const catName = typeof j.category === 'object' && j.category !== null ? j.category.name : (j.category || 'Uncategorized');
+      j.volumes?.forEach((v) => {
+        list.push({
+          id: v.id,
+          volume_number: v.volume_number,
+          year: v.year,
+          journal: {
+            id: j.id,
+            title: j.title,
+            slug: j.slug,
+            categoryName: catName,
+            issn: j.issn,
+            cover_image: j.cover_image,
+          },
+          articles: v.articles || [],
+        });
+      });
+    });
+    return list;
+  }, [journals]);
 
-  const toggleVolume = (key: string) => {
-    setExpandedVolume(expandedVolume === key ? null : key);
-  };
+  // Set initial selected volume for Split View once loaded
+  useEffect(() => {
+    if (allVolumes.length > 0 && !selectedSplitVolume) {
+      setSelectedSplitVolume(allVolumes[0]);
+    }
+  }, [allVolumes, selectedSplitVolume]);
 
-  const totalArticles = journals.reduce(
-    (sum, j) => sum + (j.volumes?.reduce(
-      (vs, v) => vs + (v.articles?.length || 0), 0
-    ) || 0), 0
-  );
+  // Extract unique available years and categories for filters
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    allVolumes.forEach((v) => { if (v.year) years.add(v.year); });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [allVolumes]);
+
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    allVolumes.forEach((v) => { if (v.journal.categoryName) cats.add(v.journal.categoryName); });
+    return Array.from(cats).sort();
+  }, [allVolumes]);
+
+  // Group Journals by Category for Option 3 (Bento Grid)
+  const categoryBentoGroups = useMemo(() => {
+    const map = new Map<string, Journal[]>();
+    journals.forEach((j) => {
+      const catName = typeof j.category === 'object' && j.category !== null ? j.category.name : (j.category || 'Uncategorized');
+      if (!map.has(catName)) {
+        map.set(catName, []);
+      }
+      map.get(catName)!.push(j);
+    });
+    return Array.from(map.entries()).map(([catName, jList]) => ({
+      categoryName: catName,
+      journals: jList,
+      totalVolumes: jList.reduce((s, j) => s + (j.volumes?.length || 0), 0),
+      totalArticles: jList.reduce((s, j) => s + (j.volumes?.reduce((vs, v) => vs + (v.articles?.length || 0), 0) || 0), 0),
+    }));
+  }, [journals]);
+
+  // Filter volumes based on user selections and search query
+  const filteredVolumes = useMemo(() => {
+    return allVolumes.filter((v) => {
+      const matchesYear = selectedYear === 'all' || String(v.year) === selectedYear;
+      const matchesCat = selectedCategory === 'all' || v.journal.categoryName === selectedCategory;
+      const matchesSearch = !searchQuery || 
+        v.journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.articles.some(a => a.title.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesYear && matchesCat && matchesSearch;
+    });
+  }, [allVolumes, selectedYear, selectedCategory, searchQuery]);
+
+  const totalArticlesCount = useMemo(() => {
+    return journals.reduce(
+      (sum, j) => sum + (j.volumes?.reduce((vs, v) => vs + (v.articles?.length || 0), 0) || 0), 0
+    );
+  }, [journals]);
+
+  const totalVolumesCount = useMemo(() => {
+    return journals.reduce((sum, j) => sum + (j.volumes?.length || 0), 0);
+  }, [journals]);
+
+  const handleArticlePdfView = async (articleId: number) => {
+    setIsPdfModalOpen(true);
+    setPdfViewUrl(null);
+    try {
+      const res = await api.get(`/public/articles/${articleId}/download-url`);
+      let url = res.data.url;
+      if (url.includes('/storage/')) {
+        const path = url.split('/storage/')[1];
+        url = `${STORAGE_URL}${path}`;
+      }
+      setPdfViewUrl(url + '#toolbar=0');
+    } catch (err) {
+      console.error('Failed to get download URL', err);
+      toast.error('Could not load PDF document.');
+      setIsPdfModalOpen(false);
+    }
+  };
 
   return (
-    <PageWrapper className="flex flex-col w-full">
-      <div className="w-full space-y-10 flex flex-col">
-        {/* Header */}
-        <PageHeader title="Archives" />
+    <PageWrapper className="flex flex-col w-full font-sans">
+      <div className="w-full space-y-8 flex flex-col">
+        {/* Page Header */}
+        <PageHeader 
+          title="Archives Repository" 
+        />
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 gap-px bg-border border border-border">
-        {[
-          { label: 'Journals', value: journals.length },
-          { label: 'Volumes', value: journals.reduce((s, j) => s + (j.volumes?.length || 0), 0) },
-          { label: 'Articles', value: totalArticles },
-        ].map((s) => (
-          <div key={s.label} className="bg-surface p-4 text-center">
-            <p className="text-xl font-semibold text-primary">{s.value}</p>
-            <p className="text-[11px] text-muted uppercase tracking-wider mt-0.5">{s.label}</p>
+        {/* Dynamic Summary Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border shadow-sm">
+          {[
+            { label: 'Journals', value: journals.length },
+            { label: 'Archived Volumes', value: totalVolumesCount },
+            { label: 'Published Articles', value: totalArticlesCount },
+            { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]} – ${availableYears[0]}` : '-' },
+          ].map((s) => (
+            <div key={s.label} className="bg-surface p-4 text-center">
+              <p className="text-xl font-bold text-primary font-mono">{s.value}</p>
+              <p className="text-[11px] font-semibold text-muted uppercase tracking-wider mt-1">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Filter & View Mode Controls Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-4 border border-border">
+          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+            {/* Search within Archives */}
+            <div className="relative w-full sm:w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
+              <input
+                type="text"
+                placeholder="Search archive issues..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary"
+              />
+            </div>
+
+            {/* Year Filter */}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
+              <span className="text-xs font-semibold text-muted uppercase tracking-wider">Year:</span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="bg-background border border-border text-xs font-medium text-primary px-3 py-1.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
+              >
+                <option value="all">All Years</option>
+                {availableYears.map((y) => (
+                  <option key={y} value={String(y)}>{y}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
+              <span className="text-xs font-semibold text-muted uppercase tracking-wider">Field:</span>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="bg-background border border-border text-xs font-medium text-primary px-3 py-1.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
+              >
+                <option value="all">All Fields</option>
+                {availableCategories.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            {(selectedYear !== 'all' || selectedCategory !== 'all' || searchQuery) && (
+              <button
+                onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchQuery(''); }}
+                className="text-xs font-mono text-muted hover:text-primary transition-colors underline"
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
-        ))}
-      </div>
 
-      {/* Journal Accordion */}
-      <div className="flex-1 flex flex-col space-y-3">
+          {/* View Mode Switcher */}
+          <div className="flex items-center gap-1 bg-background border border-border p-1">
+            <button
+              onClick={() => setViewMode('shelf')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
+                viewMode === 'shelf' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+              }`}
+              title="Visual Cover Grid Shelf"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span>Shelf</span>
+            </button>
+            <button
+              onClick={() => setViewMode('split')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
+                viewMode === 'split' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+              }`}
+              title="Split View (List Left, Live Preview Right)"
+            >
+              <Columns className="h-3.5 w-3.5" />
+              <span>Split</span>
+            </button>
+            <button
+              onClick={() => setViewMode('bento')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
+                viewMode === 'bento' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+              }`}
+              title="Discipline / Category Bento Grid"
+            >
+              <Grid className="h-3.5 w-3.5" />
+              <span>Bento</span>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
+                viewMode === 'list' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+              }`}
+              title="Classic List View"
+            >
+              <List className="h-3.5 w-3.5" />
+              <span>List</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Content Section */}
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
-            <Spinner text="Loading archives..." />
+            <Spinner text="Loading archive library..." />
           </div>
-        ) : journals.length === 0 ? (
-          <EmptyState title="No journals found" description="There are no journals with archived volumes yet." className="border border-border bg-surface" />
-        ) : (
-          journals.map((journal) => {
-            const isOpen = expandedJournal === journal.id;
-            const articleCount = journal.volumes?.reduce(
-              (s, v) => s + (v.articles?.length || 0), 0
-            ) || 0;
-
-            return (
-              <div key={journal.id} className="border border-border bg-surface">
-                {/* Journal Header */}
-                <button
-                  onClick={() => toggleJournal(journal.id)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-background transition-colors"
+        ) : viewMode === 'bento' ? (
+          /* ========================================================= */
+          /* OPTION 3: DISCIPLINE / CATEGORY BENTO GRID               */
+          /* ========================================================= */
+          categoryBentoGroups.length === 0 ? (
+            <EmptyState
+              title="No categories found"
+              description="No archived categories available."
+              className="border border-border bg-surface py-16"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {categoryBentoGroups.map((group) => (
+                <div
+                  key={group.categoryName}
+                  className="border border-border bg-surface flex flex-col justify-between p-6 space-y-6 hover:border-primary/40 transition-colors group relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
-                    <div className="min-w-0">
-                      <span className="text-[14px] font-medium text-primary block truncate">{journal.title}</span>
-                      <span className="text-[11px] text-muted">
-                        {journal.volumes?.length || 0} volume{(journal.volumes?.length || 0) !== 1 ? 's' : ''} · {articleCount} articles · ISSN {journal.issn || '-'}
-                      </span>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+
+                  {/* Bento Header */}
+                  <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <GraduationCap className="h-4 w-4 text-primary" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-primary px-2 py-0.5">
+                          Academic Discipline
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-primary uppercase tracking-wide">
+                        {group.categoryName}
+                      </h3>
+                    </div>
+                    <div className="text-right shrink-0 font-mono text-xs text-muted">
+                      <span className="font-bold text-primary text-sm block">{group.totalArticles}</span>
+                      <span>articles</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-4">
-                    <span className="text-[11px] text-muted bg-background px-2 py-0.5">{journal.category?.name || 'Uncategorized'}</span>
-                    <ChevronDown className={`h-4 w-4 text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+
+                  {/* Bento Content - Journals & Volumes List */}
+                  <div className="space-y-4 flex-1">
+                    {group.journals.map((j) => (
+                      <div key={j.id} className="bg-background border border-border p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-[13px] font-bold text-primary uppercase leading-tight">
+                              {j.title}
+                            </h4>
+                            <span className="text-[11px] text-muted font-mono">ISSN: {j.issn || '-'}</span>
+                          </div>
+                          <span className="text-[10px] font-semibold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider shrink-0">
+                            {j.volumes?.length || 0} Vol(s)
+                          </span>
+                        </div>
+
+                        {/* Volumes Badge List */}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {j.volumes?.map((v) => (
+                            <button
+                              key={v.id}
+                              onClick={() => setActiveVolumeModal({
+                                id: v.id,
+                                volume_number: v.volume_number,
+                                year: v.year,
+                                journal: {
+                                  id: j.id,
+                                  title: j.title,
+                                  slug: j.slug,
+                                  categoryName: group.categoryName,
+                                  issn: j.issn,
+                                  cover_image: j.cover_image,
+                                },
+                                articles: v.articles || [],
+                              })}
+                              className="px-2.5 py-1 bg-surface border border-border text-[11px] font-medium text-primary hover:bg-primary hover:text-white transition-all flex items-center gap-1.5"
+                            >
+                              <span className="font-semibold">{formatVolumeName(v.volume_number)}</span>
+                              <span className="text-muted group-hover:text-white/80 font-mono">({v.year})</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </button>
 
-                {/* Expanded Content */}
-                {isOpen && (
-                  <div className="border-t border-border">
-                    {journal.volumes?.length === 0 && (
-                      <div className="px-6 py-6 text-[12px] text-muted text-center bg-background">No volumes available.</div>
-                    )}
-                    {journal.volumes?.map((vol) => {
-                      const volKey = `${journal.id}-${vol.volume_number}`;
-                      const volOpen = expandedVolume === volKey;
+                  {/* Bento Footer */}
+                  <div className="pt-2 flex items-center justify-between text-xs text-muted">
+                    <span>{group.journals.length} Journal(s) archived</span>
+                    <span className="font-semibold text-primary group-hover:text-secondary transition-colors">
+                      {group.totalVolumes} Volume Issue(s) →
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : viewMode === 'split' ? (
+          /* ========================================================= */
+          /* OPTION 2: SPLIT VIEW (LIST LEFT, LIVE PREVIEW RIGHT)     */
+          /* ========================================================= */
+          filteredVolumes.length === 0 ? (
+            <EmptyState
+              title="No volumes found"
+              description="No archived volume issues match your selected filters."
+              className="border border-border bg-surface py-16"
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* LEFT COLUMN: Scrollable Volume Issues List (5/12 cols) */}
+              <div className="lg:col-span-5 border border-border bg-surface flex flex-col max-h-[700px] overflow-hidden">
+                <div className="p-3.5 border-b border-border bg-background flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
+                  </span>
+                  <span className="text-[11px] font-mono text-muted">{filteredVolumes.length} volumes</span>
+                </div>
 
-                      return (
-                        <div key={vol.id} className="border-b border-border last:border-b-0">
-                          {/* Volume Row */}
-                          <button
-                            onClick={() => toggleVolume(volKey)}
-                            className="w-full flex items-center justify-between px-6 py-3 hover:bg-background/50 transition-colors text-left"
+                <div className="divide-y divide-border overflow-y-auto max-h-[640px]">
+                  {filteredVolumes.map((vol) => {
+                    const isSelected = selectedSplitVolume?.id === vol.id && selectedSplitVolume?.journal.id === vol.journal.id;
+
+                    return (
+                      <button
+                        key={`${vol.journal.id}-${vol.id}`}
+                        onClick={() => setSelectedSplitVolume(vol)}
+                        className={`w-full text-left p-4 transition-all flex items-start justify-between gap-3 group relative ${
+                          isSelected
+                            ? 'bg-primary/5 border-l-4 border-l-primary font-medium'
+                            : 'hover:bg-background/80 border-l-4 border-l-transparent'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
+                              {formatVolumeName(vol.volume_number)}
+                            </span>
+                            <span className="text-[11px] font-mono text-muted">({vol.year})</span>
+                          </div>
+                          <h4 className={`text-[13px] font-bold uppercase line-clamp-1 transition-colors ${
+                            isSelected ? 'text-primary' : 'text-primary/90 group-hover:text-primary'
+                          }`}>
+                            {vol.journal.title}
+                          </h4>
+                          <div className="flex items-center justify-between text-[11px] text-muted mt-2">
+                            <span>{vol.journal.categoryName}</span>
+                            <span className="font-semibold">{vol.articles.length} articles</span>
+                          </div>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 text-muted shrink-0 -rotate-90 transition-transform ${isSelected ? 'text-primary translate-x-1' : ''}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: Live Selected Issue Preview Panel (7/12 cols) */}
+              <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
+                {selectedSplitVolume ? (
+                  <>
+                    <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start">
+                      <div className="w-24 h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-md">
+                        {selectedSplitVolume.journal.cover_image ? (
+                          <img
+                            src={`${STORAGE_URL}${selectedSplitVolume.journal.cover_image}`}
+                            alt={selectedSplitVolume.journal.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <BookOpen className="h-8 w-8 text-primary/30" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[10px] font-bold text-secondary bg-primary px-2.5 py-1 uppercase tracking-wider">
+                            {formatVolumeName(selectedSplitVolume.volume_number)}
+                          </span>
+                          <span className="text-xs font-mono font-bold text-primary border border-border px-2 py-0.5">
+                            Year {selectedSplitVolume.year}
+                          </span>
+                          <span className="text-xs text-muted">
+                            ISSN: {selectedSplitVolume.journal.issn || '-'}
+                          </span>
+                        </div>
+
+                        <h3 className="text-base font-bold text-primary uppercase tracking-wide">
+                          {selectedSplitVolume.journal.title}
+                        </h3>
+
+                        <p className="text-xs text-muted">
+                          Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · Contains {selectedSplitVolume.articles.length} published article(s).
+                        </p>
+
+                        <div className="pt-2">
+                          <Link
+                            to={`/journals/${selectedSplitVolume.journal.slug}`}
+                            className="text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
                           >
-                            <div className="flex items-center gap-3">
-                              <span className="text-[13px] font-semibold text-primary">{formatVolumeName(vol.volume_number)}</span>
-                              <span className="text-[11px] text-muted">({vol.year})</span>
-                              <span className="text-[11px] text-muted/60">
-                                — {vol.articles?.length || 0} article{(vol.articles?.length || 0) !== 1 ? 's' : ''}
-                              </span>
-                            </div>
-                            <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${volOpen ? 'rotate-180' : ''}`} />
-                          </button>
+                            View Main Journal Page →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
 
-                          {/* Articles */}
-                          {volOpen && (
-                            <div className="bg-background">
-                              <div className="divide-y divide-border">
-                                {vol.articles?.map((article) => (
-                                  <div 
-                                    key={article.id} 
-                                    className="px-8 py-3 hover:bg-surface transition-colors group cursor-pointer"
-                                    onClick={async () => {
-                                      if (!article.pdf_path) return;
-                                      setIsPdfModalOpen(true);
-                                      setPdfViewUrl(null);
-                                      try {
-                                        const res = await api.get(`/public/articles/${article.id}/download-url`);
-                                        let url = res.data.url;
-                                        if (url.includes('/storage/')) {
-                                          const path = url.split('/storage/')[1];
-                                          url = `${STORAGE_URL}${path}`;
-                                        }
-                                        setPdfViewUrl(url + '#toolbar=0');
-                                      } catch (err) {
-                                        console.error('Failed to get download URL', err);
-                                        toast.error('Could not load PDF document.');
-                                        setIsPdfModalOpen(false);
-                                      }
-                                    }}
+                    <div className="space-y-4 flex-1">
+                      <div className="flex items-center justify-between border-b border-border pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary" /> Table of Contents
+                        </h4>
+                        <span className="text-[11px] font-mono text-muted">{selectedSplitVolume.articles.length} articles</span>
+                      </div>
+
+                      {selectedSplitVolume.articles.length === 0 ? (
+                        <div className="p-8 text-center bg-background border border-border text-xs text-muted">
+                          No articles published in this volume issue.
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-border border border-border bg-background max-h-[440px] overflow-y-auto">
+                          {selectedSplitVolume.articles.map((article) => (
+                            <div
+                              key={article.id}
+                              className="p-4 hover:bg-surface transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <h5 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase leading-snug">
+                                  {article.title}
+                                </h5>
+                                <p className="text-xs text-muted mt-1">
+                                  {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
+                                </p>
+                                <div className="flex items-center gap-4 mt-2 text-[11px] text-muted/60">
+                                  {article.page_start && article.page_end && (
+                                    <span>pp. {article.page_start}-{article.page_end}</span>
+                                  )}
+                                  {article.doi && <span>DOI: {article.doi}</span>}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                                <button
+                                  onClick={() => {
+                                    setCitationArticle(article);
+                                    setCitationContext({
+                                      journalTitle: selectedSplitVolume.journal.title,
+                                      volumeNumber: selectedSplitVolume.volume_number,
+                                      year: selectedSplitVolume.year,
+                                    });
+                                  }}
+                                  className="px-3 py-1.5 border border-border text-xs font-semibold text-muted hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5 bg-surface"
+                                >
+                                  <Quote className="h-3 w-3" /> Cite
+                                </button>
+                                {article.pdf_path && (
+                                  <button
+                                    onClick={() => handleArticlePdfView(article.id)}
+                                    className="px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-secondary hover:text-primary transition-colors flex items-center gap-1.5 shadow-sm"
                                   >
-                                    <div className="flex items-start justify-between gap-4">
-                                      {article.cover_path && (
-                                        <div className="shrink-0 w-12 h-16 border border-border bg-surface overflow-hidden">
-                                          <img src={`${STORAGE_URL}${article.cover_path}`} alt="Cover" className="w-full h-full object-cover" onError={(e) => e.currentTarget.style.display = 'none'} />
-                                        </div>
-                                      )}
-                                      <div className="min-w-0">
-                                        <div className="flex items-center gap-2">
-                                          <FileText className="h-3.5 w-3.5 text-primary/20 shrink-0" />
-                                          <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
-                                            {article.title}
-                                          </h4>
-                                        </div>
-                                        <p className="text-[11px] text-muted mt-0.5 pl-5">
-                                          {article.authors?.map(a => a.name).join(', ') || 'Unknown'}
-                                        </p>
-                                        <div className="flex items-center gap-4 mt-1 pl-5 text-[10px] text-muted/50">
-                                          {article.page_start && article.page_end && (
-                                            <span>pp. {article.page_start}-{article.page_end}</span>
-                                          )}
-                                          {article.doi && <span>DOI: {article.doi}</span>}
-                                          
-
-
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setCitationArticle(article);
-                                              setCitationContext({
-                                                journalTitle: journal.title,
-                                                volumeNumber: vol.volume_number,
-                                                year: vol.year
-                                              });
-                                            }}
-                                            className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 ml-auto"
-                                          >
-                                            <Quote className="h-3 w-3" /> Cite
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                                {vol.articles?.length === 0 && (
-                                  <div className="px-8 py-3 text-[11px] text-muted">No articles found in this volume.</div>
+                                    <Eye className="h-3 w-3" /> Read PDF
+                                  </button>
                                 )}
                               </div>
                             </div>
-                          )}
+                          ))}
                         </div>
-                      );
-                    })}
-
-                    {/* Link to full journal */}
-                    <Link
-                      to={`/journals/${journal.slug}`}
-                      className="block px-6 py-3 text-[12px] font-medium text-primary/50 hover:text-primary transition-colors text-center border-t border-border"
-                    >
-                      View full journal →
-                    </Link>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-muted space-y-3">
+                    <BookOpen className="h-10 w-10 text-primary/20" />
+                    <p className="text-sm font-medium text-primary">Select a volume issue from the left</p>
+                    <p className="text-xs">Select any issue on the left list to view its complete table of contents and articles.</p>
                   </div>
                 )}
               </div>
-            );
-          })
+            </div>
+          )
+        ) : viewMode === 'shelf' ? (
+          /* ========================================================= */
+          /* OPTION 1: VISUAL LIBRARY SHELF (GRID OF VOLUME COVERS)     */
+          /* ========================================================= */
+          filteredVolumes.length === 0 ? (
+            <EmptyState
+              title="No volumes found"
+              description="No archived volume issues match your selected filters."
+              className="border border-border bg-surface py-16"
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {filteredVolumes.map((vol) => (
+                <div
+                  key={`${vol.journal.id}-${vol.id}`}
+                  onClick={() => setActiveVolumeModal(vol)}
+                  className="group relative border border-border bg-surface flex flex-col justify-between p-5 hover:border-primary/40 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+
+                  <div className="w-full aspect-[3/4] bg-background border border-border overflow-hidden mb-4 relative flex flex-col items-center justify-center p-4 text-center">
+                    {vol.journal.cover_image ? (
+                      <img
+                        src={`${STORAGE_URL}${vol.journal.cover_image}`}
+                        alt={vol.journal.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full space-y-2 p-2">
+                        <BookOpen className="h-8 w-8 text-primary/30" />
+                        <span className="text-[11px] font-bold text-primary uppercase tracking-widest line-clamp-3">
+                          {vol.journal.title}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="absolute top-2 left-2 bg-primary text-secondary px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
+                      {formatVolumeName(vol.volume_number)}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider inline-block mb-1.5">
+                        {vol.journal.categoryName}
+                      </span>
+                      <h3 className="text-[13px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
+                        {vol.journal.title}
+                      </h3>
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted">
+                      <span className="font-mono">{vol.year}</span>
+                      <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
+                        <Layers className="h-3 w-3" /> {vol.articles.length} article{vol.articles.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          /* ========================================================= */
+          /* CLASSIC ACCORDION LIST VIEW                              */
+          /* ========================================================= */
+          journals.length === 0 ? (
+            <EmptyState
+              title="No journals found"
+              description="There are no journals with archived volumes yet."
+              className="border border-border bg-surface py-12"
+            />
+          ) : (
+            <div className="space-y-3">
+              {journals.map((journal) => {
+                const isOpen = expandedJournal === journal.id;
+                const articleCount = journal.volumes?.reduce(
+                  (s, v) => s + (v.articles?.length || 0), 0
+                ) || 0;
+
+                return (
+                  <div key={journal.id} className="border border-border bg-surface">
+                    <button
+                      onClick={() => {
+                        setExpandedJournal(isOpen ? null : journal.id);
+                        setExpandedVolume(null);
+                      }}
+                      className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-background transition-colors"
+                    >
+                      <div className="flex items-center gap-4 min-w-0">
+                        <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="text-[14px] font-medium text-primary block truncate">{journal.title}</span>
+                          <span className="text-[11px] text-muted">
+                            {journal.volumes?.length || 0} volume{(journal.volumes?.length || 0) !== 1 ? 's' : ''} · {articleCount} articles · ISSN {journal.issn || '-'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 ml-4">
+                        <span className="text-[11px] text-muted bg-background px-2 py-0.5">
+                          {typeof journal.category === 'object' && journal.category !== null ? journal.category.name : (journal.category || 'Uncategorized')}
+                        </span>
+                        <ChevronDown className={`h-4 w-4 text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </div>
+                    </button>
+
+                    {isOpen && (
+                      <div className="border-t border-border">
+                        {journal.volumes?.length === 0 && (
+                          <div className="px-6 py-6 text-[12px] text-muted text-center bg-background">No volumes available.</div>
+                        )}
+                        {journal.volumes?.map((vol) => {
+                          const volKey = `${journal.id}-${vol.volume_number}`;
+                          const volOpen = expandedVolume === volKey;
+
+                          return (
+                            <div key={vol.id} className="border-b border-border last:border-b-0">
+                              <button
+                                onClick={() => setExpandedVolume(volOpen ? null : volKey)}
+                                className="w-full flex items-center justify-between px-6 py-3 hover:bg-background/50 transition-colors text-left"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-[13px] font-semibold text-primary">{formatVolumeName(vol.volume_number)}</span>
+                                  <span className="text-[11px] text-muted">({vol.year})</span>
+                                  <span className="text-[11px] text-muted/60">
+                                    — {vol.articles?.length || 0} article{(vol.articles?.length || 0) !== 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                                <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${volOpen ? 'rotate-180' : ''}`} />
+                              </button>
+
+                              {volOpen && (
+                                <div className="bg-background">
+                                  <div className="divide-y divide-border">
+                                    {vol.articles?.map((article) => (
+                                      <div
+                                        key={article.id}
+                                        className="px-8 py-3 hover:bg-surface transition-colors group cursor-pointer"
+                                        onClick={() => handleArticlePdfView(article.id)}
+                                      >
+                                        <div className="flex items-start justify-between gap-4">
+                                          <div className="min-w-0">
+                                            <div className="flex items-center gap-2">
+                                              <FileText className="h-3.5 w-3.5 text-primary/20 shrink-0" />
+                                              <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
+                                                {article.title}
+                                              </h4>
+                                            </div>
+                                            <p className="text-[11px] text-muted mt-0.5 pl-5">
+                                              {article.authors?.map((a) => a.name).join(', ') || 'Unknown'}
+                                            </p>
+                                            <div className="flex items-center gap-4 mt-1 pl-5 text-[10px] text-muted/50">
+                                              {article.page_start && article.page_end && (
+                                                <span>pp. {article.page_start}-{article.page_end}</span>
+                                              )}
+                                              {article.doi && <span>DOI: {article.doi}</span>}
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setCitationArticle(article);
+                                                  setCitationContext({
+                                                    journalTitle: journal.title,
+                                                    volumeNumber: vol.volume_number,
+                                                    year: vol.year,
+                                                  });
+                                                }}
+                                                className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 ml-auto"
+                                              >
+                                                <Quote className="h-3 w-3" /> Cite
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    {vol.articles?.length === 0 && (
+                                      <div className="px-8 py-3 text-[11px] text-muted">No articles found in this volume.</div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+
+                        <Link
+                          to={`/journals/${journal.slug}`}
+                          className="block px-6 py-3 text-[12px] font-medium text-primary/50 hover:text-primary transition-colors text-center border-t border-border"
+                        >
+                          View full journal →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )
+        )}
+
+        {/* Pagination Bar */}
+        {!loading && lastPage > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            lastPage={lastPage}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         )}
       </div>
 
-      {!loading && lastPage > 1 && (
-        <Pagination 
-          currentPage={currentPage} 
-          lastPage={lastPage} 
-          onPageChange={(page) => {
-            setCurrentPage(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }} 
-        />
-      )}
-      
-      </div>
+      {/* Volume Explorer Modal */}
+      {activeVolumeModal && (
+        <Modal
+          isOpen={!!activeVolumeModal}
+          onClose={() => setActiveVolumeModal(null)}
+          title={`${activeVolumeModal.journal.title} — ${formatVolumeName(activeVolumeModal.volume_number)} (${activeVolumeModal.year})`}
+          className="max-w-4xl"
+        >
+          <div className="space-y-6 pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-surface border border-border">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-primary px-2.5 py-1 inline-block mb-1">
+                  {activeVolumeModal.journal.categoryName}
+                </span>
+                <p className="text-xs text-muted">ISSN: {activeVolumeModal.journal.issn || '-'}</p>
+              </div>
+              <Link
+                to={`/journals/${activeVolumeModal.journal.slug}`}
+                onClick={() => setActiveVolumeModal(null)}
+                className="text-xs font-semibold text-primary hover:text-secondary transition-colors"
+              >
+                Go to Journal Main Page →
+              </Link>
+            </div>
 
-      <CitationModal 
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-primary border-b border-border pb-2">
+                Table of Contents ({activeVolumeModal.articles.length} Articles)
+              </h3>
+
+              {activeVolumeModal.articles.length === 0 ? (
+                <p className="text-xs text-muted py-6 text-center">No articles available in this volume.</p>
+              ) : (
+                <div className="divide-y divide-border border border-border bg-background">
+                  {activeVolumeModal.articles.map((article) => (
+                    <div
+                      key={article.id}
+                      className="p-4 hover:bg-surface transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-[13px] font-bold text-primary leading-snug uppercase">
+                          {article.title}
+                        </h4>
+                        <p className="text-xs text-muted mt-1">
+                          {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2 text-[11px] text-muted/60">
+                          {article.page_start && article.page_end && (
+                            <span>pp. {article.page_start}-{article.page_end}</span>
+                          )}
+                          {article.doi && <span>DOI: {article.doi}</span>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
+                        <button
+                          onClick={() => {
+                            setCitationArticle(article);
+                            setCitationContext({
+                              journalTitle: activeVolumeModal.journal.title,
+                              volumeNumber: activeVolumeModal.volume_number,
+                              year: activeVolumeModal.year,
+                            });
+                          }}
+                          className="px-3 py-1.5 border border-border text-xs font-semibold text-muted hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5"
+                        >
+                          <Quote className="h-3 w-3" /> Cite
+                        </button>
+                        {article.pdf_path && (
+                          <button
+                            onClick={() => handleArticlePdfView(article.id)}
+                            className="px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-secondary hover:text-primary transition-colors flex items-center gap-1.5"
+                          >
+                            <Eye className="h-3 w-3" /> Read PDF
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Citation Modal */}
+      <CitationModal
         isOpen={!!citationArticle}
         onClose={() => setCitationArticle(null)}
         article={citationArticle}
@@ -304,6 +936,7 @@ const Archives: React.FC = () => {
         year={citationContext.year}
       />
 
+      {/* PDF Viewer Modal */}
       <PdfViewerModal
         isOpen={isPdfModalOpen}
         onClose={() => setIsPdfModalOpen(false)}
