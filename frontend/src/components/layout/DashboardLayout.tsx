@@ -91,8 +91,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const menuItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Admin'] },
     { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Admin', 'Super Admin'] },
-    { label: 'Bulk Import', icon: Upload, path: '/dashboard/import', roles: ['Admin', 'Super Admin'] },
     { label: 'Articles', icon: FileText, path: '/dashboard/articles', roles: ['Admin', 'Super Admin'] },
+    { label: 'Import', icon: Upload, path: '/dashboard/import', roles: ['Admin', 'Super Admin'] },
     { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Admin'] },
     { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
   ];
