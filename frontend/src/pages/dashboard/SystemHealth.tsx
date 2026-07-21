@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
-import { Activity, Database, Server, HardDrive, Terminal, RefreshCw, Trash2, FileText, Layers, Users, BookOpen, Cpu } from 'lucide-react';
+import { Activity, Database, HardDrive, Terminal, RefreshCw, Trash2, FileText, Layers, Users, BookOpen, Cpu, Cloud } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
@@ -20,6 +20,11 @@ interface RecordCounts {
   activity_logs: number;
 }
 
+interface R2Data {
+  status: string;
+  bucket: string;
+}
+
 interface HealthData {
   status: string;
   php_version: string;
@@ -28,6 +33,7 @@ interface HealthData {
   database_size_bytes: number;
   counts: RecordCounts;
   storage_disk: string;
+  r2: R2Data;
   disk: DiskData;
   recent_logs: string[];
   timestamp: string;
@@ -122,6 +128,7 @@ const SystemHealth: React.FC = () => {
 
       {/* Top Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: API */}
         <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ API.CORE ]</span>
@@ -136,6 +143,7 @@ const SystemHealth: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald-500/40"></div>
         </div>
 
+        {/* Card 2: Database */}
         <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ DB.ENGINE ]</span>
@@ -150,29 +158,33 @@ const SystemHealth: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500/40"></div>
         </div>
 
+        {/* Card 3: Cloudflare R2 */}
         <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ RUNTIME.ENV ]</span>
-            <Server className="h-5 w-5 text-amber-500" />
+            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ OBJECT.STORAGE ]</span>
+            <Cloud className={`h-5 w-5 ${health?.r2.status === 'Active' ? 'text-amber-500' : 'text-zinc-400'}`} />
           </div>
           <div>
-            <div className="text-xl font-bold font-mono tracking-tight text-primary">PHP {health?.php_version}</div>
-            <div className="text-[11px] font-mono text-muted mt-1">
-              Disk Driver: <strong className="text-primary font-mono">{health?.storage_disk.toUpperCase()}</strong>
+            <div className="text-xl font-bold font-mono tracking-tight text-primary">
+              {health?.r2.status === 'Active' ? 'R2 ACTIVE' : 'R2 INACTIVE'}
+            </div>
+            <div className="text-[11px] font-mono text-muted mt-1 truncate">
+              Bucket: <strong className="text-primary font-mono">{health?.r2.bucket || 'None'}</strong>
             </div>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-amber-500/40"></div>
         </div>
 
+        {/* Card 4: Local Temp Disk */}
         <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ DISK.VOL ]</span>
+            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ TEMP.DISK ]</span>
             <HardDrive className="h-5 w-5 text-indigo-500" />
           </div>
           <div>
             <div className="text-xl font-bold font-mono tracking-tight text-primary">{health?.disk.percentage}% USED</div>
             <div className="text-[11px] font-mono text-muted mt-1">
-              {formatBytes(health?.disk.used_bytes || 0)} / {formatBytes(health?.disk.total_bytes || 0)}
+              Render Container Capacity
             </div>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-500/40"></div>
@@ -186,16 +198,16 @@ const SystemHealth: React.FC = () => {
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-xs font-mono font-bold text-primary uppercase tracking-wider flex items-center gap-2">
               <HardDrive className="h-4 w-4 text-accent" />
-              [ STORAGE_UTILIZATION ]
+              [ TEMP_CONTAINER_DISK ]
             </h3>
             <span className="text-[10px] font-mono bg-accent/10 text-accent px-2 py-0.5 rounded uppercase font-semibold">
-              LOCAL DISK
+              EPHEMERAL
             </span>
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-muted">Capacity Used</span>
+              <span className="text-muted">Temp Space Used</span>
               <span className="text-primary font-bold">{formatBytes(health?.disk.used_bytes || 0)} ({health?.disk.percentage}%)</span>
             </div>
             
@@ -217,6 +229,10 @@ const SystemHealth: React.FC = () => {
               <div>FREE: <strong className="text-primary font-mono">{formatBytes(health?.disk.free_bytes || 0)}</strong></div>
               <div className="text-right">TOTAL: <strong className="text-primary font-mono">{formatBytes(health?.disk.total_bytes || 0)}</strong></div>
             </div>
+            
+            <p className="text-[10px] font-mono text-muted border-t border-border/20 pt-3 leading-relaxed">
+              * Note: Render web instances use temporary local storage. All permanent file uploads bypass this container disk and save directly to your Cloudflare R2 bucket.
+            </p>
           </div>
         </div>
 

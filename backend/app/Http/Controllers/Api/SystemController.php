@@ -31,6 +31,9 @@ class SystemController extends Controller
                     WHERE table_schema = ?
                 ", [$dbName]);
                 $dbSizeBytes = (int) ($dbSizeResult[0]->size ?? 0);
+            } else if ($driver === 'pgsql') {
+                $dbSizeResult = DB::select("SELECT pg_database_size(current_database()) as size");
+                $dbSizeBytes = (int) ($dbSizeResult[0]->size ?? 0);
             }
             
             $counts = [
@@ -66,6 +69,10 @@ class SystemController extends Controller
             $recentLogs = array_slice(array_values($lines), -80);
         }
 
+        // Cloudflare R2 info
+        $r2Bucket = env('R2_BUCKET', '');
+        $r2Status = env('FILESYSTEM_DISK') === 'r2' ? 'Active' : 'Inactive';
+
         return response()->json([
             'status' => 'Operational',
             'php_version' => phpversion(),
@@ -74,6 +81,10 @@ class SystemController extends Controller
             'database_size_bytes' => $dbSizeBytes,
             'counts' => $counts,
             'storage_disk' => env('FILESYSTEM_DISK', 'local'),
+            'r2' => [
+                'status' => $r2Status,
+                'bucket' => $r2Bucket,
+            ],
             'disk' => [
                 'total_bytes' => $totalDisk,
                 'free_bytes' => $freeDisk,
