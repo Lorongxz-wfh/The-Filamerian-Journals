@@ -101,8 +101,8 @@ class ContentSeeder extends Seeder
                     'issn' => $data['issn'],
                     'frequency' => $data['frequency'],
                     'editor' => $data['editor'],
-                    'cover_image' => "journals/covers/placeholder_{$jIndex}.jpg",
-                    'pdf_path' => "journals/pdfs/placeholder_{$jIndex}.pdf",
+                    'cover_image' => null,
+                    'pdf_path' => null,
                 ]
             );
 
@@ -131,7 +131,7 @@ class ContentSeeder extends Seeder
                             'page_start' => $pageStart,
                             'page_end' => $pageEnd,
                             'doi' => "10.1234/fcu.{$year}." . str_pad($jIndex, 2, '0', STR_PAD_LEFT) . "." . str_pad($v, 2, '0', STR_PAD_LEFT) . "." . str_pad($a, 2, '0', STR_PAD_LEFT),
-                            'pdf_path' => "articles/pdfs/placeholder_v{$v}_a{$a}.pdf",
+                            'pdf_path' => null,
                             'views_count' => rand(50, 500),
                             'downloads_count' => rand(10, 200),
                             'order' => $a,

@@ -136,7 +136,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`group relative flex items-center justify-center w-full border transition-all cursor-pointer py-3 px-3.5 rounded-sm min-h-[64px] ${
+        className={`group relative flex items-center justify-center w-full border transition-all cursor-pointer py-2.5 px-3.5 rounded-sm min-h-[72px] h-[72px] ${
           isDragging
             ? 'border-primary bg-primary/5 scale-[1.005]'
             : selectedFile
@@ -162,13 +162,15 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
             {isDragging ? (
               <p className="text-[12px] font-semibold text-primary truncate">Drop new file here</p>
             ) : selectedFile ? (
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-green-700 bg-green-100 border border-green-200 rounded shrink-0">
+                      Selected
+                    </span>
                     <p className="text-[12px] font-semibold text-primary truncate">{selectedFile.name}</p>
                   </div>
-                  <p className="text-[10px] text-muted">
+                  <p className="text-[10px] text-muted truncate mt-0.5">
                     {(selectedFile.size / 1024 / 1024).toFixed(2)} MB — Click or drag to replace
                   </p>
                 </div>
@@ -179,24 +181,24 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                     e.stopPropagation();
                     onFileSelect(null);
                   }}
-                  className="p-1 hover:bg-red-500/10 hover:text-red-500 text-muted transition-colors rounded cursor-pointer"
+                  className="p-1 hover:bg-red-500/10 hover:text-red-500 text-muted transition-colors rounded cursor-pointer shrink-0"
                   title="Remove selected file"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ) : existingUrl ? (
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100 border border-blue-200 rounded shrink-0">
-                      Current File Attached
+                      Attached
                     </span>
+                    <p className="text-[12px] font-semibold text-primary truncate">
+                      {iconType === 'image' ? 'Existing Image' : 'Existing PDF'}
+                    </p>
                   </div>
-                  <p className="text-[11px] font-medium text-primary mt-1 truncate">
-                    {iconType === 'image' ? 'Existing Image Uploaded' : 'Existing PDF Document Uploaded'}
-                  </p>
-                  <p className="text-[10px] text-muted">Click or drag a new file to replace</p>
+                  <p className="text-[10px] text-muted truncate mt-0.5">Click or drag to replace</p>
                 </div>
                 <a
                   href={existingUrl}
@@ -206,7 +208,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                   className="px-2 py-1 text-[10px] font-semibold text-primary border border-border hover:bg-background transition-colors shrink-0 whitespace-nowrap"
                   title="Open existing file in new tab"
                 >
-                  View File ↗
+                  View ↗
                 </a>
               </div>
             ) : (
