@@ -95,7 +95,6 @@ const SystemHealth: React.FC = () => {
     <div className="space-y-8 font-sans">
       <DashboardHeader 
         title="System Health & Diagnostics" 
-        description="Real-time telemetric monitoring of core backend services, database storage, and runtime event streams."
       />
 
       {/* Analog/Techy Status Bar Header */}
