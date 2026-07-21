@@ -57,7 +57,7 @@ class ArticleController extends Controller
         ]);
 
         if ($request->hasFile('pdf_path')) {
-            $path = $request->file('pdf_path')->store('articles', 'public');
+            $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
             $validated['pdf_path'] = $path;
         }
 
@@ -188,9 +188,9 @@ class ArticleController extends Controller
         if ($request->hasFile('pdf_path')) {
             // Delete old file
             if ($article->pdf_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($article->pdf_path);
+                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
             }
-            $path = $request->file('pdf_path')->store('articles', 'public');
+            $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
             $validated['pdf_path'] = $path;
         }
 
@@ -255,7 +255,7 @@ class ArticleController extends Controller
     {
         // Delete PDF if exists
         if ($article->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($article->pdf_path);
+            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
         }
 
         $article->delete();
@@ -297,16 +297,30 @@ class ArticleController extends Controller
 
     public function servePdf(Article $article, \Illuminate\Http\Request $request)
     {
-        if (!$article->pdf_path || !\Illuminate\Support\Facades\Storage::disk('public')->exists($article->pdf_path)) {
+        $diskName = env('FILESYSTEM_DISK', 'public');
+        $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
+
+        if (!$article->pdf_path || !$disk->exists($article->pdf_path)) {
             abort(404, 'PDF not found.');
         }
 
-        $path = \Illuminate\Support\Facades\Storage::disk('public')->path($article->pdf_path);
-        
         $headers = [
             'Access-Control-Allow-Origin' => '*',
             'Content-Type' => 'application/pdf',
         ];
+
+        if ($diskName === 'r2') {
+            if ($request->query('download')) {
+                return response()->streamDownload(function () use ($disk, $article) {
+                    echo $disk->get($article->pdf_path);
+                }, $article->title . '.pdf', $headers);
+            }
+            return response()->stream(function () use ($disk, $article) {
+                echo $disk->get($article->pdf_path);
+            }, 200, $headers);
+        }
+
+        $path = $disk->path($article->pdf_path);
 
         if ($request->query('download')) {
             return response()->download($path, $article->title . '.pdf', $headers);

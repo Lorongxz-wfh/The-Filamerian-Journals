@@ -159,12 +159,12 @@ class JournalController extends Controller
     {
         // Delete cover image if exists
         if ($journal->cover_image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($journal->cover_image);
+            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);
         }
 
         // Delete PDF if exists
         if ($journal->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($journal->pdf_path);
+            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->pdf_path);
         }
 
         $journal->delete();
