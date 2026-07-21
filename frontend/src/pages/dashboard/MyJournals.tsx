@@ -3,9 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
-import api from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import Modal from '@/components/ui/Modal';
 
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -73,6 +73,39 @@ const MyJournals: React.FC = () => {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
+
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const sortedJournals = React.useMemo(() => {
+    let sortableItems = [...journals];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let aVal: any = a[sortConfig.key as keyof Journal];
+        let bVal: any = b[sortConfig.key as keyof Journal];
+        
+        if (sortConfig.key === 'category') {
+          aVal = a.category?.name || '';
+          bVal = b.category?.name || '';
+        } else if (sortConfig.key === 'volumes') {
+          aVal = a.volumes?.length || 0;
+          bVal = b.volumes?.length || 0;
+        }
+
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [journals, sortConfig]);
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   const {
     register,
@@ -182,6 +215,10 @@ const MyJournals: React.FC = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingJournal(null);
+    setPdfFile(null);
+    setCoverImage(null);
+    reset();
     const newParams = new URLSearchParams(searchParams);
     newParams.delete('action');
     newParams.delete('journal_slug');
@@ -190,6 +227,12 @@ const MyJournals: React.FC = () => {
 
   const onSubmit = async (data: JournalFormData) => {
     setServerError(null);
+
+    if (editingJournal && !isDirty && !pdfFile && !coverImage) {
+      toast.info('No changes were made.');
+      handleCloseModal();
+      return;
+    }
 
     try {
       const payload = new FormData();
@@ -220,9 +263,10 @@ const MyJournals: React.FC = () => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
-      await fetchJournals();
+      
       handleCloseModal();
       toast.success(editingJournal ? 'Journal updated successfully' : 'Journal created successfully');
+      await fetchJournals();
     } catch (err: any) {
       console.error('Save failed:', err);
       setServerError(err.response?.data?.message || 'Failed to save journal.');
@@ -245,6 +289,11 @@ const MyJournals: React.FC = () => {
     } finally {
       setDeleteTarget(null);
     }
+  };
+
+  const getSortIcon = (key: string) => {
+    if (sortConfig?.key !== key) return <ArrowUp className="h-3 w-3 opacity-20" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3 opacity-100" /> : <ArrowDown className="h-3 w-3 opacity-100" />;
   };
 
   return (
@@ -280,24 +329,32 @@ const MyJournals: React.FC = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead className="text-center">Volumes</TableHead>
-            <TableHead>Editor</TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
+              <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
+            </TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('category')}>
+              <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
+            </TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors text-center" onClick={() => requestSort('volumes')}>
+              <div className="flex items-center justify-center gap-1">Volumes {getSortIcon('volumes')}</div>
+            </TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
+              <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
+            </TableHead>
             <TableHead className="w-28 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRowSkeleton columns={5} rows={5} />
-          ) : journals.length === 0 ? (
+          ) : sortedJournals.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="h-32 text-center">
                 <EmptyState title="No journals" description="No journals match your criteria." className="bg-transparent border-0 py-16" />
               </TableCell>
             </TableRow>
           ) : (
-            journals.map((journal) => (
+            sortedJournals.map((journal) => (
               <TableRow
                 key={journal.id}
                 onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
@@ -369,10 +426,6 @@ const MyJournals: React.FC = () => {
             </div>
           )}
           
-          <div className="text-[12px] text-muted italic mb-4">
-            (* indicates required field)
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <Input 
@@ -381,6 +434,7 @@ const MyJournals: React.FC = () => {
                 placeholder="e.g. FCU Multidisciplinary Research Journal"
                 error={errors.title?.message}
                 {...register('title')}
+                autoFocus
               />
             </div>
             
@@ -463,7 +517,7 @@ const MyJournals: React.FC = () => {
                 accept=".pdf,application/pdf"
                 iconType="pdf"
                 selectedFile={pdfFile}
-                existingUrl={editingJournal?.pdf_url}
+                existingUrl={editingJournal?.pdf_url ? getFileUrl(editingJournal.pdf_url) : undefined}
                 onFileSelect={(file) => setPdfFile(file)}
               />
             </div>
@@ -475,7 +529,7 @@ const MyJournals: React.FC = () => {
                 accept="image/*"
                 iconType="image"
                 selectedFile={coverImage}
-                existingUrl={editingJournal?.cover_image}
+                existingUrl={editingJournal?.cover_image ? getFileUrl(editingJournal.cover_image) : undefined}
                 onFileSelect={(file) => setCoverImage(file)}
               />
             </div>

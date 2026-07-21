@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import Button from '@/components/ui/Button';
@@ -211,6 +211,28 @@ const ManageVolume: React.FC = () => {
                 key={article.id} 
                 className="flex items-center justify-between px-5 py-3 hover:bg-background/50 transition-colors cursor-pointer"
                 onClick={() => handleOpenModal(article)}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', index.toString());
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                  const toIndex = index;
+                  if (fromIndex !== toIndex) {
+                    const newArticles = [...articles];
+                    const [movedArticle] = newArticles.splice(fromIndex, 1);
+                    newArticles.splice(toIndex, 0, movedArticle);
+                    const updatedArticles = newArticles.map((a, idx) => ({ ...a, order: idx + 1 }));
+                    setArticles(updatedArticles);
+                    setHasOrderChanged(true);
+                  }
+                }}
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="flex flex-col gap-1 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
@@ -247,6 +269,7 @@ const ManageVolume: React.FC = () => {
                     {article.pdf_url && (
                       <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
                     )}
+                    <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit" />
                     <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(article.id)} title="Delete" />
                   </div>
                 </div>
@@ -254,10 +277,6 @@ const ManageVolume: React.FC = () => {
             ))}
           </div>
         )}
-      </div>
-      
-      <div className="text-[12px] text-muted text-center pt-2">
-        You can now edit articles directly by clicking on them! Advanced management is still available in the <Link to={`/dashboard/articles?volume_id=${id}`} className="text-primary hover:underline font-semibold">Articles page</Link>.
       </div>
 
       <ArticleFormModal

@@ -157,15 +157,29 @@ const ManageJournal: React.FC = () => {
       </div>
 
       {/* Volume Modal */}
-      <Modal isOpen={isVolModalOpen} onClose={() => !isSubmitting && setIsVolModalOpen(false)} title={editingVol ? 'Edit Volume' : 'New Volume'}>
+      <Modal 
+        isOpen={isVolModalOpen} 
+        onClose={() => !isSubmitting && setIsVolModalOpen(false)} 
+        title={editingVol ? 'Edit Volume' : 'New Volume'}
+        isDirty={volFormData.volume_number !== (editingVol ? String(editingVol.volume_number) : '') || volFormData.year !== (editingVol ? String(editingVol.year) : String(new Date().getFullYear()))}
+      >
         <form onSubmit={submitVolume} className="space-y-4">
           <Input 
-            label="Volume Name (e.g. 'Vol. 1 Issue 1' or 'CCS Volume 2')" required type="text" value={volFormData.volume_number} onChange={e => setVolFormData({...volFormData, volume_number: e.target.value})}
+            label="Volume Name (e.g. 'Vol. 1 Issue 1' or 'CCS Volume 2')" 
+            required 
+            type="text" 
+            value={volFormData.volume_number} 
+            onChange={e => setVolFormData({...volFormData, volume_number: e.target.value})}
+            autoFocus
           />
           <Input 
-            label="Year" required type="number" value={volFormData.year} onChange={e => setVolFormData({...volFormData, year: e.target.value})}
+            label="Year" 
+            required 
+            type="number" 
+            value={volFormData.year} 
+            onChange={e => setVolFormData({...volFormData, year: e.target.value})}
           />
-          <div className="flex justify-end gap-3 pt-4 mt-6">
+          <div className="flex justify-end gap-3 pt-4 mt-6 border-t border-border">
             <Button type="button" variant="ghost" onClick={() => setIsVolModalOpen(false)}>Cancel</Button>
             <Button type="submit" isLoading={isSubmitting}>{editingVol ? 'Save Changes' : 'Create Volume'}</Button>
           </div>

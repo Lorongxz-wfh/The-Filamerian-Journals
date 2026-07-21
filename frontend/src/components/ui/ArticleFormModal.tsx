@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
-import api from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -49,11 +49,13 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDirtyForm, setIsDirtyForm] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setError(null);
       setPdfFile(null);
+      setIsDirtyForm(false);
       if (editingArticle) {
         setFormData({
           volume_id: String(editingArticle.volume?.id || ''),
@@ -92,6 +94,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setIsDirtyForm(true);
   };
 
   const handleArrayChange = (field: 'keyword_names', index: number, value: string) => {
@@ -100,6 +103,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
       newArray[index] = value;
       return { ...prev, [field]: newArray };
     });
+    setIsDirtyForm(true);
   };
 
   const handleAuthorChange = (index: number, author: AuthorData) => {
@@ -108,28 +112,41 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
       newAuthors[index] = author;
       return { ...prev, authors: newAuthors };
     });
+    setIsDirtyForm(true);
   };
 
   const addAuthor = () => {
     setFormData(prev => ({ ...prev, authors: [...prev.authors, { first_name: '', middle_name: '', last_name: '', suffix: '' }] }));
+    setIsDirtyForm(true);
   };
 
   const removeAuthor = (index: number) => {
     setFormData(prev => ({ ...prev, authors: prev.authors.filter((_, i) => i !== index) }));
+    setIsDirtyForm(true);
   };
 
   const addArrayItem = (field: 'keyword_names') => {
     setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
+    setIsDirtyForm(true);
   };
 
   const removeArrayItem = (field: 'keyword_names', index: number) => {
     setFormData(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+    setIsDirtyForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+
+    if (editingArticle && !isDirtyForm && !pdfFile) {
+      toast.info('No changes were made.');
+      onClose();
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const payload = new FormData();
       payload.append('volume_id', formData.volume_id);
@@ -181,14 +198,20 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={() => !isSubmitting && onClose()} title={editingArticle ? 'Edit Article' : 'Submit Article'} className="max-w-2xl">
+    <Modal 
+      isOpen={isOpen} 
+      onClose={() => !isSubmitting && onClose()} 
+      title={editingArticle ? 'Edit Article' : 'Submit Article'} 
+      className="max-w-2xl"
+      isDirty={isDirtyForm || !!pdfFile}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px]">{error}</div>}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <Input 
-              label="Title" required name="title" value={formData.title} onChange={handleInputChange}
+              label="Title" required name="title" value={formData.title} onChange={handleInputChange} autoFocus
             />
           </div>
           
@@ -291,7 +314,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
               accept=".pdf,application/pdf"
               iconType="pdf"
               selectedFile={pdfFile}
-              existingUrl={editingArticle?.pdf_url}
+              existingUrl={editingArticle?.pdf_url ? getFileUrl(editingArticle.pdf_url) : undefined}
               onFileSelect={(file) => setPdfFile(file)}
             />
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
-import { FileText, Plus, Edit2, Trash2, Eye, Upload } from 'lucide-react';
+import { FileText, Plus, Edit2, Trash2, Eye, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
@@ -62,6 +62,39 @@ const Articles: React.FC = () => {
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [initialVolumeId, setInitialVolumeId] = useState<string>('');
+
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const sortedArticles = React.useMemo(() => {
+    let sortableItems = [...articles];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let aVal: any = a[sortConfig.key as keyof Article];
+        let bVal: any = b[sortConfig.key as keyof Article];
+        
+        if (sortConfig.key === 'journal') {
+          aVal = a.volume?.journal?.title || '';
+          bVal = b.volume?.journal?.title || '';
+        } else if (sortConfig.key === 'volume') {
+          aVal = a.volume?.volume_number || '';
+          bVal = b.volume?.volume_number || '';
+        }
+
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [articles, sortConfig]);
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   // Debounce search filter
   useEffect(() => {
@@ -163,6 +196,11 @@ const Articles: React.FC = () => {
     }
   };
 
+  const getSortIcon = (key: string) => {
+    if (sortConfig?.key !== key) return <ArrowUp className="h-3 w-3 opacity-20" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3 opacity-100" /> : <ArrowDown className="h-3 w-3 opacity-100" />;
+  };
+
   const tabs = [
     { key: 'all' as const, label: 'All' },
     { key: 'Published' as const, label: 'Published' },
@@ -210,25 +248,33 @@ const Articles: React.FC = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Journal</TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
+              <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
+            </TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('journal')}>
+              <div className="flex items-center gap-1">Journal {getSortIcon('journal')}</div>
+            </TableHead>
             <TableHead>Authors</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Submitted</TableHead>
-            <TableHead className="w-24 text-right">Actions</TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('status')}>
+              <div className="flex items-center gap-1">Status {getSortIcon('status')}</div>
+            </TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('created_at')}>
+              <div className="flex items-center gap-1">Submitted {getSortIcon('created_at')}</div>
+            </TableHead>
+            <TableHead className="w-28 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRowSkeleton columns={6} rows={5} />
-          ) : articles.length === 0 ? (
+          ) : sortedArticles.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="h-32 text-center">
-                <EmptyState title="No articles found" description="There are no articles matching your criteria." className="bg-transparent border-0" />
+                <EmptyState title="No articles" description="No articles match your criteria." className="bg-transparent border-0 py-16" />
               </TableCell>
             </TableRow>
           ) : (
-            articles.map((article) => (
+            sortedArticles.map((article) => (
               <TableRow 
                 key={article.id} 
                 className={`group ${articleHasPdf(article) ? 'cursor-pointer' : ''}`}
