@@ -49,6 +49,8 @@ const Journals: React.FC = () => {
     categoryParam ? [categoryParam] : []
   );
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [fromYear, setFromYear] = useState('');
+  const [toYear, setToYear] = useState('');
   const [journals, setJournals] = useState<Journal[]>(initialJournals);
   const [availableCategories, setAvailableCategories] = useState<string[]>(initialCategories);
   const [loading, setLoading] = useState(initialJournals.length === 0);
@@ -170,9 +172,17 @@ const Journals: React.FC = () => {
         (j.description && j.description.toLowerCase().includes(debouncedSearch.toLowerCase()));
         
       let matchesYear = true;
+      const jYearNum = j.volumes?.[0]?.year ? parseInt(j.volumes[0].year.toString()) : (j.created_at ? new Date(j.created_at).getFullYear() : null);
+
+      if (fromYear && jYearNum) {
+        if (jYearNum < parseInt(fromYear)) matchesYear = false;
+      }
+      if (toYear && jYearNum) {
+        if (jYearNum > parseInt(toYear)) matchesYear = false;
+      }
       if (selectedYears.length > 0) {
-        const jYear = j.volumes?.[0]?.year?.toString() || (j.created_at ? new Date(j.created_at).getFullYear().toString() : '');
-        matchesYear = selectedYears.includes(jYear);
+        const jYear = jYearNum ? jYearNum.toString() : '';
+        if (!selectedYears.includes(jYear)) matchesYear = false;
       }
       
       return matchesCategory && matchesSearch && matchesYear;
@@ -192,13 +202,15 @@ const Journals: React.FC = () => {
     });
     
     return result;
-  }, [journals, selectedCategories, debouncedSearch, selectedYears, sortOption]);
+  }, [journals, selectedCategories, debouncedSearch, selectedYears, fromYear, toYear, sortOption]);
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedYears.length > 0;
+  const hasActiveFilters = selectedCategories.length > 0 || selectedYears.length > 0 || !!fromYear || !!toYear;
 
   const clearAllFilters = () => {
     setSelectedCategories([]);
     setSelectedYears([]);
+    setFromYear('');
+    setToYear('');
     navigate('/journals');
   };
 
@@ -270,18 +282,45 @@ const Journals: React.FC = () => {
                 <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.year ? 'rotate-180' : ''}`} />
               </button>
               {openSections.year && (
-                <div className="px-4 pb-4 space-y-2.5">
-                  {availableYears.map(year => (
-                    <label key={year} className="flex items-center gap-2.5 cursor-pointer group">
+                <div className="px-4 pb-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-2 pb-2 border-b border-border">
+                    <div>
+                      <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">From</label>
                       <input
-                        type="checkbox"
-                        checked={selectedYears.includes(year)}
-                        onChange={() => toggleYear(year)}
-                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                        type="number"
+                        placeholder="e.g. 2020"
+                        value={fromYear}
+                        onChange={(e) => setFromYear(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
                       />
-                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{year}</span>
-                    </label>
-                  ))}
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">To</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 2024"
+                        value={toYear}
+                        onChange={(e) => setToYear(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
+                      />
+                    </div>
+                  </div>
+                  {availableYears.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Specific Years</span>
+                      {availableYears.map(year => (
+                        <label key={year} className="flex items-center gap-2.5 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={selectedYears.includes(year)}
+                            onChange={() => toggleYear(year)}
+                            className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                          />
+                          <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{year}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

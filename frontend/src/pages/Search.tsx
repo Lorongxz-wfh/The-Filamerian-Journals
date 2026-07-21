@@ -30,7 +30,8 @@ const Search: React.FC = () => {
   // Filters State
   const [type, setType] = useState('all');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [year, setYear] = useState('');
+  const [fromYear, setFromYear] = useState('');
+  const [toYear, setToYear] = useState('');
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
   // Accordion open/close state
@@ -75,11 +76,11 @@ const Search: React.FC = () => {
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [query, type, selectedCategories, year]);
+  }, [query, type, selectedCategories, fromYear, toYear]);
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query.trim() && selectedCategories.length === 0 && !year.trim()) {
+      if (!query.trim() && selectedCategories.length === 0 && !fromYear.trim() && !toYear.trim()) {
         setResults({ journals: [], articles: [] });
         return;
       }
@@ -87,7 +88,7 @@ const Search: React.FC = () => {
       setLoading(true);
       try {
         const categoryParam = selectedCategories.length > 0 ? selectedCategories.join(',') : '';
-        const res = await api.get(`/public/search?q=${encodeURIComponent(query)}&type=${type}&category=${encodeURIComponent(categoryParam)}&year=${encodeURIComponent(year)}&page=${currentPage}`);
+        const res = await api.get(`/public/search?q=${encodeURIComponent(query)}&type=${type}&category=${encodeURIComponent(categoryParam)}&from_year=${encodeURIComponent(fromYear)}&to_year=${encodeURIComponent(toYear)}&page=${currentPage}`);
         
         const data = res.data.data;
         if (type === 'all') {
@@ -108,7 +109,7 @@ const Search: React.FC = () => {
     };
 
     fetchResults();
-  }, [query, type, selectedCategories, year, currentPage]);
+  }, [query, type, selectedCategories, fromYear, toYear, currentPage]);
 
   const navigate = useNavigate();
 
@@ -121,25 +122,34 @@ const Search: React.FC = () => {
         preTitle={
           <button 
             onClick={() => navigate(-1)} 
-            className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider mb-4"
+            className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider mb-4 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Back to previous page
           </button>
         }
       >
         <p className="text-[14px] text-muted">
-          Showing results for: <span className="font-semibold text-primary">"{query}"</span>
+          {query ? (
+            <span>
+              Showing matches for <strong className="text-primary font-semibold">"{query}"</strong>
+            </span>
+          ) : (
+            'Filter through published academic journals and articles.'
+          )}
         </p>
       </PageHeader>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-8">
+      {/* Main Content Layout */}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-[220px] shrink-0">
-          <div className="sticky top-24 space-y-1">
-            <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest mb-4">Advanced Filters</h3>
+        <aside className="w-full lg:w-64 shrink-0 space-y-4">
+          <div className="bg-surface border border-border p-4">
+            <h3 className="text-xs font-bold text-primary uppercase tracking-wider border-b border-border pb-3 mb-4">
+              Filter Results
+            </h3>
 
             {/* Content Type */}
-            <div className="border border-border">
+            <div className="border border-border mb-4">
               <button
                 onClick={() => toggleSection('type')}
                 className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
@@ -201,14 +211,37 @@ const Search: React.FC = () => {
                 <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.year ? 'rotate-180' : ''}`} />
               </button>
               {openSections.year && (
-                <div className="px-4 pb-4">
-                  <input
-                    type="number"
-                    placeholder="e.g. 2024"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                    className="w-full px-3 py-2 bg-surface border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                  />
+                <div className="px-4 pb-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">From</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 2020"
+                        value={fromYear}
+                        onChange={(e) => setFromYear(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">To</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 2024"
+                        value={toYear}
+                        onChange={(e) => setToYear(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
+                      />
+                    </div>
+                  </div>
+                  {(fromYear || toYear) && (
+                    <button
+                      onClick={() => { setFromYear(''); setToYear(''); }}
+                      className="text-[11px] font-medium text-muted hover:text-red-600 border border-border hover:border-red-300 w-full py-1 transition-colors uppercase tracking-wider text-center cursor-pointer"
+                    >
+                      Clear Year Filter
+                    </button>
+                  )}
                 </div>
               )}
             </div>

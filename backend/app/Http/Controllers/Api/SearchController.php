@@ -20,8 +20,19 @@ class SearchController extends Controller
         $type = $request->query('type', 'all'); // 'all', 'journals', 'articles'
         $category = $request->query('category', '');
         $year = $request->query('year', '');
+        $fromYear = $request->query('from_year', '');
+        $toYear = $request->query('to_year', '');
 
-        if (empty(trim($q)) && empty($category) && empty($year)) {
+        if (!empty($year) && empty($fromYear) && empty($toYear)) {
+            if (str_contains($year, '-')) {
+                [$fromYear, $toYear] = explode('-', $year);
+            } else {
+                $fromYear = $year;
+                $toYear = $year;
+            }
+        }
+
+        if (empty(trim($q)) && empty($category) && empty($year) && empty($fromYear) && empty($toYear)) {
             return response()->json([
                 'data' => [
                     'journals' => [],
@@ -56,11 +67,14 @@ class SearchController extends Controller
                 });
             }
 
-            // Journals don't inherently have a "year" column in this basic setup (volumes have years), 
-            // but we'll apply it if possible, or just ignore for journals.
-            if (!empty($year)) {
-                $journalQuery->whereHas('volumes', function ($query) use ($year) {
-                    $query->where('year', $year);
+            if (!empty($fromYear) || !empty($toYear)) {
+                $journalQuery->whereHas('volumes', function ($query) use ($fromYear, $toYear) {
+                    if (!empty($fromYear)) {
+                        $query->where('year', '>=', (int)$fromYear);
+                    }
+                    if (!empty($toYear)) {
+                        $query->where('year', '<=', (int)$toYear);
+                    }
                 });
             }
 
@@ -93,9 +107,14 @@ class SearchController extends Controller
                 });
             }
 
-            if (!empty($year)) {
-                $articleQuery->whereHas('volume', function ($query) use ($year) {
-                    $query->where('year', $year);
+            if (!empty($fromYear) || !empty($toYear)) {
+                $articleQuery->whereHas('volume', function ($query) use ($fromYear, $toYear) {
+                    if (!empty($fromYear)) {
+                        $query->where('year', '>=', (int)$fromYear);
+                    }
+                    if (!empty($toYear)) {
+                        $query->where('year', '<=', (int)$toYear);
+                    }
                 });
             }
 
