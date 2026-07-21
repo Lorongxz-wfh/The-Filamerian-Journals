@@ -111,7 +111,7 @@ const Notifications: React.FC = () => {
                     {notif.data.message}
                   </p>
                 </div>
-                <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+                <div className="shrink-0 flex items-center">
                   <button 
                     onClick={(e) => deleteNotif(e, notif.id)}
                     className="h-8 w-8 flex items-center justify-center text-muted hover:text-red-500 transition-colors"

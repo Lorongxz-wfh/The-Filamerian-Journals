@@ -311,7 +311,7 @@ const MyJournals: React.FC = () => {
                   {journal.editor || '-'}
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-end gap-1">
                     <IconButton 
                       icon={Settings2} 
                       onClick={() => navigate(`/dashboard/journals/${journal.slug}`)} 

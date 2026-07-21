@@ -245,7 +245,7 @@ const Articles: React.FC = () => {
                 </TableCell>
                 <TableCell className="text-muted">{new Date(article.created_at).toLocaleDateString()}</TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center justify-end gap-1">
                     {article.pdf_url && (
                       <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
                     )}
