@@ -54,13 +54,15 @@ const SystemSettings: React.FC = () => {
     }
   };
 
-  if (loading) return <FormSkeleton rows={6} />;
-
   return (
     <div className="space-y-8">
       <DashboardHeader title="System Settings" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {loading ? (
+        <FormSkeleton rows={6} />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Email */}
         <div className="border border-border bg-surface p-6 space-y-5">
           <div className="flex items-center gap-3 border-b border-border pb-3">
@@ -145,6 +147,8 @@ const SystemSettings: React.FC = () => {
           {saving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
+        </>
+      )}
     </div>
   );
 };

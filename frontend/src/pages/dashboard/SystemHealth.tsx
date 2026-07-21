@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
-import Spinner from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface RecordCounts {
   articles: number;
@@ -70,14 +70,6 @@ const SystemHealth: React.FC = () => {
     }
   };
 
-  if (loading && !health) {
-    return (
-      <div className="flex h-full items-center justify-center py-20">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
   const dbStatusText = typeof health?.database === 'object' ? health.database?.status : (typeof health?.database === 'string' ? health.database : 'Disconnected');
   const dbDriverText = typeof health?.database === 'object' ? health.database?.driver : '';
   const dbTypeText = typeof health?.database === 'object' ? health.database?.type : '';
@@ -95,23 +87,34 @@ const SystemHealth: React.FC = () => {
         title="System Status" 
       />
 
-      {/* Main Connection Status Bento */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* API / Backend Card */}
-        <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted uppercase tracking-wider">Backend</span>
-            <span className="flex h-2 w-2 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.status === 'Operational' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-            </span>
+      {loading && !health ? (
+        <div className="space-y-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-[150px] w-full" />
+            <Skeleton className="h-[150px] w-full" />
+            <Skeleton className="h-[150px] w-full" />
           </div>
-          <div>
-            <div className="text-xl font-bold text-primary tracking-tight font-mono">{health?.status}</div>
-            <div className="text-xs text-muted mt-2 font-mono uppercase tracking-wider">[ Backend Service Active ]</div>
-          </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.status === 'Operational' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
+          <Skeleton className="h-[220px] w-full" />
         </div>
+      ) : (
+        <>
+          {/* Main Connection Status Bento */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* API / Backend Card */}
+            <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted uppercase tracking-wider">Backend</span>
+                <span className="flex h-2 w-2 relative">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.status === 'Operational' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                </span>
+              </div>
+              <div>
+                <div className="text-xl font-bold text-primary tracking-tight font-mono">{health?.status}</div>
+                <div className="text-xs text-muted mt-2 font-mono uppercase tracking-wider">[ Backend Service Active ]</div>
+              </div>
+              <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.status === 'Operational' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
+            </div>
 
         {/* Database Card */}
         <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
@@ -207,6 +210,8 @@ const SystemHealth: React.FC = () => {
           [ REFRESH STATUS ]
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 };

@@ -243,39 +243,43 @@ const Overview: React.FC = () => {
           </div>
 
           {/* System Info - Super Admin Only */}
-          {user.role === 'Super Admin' && (
-            <div className="border border-border bg-surface p-5 shadow-sm">
-              <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5">
-                System Status
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] text-muted">
-                    <div className={`h-1.5 w-1.5 rounded-full ${systemHealth?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`} /> API Services
+          {user.role === 'Super Admin' && (() => {
+            const dbStatus = typeof systemHealth?.database === 'object' ? systemHealth.database.status : (systemHealth?.database || 'Loading...');
+            const storageText = typeof systemHealth?.storage === 'object' ? systemHealth.storage.type : (systemHealth?.storage_disk ? systemHealth.storage_disk.toUpperCase() : 'Loading...');
+            return (
+              <div className="border border-border bg-surface p-5 shadow-sm">
+                <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5">
+                  System Status
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                      <div className={`h-1.5 w-1.5 rounded-full ${systemHealth?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`} /> API Services
+                    </div>
+                    <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 ${systemHealth?.status === 'Operational' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'}`}>
+                      {systemHealth?.status || 'Loading...'}
+                    </span>
                   </div>
-                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 ${systemHealth?.status === 'Operational' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'}`}>
-                    {systemHealth?.status || 'Loading...'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] text-muted">
-                    <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> Cloud Storage
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                      <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> Cloud Storage
+                    </div>
+                    <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">
+                      {storageText}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">
-                    {systemHealth?.storage_disk ? systemHealth.storage_disk.toUpperCase() : 'Loading...'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] text-muted">
-                    <div className={`h-1.5 w-1.5 rounded-full ${systemHealth?.database === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`} /> Primary DB
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                      <div className={`h-1.5 w-1.5 rounded-full ${dbStatus === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`} /> Primary DB
+                    </div>
+                    <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 ${dbStatus === 'Connected' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'}`}>
+                      {dbStatus}
+                    </span>
                   </div>
-                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 ${systemHealth?.database === 'Connected' ? 'text-emerald-600 bg-emerald-500/10' : 'text-red-600 bg-red-500/10'}`}>
-                    {systemHealth?.database || 'Loading...'}
-                  </span>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
       </div>
