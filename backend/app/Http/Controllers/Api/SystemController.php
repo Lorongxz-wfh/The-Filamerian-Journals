@@ -11,12 +11,47 @@ class SystemController extends Controller
 {
     public function health()
     {
+        $dbStatus = 'Disconnected';
+        $dbDriver = 'Unknown';
+        $dbType = 'Unknown';
+        $dbHostDisplay = '';
+        $dbSizeBytes = 0;
+        $counts = [
+            'articles' => 0,
+            'journals' => 0,
+            'users' => 0,
+            'activity_logs' => 0,
+        ];
+
         try {
             DB::connection()->getPdo();
             $dbStatus = 'Connected';
             
             $driver = DB::connection()->getDriverName();
-            $dbSizeBytes = 0;
+            
+            // Map driver names to nice labels
+            $dbDriver = match($driver) {
+                'sqlite' => 'SQLite',
+                'mysql' => 'MySQL',
+                'pgsql' => 'PostgreSQL',
+                default => ucfirst($driver)
+            };
+
+            $host = DB::connection()->getConfig('host') ?? '';
+            
+            if ($driver === 'sqlite' || $host === '127.0.0.1' || $host === 'localhost') {
+                $dbType = 'Local';
+                $dbHostDisplay = $driver === 'sqlite' ? 'Local Database File' : 'Localhost';
+            } else {
+                $dbType = 'Deployed';
+                if (str_contains($host, 'render.com')) {
+                    $dbHostDisplay = 'Render Cloud';
+                } else if (str_contains($host, 'rds.amazonaws.com')) {
+                    $dbHostDisplay = 'AWS RDS';
+                } else {
+                    $dbHostDisplay = explode('.', $host)[0] ?? 'External Host';
+                }
+            }
 
             if ($driver === 'sqlite') {
                 $dbPath = DB::connection()->getDatabaseName();
@@ -44,54 +79,48 @@ class SystemController extends Controller
             ];
         } catch (\Exception $e) {
             $dbStatus = 'Disconnected';
-            $dbSizeBytes = 0;
-            $counts = [
-                'articles' => 0,
-                'journals' => 0,
-                'users' => 0,
-                'activity_logs' => 0,
-            ];
         }
 
-        // Disk space
-        $storagePath = storage_path();
-        $totalDisk = @disk_total_space($storagePath) ?: 0;
-        $freeDisk = @disk_free_space($storagePath) ?: 0;
-        $usedDisk = max(0, $totalDisk - $freeDisk);
-        $diskPercentage = $totalDisk > 0 ? round(($usedDisk / $totalDisk) * 100, 1) : 0;
-
-        // Recent logs
-        $logPath = storage_path('logs/laravel.log');
-        $recentLogs = [];
-        if (File::exists($logPath)) {
-            $rawContent = File::get($logPath);
-            $lines = array_filter(explode("\n", trim($rawContent)));
-            $recentLogs = array_slice(array_values($lines), -80);
-        }
-
-        // Cloudflare R2 info
+        // Storage Info
+        $storageDisk = env('FILESYSTEM_DISK', 'local');
+        $storageType = $storageDisk === 'r2' ? 'Cloudflare R2' : 'Local Storage';
         $r2Bucket = env('R2_BUCKET', '');
-        $r2Status = env('FILESYSTEM_DISK') === 'r2' ? 'Active' : 'Inactive';
+
+        // Calculate total storage size (cached for 10 mins to avoid API lag)
+        $storageSizeBytes = \Illuminate\Support\Facades\Cache::remember('storage_total_size', 600, function () use ($storageDisk) {
+            $totalSize = 0;
+            try {
+                $disk = \Illuminate\Support\Facades\Storage::disk($storageDisk);
+                $files = $disk->allFiles();
+                foreach ($files as $file) {
+                    // Skip hidden files
+                    if (str_starts_with(basename($file), '.')) continue;
+                    $totalSize += $disk->size($file);
+                }
+            } catch (\Exception $e) {
+                // Fallback
+            }
+            return $totalSize;
+        });
 
         return response()->json([
             'status' => 'Operational',
             'php_version' => phpversion(),
             'laravel_version' => app()->version(),
-            'database' => $dbStatus,
-            'database_size_bytes' => $dbSizeBytes,
-            'counts' => $counts,
-            'storage_disk' => env('FILESYSTEM_DISK', 'local'),
-            'r2' => [
-                'status' => $r2Status,
+            'database' => [
+                'status' => $dbStatus,
+                'driver' => $dbDriver,
+                'type' => $dbType,
+                'host' => $dbHostDisplay,
+                'size_bytes' => $dbSizeBytes,
+            ],
+            'storage' => [
+                'disk' => $storageDisk,
+                'type' => $storageType,
                 'bucket' => $r2Bucket,
+                'size_bytes' => $storageSizeBytes,
             ],
-            'disk' => [
-                'total_bytes' => $totalDisk,
-                'free_bytes' => $freeDisk,
-                'used_bytes' => $usedDisk,
-                'percentage' => $diskPercentage,
-            ],
-            'recent_logs' => $recentLogs,
+            'counts' => $counts,
             'timestamp' => now()->toIso8601String(),
         ]);
     }

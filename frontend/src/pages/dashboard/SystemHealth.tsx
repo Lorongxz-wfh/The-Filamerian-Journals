@@ -1,41 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
-import { Activity, Database, HardDrive, Terminal, RefreshCw, Trash2, FileText, Layers, Users, BookOpen, Cpu, Cloud } from 'lucide-react';
+import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Spinner from '@/components/ui/Spinner';
-import Button from '@/components/ui/Button';
-import { toast } from 'sonner';
-
-interface DiskData {
-  total_bytes: number;
-  free_bytes: number;
-  used_bytes: number;
-  percentage: number;
-}
 
 interface RecordCounts {
   articles: number;
   journals: number;
   users: number;
-  activity_logs: number;
 }
 
-interface R2Data {
+interface DatabaseData {
   status: string;
+  driver: string;
+  type: string;
+  host: string;
+  size_bytes: number;
+}
+
+interface StorageData {
+  disk: string;
+  type: string;
   bucket: string;
+  size_bytes: number;
 }
 
 interface HealthData {
   status: string;
-  php_version: string;
-  laravel_version: string;
-  database: string;
-  database_size_bytes: number;
+  database: DatabaseData;
+  storage: StorageData;
   counts: RecordCounts;
-  storage_disk: string;
-  r2: R2Data;
-  disk: DiskData;
-  recent_logs: string[];
   timestamp: string;
 }
 
@@ -51,8 +45,6 @@ const formatBytes = (bytes: number, decimals = 2) => {
 const SystemHealth: React.FC = () => {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [clearing, setClearing] = useState(false);
-  const [logFilter, setLogFilter] = useState('');
 
   useEffect(() => {
     fetchHealth();
@@ -65,23 +57,15 @@ const SystemHealth: React.FC = () => {
       setHealth(res.data);
     } catch (error) {
       console.error('Failed to fetch system health', error);
-      toast.error('Failed to load system health metrics');
+      setHealth({
+        status: 'Offline',
+        database: { status: 'Disconnected', driver: 'Unknown', type: 'Unknown', host: '', size_bytes: 0 },
+        storage: { disk: 'local', type: 'Local Storage', bucket: '', size_bytes: 0 },
+        counts: { articles: 0, journals: 0, users: 0 },
+        timestamp: new Date().toISOString(),
+      });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleClearLogs = async () => {
-    if (!confirm('Are you sure you want to clear system logs?')) return;
-    try {
-      setClearing(true);
-      await api.delete('/system/logs');
-      toast.success('Logs cleared successfully');
-      fetchHealth();
-    } catch (error) {
-      toast.error('Failed to clear logs');
-    } finally {
-      setClearing(false);
     }
   };
 
@@ -93,239 +77,123 @@ const SystemHealth: React.FC = () => {
     );
   }
 
-  const filteredLogs = (health?.recent_logs || []).filter(line => 
-    line.toLowerCase().includes(logFilter.toLowerCase())
-  );
-
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-8 font-sans w-full">
       <DashboardHeader 
-        title="System Health & Diagnostics" 
+        title="System Status" 
       />
 
-      {/* Analog/Techy Status Bar Header */}
-      <div className="bg-card border border-border p-3 flex flex-wrap items-center justify-between text-xs font-mono text-muted gap-4">
-        <div className="flex items-center gap-3">
-          <span className="flex h-2.5 w-2.5 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-          </span>
-          <span className="font-semibold text-primary uppercase tracking-widest text-[11px]">SYS.HEALTH // TELEMETRY OK</span>
-        </div>
-        <div className="flex items-center gap-6 text-[11px]">
-          <span>SERVER: <strong className="text-primary font-mono">ONLINE</strong></span>
-          <span>LAST PING: <strong className="text-primary font-mono">{new Date(health?.timestamp || '').toLocaleTimeString()}</strong></span>
-          <button 
-            onClick={fetchHealth} 
-            disabled={loading}
-            className="flex items-center gap-1.5 text-accent hover:text-accent/80 transition-colors uppercase tracking-wider font-semibold"
-          >
-            <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-            Refresh Telemetry
-          </button>
-        </div>
-      </div>
-
-      {/* Top Telemetry Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: API */}
-        <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ API.CORE ]</span>
-            <Activity className={`h-5 w-5 ${health?.status === 'Operational' ? 'text-emerald-500' : 'text-red-500'}`} />
-          </div>
-          <div>
-            <div className="text-xl font-bold font-mono tracking-tight text-primary">{health?.status}</div>
-            <div className="text-[11px] font-mono text-muted mt-1 flex items-center gap-1">
-              <Cpu className="h-3 w-3 text-muted/70" /> Laravel v{health?.laravel_version}
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald-500/40"></div>
-        </div>
-
-        {/* Card 2: Database */}
-        <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ DB.ENGINE ]</span>
-            <Database className={`h-5 w-5 ${health?.database === 'Connected' ? 'text-emerald-500' : 'text-red-500'}`} />
-          </div>
-          <div>
-            <div className="text-xl font-bold font-mono tracking-tight text-primary">{health?.database}</div>
-            <div className="text-[11px] font-mono text-muted mt-1">
-              Footprint: <strong className="text-primary font-mono">{formatBytes(health?.database_size_bytes || 0)}</strong>
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500/40"></div>
-        </div>
-
-        {/* Card 3: Cloudflare R2 */}
-        <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ OBJECT.STORAGE ]</span>
-            <Cloud className={`h-5 w-5 ${health?.r2.status === 'Active' ? 'text-amber-500' : 'text-zinc-400'}`} />
-          </div>
-          <div>
-            <div className="text-xl font-bold font-mono tracking-tight text-primary">
-              {health?.r2.status === 'Active' ? 'R2 ACTIVE' : 'R2 INACTIVE'}
-            </div>
-            <div className="text-[11px] font-mono text-muted mt-1 truncate">
-              Bucket: <strong className="text-primary font-mono">{health?.r2.bucket || 'None'}</strong>
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-amber-500/40"></div>
-        </div>
-
-        {/* Card 4: Local Temp Disk */}
-        <div className="bg-card border border-border p-5 relative overflow-hidden group hover:border-primary/40 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-widest">[ TEMP.DISK ]</span>
-            <HardDrive className="h-5 w-5 text-indigo-500" />
-          </div>
-          <div>
-            <div className="text-xl font-bold font-mono tracking-tight text-primary">{health?.disk.percentage}% USED</div>
-            <div className="text-[11px] font-mono text-muted mt-1">
-              Render Container Capacity
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-500/40"></div>
-        </div>
-      </div>
-
-      {/* Storage Utilization & DB Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Analog Storage Gauge */}
-        <div className="bg-card border border-border p-6 lg:col-span-1 space-y-5">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <h3 className="text-xs font-mono font-bold text-primary uppercase tracking-wider flex items-center gap-2">
-              <HardDrive className="h-4 w-4 text-accent" />
-              [ TEMP_CONTAINER_DISK ]
-            </h3>
-            <span className="text-[10px] font-mono bg-accent/10 text-accent px-2 py-0.5 rounded uppercase font-semibold">
-              EPHEMERAL
+      {/* Main Connection Status Bento */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* API / Backend Card */}
+        <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider">Backend</span>
+            <span className="flex h-2 w-2 relative">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.status === 'Operational' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
             </span>
           </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between text-xs font-mono">
-              <span className="text-muted">Temp Space Used</span>
-              <span className="text-primary font-bold">{formatBytes(health?.disk.used_bytes || 0)} ({health?.disk.percentage}%)</span>
-            </div>
-            
-            {/* Segmented Analog Gauge Bar */}
-            <div className="w-full bg-border/40 p-1 border border-border/80">
-              <div 
-                className={`h-3 transition-all duration-500 ${
-                  (health?.disk.percentage || 0) > 85 
-                    ? 'bg-red-500' 
-                    : (health?.disk.percentage || 0) > 65 
-                    ? 'bg-amber-500' 
-                    : 'bg-emerald-500'
-                }`} 
-                style={{ width: `${health?.disk.percentage || 0}%` }}
-              ></div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-muted pt-2 border-t border-border/40">
-              <div>FREE: <strong className="text-primary font-mono">{formatBytes(health?.disk.free_bytes || 0)}</strong></div>
-              <div className="text-right">TOTAL: <strong className="text-primary font-mono">{formatBytes(health?.disk.total_bytes || 0)}</strong></div>
-            </div>
-            
-            <p className="text-[10px] font-mono text-muted border-t border-border/20 pt-3 leading-relaxed">
-              * Note: Render web instances use temporary local storage. All permanent file uploads bypass this container disk and save directly to your Cloudflare R2 bucket.
-            </p>
+          <div>
+            <div className="text-xl font-bold text-primary tracking-tight font-mono">{health?.status}</div>
+            <div className="text-xs text-muted mt-2 font-mono uppercase tracking-wider">[ Backend Service Active ]</div>
           </div>
+          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.status === 'Operational' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
         </div>
 
-        {/* Database Record Summary Bento */}
-        <div className="bg-card border border-border p-6 lg:col-span-2 space-y-5">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <h3 className="text-xs font-mono font-bold text-primary uppercase tracking-wider flex items-center gap-2">
-              <Database className="h-4 w-4 text-accent" />
-              [ DATABASE_RECORD_SUMMARY ]
-            </h3>
-            <span className="text-[10px] font-mono text-muted">LIVE SYNCED</span>
+        {/* Database Card */}
+        <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider">Database</span>
+            <span className="flex h-2 w-2 relative">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.database.status === 'Connected' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.database.status === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+            </span>
+          </div>
+          <div>
+            <div className="text-xl font-bold text-primary tracking-tight font-mono">
+              {health?.database.status === 'Connected' ? `Connected (${formatBytes(health?.database.size_bytes || 0)})` : health?.database.status}
+            </div>
+            <div className="text-[11px] text-muted mt-2 font-mono">
+              {health?.database.type} ({health?.database.driver}) // {health?.database.host}
+            </div>
+          </div>
+          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.database.status === 'Connected' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
+        </div>
+
+        {/* Storage Card */}
+        <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider">Storage</span>
+            <span className="flex h-2 w-2 relative">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.storage.disk === 'r2' ? 'bg-amber-400' : 'bg-zinc-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.storage.disk === 'r2' ? 'bg-amber-500' : 'bg-zinc-500'}`}></span>
+            </span>
+          </div>
+          <div>
+            <div className="text-xl font-bold text-primary tracking-tight font-mono">
+              {health?.storage.type} ({formatBytes(health?.storage.size_bytes || 0)})
+            </div>
+            <div className="text-[11px] text-muted mt-2 font-mono truncate">
+              {health?.storage.disk === 'r2' ? `Bucket: ${health?.storage.bucket}` : 'Local Server Drive'}
+            </div>
+          </div>
+          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.storage.disk === 'r2' ? 'bg-amber-500/30' : 'bg-zinc-500/30'}`}></div>
+        </div>
+      </div>
+
+      {/* Record Totals Bento */}
+      <div className="bg-card border border-border p-6 space-y-6">
+        <div className="flex items-center justify-between border-b border-border pb-4">
+          <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Resource Totals</h3>
+          <span className="text-xs font-mono text-muted">
+            Last Synced: {new Date(health?.timestamp || '').toLocaleTimeString()}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
+            <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-none">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
+              <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.articles}</div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-surface border border-border p-4 text-center hover:border-primary/40 transition-colors">
-              <FileText className="h-5 w-5 text-emerald-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold font-mono text-primary">{health?.counts?.articles || 0}</div>
-              <div className="text-[10px] font-mono text-muted uppercase tracking-widest mt-1">Articles</div>
+          <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
+            <div className="p-3 bg-blue-500/10 text-blue-500 rounded-none">
+              <BookOpen className="h-5 w-5" />
             </div>
-
-            <div className="bg-surface border border-border p-4 text-center hover:border-primary/40 transition-colors">
-              <BookOpen className="h-5 w-5 text-blue-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold font-mono text-primary">{health?.counts?.journals || 0}</div>
-              <div className="text-[10px] font-mono text-muted uppercase tracking-widest mt-1">Journals</div>
+            <div>
+              <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
+              <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.journals}</div>
             </div>
+          </div>
 
-            <div className="bg-surface border border-border p-4 text-center hover:border-primary/40 transition-colors">
-              <Users className="h-5 w-5 text-purple-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold font-mono text-primary">{health?.counts?.users || 0}</div>
-              <div className="text-[10px] font-mono text-muted uppercase tracking-widest mt-1">Users</div>
+          <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
+            <div className="p-3 bg-purple-500/10 text-purple-500 rounded-none">
+              <Users className="h-5 w-5" />
             </div>
-
-            <div className="bg-surface border border-border p-4 text-center hover:border-primary/40 transition-colors">
-              <Layers className="h-5 w-5 text-amber-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold font-mono text-primary">{health?.counts?.activity_logs || 0}</div>
-              <div className="text-[10px] font-mono text-muted uppercase tracking-widest mt-1">Audit Logs</div>
+            <div>
+              <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
+              <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.users}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Terminal Log Stream Console */}
-      <div className="bg-card border border-border overflow-hidden shadow-md">
-        <div className="bg-zinc-900 border-b border-zinc-800 px-5 py-3 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Terminal className="h-4 w-4 text-emerald-400" />
-            <span className="text-xs font-mono font-bold text-zinc-200 uppercase tracking-widest">[ EVENT_LOG_CONSOLE ]</span>
-            <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">laravel.log</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input 
-              type="text" 
-              placeholder="Search log stream..." 
-              value={logFilter}
-              onChange={(e) => setLogFilter(e.target.value)}
-              className="bg-zinc-950 border border-zinc-700 text-zinc-200 text-xs px-3 py-1 font-mono focus:outline-none focus:border-accent w-40 sm:w-56"
-            />
-            <Button size="sm" variant="ghost" onClick={fetchHealth} disabled={loading} className="h-8 text-zinc-300 hover:text-white">
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleClearLogs} disabled={clearing} className="h-8 text-red-400 border-red-500/40 hover:bg-red-500/10">
-              <Trash2 className="h-3.5 w-3.5 mr-1" />
-              Clear
-            </Button>
-          </div>
-        </div>
-
-        <div className="bg-zinc-950 p-4 font-mono text-[11px] leading-relaxed text-zinc-300 h-96 overflow-y-auto space-y-1 select-text border-t border-zinc-900">
-          {filteredLogs.length > 0 ? (
-            filteredLogs.map((log, index) => {
-              const isError = log.includes('.ERROR') || log.includes('Exception') || log.includes('Fatal');
-              const isWarning = log.includes('.WARNING');
-              const isInfo = log.includes('.INFO');
-
-              return (
-                <div 
-                  key={index} 
-                  className={`py-1 px-2 font-mono whitespace-pre-wrap break-all border-l-2 transition-colors ${
-                    isError ? 'border-red-500 bg-red-950/30 text-red-300' : isWarning ? 'border-amber-500 bg-amber-950/20 text-amber-300' : isInfo ? 'border-blue-500 bg-blue-950/20 text-blue-300' : 'border-transparent text-zinc-400'
-                  }`}
-                >
-                  <span className="text-zinc-600 select-none mr-3 font-mono">{String(index + 1).padStart(3, '0')}</span>
-                  {log}
-                </div>
-              );
-            })
-          ) : (
-            <div className="h-full flex items-center justify-center text-zinc-600 text-xs font-mono italic">
-              {logFilter ? '> No log events match query.' : '> Event stream is currently empty.'}
-            </div>
-          )}
-        </div>
+      {/* Manual Refresh Action */}
+      <div className="flex justify-end">
+        <button
+          onClick={fetchHealth}
+          disabled={loading}
+          className="flex items-center gap-2 text-xs font-mono font-bold text-muted hover:text-primary transition-colors border border-border px-4 py-2 hover:bg-surface"
+        >
+          <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+          [ REFRESH STATUS ]
+        </button>
       </div>
     </div>
   );
