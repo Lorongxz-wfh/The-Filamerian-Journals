@@ -6,7 +6,6 @@ import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
-import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
@@ -142,7 +141,7 @@ const Search: React.FC = () => {
       {/* Main Content Layout */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-4">
+        <aside className="w-full lg:w-64 shrink-0 space-y-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] overflow-y-auto">
           <div className="bg-surface border border-border p-4">
             <h3 className="text-xs font-bold text-primary uppercase tracking-wider border-b border-border pb-3 mb-4">
               Filter Results
@@ -158,48 +157,54 @@ const Search: React.FC = () => {
                 <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.type ? 'rotate-180' : ''}`} />
               </button>
               {openSections.type && (
-                <div className="px-4 pb-4 space-y-2.5">
-                  {['all', 'journals', 'articles'].map(t => (
-                    <label key={t} className="flex items-center gap-2.5 cursor-pointer group">
+                <div className="px-4 pb-4 space-y-2">
+                  {[
+                    { id: 'all', label: 'All Content' },
+                    { id: 'journals', label: 'Journals' },
+                    { id: 'articles', label: 'Articles' },
+                  ].map((t) => (
+                    <label key={t.id} className="flex items-center gap-2.5 cursor-pointer group">
                       <input
                         type="radio"
-                        name="contentType"
-                        checked={type === t}
-                        onChange={() => setType(t)}
+                        name="type"
+                        checked={type === t.id}
+                        onChange={() => setType(t.id)}
                         className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
                       />
-                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors capitalize">{t}</span>
+                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{t.label}</span>
                     </label>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Subject / Discipline */}
-            <div className="border border-border">
-              <button
-                onClick={() => toggleSection('subject')}
-                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
-              >
-                Subject / Discipline
-                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.subject ? 'rotate-180' : ''}`} />
-              </button>
-              {openSections.subject && (
-                <div className="px-4 pb-4 space-y-2.5">
-                  {availableCategories.map(cat => (
-                    <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(cat)}
-                        onChange={() => toggleCategory(cat)}
-                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
-                      />
-                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{cat}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Category / Subject */}
+            {availableCategories.length > 0 && (
+              <div className="border border-border mb-4">
+                <button
+                  onClick={() => toggleSection('subject')}
+                  className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
+                >
+                  Subject / Discipline
+                  <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.subject ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.subject && (
+                  <div className="px-4 pb-4 space-y-2">
+                    {availableCategories.map((cat) => (
+                      <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(cat)}
+                          onChange={() => toggleCategory(cat)}
+                          className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                        />
+                        <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{cat}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Publication Year */}
             <div className="border border-border">
@@ -251,8 +256,41 @@ const Search: React.FC = () => {
         {/* Results */}
         <div className="flex-1 space-y-12">
           {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center space-y-4 min-h-[40vh]">
-              <Spinner size="lg" text="Searching database..." />
+            <div className="flex-1 space-y-8 animate-pulse">
+              {/* Journal Skeletons Grid */}
+              <div className="space-y-4">
+                <div className="h-4 w-28 bg-border/60 rounded" />
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="bg-surface border border-border p-5 flex flex-col justify-between min-h-[396px] w-full">
+                      <div className="w-32 h-44 bg-border/40 mx-auto mb-6 shrink-0" />
+                      <div className="space-y-3">
+                        <div className="h-4 w-20 bg-border/60" />
+                        <div className="h-4 w-full bg-border/60" />
+                        <div className="h-3 w-3/4 bg-border/40" />
+                      </div>
+                      <div className="pt-3 border-t border-border flex justify-between">
+                        <div className="h-3 w-16 bg-border/40" />
+                        <div className="h-3 w-16 bg-border/40" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Article Skeletons List */}
+              <div className="space-y-4 pt-4 border-t border-border">
+                <div className="h-4 w-28 bg-border/60 rounded" />
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="border border-border p-6 bg-surface space-y-3">
+                      <div className="h-4 w-3/4 bg-border/60" />
+                      <div className="h-3 w-1/2 bg-border/40" />
+                      <div className="h-12 w-full bg-border/30" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-12">
