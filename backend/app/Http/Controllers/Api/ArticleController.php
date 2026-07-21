@@ -317,6 +317,15 @@ class ArticleController extends Controller
 
     public function trackView(Article $article)
     {
+        $ip = request()->ip();
+        $cacheKey = "article_viewed:{$article->id}:{$ip}";
+
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            return response()->json(['message' => 'View already recorded recently.']);
+        }
+
+        \Illuminate\Support\Facades\Cache::put($cacheKey, true, now()->addHours(1));
+
         $article->increment('views_count');
         
         $metric = \Illuminate\Support\Facades\DB::table('article_metrics')
