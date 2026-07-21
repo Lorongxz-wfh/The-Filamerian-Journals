@@ -29,6 +29,7 @@ interface HealthData {
   status: string;
   database: DatabaseData;
   storage: StorageData;
+  storage_disk?: string;
   counts: RecordCounts;
   timestamp: string;
 }
@@ -77,6 +78,17 @@ const SystemHealth: React.FC = () => {
     );
   }
 
+  const dbStatusText = typeof health?.database === 'object' ? health.database?.status : (typeof health?.database === 'string' ? health.database : 'Disconnected');
+  const dbDriverText = typeof health?.database === 'object' ? health.database?.driver : '';
+  const dbTypeText = typeof health?.database === 'object' ? health.database?.type : '';
+  const dbHostText = typeof health?.database === 'object' ? health.database?.host : '';
+  const dbSizeBytes = typeof health?.database === 'object' ? (health.database?.size_bytes || 0) : 0;
+
+  const storageTypeText = typeof health?.storage === 'object' ? health.storage?.type : (health?.storage_disk === 'r2' ? 'Cloudflare R2' : 'Local Storage');
+  const storageDiskText = typeof health?.storage === 'object' ? health.storage?.disk : (health?.storage_disk || 'local');
+  const storageBucketText = typeof health?.storage === 'object' ? health.storage?.bucket : '';
+  const storageSizeBytes = typeof health?.storage === 'object' ? (health.storage?.size_bytes || 0) : 0;
+
   return (
     <div className="space-y-8 font-sans w-full">
       <DashboardHeader 
@@ -106,19 +118,19 @@ const SystemHealth: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted uppercase tracking-wider">Database</span>
             <span className="flex h-2 w-2 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.database.status === 'Connected' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.database.status === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dbStatusText === 'Connected' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${dbStatusText === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
             </span>
           </div>
           <div>
             <div className="text-xl font-bold text-primary tracking-tight font-mono">
-              {health?.database.status === 'Connected' ? `Connected (${formatBytes(health?.database.size_bytes || 0)})` : health?.database.status}
+              {dbStatusText === 'Connected' ? `Connected (${formatBytes(dbSizeBytes)})` : dbStatusText}
             </div>
             <div className="text-[11px] text-muted mt-2 font-mono">
-              {health?.database.type} ({health?.database.driver}) // {health?.database.host}
+              {dbTypeText} {dbDriverText ? `(${dbDriverText})` : ''} {dbHostText ? `// ${dbHostText}` : ''}
             </div>
           </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.database.status === 'Connected' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
+          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${dbStatusText === 'Connected' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
         </div>
 
         {/* Storage Card */}
@@ -126,19 +138,19 @@ const SystemHealth: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted uppercase tracking-wider">Storage</span>
             <span className="flex h-2 w-2 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.storage.disk === 'r2' ? 'bg-amber-400' : 'bg-zinc-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.storage.disk === 'r2' ? 'bg-amber-500' : 'bg-zinc-500'}`}></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${storageDiskText === 'r2' ? 'bg-amber-400' : 'bg-zinc-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${storageDiskText === 'r2' ? 'bg-amber-500' : 'bg-zinc-500'}`}></span>
             </span>
           </div>
           <div>
             <div className="text-xl font-bold text-primary tracking-tight font-mono">
-              {health?.storage.type} ({formatBytes(health?.storage.size_bytes || 0)})
+              {storageTypeText} ({formatBytes(storageSizeBytes)})
             </div>
             <div className="text-[11px] text-muted mt-2 font-mono truncate">
-              {health?.storage.disk === 'r2' ? `Bucket: ${health?.storage.bucket}` : 'Local Server Drive'}
+              {storageDiskText === 'r2' ? `Bucket: ${storageBucketText || 'Configured'}` : 'Local Server Drive'}
             </div>
           </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.storage.disk === 'r2' ? 'bg-amber-500/30' : 'bg-zinc-500/30'}`}></div>
+          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${storageDiskText === 'r2' ? 'bg-amber-500/30' : 'bg-zinc-500/30'}`}></div>
         </div>
       </div>
 
