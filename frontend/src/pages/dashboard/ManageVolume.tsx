@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { Reorder } from 'framer-motion';
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2 } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import Button from '@/components/ui/Button';
@@ -10,6 +10,7 @@ import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Eye } from 'lucide-react';
 
 interface Author {
@@ -54,6 +55,7 @@ const ManageVolume: React.FC = () => {
   
   // Ordering state
   const [articles, setArticles] = useState<Article[]>([]);
+  const [originalArticles, setOriginalArticles] = useState<Article[]>([]);
   const [hasOrderChanged, setHasOrderChanged] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
 
@@ -77,6 +79,7 @@ const ManageVolume: React.FC = () => {
       // Sort articles by order just to be safe
       const sorted = (res.data.data.articles || []).sort((a: Article, b: Article) => a.order - b.order);
       setArticles(sorted);
+      setOriginalArticles(sorted);
       setHasOrderChanged(false);
     } catch (err) {
       console.error(err);
@@ -146,12 +149,18 @@ const ManageVolume: React.FC = () => {
       const article_ids = articles.map(a => a.id);
       await api.post(`/volumes/${id}/reorder`, { article_ids });
       toast.success('Order saved successfully!');
+      setOriginalArticles(articles);
       setHasOrderChanged(false);
     } catch (err) {
       toast.error('Failed to save order.');
     } finally {
       setIsSavingOrder(false);
     }
+  };
+
+  const cancelOrder = () => {
+    setArticles(originalArticles);
+    setHasOrderChanged(false);
   };
 
   const handleReorder = (newArticles: Article[]) => {
@@ -179,7 +188,7 @@ const ManageVolume: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <DashboardHeader
-        title={<span className="line-clamp-1">{volume ? `${volume.volume_number} (${volume.year})` : 'Loading...'}</span>}
+        title={<span className="line-clamp-1">{volume ? `${volume.volume_number} (${volume.year})` : <Skeleton className="h-7 w-48 rounded inline-block" />}</span>}
         preTitle={
           <div className="flex items-center gap-2 text-[12px] text-muted mb-4">
             <Link to={`/dashboard/journals/${volume?.journal?.slug || ''}`} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
@@ -195,19 +204,62 @@ const ManageVolume: React.FC = () => {
 
       {/* Articles List for Ordering */}
       <div className="border border-border bg-surface shadow-sm">
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div className="px-5 py-3 border-b border-border flex items-center justify-between min-h-[56px]">
           <h3 className="text-[13px] font-bold text-primary uppercase tracking-wider">
-            Articles ({articles.length})
+            Articles ({loading ? '...' : articles.length})
           </h3>
-          {hasOrderChanged && (
-            <Button onClick={saveOrder} isLoading={isSavingOrder} size="sm" className="h-8 text-[11px] px-3">
-              Save Order
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {hasOrderChanged ? (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={cancelOrder} 
+                  disabled={isSavingOrder}
+                  size="sm" 
+                  className="h-8 text-[11px] px-3"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveOrder} 
+                  isLoading={isSavingOrder} 
+                  size="sm" 
+                  className="h-8 text-[11px] px-3"
+                >
+                  Save Order
+                </Button>
+              </>
+            ) : (
+              <span className="text-[12px] text-muted flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-border/60 rounded">
+                <GripVertical className="h-3.5 w-3.5 text-muted/70" />
+                <span>Drag or use arrows to reorder</span>
+              </span>
+            )}
+          </div>
         </div>
         
         {loading ? (
-          <div className="p-10 text-center text-[13px] text-muted">Loading articles...</div>
+          <div className="divide-y divide-border">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between px-5 py-3.5 bg-surface">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="flex flex-col gap-1 items-center shrink-0 w-9">
+                    <Skeleton className="h-6 w-6 rounded" />
+                    <Skeleton className="h-6 w-6 rounded" />
+                  </div>
+                  <div className="space-y-2 flex-1 max-w-md">
+                    <Skeleton className="h-4 w-3/4 rounded" />
+                    <Skeleton className="h-3 w-1/2 rounded" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-6 w-20 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : articles.length === 0 ? (
           <div className="p-10 text-center text-[13px] text-muted">
             No articles in this volume yet. Go to Articles to add one.
@@ -228,20 +280,22 @@ const ManageVolume: React.FC = () => {
                 onClick={() => handleOpenModal(article)}
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="flex flex-col gap-1 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex flex-col gap-0.5 items-center shrink-0 w-9" onClick={(e) => e.stopPropagation()}>
                     <button 
                       onClick={() => moveUp(index)} 
                       disabled={index === 0}
-                      className="text-muted hover:text-primary disabled:opacity-30 transition-colors"
+                      title="Move Up"
+                      className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
                     >
-                      <ArrowUp className="h-4 w-4" />
+                      <ArrowUp className="h-4 w-4 stroke-[2.5]" />
                     </button>
                     <button 
                       onClick={() => moveDown(index)} 
                       disabled={index === articles.length - 1}
-                      className="text-muted hover:text-primary disabled:opacity-30 transition-colors"
+                      title="Move Down"
+                      className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
                     >
-                      <ArrowDown className="h-4 w-4" />
+                      <ArrowDown className="h-4 w-4 stroke-[2.5]" />
                     </button>
                   </div>
                   <div className="flex flex-col min-w-0">

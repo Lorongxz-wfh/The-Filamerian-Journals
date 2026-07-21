@@ -7,7 +7,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
-import { ListSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
@@ -111,7 +111,7 @@ const ManageJournal: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <DashboardHeader
-        title={<span className="line-clamp-1">{journal?.title || 'Loading...'}</span>}
+        title={<span className="line-clamp-1">{journal?.title || <Skeleton className="h-7 w-64 rounded inline-block" />}</span>}
         preTitle={
           <Link to="/dashboard/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-4">
             <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
@@ -126,7 +126,20 @@ const ManageJournal: React.FC = () => {
       {/* Volumes List */}
       <div className="space-y-4">
         {loading && !journal ? (
-          <ListSkeleton colSpans={[12]} rows={4} />
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="border border-border bg-surface p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-5 w-48 rounded" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-16 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : journal?.volumes?.length === 0 ? (
           <div className="border border-border bg-surface p-10 text-center text-[13px] text-muted">
             No volumes added yet. Create one to get started.
