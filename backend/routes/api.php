@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users/{user}/approve', [\App\Http\Controllers\Api\UserController::class, 'approve']);
         // System Health & Logs
         Route::get('/system/health', [\App\Http\Controllers\Api\SystemController::class, 'health']);
+        Route::delete('/system/logs', [\App\Http\Controllers\Api\SystemController::class, 'clearLogs']);
         Route::get('/dashboard/logs', [\App\Http\Controllers\Api\DashboardController::class, 'logs']);
     });
     }); // End EnsureUserIsApproved group
