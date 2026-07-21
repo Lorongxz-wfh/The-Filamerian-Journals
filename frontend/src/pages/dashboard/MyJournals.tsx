@@ -80,7 +80,7 @@ const MyJournals: React.FC = () => {
     setValue,
     watch,
     reset,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting, isDirty }
   } = useForm<JournalFormData>({
     resolver: zodResolver(journalFormSchema),
     defaultValues: {
@@ -360,6 +360,7 @@ const MyJournals: React.FC = () => {
         onClose={() => !isSubmitting && handleCloseModal()}
         title={editingJournal ? 'Edit Journal' : 'Create New Journal'}
         className="max-w-2xl"
+        isDirty={isDirty || !!pdfFile || !!coverImage}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {serverError && (

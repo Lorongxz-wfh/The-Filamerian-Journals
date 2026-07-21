@@ -23,6 +23,7 @@ import { Outlet } from 'react-router';
 import SplashLoader from '@/components/ui/SplashLoader';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
+import { toast } from 'sonner';
 
 
 interface DashboardLayoutProps {}
@@ -135,8 +136,38 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [location.pathname]);
+
+    // 60-Minute Session Inactivity Timeout Listener
+    const TIMEOUT_MS = 60 * 60 * 1000; // 60 minutes
+    const updateActivity = () => {
+      localStorage.setItem('last_activity', Date.now().toString());
+    };
+
+    if (!localStorage.getItem('last_activity')) {
+      updateActivity();
+    }
+
+    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    activityEvents.forEach((evt) => window.addEventListener(evt, updateActivity));
+
+    const checkTimeout = setInterval(() => {
+      const lastActivity = Number(localStorage.getItem('last_activity') || Date.now());
+      if (Date.now() - lastActivity > TIMEOUT_MS) {
+        toast.warning('Session expired due to 60 minutes of inactivity. Please log in again.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('last_activity');
+        navigate('/login');
+      }
+    }, 15000); // Check every 15 seconds
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      activityEvents.forEach((evt) => window.removeEventListener(evt, updateActivity));
+      clearInterval(checkTimeout);
+    };
+  }, [location.pathname, navigate]);
 
   const markAllAsRead = async () => {
     try {

@@ -36,6 +36,7 @@ const Login: React.FC = () => {
       localStorage.setItem('auth_token', access_token);
       localStorage.setItem('token', access_token); // ProtectedRoute guard checks 'token'
       localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('last_activity', Date.now().toString());
 
       navigate('/dashboard');
     } catch (err: any) {

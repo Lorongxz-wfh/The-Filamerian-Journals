@@ -9,13 +9,24 @@ interface ModalProps {
   children: React.ReactNode;
   className?: string;
   bodyClassName?: string;
+  isDirty?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className, bodyClassName }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className, bodyClassName, isDirty }) => {
+  const handleAttemptClose = () => {
+    if (isDirty) {
+      if (window.confirm("You have unsaved changes. Are you sure you want to cancel and close?")) {
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        handleAttemptClose();
       }
     };
 
@@ -29,15 +40,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
       document.body.style.overflow = 'unset';
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isDirty]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
       <div 
-        className="fixed inset-0 bg-black/60 transition-opacity" 
-        onClick={onClose}
+        className="fixed inset-0 bg-black/60 transition-opacity cursor-pointer" 
+        onClick={handleAttemptClose}
       />
       
       <div className={cn(
@@ -48,8 +59,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <h2 className="text-lg uppercase tracking-wider">{title}</h2>
           <button 
-            onClick={onClose}
-            className="text-muted hover:text-primary transition-colors"
+            onClick={handleAttemptClose}
+            className="text-muted hover:text-primary transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>

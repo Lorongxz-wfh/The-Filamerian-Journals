@@ -162,7 +162,12 @@ const Categories: React.FC = () => {
         </table>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingCategory ? "Edit Category" : "Add Category"}>
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => !isSubmitting && setIsModalOpen(false)} 
+        title={editingCategory ? "Edit Category" : "Add Category"}
+        isDirty={formData.name !== (editingCategory?.name || '') || formData.slug !== (editingCategory?.slug || '') || formData.description !== (editingCategory?.description || '')}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input 
             label="Name" required 
