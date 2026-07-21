@@ -6,6 +6,7 @@ import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import { formatVolumeName } from '@/lib/utils';
 import PdfViewer from '@/components/ui/PdfViewer';
 
 interface Author {
@@ -172,7 +173,7 @@ const ArticleDetail: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">
           <div className="space-y-2 flex-1">
             <p className="text-[11px] font-semibold text-secondary uppercase tracking-wider">
-              {article.volume?.journal?.title} • Volume {article.volume?.volume_number} ({article.volume?.year})
+              {article.volume?.journal?.title} • {formatVolumeName(article.volume?.volume_number)} ({article.volume?.year})
             </p>
             <h1 className="text-2xl md:text-3xl font-bold text-primary leading-tight">
               {article.title}
@@ -235,7 +236,7 @@ const ArticleDetail: React.FC = () => {
       {relatedArticles.length > 0 && (
         <div className="mt-12 space-y-6">
           <div className="flex items-center gap-2 pb-2 border-b border-border">
-            <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider">More from Volume {article.volume?.volume_number}</h2>
+            <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider">More from {formatVolumeName(article.volume?.volume_number)}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {relatedArticles.map((rel) => (

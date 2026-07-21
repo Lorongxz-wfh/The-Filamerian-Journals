@@ -9,6 +9,7 @@ import Textarea from '@/components/ui/Textarea';
 import AuthorInput from '@/components/ui/AuthorInput';
 import Button from '@/components/ui/Button';
 import FileUploadZone from '@/components/ui/FileUploadZone';
+import { formatVolumeName } from '@/lib/utils';
 
 interface AuthorData {
   first_name: string;
@@ -202,7 +203,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
                 ...journalsData.flatMap((journal: any) => 
                   journal.volumes?.map((vol: any) => ({
                     value: String(vol.id),
-                    label: `Vol ${vol.volume_number}${vol.issue_number ? `, Issue ${vol.issue_number}` : ''} (${vol.year})`,
+                    label: `${formatVolumeName(vol.volume_number)}${vol.issue_number ? `, Issue ${vol.issue_number}` : ''} (${vol.year})`,
                     group: journal.title
                   })) || []
                 )

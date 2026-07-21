@@ -10,6 +10,7 @@ import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
+import { formatVolumeName } from '@/lib/utils';
 
 interface Author {
   id: number;
@@ -177,7 +178,7 @@ const Archives: React.FC = () => {
                             className="w-full flex items-center justify-between px-6 py-3 hover:bg-background/50 transition-colors text-left"
                           >
                             <div className="flex items-center gap-3">
-                              <span className="text-[13px] font-semibold text-primary">Volume {vol.volume_number}</span>
+                              <span className="text-[13px] font-semibold text-primary">{formatVolumeName(vol.volume_number)}</span>
                               <span className="text-[11px] text-muted">({vol.year})</span>
                               <span className="text-[11px] text-muted/60">
                                 — {vol.articles?.length || 0} article{(vol.articles?.length || 0) !== 1 ? 's' : ''}

@@ -7,6 +7,7 @@ import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
+import { formatVolumeName } from '@/lib/utils';
 
 interface Author {
   id: number;
@@ -187,7 +188,7 @@ const JournalDetail: React.FC = () => {
               <div className="flex items-center gap-3">
                 <BookOpen className="h-4 w-4 text-primary/30" />
                 <span className="text-[14px] font-medium text-primary">
-                  Volume {vol.volume_number} ({vol.year})
+                  {formatVolumeName(vol.volume_number)} ({vol.year})
                 </span>
                 <span className="text-[11px] text-muted">
                   — {vol.articles?.length || 0} article{(vol.articles?.length || 0) !== 1 ? 's' : ''}
