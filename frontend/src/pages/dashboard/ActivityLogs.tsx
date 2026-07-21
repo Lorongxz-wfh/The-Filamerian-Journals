@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, RefreshCw } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Filter, Calendar } from 'lucide-react';
 import api from '@/services/api';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/Table';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
@@ -7,9 +7,8 @@ import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
 import DashboardHeader from '@/components/ui/DashboardHeader';
-import SearchInput from '@/components/ui/SearchInput';
 import Pagination from '@/components/ui/Pagination';
-import Badge from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
 
 interface ActivityLog {
   id: number;
@@ -30,30 +29,23 @@ const ActivityLogs: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const [filter, setFilter] = useState('');
-  const [debouncedFilter, setDebouncedFilter] = useState('');
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedFilter(filter);
-      setPage(1);
-    }, 400);
-    return () => clearTimeout(handler);
-  }, [filter]);
+  const [actionFilter, setActionFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all');
 
   const fetchLogs = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       params.append('page', page.toString());
-      if (debouncedFilter) params.append('search', debouncedFilter);
+      if (actionFilter !== 'all') params.append('action', actionFilter);
+      if (periodFilter !== 'all') params.append('period', periodFilter);
 
       const res = await api.get(`/dashboard/logs?${params.toString()}`);
       setLogs(res.data.data);
       setLastPage(res.data.last_page || 1);
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to fetch logs');
+      toast.error(err.response?.data?.message || 'Failed to fetch activity logs');
     } finally {
       setLoading(false);
     }
@@ -61,81 +53,169 @@ const ActivityLogs: React.FC = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [page, debouncedFilter]);
+  }, [page, actionFilter, periodFilter]);
+
+  const renderActionBadge = (action: string) => {
+    const act = action.toLowerCase();
+    let badgeStyle = 'bg-slate-500/10 text-slate-700 border-slate-300/60';
+
+    if (act.includes('login') || act.includes('logged in') || act.includes('approved')) {
+      badgeStyle = 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30';
+    } else if (act.includes('fail') || act.includes('delete') || act.includes('remove')) {
+      badgeStyle = 'bg-red-500/10 text-red-700 border-red-500/30';
+    } else if (act.includes('create') || act.includes('add')) {
+      badgeStyle = 'bg-blue-500/10 text-blue-700 border-blue-500/30';
+    } else if (act.includes('update') || act.includes('edit')) {
+      badgeStyle = 'bg-amber-500/10 text-amber-700 border-amber-500/30';
+    }
+
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 border text-[10px] font-bold tracking-wider uppercase font-mono whitespace-nowrap rounded-none ${badgeStyle}`}>
+        {action}
+      </span>
+    );
+  };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 font-sans w-full">
       <DashboardHeader title="System Activity Logs">
         <Button
           onClick={() => fetchLogs()}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-xs font-mono"
           variant="outline"
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </DashboardHeader>
 
-      <div className="flex justify-end">
-        <SearchInput
-          placeholder="Search logs..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
+      {/* Sleek, Compact Inline Filter Toolbar (No wasting outer box space) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-2">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Action Filter */}
+          <div className="flex items-center gap-2 w-48">
+            <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
+            <div className="w-full">
+              <Select
+                value={actionFilter}
+                onChange={(val) => {
+                  setActionFilter(String(val));
+                  setPage(1);
+                }}
+                options={[
+                  { value: 'all', label: 'All Actions' },
+                  { value: 'login', label: 'Logins & Auth' },
+                  { value: 'create', label: 'Created Items' },
+                  { value: 'update', label: 'Updated Items' },
+                  { value: 'delete', label: 'Deleted Items' },
+                ]}
+              />
+            </div>
+          </div>
+
+          {/* Timeframe Filter */}
+          <div className="flex items-center gap-2 w-44">
+            <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
+            <div className="w-full">
+              <Select
+                value={periodFilter}
+                onChange={(val) => {
+                  setPeriodFilter(String(val));
+                  setPage(1);
+                }}
+                options={[
+                  { value: 'all', label: 'All Time' },
+                  { value: 'today', label: 'Today' },
+                  { value: '7days', label: 'Last 7 Days' },
+                  { value: '30days', label: 'Last 30 Days' },
+                ]}
+              />
+            </div>
+          </div>
+
+          {/* Clear Filters Action */}
+          {(actionFilter !== 'all' || periodFilter !== 'all') && (
+            <button
+              onClick={() => {
+                setActionFilter('all');
+                setPeriodFilter('all');
+                setPage(1);
+              }}
+              className="text-xs font-mono text-muted hover:text-primary transition-colors underline ml-2"
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        <span className="text-[11px] font-mono text-muted">
+          Showing {logs.length} logs
+        </span>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date & Time</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead>Action</TableHead>
-            <TableHead>Description</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <TableRowSkeleton columns={4} rows={5} />
-          ) : logs.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="h-32 text-center">
-                <EmptyState
-                  icon={ShieldAlert}
-                  title="No logs found"
-                  description="There are no activity logs matching your search."
-                  className="bg-transparent border-0"
-                />
-              </TableCell>
+      {/* Scrollable Container with Sticky Header */}
+      <div className="border border-border bg-surface max-h-[600px] overflow-y-auto overflow-x-auto shadow-sm relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
+        <Table className="w-full border-collapse">
+          <TableHeader className="sticky top-0 z-10 bg-surface shadow-sm">
+            <TableRow className="border-b border-border bg-surface/95 backdrop-blur-sm">
+              <TableHead className="w-[180px] bg-surface font-semibold">Date & Time</TableHead>
+              <TableHead className="w-[160px] bg-surface font-semibold">User</TableHead>
+              <TableHead className="w-[150px] bg-surface font-semibold">Action</TableHead>
+              <TableHead className="bg-surface font-semibold">Description</TableHead>
             </TableRow>
-          ) : (
-            logs.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell className="text-muted whitespace-nowrap">
-                  {new Date(log.created_at).toLocaleString()}
-                </TableCell>
-                <TableCell className="text-primary font-medium whitespace-nowrap">
-                  {log.user ? log.user.name : 'System'}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">
-                    {log.action}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted/90 w-full">
-                  {log.description}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRowSkeleton columns={4} rows={6} />
+            ) : logs.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="h-40 text-center">
+                  <EmptyState
+                    icon={ShieldAlert}
+                    title="No activity logs found"
+                    description="There are no system logs matching your selected filters."
+                    className="bg-transparent border-0 py-8"
+                  />
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              logs.map((log) => (
+                <TableRow key={log.id} className="hover:bg-background/80 transition-colors">
+                  <TableCell className="text-xs font-mono text-muted whitespace-nowrap">
+                    {new Date(log.created_at).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true
+                    })}
+                  </TableCell>
+                  <TableCell className="text-xs font-semibold text-primary whitespace-nowrap">
+                    {log.user ? log.user.name : 'System'}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {renderActionBadge(log.action)}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted/90 leading-relaxed font-sans">
+                    {log.description}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
       
       {!loading && lastPage > 1 && (
-        <Pagination
-          currentPage={page}
-          lastPage={lastPage}
-          onPageChange={setPage}
-        />
+        <div className="pt-2">
+          <Pagination
+            currentPage={page}
+            lastPage={lastPage}
+            onPageChange={setPage}
+          />
+        </div>
       )}
     </div>
   );

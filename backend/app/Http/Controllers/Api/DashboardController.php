@@ -108,6 +108,22 @@ class DashboardController extends Controller
     {
         $query = \App\Models\ActivityLog::with('user');
 
+        if ($request->filled('action') && $request->query('action') !== 'all') {
+            $actionFilter = strtolower($request->query('action'));
+            $query->whereRaw('LOWER(action) LIKE ?', ["%{$actionFilter}%"]);
+        }
+
+        if ($request->filled('period') && $request->query('period') !== 'all') {
+            $period = $request->query('period');
+            if ($period === 'today') {
+                $query->whereDate('created_at', \Carbon\Carbon::today());
+            } elseif ($period === '7days') {
+                $query->where('created_at', '>=', \Carbon\Carbon::now()->subDays(7));
+            } elseif ($period === '30days') {
+                $query->where('created_at', '>=', \Carbon\Carbon::now()->subDays(30));
+            }
+        }
+
         if ($request->filled('search')) {
             $search = strtolower($request->query('search'));
             $query->where(function($q) use ($search) {
