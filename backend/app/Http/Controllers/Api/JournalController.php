@@ -97,8 +97,16 @@ class JournalController extends Controller
      * Display the specified resource.
      * Supports both ID and slug lookups.
      */
-    public function show(Request $request, Journal $journal)
+    public function show(Request $request, $journal)
     {
+        if (!($journal instanceof Journal)) {
+            $journalModel = Journal::where('slug', $journal)->orWhere('id', $journal)->first();
+            if (!$journalModel) {
+                abort(404, 'Journal not found.');
+            }
+            $journal = $journalModel;
+        }
+
         $journal->load(['category', 'volumes.articles' => function ($q) use ($request) {
             if ($request->is('api/public/*')) {
                 $q->where('status', 'Published');
@@ -172,8 +180,16 @@ class JournalController extends Controller
         return response()->noContent();
     }
 
-    public function servePdf(Journal $journal, Request $request)
+    public function servePdf($journal, Request $request)
     {
+        if (!($journal instanceof Journal)) {
+            $journalModel = Journal::where('slug', $journal)->orWhere('id', $journal)->first();
+            if (!$journalModel) {
+                abort(404, 'Journal not found.');
+            }
+            $journal = $journalModel;
+        }
+
         if (!$journal->pdf_path) {
             abort(404, 'Journal PDF not found.');
         }
