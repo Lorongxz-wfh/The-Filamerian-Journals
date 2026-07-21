@@ -373,7 +373,7 @@ const Journals: React.FC = () => {
               viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="bg-surface border border-border p-5 flex flex-col justify-between min-h-[360px]">
+                    <div key={i} className="bg-surface border border-border p-5 flex flex-col justify-between min-h-[396px] w-[95%] mx-auto">
                       <Skeleton className="mx-auto w-[120px] aspect-[3/4]" />
                       <div className="space-y-2 mt-4">
                         <Skeleton className="h-3 w-20" />

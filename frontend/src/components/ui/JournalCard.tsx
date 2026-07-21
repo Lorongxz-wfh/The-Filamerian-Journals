@@ -72,7 +72,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
     return (
       <Link
         to={`/journals/${slug}`}
-        className={cn('group bg-surface border border-border p-5 flex flex-col justify-between hover:border-primary/40 transition-colors cursor-pointer min-h-[360px] text-left relative', className)}
+        className={cn('group bg-surface border border-border p-5 flex flex-col justify-between hover:border-primary/40 transition-colors cursor-pointer min-h-[396px] w-[95%] mx-auto text-left relative', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -103,7 +103,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
                 {categoryName}
               </span>
             )}
-            <h3 className="text-[13px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
+            <h3 className="text-[12px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
               {title}
             </h3>
           </div>
