@@ -79,23 +79,25 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
       {/* Custom Unsaved Changes Confirmation Dialog */}
       {showConfirmClose && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/75 animate-in fade-in duration-200">
-          <div className="bg-surface border border-border w-full max-w-sm shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <div className="font-sans bg-surface border border-border w-full max-w-md shadow-2xl p-7 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertTriangle className="h-6 w-6 text-amber-600" />
               </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold text-primary uppercase tracking-wider">Discard Unsaved Changes?</h3>
-                <p className="text-[12px] text-muted leading-relaxed">
+              <div className="space-y-1.5 min-w-0 flex-1">
+                <h3 className="font-sans text-base font-bold text-primary tracking-wide uppercase">
+                  Discard Unsaved Changes?
+                </h3>
+                <p className="font-sans text-[13px] text-muted leading-relaxed">
                   You have entered data in this form. Closing will discard your changes.
                 </p>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
               <button
                 type="button"
                 onClick={() => setShowConfirmClose(false)}
-                className="px-3.5 py-2 text-[12px] font-medium text-muted hover:text-primary border border-border hover:bg-background transition-colors cursor-pointer"
+                className="font-sans px-4 py-2.5 text-[13px] font-medium text-muted hover:text-primary border border-border hover:bg-background transition-colors cursor-pointer"
               >
                 Keep Editing
               </button>
@@ -105,7 +107,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
                   setShowConfirmClose(false);
                   onClose();
                 }}
-                className="px-3.5 py-2 text-[12px] font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors uppercase tracking-wider cursor-pointer"
+                className="font-sans px-4 py-2.5 text-[13px] font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Discard & Close
               </button>
