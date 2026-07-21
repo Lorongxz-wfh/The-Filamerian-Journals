@@ -94,12 +94,6 @@ const JournalCard: React.FC<JournalCardProps> = ({
               </span>
             </div>
           )}
-
-          {volume && volume !== 'No Volumes' && (
-            <div className="absolute top-2 left-2 bg-primary text-secondary px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
-              {volume.replace(' Volume/s', '')} VOLS
-            </div>
-          )}
         </div>
 
         <div className="space-y-1.5 flex-1 flex flex-col justify-between">
@@ -118,7 +112,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
             <span className="font-mono">{date || publisher || '-'}</span>
             {volume && volume !== 'No Volumes' && (
               <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
-                {volume.split(' ')[0]} issue(s)
+                {volume.split(' ')[0]} volume{volume.split(' ')[0] !== '1' ? 's' : ''}
               </span>
             )}
           </div>
