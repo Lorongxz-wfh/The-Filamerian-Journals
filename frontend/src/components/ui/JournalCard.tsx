@@ -61,7 +61,8 @@ const JournalCard: React.FC<JournalCardProps> = ({
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
         />
         <div className="flex flex-col gap-1 text-[11px] text-muted/80">
-          {publisher && <span><strong className="text-gray-900">Year:</strong> {publisher}</span>}
+          {date && <span><strong className="text-gray-900">Year:</strong> {date}</span>}
+          {publisher && <span><strong className="text-gray-900">Publisher:</strong> {publisher}</span>}
           {volume && <span><strong className="text-gray-900">Vols:</strong> {volume}</span>}
         </div>
       </div>
@@ -78,7 +79,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
       >
         <FloatingCard />
         
-        <div className="relative mx-auto w-full max-w-[120px] aspect-[3/4] overflow-hidden mb-6 bg-background shadow-sm border border-border shrink-0">
+        <div className="relative mx-auto w-full max-w-[160px] aspect-[3/4] overflow-hidden mb-6 bg-background shadow-sm border border-border shrink-0">
           {image && !imgError ? (
             <img
               src={image}
@@ -96,7 +97,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
           )}
         </div>
 
-        <div className="space-y-1.5 flex-1 flex flex-col justify-between">
+        <div className="space-y-1.5 flex-1 flex flex-col justify-between pt-2">
           <div>
             {categoryName && (
               <span className="text-[10px] font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider inline-block mb-1.5">
