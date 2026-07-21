@@ -171,4 +171,38 @@ class JournalController extends Controller
 
         return response()->noContent();
     }
+
+    public function servePdf(Journal $journal, Request $request)
+    {
+        $diskName = env('FILESYSTEM_DISK', 'public');
+        $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
+
+        if (!$journal->pdf_path || !$disk->exists($journal->pdf_path)) {
+            abort(404, 'Journal PDF not found.');
+        }
+
+        $headers = [
+            'Access-Control-Allow-Origin' => '*',
+            'Content-Type' => 'application/pdf',
+        ];
+
+        if ($diskName === 'r2') {
+            if ($request->query('download')) {
+                return response()->streamDownload(function () use ($disk, $journal) {
+                    echo $disk->get($journal->pdf_path);
+                }, $journal->title . '.pdf', $headers);
+            }
+            return response()->stream(function () use ($disk, $journal) {
+                echo $disk->get($journal->pdf_path);
+            }, 200, $headers);
+        }
+
+        $path = $disk->path($journal->pdf_path);
+
+        if ($request->query('download')) {
+            return response()->download($path, $journal->title . '.pdf', $headers);
+        }
+
+        return response()->file($path, $headers);
+    }
 }

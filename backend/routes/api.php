@@ -83,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/public/search', [\App\Http\Controllers\Api\SearchController::class, 'index']);
 Route::get('/public/journals', [\App\Http\Controllers\Api\JournalController::class, 'index']);
 Route::get('/public/journals/{journal}', [\App\Http\Controllers\Api\JournalController::class, 'show']);
+Route::get('/public/journals/{journal}/pdf', [\App\Http\Controllers\Api\JournalController::class, 'servePdf']);
 Route::get('/public/announcements', [\App\Http\Controllers\Api\AnnouncementController::class, 'index']);
 Route::get('/public/resources', [\App\Http\Controllers\Api\ResourceController::class, 'index']);
 Route::get('/public/resources/{resource:slug}', [\App\Http\Controllers\Api\ResourceController::class, 'show']);

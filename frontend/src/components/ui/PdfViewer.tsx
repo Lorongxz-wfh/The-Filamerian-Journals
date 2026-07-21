@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Maximize, Minimize, ZoomIn, ZoomOut, Loader2, RotateCw, PanelLeft, LayoutList, LayoutTemplate, Download } from 'lucide-react';
+import { Maximize, Minimize, ZoomIn, ZoomOut, Loader2, RotateCw, PanelLeft, LayoutList, LayoutTemplate, Download, FileText } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -231,9 +231,13 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl, allowDownload = false, d
             </div>
           }
           error={
-            <div className="flex items-center justify-center h-full text-red-400 w-full absolute inset-0 z-50 bg-white">
-              <p className="text-[13px] bg-red-500/10 border border-red-500/20 px-4 py-2 rounded">
-                Failed to load PDF.
+            <div className="flex flex-col items-center justify-center h-full text-muted w-full absolute inset-0 z-50 bg-white p-6 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+                <FileText className="h-6 w-6" />
+              </div>
+              <h4 className="text-[14px] font-bold text-primary uppercase tracking-wider">PDF Document Unavailable</h4>
+              <p className="text-[13px] text-muted max-w-md leading-relaxed">
+                The requested PDF document could not be loaded. The file may not have been uploaded yet or is currently being processed.
               </p>
             </div>
           }
