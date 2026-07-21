@@ -63,6 +63,7 @@ const MyJournals: React.FC = () => {
   const [lastPage, setLastPage] = useState(1);
   const [filter, setFilter] = useState('');
   const [debouncedFilter, setDebouncedFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -146,6 +147,7 @@ const MyJournals: React.FC = () => {
       params.append('page', page.toString());
       params.append('with_volumes', '1');
       if (debouncedFilter) params.append('search', debouncedFilter);
+      if (categoryFilter) params.append('category', categoryFilter);
 
       const [journalsRes, categoriesRes] = await Promise.all([
         api.get(`/journals?${params.toString()}`),
@@ -163,7 +165,7 @@ const MyJournals: React.FC = () => {
 
   useEffect(() => {
     fetchJournals();
-  }, [page, debouncedFilter]);
+  }, [page, debouncedFilter, categoryFilter]);
 
   // URL Sync
   useEffect(() => {
@@ -318,7 +320,20 @@ const MyJournals: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
+          <select
+            value={categoryFilter}
+            onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+            className="h-9 px-3 text-[13px] border border-border bg-surface focus:outline-none focus:border-primary rounded-sm cursor-pointer"
+          >
+            <option value="">All Categories</option>
+            {availableCategories.map(cat => (
+              <option key={cat.id} value={cat.slug}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
         <SearchInput 
           placeholder="Search journals by title..."
           value={filter}

@@ -55,6 +55,8 @@ const ManageVolume: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [hasOrderChanged, setHasOrderChanged] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
@@ -209,22 +211,43 @@ const ManageVolume: React.FC = () => {
             {articles.map((article, index) => (
               <div 
                 key={article.id} 
-                className="flex items-center justify-between px-5 py-3 hover:bg-background/50 transition-colors cursor-pointer"
+                className={`flex items-center justify-between px-5 py-3 transition-all cursor-grab active:cursor-grabbing ${
+                  draggedItemIndex === index ? 'opacity-40 border-2 border-primary/50 scale-[0.98] shadow-md z-10 relative bg-surface' : 'hover:bg-background/50'
+                } ${
+                  dragOverItemIndex === index && draggedItemIndex !== index ? 'bg-primary/5 border-t-2 border-t-primary' : ''
+                }`}
                 onClick={() => handleOpenModal(article)}
                 draggable
                 onDragStart={(e) => {
+                  setDraggedItemIndex(index);
                   e.dataTransfer.effectAllowed = 'move';
                   e.dataTransfer.setData('text/plain', index.toString());
+                  // Optional: use a ghost image or just rely on default
+                }}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  setDragOverItemIndex(index);
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
                   e.dataTransfer.dropEffect = 'move';
                 }}
+                onDragLeave={() => {
+                  if (dragOverItemIndex === index) {
+                    setDragOverItemIndex(null);
+                  }
+                }}
+                onDragEnd={() => {
+                  setDraggedItemIndex(null);
+                  setDragOverItemIndex(null);
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
+                  setDragOverItemIndex(null);
+                  setDraggedItemIndex(null);
                   const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
                   const toIndex = index;
-                  if (fromIndex !== toIndex) {
+                  if (fromIndex !== toIndex && !isNaN(fromIndex)) {
                     const newArticles = [...articles];
                     const [movedArticle] = newArticles.splice(fromIndex, 1);
                     newArticles.splice(toIndex, 0, movedArticle);

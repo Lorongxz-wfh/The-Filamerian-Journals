@@ -25,6 +25,12 @@ class ArticleController extends Controller
             $query->where('status', $request->query('status'));
         }
 
+        if ($request->filled('journal_id')) {
+            $query->whereHas('volume', function($q) use ($request) {
+                $q->where('journal_id', $request->query('journal_id'));
+            });
+        }
+
         $query->orderBy('created_at', 'desc');
 
         return ArticleResource::collection($query->paginate(50));

@@ -110,6 +110,8 @@ const Articles: React.FC = () => {
     setPage(1);
   }, [tab]);
 
+  const [journalFilter, setJournalFilter] = useState('');
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -117,6 +119,7 @@ const Articles: React.FC = () => {
       params.append('page', page.toString());
       if (debouncedFilter) params.append('search', debouncedFilter);
       if (tab !== 'all') params.append('status', tab);
+      if (journalFilter) params.append('journal_id', journalFilter);
 
       const [artRes, jrnRes] = await Promise.all([
         api.get(`/articles?${params.toString()}`),
@@ -136,7 +139,7 @@ const Articles: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, debouncedFilter, tab]);
+  }, [page, debouncedFilter, tab, journalFilter]);
 
   const handleOpenModal = (article: Article | null = null, initialOverrides: any = {}) => {
     setEditingArticle(article);
@@ -225,18 +228,33 @@ const Articles: React.FC = () => {
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex gap-1 border border-border bg-surface">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`px-4 py-2 text-[12px] font-medium transition-colors ${
-                tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
-              }`}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex gap-1 border border-border bg-surface">
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-4 py-2 text-[12px] font-medium transition-colors ${
+                  tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
+            <select
+              value={journalFilter}
+              onChange={(e) => { setJournalFilter(e.target.value); setPage(1); }}
+              className="h-9 px-3 text-[13px] border border-border bg-surface focus:outline-none focus:border-primary rounded-sm cursor-pointer max-w-[200px] truncate"
             >
-              {t.label}
-            </button>
-          ))}
+              <option value="">All Journals</option>
+              {journalsData.map(j => (
+                <option key={j.id} value={j.id}>{j.title}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <SearchInput
           placeholder="Search articles..."

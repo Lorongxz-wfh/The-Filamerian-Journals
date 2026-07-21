@@ -45,7 +45,7 @@ class JournalController extends Controller
                 if ($request->is('api/public/*')) {
                     $q->where('status', 'Published');
                 }
-                $q->with('authors');
+                $q->orderBy('order', 'asc')->with('authors');
             }]);
         }
 
@@ -103,7 +103,7 @@ class JournalController extends Controller
             if ($request->is('api/public/*')) {
                 $q->where('status', 'Published');
             }
-            $q->with('authors');
+            $q->orderBy('order', 'asc')->with('authors');
         }]);
 
         return new JournalResource($journal);
