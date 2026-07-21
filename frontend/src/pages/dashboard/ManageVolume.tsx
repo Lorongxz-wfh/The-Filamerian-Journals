@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
+import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
@@ -209,7 +210,11 @@ const ManageVolume: React.FC = () => {
         ) : (
           <div className="divide-y divide-border">
             {articles.map((article, index) => (
-              <div 
+              <motion.div 
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 key={article.id} 
                 className={`flex items-center justify-between px-5 py-3 transition-all cursor-grab active:cursor-grabbing ${
                   draggedItemIndex === index ? 'opacity-40 border-2 border-primary/50 scale-[0.98] shadow-md z-10 relative bg-surface' : 'hover:bg-background/50'
@@ -218,17 +223,17 @@ const ManageVolume: React.FC = () => {
                 }`}
                 onClick={() => handleOpenModal(article)}
                 draggable
-                onDragStart={(e) => {
+                onDragStart={(e: any) => {
                   setDraggedItemIndex(index);
                   e.dataTransfer.effectAllowed = 'move';
                   e.dataTransfer.setData('text/plain', index.toString());
                   // Optional: use a ghost image or just rely on default
                 }}
-                onDragEnter={(e) => {
+                onDragEnter={(e: any) => {
                   e.preventDefault();
                   setDragOverItemIndex(index);
                 }}
-                onDragOver={(e) => {
+                onDragOver={(e: any) => {
                   e.preventDefault();
                   e.dataTransfer.dropEffect = 'move';
                 }}
@@ -241,7 +246,7 @@ const ManageVolume: React.FC = () => {
                   setDraggedItemIndex(null);
                   setDragOverItemIndex(null);
                 }}
-                onDrop={(e) => {
+                onDrop={(e: any) => {
                   e.preventDefault();
                   setDragOverItemIndex(null);
                   setDraggedItemIndex(null);
@@ -296,7 +301,7 @@ const ManageVolume: React.FC = () => {
                     <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(article.id)} title="Delete" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}

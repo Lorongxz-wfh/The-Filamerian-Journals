@@ -320,28 +320,29 @@ const MyJournals: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
-          <select
-            value={categoryFilter}
-            onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-            className="h-9 px-3 text-[13px] border border-border bg-surface focus:outline-none focus:border-primary rounded-sm cursor-pointer"
-          >
-            <option value="">All Categories</option>
-            {availableCategories.map(cat => (
-              <option key={cat.id} value={cat.slug}>{cat.name}</option>
-            ))}
-          </select>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
+            <div className="w-[200px]">
+              <Select
+                value={categoryFilter}
+                onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
+                options={[
+                  { value: '', label: 'All Categories' },
+                  ...availableCategories.map(cat => ({ value: cat.slug, label: cat.name }))
+                ]}
+              />
+            </div>
+          </div>
+          <SearchInput 
+            placeholder="Search journals by title..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
         </div>
-        <SearchInput 
-          placeholder="Search journals by title..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-      </div>
 
-      <Table>
+        <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
@@ -425,6 +426,7 @@ const MyJournals: React.FC = () => {
           onPageChange={setPage}
         />
       )}
+      </div>
 
       {/* Modal Form */}
       <Modal 

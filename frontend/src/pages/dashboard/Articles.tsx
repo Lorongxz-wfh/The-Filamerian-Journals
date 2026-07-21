@@ -7,6 +7,7 @@ import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
+import Select from '@/components/ui/Select';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';
@@ -227,43 +228,44 @@ const Articles: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex gap-1 border border-border bg-surface">
-            {tabs.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={`px-4 py-2 text-[12px] font-medium transition-colors ${
-                  tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
-            <select
-              value={journalFilter}
-              onChange={(e) => { setJournalFilter(e.target.value); setPage(1); }}
-              className="h-9 px-3 text-[13px] border border-border bg-surface focus:outline-none focus:border-primary rounded-sm cursor-pointer max-w-[200px] truncate"
-            >
-              <option value="">All Journals</option>
-              {journalsData.map(j => (
-                <option key={j.id} value={j.id}>{j.title}</option>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex gap-1 border border-border bg-surface">
+              {tabs.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`px-4 py-2 text-[12px] font-medium transition-colors ${
+                    tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                  }`}
+                >
+                  {t.label}
+                </button>
               ))}
-            </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
+              <div className="w-[200px]">
+                <Select
+                  value={journalFilter}
+                  onChange={(val) => { setJournalFilter(val as string); setPage(1); }}
+                  options={[
+                    { value: '', label: 'All Journals' },
+                    ...journalsData.map(j => ({ value: j.id.toString(), label: j.title }))
+                  ]}
+                />
+              </div>
+            </div>
           </div>
+          <SearchInput
+            placeholder="Search articles..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
         </div>
-        <SearchInput
-          placeholder="Search articles..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-      </div>
 
-      <Table>
+        <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
@@ -340,6 +342,7 @@ const Articles: React.FC = () => {
           onPageChange={setPage}
         />
       )}
+      </div>
 
       <ArticleFormModal
         isOpen={isModalOpen}
