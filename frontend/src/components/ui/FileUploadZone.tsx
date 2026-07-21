@@ -84,11 +84,29 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
       return <Upload className="h-5 w-5 text-primary animate-bounce shrink-0" />;
     }
     if (selectedFile) {
-      return <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />;
+      return <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />;
     }
     if (existingUrl) {
-      if (iconType === 'image') return <ImageIcon className="h-5 w-5 text-primary/40 shrink-0" />;
-      return <FileText className="h-5 w-5 text-primary/40 shrink-0" />;
+      if (iconType === 'image') {
+        return (
+          <div className="w-9 h-9 shrink-0 bg-muted/20 border border-border overflow-hidden rounded flex items-center justify-center">
+            <img 
+              src={existingUrl} 
+              alt="Existing cover preview" 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }} 
+            />
+            <ImageIcon className="h-4 w-4 text-primary/60 shrink-0" />
+          </div>
+        );
+      }
+      return (
+        <div className="w-9 h-9 shrink-0 bg-red-50 border border-red-200 rounded flex items-center justify-center">
+          <FileText className="h-5 w-5 text-red-600 shrink-0" />
+        </div>
+      );
     }
     if (iconType === 'image') return <ImageIcon className="h-5 w-5 text-muted group-hover:text-primary transition-colors shrink-0" />;
     if (iconType === 'pdf') return <FileText className="h-5 w-5 text-muted group-hover:text-primary transition-colors shrink-0" />;
@@ -118,12 +136,14 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`group relative flex items-center justify-center w-full border border-dashed transition-all cursor-pointer py-3 px-3.5 rounded-sm min-h-[58px] ${
+        className={`group relative flex items-center justify-center w-full border transition-all cursor-pointer py-3 px-3.5 rounded-sm min-h-[64px] ${
           isDragging
             ? 'border-primary bg-primary/5 scale-[1.005]'
             : selectedFile
             ? 'border-green-500/40 bg-green-500/[0.02]'
-            : 'border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02]'
+            : existingUrl
+            ? 'border-blue-500/30 bg-blue-500/[0.02] border-solid'
+            : 'border-dashed border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02]'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <input
@@ -140,11 +160,14 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
 
           <div className="flex-1 min-w-0 text-left">
             {isDragging ? (
-              <p className="text-[12px] font-semibold text-primary truncate">Drop file here</p>
+              <p className="text-[12px] font-semibold text-primary truncate">Drop new file here</p>
             ) : selectedFile ? (
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-[12px] font-semibold text-primary truncate">{selectedFile.name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                    <p className="text-[12px] font-semibold text-primary truncate">{selectedFile.name}</p>
+                  </div>
                   <p className="text-[10px] text-muted">
                     {(selectedFile.size / 1024 / 1024).toFixed(2)} MB — Click or drag to replace
                   </p>
@@ -156,18 +179,35 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                     e.stopPropagation();
                     onFileSelect(null);
                   }}
-                  className="p-1 hover:bg-red-500/10 hover:text-red-500 text-muted transition-colors rounded"
-                  title="Remove file"
+                  className="p-1 hover:bg-red-500/10 hover:text-red-500 text-muted transition-colors rounded cursor-pointer"
+                  title="Remove selected file"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ) : existingUrl ? (
-              <div>
-                <p className="text-[12px] font-semibold text-primary truncate">
-                  {iconType === 'image' ? 'Cover image uploaded' : 'PDF document uploaded'}
-                </p>
-                <p className="text-[10px] text-muted">Click or drag a new file to replace</p>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100 border border-blue-200 rounded shrink-0">
+                      Current File Attached
+                    </span>
+                  </div>
+                  <p className="text-[11px] font-medium text-primary mt-1 truncate">
+                    {iconType === 'image' ? 'Existing Image Uploaded' : 'Existing PDF Document Uploaded'}
+                  </p>
+                  <p className="text-[10px] text-muted">Click or drag a new file to replace</p>
+                </div>
+                <a
+                  href={existingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-2 py-1 text-[10px] font-semibold text-primary border border-border hover:bg-background transition-colors shrink-0 whitespace-nowrap"
+                  title="Open existing file in new tab"
+                >
+                  View File ↗
+                </a>
               </div>
             ) : (
               <div>
