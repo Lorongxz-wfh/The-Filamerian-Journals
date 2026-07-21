@@ -200,16 +200,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                   </div>
                   <p className="text-[10px] text-muted truncate mt-0.5">Click or drag to replace</p>
                 </div>
-                <a
-                  href={existingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-2 py-1 text-[10px] font-semibold text-primary border border-border hover:bg-background transition-colors shrink-0 whitespace-nowrap"
-                  title="Open existing file in new tab"
-                >
-                  View ↗
-                </a>
               </div>
             ) : (
               <div>
