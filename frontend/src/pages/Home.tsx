@@ -126,7 +126,7 @@ const Home: React.FC = () => {
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/articles/latest'),
           api.get('/public/announcements'),
-          api.get('/categories')
+          api.get('/public/categories')
         ]);
         
         const freshJournals = jrnRes.data.data;

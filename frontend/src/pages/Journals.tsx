@@ -130,7 +130,7 @@ const Journals: React.FC = () => {
           localStorage.setItem('journals_cache', JSON.stringify(newJournals));
         }
         
-        const categoriesRes = await api.get('/categories');
+        const categoriesRes = await api.get('/public/categories');
         const catsArray = categoriesRes.data.data.map((c: any) => c.slug) || [];
         const newCategories = ['All', ...catsArray];
         setAvailableCategories(newCategories);
