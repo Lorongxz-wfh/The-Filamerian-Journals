@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Calendar, Filter, Eye, Layers, Search, ArrowUpDown } from 'lucide-react';
+import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Calendar, Filter, Eye, Layers, Search, ArrowUpDown, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
@@ -11,6 +11,7 @@ import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
+import Select from '@/components/ui/Select';
 import { formatVolumeName } from '@/lib/utils';
 
 interface Author {
@@ -257,75 +258,81 @@ const Archives: React.FC = () => {
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-3.5 border border-border">
-          <div className="flex flex-wrap items-center gap-3.5 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-surface p-3 border border-border">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             {/* Search within Archives (Debounced) */}
-            <div className="relative w-full sm:w-60">
+            <div className="relative w-full sm:w-52">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
               <input
                 type="text"
                 placeholder="Search archive issues..."
                 value={searchInputValue}
                 onChange={(e) => setSearchInputValue(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary transition-colors"
+                className="w-full pl-9 pr-3 py-2 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* Year Filter */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-xs font-semibold text-muted uppercase tracking-wider">Year:</span>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="bg-background border border-border text-xs font-medium text-primary px-3 py-1.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
-              >
-                <option value="all">All Years</option>
-                {availableYears.map((y) => (
-                  <option key={y} value={String(y)}>{y}</option>
-                ))}
-              </select>
+              <span className="text-[11px] font-semibold text-muted uppercase tracking-wider shrink-0">Year:</span>
+              <div className="w-28">
+                <Select
+                  value={selectedYear}
+                  onChange={(val) => setSelectedYear(String(val))}
+                  options={[
+                    { value: 'all', label: 'All Years' },
+                    ...availableYears.map((y) => ({ value: String(y), label: String(y) }))
+                  ]}
+                  className="py-1.5 px-3 text-xs"
+                />
+              </div>
             </div>
 
             {/* Category Filter */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-xs font-semibold text-muted uppercase tracking-wider">Field:</span>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="bg-background border border-border text-xs font-medium text-primary px-3 py-1.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
-              >
-                <option value="all">All Fields</option>
-                {availableCategories.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <span className="text-[11px] font-semibold text-muted uppercase tracking-wider shrink-0">Field:</span>
+              <div className="w-36">
+                <Select
+                  value={selectedCategory}
+                  onChange={(val) => setSelectedCategory(String(val))}
+                  options={[
+                    { value: 'all', label: 'All Fields' },
+                    ...availableCategories.map((c) => ({ value: c, label: c }))
+                  ]}
+                  className="py-1.5 px-3 text-xs"
+                />
+              </div>
             </div>
 
             {/* Sort By Dropdown */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <ArrowUpDown className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-xs font-semibold text-muted uppercase tracking-wider">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-background border border-border text-xs font-medium text-primary px-3 py-1.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="title_asc">Title (A – Z)</option>
-                <option value="title_desc">Title (Z – A)</option>
-                <option value="volume_desc">Volume (High – Low)</option>
-              </select>
+              <span className="text-[11px] font-semibold text-muted uppercase tracking-wider shrink-0">Sort:</span>
+              <div className="w-36">
+                <Select
+                  value={sortBy}
+                  onChange={(val) => setSortBy(val as any)}
+                  options={[
+                    { value: 'newest', label: 'Newest First' },
+                    { value: 'oldest', label: 'Oldest First' },
+                    { value: 'title_asc', label: 'Title (A – Z)' },
+                    { value: 'title_desc', label: 'Title (Z – A)' },
+                    { value: 'volume_desc', label: 'Vol (High-Low)' }
+                  ]}
+                  className="py-1.5 px-3 text-xs"
+                />
+              </div>
             </div>
 
             {(selectedYear !== 'all' || selectedCategory !== 'all' || searchInputValue || sortBy !== 'newest') && (
               <button
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="text-xs font-mono text-muted hover:text-primary transition-colors underline"
+                className="px-2 py-1.5 text-[10px] font-mono text-muted hover:text-red-600 hover:bg-red-50 border border-dashed border-border hover:border-red-200 transition-all shrink-0 uppercase tracking-wider flex items-center gap-1"
+                title="Reset Filters"
               >
-                Reset Filters
+                <RotateCcw className="h-3 w-3" /> Reset
               </button>
             )}
           </div>
