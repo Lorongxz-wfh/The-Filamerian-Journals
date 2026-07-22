@@ -76,14 +76,19 @@ class JournalController extends Controller
             $validated['slug'] = Str::slug($validated['title']);
         }
 
-        if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
-            $validated['cover_image'] = $path;
-        }
+        try {
+            if ($request->hasFile('cover_image')) {
+                $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
+                $validated['cover_image'] = $path;
+            }
 
-        if ($request->hasFile('pdf_path')) {
-            $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
-            $validated['pdf_path'] = $path;
+            if ($request->hasFile('pdf_path')) {
+                $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
+                $validated['pdf_path'] = $path;
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Journal file upload error: ' . $e->getMessage());
+            return response()->json(['message' => 'File storage upload failed: ' . $e->getMessage()], 500);
         }
 
         $journal = Journal::create($validated);
@@ -140,22 +145,31 @@ class JournalController extends Controller
             'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
-        if ($request->hasFile('cover_image')) {
-            // Delete old image
-            if ($journal->cover_image) {
-                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);
+        try {
+            if ($request->hasFile('cover_image')) {
+                // Delete old image
+                if ($journal->cover_image) {
+                    try {
+                        \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);
+                    } catch (\Throwable $t) {}
+                }
+                $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
+                $validated['cover_image'] = $path;
             }
-            $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
-            $validated['cover_image'] = $path;
-        }
 
-        if ($request->hasFile('pdf_path')) {
-            // Delete old PDF
-            if ($journal->pdf_path) {
-                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->pdf_path);
+            if ($request->hasFile('pdf_path')) {
+                // Delete old PDF
+                if ($journal->pdf_path) {
+                    try {
+                        \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->pdf_path);
+                    } catch (\Throwable $t) {}
+                }
+                $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
+                $validated['pdf_path'] = $path;
             }
-            $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
-            $validated['pdf_path'] = $path;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Journal file update error: ' . $e->getMessage());
+            return response()->json(['message' => 'File storage upload failed: ' . $e->getMessage()], 500);
         }
 
         $journal->update($validated);

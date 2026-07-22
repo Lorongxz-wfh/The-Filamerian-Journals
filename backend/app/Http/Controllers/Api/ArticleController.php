@@ -62,9 +62,14 @@ class ArticleController extends Controller
             'keyword_names.*' => 'string|max:255',
         ]);
 
-        if ($request->hasFile('pdf_path')) {
-            $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
-            $validated['pdf_path'] = $path;
+        try {
+            if ($request->hasFile('pdf_path')) {
+                $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
+                $validated['pdf_path'] = $path;
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Article PDF upload error: ' . $e->getMessage());
+            return response()->json(['message' => 'Article PDF upload failed: ' . $e->getMessage()], 500);
         }
 
         $article = Article::create($validated);
@@ -191,13 +196,20 @@ class ArticleController extends Controller
             'keyword_names.*' => 'string|max:255',
         ]);
 
-        if ($request->hasFile('pdf_path')) {
-            // Delete old file
-            if ($article->pdf_path) {
-                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
+        try {
+            if ($request->hasFile('pdf_path')) {
+                // Delete old file
+                if ($article->pdf_path) {
+                    try {
+                        \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
+                    } catch (\Throwable $t) {}
+                }
+                $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
+                $validated['pdf_path'] = $path;
             }
-            $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
-            $validated['pdf_path'] = $path;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Article PDF update error: ' . $e->getMessage());
+            return response()->json(['message' => 'Article PDF upload failed: ' . $e->getMessage()], 500);
         }
 
         $article->update($validated);
