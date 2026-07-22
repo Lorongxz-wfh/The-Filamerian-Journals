@@ -173,6 +173,17 @@ const Archives: React.FC = () => {
     });
   }, [allVolumes, selectedYear, selectedCategory, searchQuery]);
 
+  const groupedByJournal = useMemo(() => {
+    const map: { [journalId: number]: { journal: any; volumes: VolumeItem[] } } = {};
+    filteredVolumes.forEach((vol) => {
+      if (!map[vol.journal.id]) {
+        map[vol.journal.id] = { journal: vol.journal, volumes: [] };
+      }
+      map[vol.journal.id].volumes.push(vol);
+    });
+    return Object.values(map);
+  }, [filteredVolumes]);
+
   const totalArticlesCount = useMemo(() => {
     return journals.reduce(
       (sum, j) => sum + (j.volumes?.reduce((vs, v) => vs + (v.articles?.length || 0), 0) || 0), 0
@@ -504,53 +515,76 @@ const Archives: React.FC = () => {
               className="border border-border bg-surface py-16"
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {filteredVolumes.map((vol) => (
-                <div
-                  key={`${vol.journal.id}-${vol.id}`}
-                  onClick={() => setActiveVolumeModal(vol)}
-                  className="group relative border border-border bg-surface flex flex-col justify-between p-5 hover:border-primary/40 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-
-                  <div className="w-full aspect-[3/4] bg-background border border-border overflow-hidden mb-4 relative flex flex-col items-center justify-center p-4 text-center">
-                    {vol.journal.cover_image ? (
-                      <img
-                        src={getFileUrl(vol.journal.cover_image)}
-                        alt={vol.journal.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full space-y-2 p-2">
-                        <BookOpen className="h-8 w-8 text-primary/30" />
-                        <span className="text-[11px] font-bold text-primary uppercase tracking-widest line-clamp-3">
-                          {vol.journal.title}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="absolute top-2 left-2 bg-primary text-secondary px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
-                      {formatVolumeName(vol.volume_number)}
+            <div className="space-y-10">
+              {groupedByJournal.map(({ journal, volumes }) => (
+                <div key={journal.id} className="space-y-4">
+                  {/* Journal Header Bar */}
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                      <h3 className="text-[14px] font-bold text-primary uppercase tracking-wide">
+                        {journal.title}
+                      </h3>
+                      <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider hidden sm:inline-block">
+                        {journal.categoryName}
+                      </span>
                     </div>
+                    <span className="text-xs font-mono font-medium text-muted">
+                      {volumes.length} Archived Volume{volumes.length !== 1 ? 's' : ''}
+                    </span>
                   </div>
 
-                  <div className="space-y-1.5 flex-1 flex flex-col justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider inline-block mb-1.5">
-                        {vol.journal.categoryName}
-                      </span>
-                      <h3 className="text-[13px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
-                        {vol.journal.title}
-                      </h3>
-                    </div>
+                  {/* Volume Cards Shelf Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    {volumes.map((vol) => (
+                      <div
+                        key={`${vol.journal.id}-${vol.id}`}
+                        onClick={() => setActiveVolumeModal(vol)}
+                        className="group relative border border-border bg-surface flex flex-col justify-between p-5 hover:border-primary/40 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                      >
+                        <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
 
-                    <div className="pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted">
-                      <span className="font-mono">{vol.year}</span>
-                      <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
-                        <Layers className="h-3 w-3" /> {vol.articles.length} article{vol.articles.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
+                        <div className="w-full aspect-[3/4] bg-background border border-border overflow-hidden mb-4 relative flex flex-col items-center justify-center p-4 text-center">
+                          {vol.journal.cover_image ? (
+                            <img
+                              src={getFileUrl(vol.journal.cover_image)}
+                              alt={vol.journal.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-full space-y-2 p-2">
+                              <BookOpen className="h-8 w-8 text-primary/30" />
+                              <span className="text-[11px] font-bold text-primary uppercase tracking-widest line-clamp-3">
+                                {vol.journal.title}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="absolute top-2 left-2 bg-primary text-secondary px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider shadow-md">
+                            {formatVolumeName(vol.volume_number)}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 flex-1 flex flex-col justify-between">
+                          <div>
+                            <span className="text-[10px] font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider inline-block mb-1.5">
+                              {vol.journal.categoryName}
+                            </span>
+                            <h3 className="text-[13px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
+                              {vol.journal.title}
+                            </h3>
+                          </div>
+
+                          <div className="pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted">
+                            <span className="font-mono">{vol.year}</span>
+                            <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
+                              <Layers className="h-3 w-3" /> {vol.articles.length} article{vol.articles.length !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
