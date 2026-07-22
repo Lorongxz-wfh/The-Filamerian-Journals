@@ -333,7 +333,7 @@ const Home: React.FC = () => {
           {/* Sidebar */}
           <div className="lg:col-span-3 space-y-9">
             {/* Announcements */}
-            <div className="border border-border bg-surface p-5 min-h-[560px] flex flex-col justify-between">
+            <div className="border border-border bg-surface p-5 flex flex-col">
               <Link to="/announcements" className="flex items-center justify-between mb-4 pb-3 border-b border-border group">
                 <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
                   Announcements
@@ -344,30 +344,32 @@ const Home: React.FC = () => {
               {loading ? (
                 <Spinner text="Loading news..." size="sm" className="py-8" />
               ) : (
-                <div className="space-y-4 flex-1 relative overflow-hidden pb-14">
-                  {announcements.slice(0, 3).map((item, i) => (
-                    <Link to="/announcements" key={item.id} className="group block">
-                      <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                      <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-0.5">
-                        {item.title}
-                      </h4>
-                      <div 
-                        className="text-[12px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
-                      />
-                      {i < 2 && <div className="border-b border-border mt-3.5" />}
-                    </Link>
-                  ))}
-                  {announcements.length === 0 && (
-                    <p className="text-xs text-muted">No announcements posted.</p>
-                  )}
+                <div className="space-y-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    {announcements.slice(0, 3).map((item, i) => (
+                      <Link to="/announcements" key={item.id} className="group block">
+                        <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </span>
+                        <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-0.5">
+                          {item.title}
+                        </h4>
+                        <div 
+                          className="text-[12px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
+                        />
+                        {i < 2 && <div className="border-b border-border mt-3.5" />}
+                      </Link>
+                    ))}
+                    {announcements.length === 0 && (
+                      <p className="text-xs text-muted">No announcements posted.</p>
+                    )}
+                  </div>
                   
-                  {/* Fading effect overlay at the bottom */}
+                  {/* Clean bottom button */}
                   {announcements.length > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-surface via-surface/90 to-transparent flex items-end justify-center pb-1 pointer-events-none">
-                       <Link to="/announcements" className="px-6 py-2 bg-[#d83526] hover:bg-red-700 text-white text-[13px] font-medium rounded-full pointer-events-auto transition-all shadow-md hover:shadow-lg">
+                    <div className="pt-3 border-t border-border mt-4 flex justify-center">
+                       <Link to="/announcements" className="px-5 py-1.5 bg-[#d83526] hover:bg-red-700 text-white text-xs font-medium rounded-full transition-all shadow-xs hover:shadow-sm">
                          See All News
                        </Link>
                     </div>

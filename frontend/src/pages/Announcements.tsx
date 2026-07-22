@@ -113,12 +113,8 @@ const Announcements: React.FC = () => {
                 <article 
                   key={item.id} 
                   onClick={() => toggleExpand(item.id)}
-                  className="relative group border border-border bg-surface overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer"
+                  className="group border border-border bg-surface hover:border-primary/40 transition-colors duration-200 cursor-pointer p-6 sm:p-7 shadow-xs"
                 >
-                  {/* Top Accent Line */}
-                  <div className="h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-
-                  <div className="p-6 sm:p-7">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5 text-secondary" />
@@ -153,7 +149,6 @@ const Announcements: React.FC = () => {
                       <span>{isExpanded ? 'Show Less' : 'Read Full Announcement'}</span>
                       <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180 text-secondary' : ''}`} />
                     </div>
-                  </div>
                 </article>
               );
             })
