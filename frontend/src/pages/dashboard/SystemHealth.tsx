@@ -27,6 +27,7 @@ interface StorageData {
 
 interface HealthData {
   status: string;
+  backend_provider?: string;
   database: DatabaseData;
   storage: StorageData;
   storage_disk?: string;
@@ -111,7 +112,7 @@ const SystemHealth: React.FC = () => {
               </div>
               <div>
                 <div className="text-xl font-bold text-primary tracking-tight font-mono">{health?.status}</div>
-                <div className="text-xs text-muted mt-2 font-mono uppercase tracking-wider">[ Backend Service Active ]</div>
+                <div className="text-xs text-muted mt-2 font-mono uppercase tracking-wider">[ {health?.backend_provider || 'Backend Service Active'} ]</div>
               </div>
               <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.status === 'Operational' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
             </div>

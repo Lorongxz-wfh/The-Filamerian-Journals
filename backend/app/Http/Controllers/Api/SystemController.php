@@ -43,13 +43,17 @@ class SystemController extends Controller
                 $dbType = 'Local';
                 $dbHostDisplay = $driver === 'sqlite' ? 'Local Database File' : 'Localhost';
             } else {
-                $dbType = 'Deployed';
-                if (str_contains($host, 'render.com')) {
-                    $dbHostDisplay = 'Render Cloud';
+                $dbType = 'Cloud';
+                if (str_contains($host, 'neon.tech')) {
+                    $dbHostDisplay = 'Neon Postgres';
+                } else if (str_contains($host, 'render.com')) {
+                    $dbHostDisplay = 'Render Postgres';
+                } else if (str_contains($host, 'supabase.co') || str_contains($host, 'supabase.net')) {
+                    $dbHostDisplay = 'Supabase Postgres';
                 } else if (str_contains($host, 'rds.amazonaws.com')) {
                     $dbHostDisplay = 'AWS RDS';
                 } else {
-                    $dbHostDisplay = explode('.', $host)[0] ?? 'External Host';
+                    $dbHostDisplay = 'External Postgres';
                 }
             }
 
@@ -83,8 +87,16 @@ class SystemController extends Controller
 
         // Storage Info
         $storageDisk = env('FILESYSTEM_DISK', 'local');
-        $storageType = $storageDisk === 'r2' ? 'Cloudflare R2' : 'Local Storage';
+        $storageType = match($storageDisk) {
+            'r2' => 'Cloudflare R2',
+            's3' => 'AWS S3',
+            'public', 'local' => 'Local File Storage',
+            default => ucfirst($storageDisk) . ' Storage'
+        };
         $r2Bucket = env('R2_BUCKET', '');
+
+        // Backend Provider
+        $backendProvider = env('RENDER') || env('RENDER_SERVICE_ID') ? 'Render Cloud' : (app()->isLocal() ? 'Local Server' : 'Cloud Server');
 
         // Calculate total storage size (cached for 10 seconds for real-time updates)
         $storageSizeBytes = \Illuminate\Support\Facades\Cache::remember('storage_total_size', 10, function () use ($storageDisk) {
@@ -105,6 +117,7 @@ class SystemController extends Controller
 
         return response()->json([
             'status' => 'Operational',
+            'backend_provider' => $backendProvider,
             'php_version' => phpversion(),
             'laravel_version' => app()->version(),
             'database' => [
