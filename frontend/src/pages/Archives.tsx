@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Calendar, Filter, Eye, Layers, Search } from 'lucide-react';
+import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Calendar, Filter, Eye, Layers, Search, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
@@ -70,10 +70,20 @@ const Archives: React.FC = () => {
   // View Mode: 'shelf' (Option 1) | 'split' (Option 2)
   const [viewMode, setViewMode] = useState<'shelf' | 'split'>('shelf');
 
-  // Filters & Search
+  // Filters, Search (with 300ms Debounce) & Sort
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchInputValue, setSearchInputValue] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title_asc' | 'title_desc' | 'volume_desc'>('newest');
+
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchInputValue);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchInputValue]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -161,17 +171,26 @@ const Archives: React.FC = () => {
 
 
 
-  // Filter volumes based on user selections and search query
+  // Filter & Sort volumes based on user selections
   const filteredVolumes = useMemo(() => {
-    return allVolumes.filter((v) => {
+    const list = allVolumes.filter((v) => {
       const matchesYear = selectedYear === 'all' || String(v.year) === selectedYear;
       const matchesCat = selectedCategory === 'all' || v.journal.categoryName === selectedCategory;
-      const matchesSearch = !searchQuery || 
-        v.journal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.articles.some(a => a.title.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch = !debouncedSearchQuery || 
+        v.journal.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        v.articles.some(a => a.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()));
       return matchesYear && matchesCat && matchesSearch;
     });
-  }, [allVolumes, selectedYear, selectedCategory, searchQuery]);
+
+    return list.sort((a, b) => {
+      if (sortBy === 'newest') return (b.year || 0) - (a.year || 0);
+      if (sortBy === 'oldest') return (a.year || 0) - (b.year || 0);
+      if (sortBy === 'title_asc') return a.journal.title.localeCompare(b.journal.title);
+      if (sortBy === 'title_desc') return b.journal.title.localeCompare(a.journal.title);
+      if (sortBy === 'volume_desc') return Number(b.volume_number) - Number(a.volume_number);
+      return 0;
+    });
+  }, [allVolumes, selectedYear, selectedCategory, debouncedSearchQuery, sortBy]);
 
   const groupedByJournal = useMemo(() => {
     const map: { [journalId: number]: { journal: any; volumes: VolumeItem[] } } = {};
@@ -220,33 +239,35 @@ const Archives: React.FC = () => {
           title="Archives Repository" 
         />
 
-        {/* Dynamic Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border shadow-sm">
-          {[
-            { label: 'Journals', value: journals.length },
-            { label: 'Archived Volumes', value: totalVolumesCount },
-            { label: 'Published Articles', value: totalArticlesCount },
-            { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]} – ${availableYears[0]}` : '-' },
-          ].map((s) => (
-            <div key={s.label} className="bg-surface p-4 text-center">
-              <p className="text-xl font-bold text-primary font-mono">{s.value}</p>
-              <p className="text-[11px] font-semibold text-muted uppercase tracking-wider mt-1">{s.label}</p>
-            </div>
-          ))}
+        {/* Dynamic Compact Summary Stats */}
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-surface border border-border px-5 py-3 shadow-xs">
+          <div className="flex flex-wrap items-center gap-6 sm:gap-8 divide-x divide-border">
+            {[
+              { label: 'Journals', value: journals.length },
+              { label: 'Archived Volumes', value: totalVolumesCount },
+              { label: 'Published Articles', value: totalArticlesCount },
+              { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]} – ${availableYears[0]}` : '-' },
+            ].map((s, idx) => (
+              <div key={s.label} className={`flex items-center gap-2.5 ${idx > 0 ? 'pl-6 sm:pl-8' : ''}`}>
+                <span className="text-base font-bold text-primary font-mono">{s.value}</span>
+                <span className="text-[11px] font-semibold text-muted uppercase tracking-wider">{s.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Filter & View Mode Controls Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-4 border border-border">
-          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-            {/* Search within Archives */}
-            <div className="relative w-full sm:w-56">
+        {/* Filter, Sort & View Mode Controls Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-surface p-3.5 border border-border">
+          <div className="flex flex-wrap items-center gap-3.5 w-full lg:w-auto">
+            {/* Search within Archives (Debounced) */}
+            <div className="relative w-full sm:w-60">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
               <input
                 type="text"
                 placeholder="Search archive issues..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary"
+                value={searchInputValue}
+                onChange={(e) => setSearchInputValue(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
@@ -282,9 +303,26 @@ const Archives: React.FC = () => {
               </select>
             </div>
 
-            {(selectedYear !== 'all' || selectedCategory !== 'all' || searchQuery) && (
+            {/* Sort By Dropdown */}
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="h-3.5 w-3.5 text-muted shrink-0" />
+              <span className="text-xs font-semibold text-muted uppercase tracking-wider">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-background border border-border text-xs font-medium text-primary px-3 py-1.5 focus:outline-none focus:border-primary transition-colors cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="title_asc">Title (A – Z)</option>
+                <option value="title_desc">Title (Z – A)</option>
+                <option value="volume_desc">Volume (High – Low)</option>
+              </select>
+            </div>
+
+            {(selectedYear !== 'all' || selectedCategory !== 'all' || searchInputValue || sortBy !== 'newest') && (
               <button
-                onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchQuery(''); }}
+                onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
                 className="text-xs font-mono text-muted hover:text-primary transition-colors underline"
               >
                 Reset Filters
@@ -293,7 +331,7 @@ const Archives: React.FC = () => {
           </div>
 
           {/* View Mode Switcher */}
-          <div className="flex items-center gap-1 bg-background border border-border p-1">
+          <div className="flex items-center gap-1 bg-background border border-border p-1 shrink-0">
             <button
               onClick={() => setViewMode('shelf')}
               className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
