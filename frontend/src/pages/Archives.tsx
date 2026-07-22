@@ -266,25 +266,25 @@ const Archives: React.FC = () => {
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-surface p-3 border border-border">
-          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 bg-surface px-3 py-2.5 border border-border mb-8">
+          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
             {/* Search within Archives (Debounced) */}
-            <div className="relative w-full sm:w-52">
+            <div className="relative w-full sm:w-44">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
               <input
                 type="text"
                 placeholder="Search archive issues..."
                 value={searchInputValue}
                 onChange={(e) => setSearchInputValue(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary transition-colors"
+                className="w-full pl-8 pr-2 py-1.5 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* Year Filter */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[11px] font-semibold text-muted uppercase tracking-wider shrink-0">Year:</span>
-              <div className="w-28">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0">Year:</span>
+              <div className="w-24">
                 <Select
                   value={selectedYear}
                   onChange={(val) => setSelectedYear(String(val))}
@@ -292,16 +292,16 @@ const Archives: React.FC = () => {
                     { value: 'all', label: 'All Years' },
                     ...availableYears.map((y) => ({ value: String(y), label: String(y) }))
                   ]}
-                  className="py-1.5 px-3 text-xs"
+                  className="py-1 px-2.5 text-xs"
                 />
               </div>
             </div>
 
             {/* Category Filter */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[11px] font-semibold text-muted uppercase tracking-wider shrink-0">Field:</span>
-              <div className="w-36">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0">Field:</span>
+              <div className="w-32">
                 <Select
                   value={selectedCategory}
                   onChange={(val) => setSelectedCategory(String(val))}
@@ -309,27 +309,27 @@ const Archives: React.FC = () => {
                     { value: 'all', label: 'All Fields' },
                     ...availableCategories.map((c) => ({ value: c, label: c }))
                   ]}
-                  className="py-1.5 px-3 text-xs"
+                  className="py-1 px-2.5 text-xs"
                 />
               </div>
             </div>
 
             {/* Sort By Dropdown */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <ArrowUpDown className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[11px] font-semibold text-muted uppercase tracking-wider shrink-0">Sort:</span>
-              <div className="w-36">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0">Sort:</span>
+              <div className="w-32">
                 <Select
                   value={sortBy}
                   onChange={(val) => setSortBy(val as any)}
                   options={[
                     { value: 'newest', label: 'Newest First' },
                     { value: 'oldest', label: 'Oldest First' },
-                    { value: 'title_asc', label: 'Title (A – Z)' },
-                    { value: 'title_desc', label: 'Title (Z – A)' },
+                    { value: 'title_asc', label: 'Title (A–Z)' },
+                    { value: 'title_desc', label: 'Title (Z–A)' },
                     { value: 'volume_desc', label: 'Vol (High-Low)' }
                   ]}
-                  className="py-1.5 px-3 text-xs"
+                  className="py-1 px-2.5 text-xs"
                 />
               </div>
             </div>
@@ -339,10 +339,10 @@ const Archives: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="h-[34px] px-2.5 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center gap-1.5 font-medium"
+                className="h-[30px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center gap-1 font-medium"
                 title="Reset All Filters"
               >
-                <RotateCcw className="h-3.5 w-3.5" />
+                <RotateCcw className="h-3 w-3" />
                 <span>Reset</span>
               </Button>
             )}
