@@ -68,8 +68,9 @@ class ArticleController extends Controller
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Article PDF upload error: ' . $e->getMessage());
-            return response()->json(['message' => 'Article PDF upload failed: ' . $e->getMessage()], 500);
+            $reason = $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage();
+            \Illuminate\Support\Facades\Log::error('Article PDF upload error: ' . $reason);
+            return response()->json(['message' => 'Article PDF upload failed: ' . $reason], 500);
         }
 
         $article = Article::create($validated);
@@ -208,8 +209,9 @@ class ArticleController extends Controller
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Article PDF update error: ' . $e->getMessage());
-            return response()->json(['message' => 'Article PDF upload failed: ' . $e->getMessage()], 500);
+            $reason = $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage();
+            \Illuminate\Support\Facades\Log::error('Article PDF update error: ' . $reason);
+            return response()->json(['message' => 'Article PDF upload failed: ' . $reason], 500);
         }
 
         $article->update($validated);

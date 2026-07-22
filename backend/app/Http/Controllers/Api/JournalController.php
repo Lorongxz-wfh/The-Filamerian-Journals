@@ -87,8 +87,9 @@ class JournalController extends Controller
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Journal file upload error: ' . $e->getMessage());
-            return response()->json(['message' => 'File storage upload failed: ' . $e->getMessage()], 500);
+            $reason = $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage();
+            \Illuminate\Support\Facades\Log::error('Journal file upload error: ' . $reason);
+            return response()->json(['message' => 'File storage upload failed: ' . $reason], 500);
         }
 
         $journal = Journal::create($validated);
@@ -168,8 +169,9 @@ class JournalController extends Controller
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Journal file update error: ' . $e->getMessage());
-            return response()->json(['message' => 'File storage upload failed: ' . $e->getMessage()], 500);
+            $reason = $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage();
+            \Illuminate\Support\Facades\Log::error('Journal file update error: ' . $reason);
+            return response()->json(['message' => 'File storage upload failed: ' . $reason], 500);
         }
 
         $journal->update($validated);
