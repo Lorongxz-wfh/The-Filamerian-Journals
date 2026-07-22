@@ -33,6 +33,7 @@ import Search from '@/pages/Search';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -47,6 +48,7 @@ function App() {
         <Router>
           <ScrollToTop />
           <Analytics />
+          <SpeedInsights />
           <Routes>
         {/* Public Website Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
