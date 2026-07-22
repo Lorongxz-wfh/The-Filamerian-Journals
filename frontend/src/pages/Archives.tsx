@@ -240,21 +240,19 @@ const Archives: React.FC = () => {
           title="Archives Repository" 
         />
 
-        {/* Dynamic Compact Summary Stats */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-surface border border-border px-5 py-3 shadow-xs">
-          <div className="flex flex-wrap items-center gap-6 sm:gap-8 divide-x divide-border">
-            {[
-              { label: 'Journals', value: journals.length },
-              { label: 'Archived Volumes', value: totalVolumesCount },
-              { label: 'Published Articles', value: totalArticlesCount },
-              { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]} – ${availableYears[0]}` : '-' },
-            ].map((s, idx) => (
-              <div key={s.label} className={`flex items-center gap-2.5 ${idx > 0 ? 'pl-6 sm:pl-8' : ''}`}>
-                <span className="text-base font-bold text-primary font-mono">{s.value}</span>
-                <span className="text-[11px] font-semibold text-muted uppercase tracking-wider">{s.label}</span>
-              </div>
-            ))}
-          </div>
+        {/* Balanced 4-Column Summary Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border shadow-xs">
+          {[
+            { label: 'Journals', value: journals.length },
+            { label: 'Archived Volumes', value: totalVolumesCount },
+            { label: 'Published Articles', value: totalArticlesCount },
+            { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]} – ${availableYears[0]}` : '-' },
+          ].map((s) => (
+            <div key={s.label} className="bg-surface py-2.5 px-4 flex items-center justify-center gap-2.5 text-center">
+              <span className="text-sm font-bold text-primary font-mono">{s.value}</span>
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">{s.label}</span>
+            </div>
+          ))}
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
