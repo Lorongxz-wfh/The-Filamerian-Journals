@@ -265,8 +265,8 @@ const Archives: React.FC = () => {
           ))}
         </div>
 
-        {/* Filter, Sort & View Mode Controls Toolbar (Sticky on top when scrolling) */}
-        <div className="sticky top-16 z-40 flex flex-wrap items-center justify-between gap-2.5 bg-surface/95 backdrop-blur-md px-3 py-2.5 border border-border shadow-sm mb-8 transition-all">
+        {/* Filter, Sort & View Mode Controls Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 bg-surface px-3 py-2.5 border border-border mb-8">
           <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
             {/* Search within Archives (Debounced) */}
             <div className="relative w-full sm:w-44">
