@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import api, { getFileUrl } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
@@ -239,7 +239,7 @@ const Home: React.FC = () => {
                   </p>
                   <div className="flex items-center justify-between text-[11px] text-white/70 uppercase tracking-wider truncate pt-4 border-t border-white/20">
                     <span className="truncate pr-4">{article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}</span>
-                    <span className="shrink-0 group-hover:translate-x-1.5 group-hover:text-secondary font-bold text-white transition-all">→</span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-white/70 group-hover:text-secondary group-hover:translate-x-1 transition-all" />
                   </div>
                 </Link>
               ))}
