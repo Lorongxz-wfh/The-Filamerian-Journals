@@ -42,10 +42,10 @@ class JournalController extends Controller
         // Eager-load nested relationships when requested
         if ($request->boolean('with_volumes')) {
             $query->with(['volumes.articles' => function ($q) use ($request) {
-                if ($request->is('api/public/*')) {
+                if ($request->is('api/public/*') || $request->is('public/*')) {
                     $q->where('status', 'Published');
                 }
-                $q->orderBy('order', 'asc')->with('authors');
+                $q->orderBy('articles.order', 'asc')->with('authors');
             }]);
         }
 
@@ -100,7 +100,12 @@ class JournalController extends Controller
     public function show(Request $request, $journal)
     {
         if (!($journal instanceof Journal)) {
-            $journalModel = Journal::where('slug', $journal)->orWhere('id', $journal)->first();
+            $journalModel = Journal::where('slug', $journal);
+            if (is_numeric($journal)) {
+                $journalModel = $journalModel->orWhere('id', $journal);
+            }
+            $journalModel = $journalModel->first();
+            
             if (!$journalModel) {
                 abort(404, 'Journal not found.');
             }
@@ -183,7 +188,12 @@ class JournalController extends Controller
     public function servePdf($journal, Request $request)
     {
         if (!($journal instanceof Journal)) {
-            $journalModel = Journal::where('slug', $journal)->orWhere('id', $journal)->first();
+            $journalModel = Journal::where('slug', $journal);
+            if (is_numeric($journal)) {
+                $journalModel = $journalModel->orWhere('id', $journal);
+            }
+            $journalModel = $journalModel->first();
+
             if (!$journalModel) {
                 abort(404, 'Journal not found.');
             }
