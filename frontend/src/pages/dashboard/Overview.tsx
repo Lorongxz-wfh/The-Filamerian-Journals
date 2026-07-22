@@ -23,6 +23,16 @@ const Overview: React.FC = () => {
     };
     chartData?: Array<{ date: string; actions: number }>;
     websiteChartData?: Array<{ date: string; views: number; downloads: number }>;
+    vercel?: {
+      status: string;
+      latest_deployment?: {
+        url: string;
+        state: string;
+        branch: string;
+        commit_msg: string;
+        created_at: string;
+      };
+    };
   }>({ journals: 0, articles: 0, drafts: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
 
   const [systemHealth, setSystemHealth] = useState<any>(null);
@@ -276,10 +286,55 @@ const Overview: React.FC = () => {
                       {dbStatus}
                     </span>
                   </div>
+                  <div className="flex items-center justify-between border-t border-border pt-3">
+                    <div className="flex items-center gap-2 text-[13px] text-muted">
+                      <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full" /> Vercel Cloud API
+                    </div>
+                    <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5">
+                      {data.vercel?.status || 'Connected'}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
           })()}
+
+          {/* Vercel Live Deployment Status */}
+          {data.vercel && data.vercel.latest_deployment && (
+            <div className="border border-border bg-surface p-5 shadow-sm space-y-3">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
+                  <Globe className="h-3.5 w-3.5 text-secondary" />
+                  Vercel Live Build
+                </h3>
+                <span className="text-[10px] font-mono text-emerald-600 bg-emerald-500/10 px-2 py-0.5 uppercase tracking-wider">
+                  Live
+                </span>
+              </div>
+              
+              <div className="bg-background border border-border p-3 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-secondary uppercase tracking-wider">
+                    Branch: {data.vercel.latest_deployment.branch}
+                  </span>
+                  <span className="text-[10px] text-muted font-mono">
+                    {data.vercel.latest_deployment.created_at}
+                  </span>
+                </div>
+                <p className="text-[12px] font-medium text-primary line-clamp-1">
+                  {data.vercel.latest_deployment.commit_msg}
+                </p>
+                <a 
+                  href={`https://${data.vercel.latest_deployment.url}`} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-[11px] font-mono text-primary/70 hover:text-primary transition-colors underline block truncate"
+                >
+                  {data.vercel.latest_deployment.url}
+                </a>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

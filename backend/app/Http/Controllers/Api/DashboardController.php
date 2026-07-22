@@ -82,6 +82,45 @@ class DashboardController extends Controller
             ];
         }
 
+        $vercelData = null;
+        $vercelToken = env('VERCEL_ANALYTICS_TOKEN');
+        if ($vercelToken) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::withToken($vercelToken)
+                    ->timeout(5)
+                    ->get('https://api.vercel.com/v6/deployments', [
+                        'limit' => 5
+                    ]);
+
+                if ($response->successful()) {
+                    $deps = $response->json('deployments') ?? [];
+                    $latest = $deps[0] ?? null;
+                    $vercelData = [
+                        'status' => 'Connected',
+                        'latest_deployment' => $latest ? [
+                            'url' => $latest['url'] ?? '',
+                            'state' => $latest['state'] ?? 'READY',
+                            'branch' => $latest['meta']['githubCommitRef'] ?? 'main',
+                            'commit_msg' => $latest['meta']['githubCommitMessage'] ?? '',
+                            'created_at' => isset($latest['created']) ? \Carbon\Carbon::createFromTimestampMs($latest['created'])->diffForHumans() : '',
+                        ] : null,
+                        'recent_deployments' => array_map(function($d) {
+                            return [
+                                'id' => $d['uid'] ?? '',
+                                'url' => $d['url'] ?? '',
+                                'branch' => $d['meta']['githubCommitRef'] ?? 'main',
+                                'commit_msg' => $d['meta']['githubCommitMessage'] ?? '',
+                                'state' => $d['state'] ?? 'READY',
+                                'created_at' => isset($d['created']) ? \Carbon\Carbon::createFromTimestampMs($d['created'])->diffForHumans() : '',
+                            ];
+                        }, array_slice($deps, 0, 3)),
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Vercel API fetch failed: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'journals' => Journal::count(),
             'articles' => Article::where('status', 'Published')->count(),
@@ -97,7 +136,8 @@ class DashboardController extends Controller
                 'users' => $calculateTrend(User::class),
             ],
             'chartData' => $chartData,
-            'websiteChartData' => $websiteChartData
+            'websiteChartData' => $websiteChartData,
+            'vercel' => $vercelData
         ]);
     }
 
