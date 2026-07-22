@@ -376,38 +376,7 @@ const Home: React.FC = () => {
               )}
             </div>
 
-            {/* Quick Links */}
-            <div className="border border-border bg-surface p-5 flex flex-col">
-              <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5 pb-3 border-b border-border">
-                Quick Links
-              </h3>
-              
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Browse</h4>
-                  <ul className="space-y-2 text-[13px] text-muted">
-                    <li><Link to="/journals" className="hover:text-primary transition-colors">All Journals</Link></li>
-                    <li><Link to="/archives" className="hover:text-primary transition-colors">Archives & Past Volumes</Link></li>
-                  </ul>
-                </div>
 
-                <div>
-                  <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">Author Corner</h4>
-                  <ul className="space-y-2 text-[13px] text-muted">
-                    <li><Link to="/dashboard" className="hover:text-primary transition-colors">Submit Materials</Link></li>
-                    <li><Link to="/login" className="hover:text-primary transition-colors">Portal Login</Link></li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="text-[11px] font-bold text-secondary uppercase tracking-widest mb-2.5">About Us</h4>
-                  <ul className="space-y-2 text-[13px] text-muted">
-                    <li><Link to="/about" className="hover:text-primary transition-colors">Policies & Information</Link></li>
-                    <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Support</Link></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
