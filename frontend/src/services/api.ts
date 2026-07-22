@@ -7,16 +7,24 @@ export const STORAGE_URL = API_BASE_URL.replace(/\/api\/?$/, '') + '/storage/';
 
 export const getFileUrl = (path: string | null | undefined): string => {
   if (!path) return '';
+  const origin = API_BASE_URL.replace(/\/api\/?$/, '');
+
+  // If path contains localhost/storage or 127.0.0.1/storage from Laravel's APP_URL default
+  if (path.includes('localhost/storage') || path.includes('127.0.0.1/storage')) {
+    const relativeStoragePath = path.substring(path.indexOf('/storage/'));
+    return `${origin}${relativeStoragePath}`;
+  }
+
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
+
   // If it starts with /storage/
   if (path.startsWith('/storage/')) {
-    const origin = API_BASE_URL.replace('/api', '');
     return `${origin}${path}`;
   }
   // Otherwise, fallback to STORAGE_URL prefix
-  return `${STORAGE_URL}${path}`;
+  return `${STORAGE_URL}${path.replace(/^\/+/, '')}`;
 };
 
 const api = axios.create({
