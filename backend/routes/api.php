@@ -97,7 +97,7 @@ Route::get('/public/categories', [\App\Http\Controllers\Api\CategoryController::
 
 // Settings & Feedbacks
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);
-Route::post('/public/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'store']);
+Route::post('/public/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'store'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware([\App\Http\Middleware\EnsureUserIsApproved::class])->group(function () {
