@@ -90,7 +90,7 @@ const About: React.FC = () => {
               </div>
             ) : activeResource ? (
               <div 
-                className="space-y-6 prose prose-sm max-w-none prose-headings:font-display prose-headings:font-normal prose-headings:text-primary prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary"
+                className="space-y-6 prose prose-sm max-w-none prose-headings:font-display prose-headings:font-normal prose-headings:text-primary prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-primary/80"
                 dangerouslySetInnerHTML={{ __html: activeResource.content || '' }}
               />
             ) : (

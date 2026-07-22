@@ -118,7 +118,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, label 
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[150px] max-h-[400px] overflow-y-auto p-4 text-[14px] prose-headings:font-display prose-headings:font-normal prose-headings:uppercase prose-headings:tracking-wider prose-headings:text-primary prose-p:text-primary/90 prose-p:leading-relaxed',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[150px] max-h-[400px] overflow-y-auto p-4 text-[14px] prose-headings:font-display prose-headings:font-normal prose-headings:uppercase prose-headings:tracking-wider prose-headings:text-primary prose-p:text-primary/90 prose-p:leading-relaxed prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-primary/80',
       },
     },
   });
