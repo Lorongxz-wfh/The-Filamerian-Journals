@@ -20,24 +20,12 @@ const MenuBar = ({ editor }: { editor: any }) => {
     <div className="flex flex-wrap items-center gap-1 border-b border-border bg-surface p-1.5">
       <button
         type="button"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={toggleBtnClass(editor.isActive('bold'))}
-        title="Bold"
+        onClick={() => editor.chain().focus().setParagraph().run()}
+        className={toggleBtnClass(editor.isActive('paragraph'))}
+        title="Normal Text (Paragraph)"
       >
-        <Bold className="w-4 h-4" />
+        <span className="w-4 h-4 text-[12px] font-bold flex items-center justify-center font-sans">P</span>
       </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={toggleBtnClass(editor.isActive('italic'))}
-        title="Italic"
-      >
-        <Italic className="w-4 h-4" />
-      </button>
-      
-      <div className="w-px h-4 bg-border mx-1" />
 
       <button
         type="button"
@@ -56,6 +44,27 @@ const MenuBar = ({ editor }: { editor: any }) => {
         <Heading2 className="w-4 h-4" />
       </button>
 
+      <div className="w-px h-4 bg-border mx-1" />
+
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        disabled={!editor.can().chain().focus().toggleBold().run()}
+        className={toggleBtnClass(editor.isActive('bold'))}
+        title="Bold"
+      >
+        <Bold className="w-4 h-4" />
+      </button>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        disabled={!editor.can().chain().focus().toggleItalic().run()}
+        className={toggleBtnClass(editor.isActive('italic'))}
+        title="Italic"
+      >
+        <Italic className="w-4 h-4" />
+      </button>
+      
       <div className="w-px h-4 bg-border mx-1" />
 
       <button
