@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import Tabs from '@/components/ui/Tabs';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import Textarea from '@/components/ui/Textarea';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -353,8 +353,8 @@ const WebsiteSettings: React.FC = () => {
             </div>
           </div>
 
-          <Textarea 
-            label="Content" required rows={12} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="font-sans whitespace-pre-wrap" placeholder="Content goes here..."
+          <RichTextEditor 
+            label="Content" value={formData.content} onChange={val => setFormData({...formData, content: val})}
           />
           
           <div className="flex justify-end gap-3 pt-4 mt-6">

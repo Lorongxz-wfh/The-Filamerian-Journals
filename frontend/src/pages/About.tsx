@@ -90,10 +90,9 @@ const About: React.FC = () => {
               </div>
             ) : activeResource ? (
               <div 
-                className="whitespace-pre-wrap text-[13px] text-muted leading-relaxed"
-              >
-                {activeResource.content || ''}
-              </div>
+                className="space-y-6 prose prose-sm max-w-none prose-headings:text-primary prose-headings:font-bold prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary"
+                dangerouslySetInnerHTML={{ __html: activeResource.content || '' }}
+              />
             ) : (
               <div className="flex items-center justify-center h-full text-muted text-[13px]">
                 Select a topic from the sidebar.
