@@ -1,8 +1,41 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { useSettings } from '@/contexts/SettingsContext';
 
 const Footer: React.FC = () => {
   const { settings } = useSettings();
+
+  const schoolName = settings.footer_school_name || 'Filamer Christian University';
+  const schoolSubtitle = settings.footer_school_subtitle || 'A globally linked Christian university';
+  const address = settings.footer_address || 'Roxas Avenue, Roxas City, Capiz, Philippines';
+  const email = settings.footer_email || 'info@filamer.edu.ph';
+  const phone = settings.footer_phone || '(036) 621-2317';
+
+  const quickLinksTitle = settings.footer_quick_links_title || 'Quick Links';
+  const quickLinks = (settings.footer_quick_links || 'About, Academics, Admission, Organizations, Data Privacy Act, Sitemap')
+    .split(',')
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+
+  const journalLinksTitle = settings.footer_journal_links_title || settings.site_title || 'The Filamerian Journals';
+  const journalLinks = (settings.footer_journal_links || 'Submission Guidelines, Editorial Board, Publication Ethics, Open Access Policy, Contact Editorial Office')
+    .split(',')
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+
+  const copyrightText = settings.footer_copyright || `© ${new Date().getFullYear()} Filamer Christian University, Inc. All rights reserved.`;
+  const facebookUrl = settings.footer_facebook_url || '#';
+  const facebookText = settings.footer_facebook_text || 'Official Facebook Page';
+
+  const getLinkHref = (item: string) => {
+    const lower = item.toLowerCase();
+    if (lower === 'about') return '/about';
+    if (lower === 'contact' || lower === 'contact editorial office') return '/contact';
+    if (lower === 'archives' || lower === 'journals') return '/archives';
+    if (lower.includes('submission')) return '/about';
+    return '/about';
+  };
+
   return (
     <footer className="bg-primary text-white">
       {/* Main footer content */}
@@ -11,29 +44,31 @@ const Footer: React.FC = () => {
           {/* School Info */}
           <div className="space-y-4">
             <h3 className="font-display font-normal text-secondary text-lg tracking-wider uppercase">
-              Filamer Christian University
+              {schoolName}
             </h3>
-            <p className="text-[11px] text-white/40 uppercase tracking-wider">
-              A globally linked Christian university
-            </p>
+            {schoolSubtitle && (
+              <p className="text-[11px] text-white/40 uppercase tracking-wider">
+                {schoolSubtitle}
+              </p>
+            )}
             <div className="space-y-2 text-[13px] text-white/60 pt-2">
-              <p>Roxas Avenue, Roxas City, Capiz, Philippines</p>
-              <p>info@filamer.edu.ph</p>
-              <p>(036) 621-2317</p>
+              {address && <p>{address}</p>}
+              {email && <p>{email}</p>}
+              {phone && <p>{phone}</p>}
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
             <h4 className="text-[12px] font-semibold text-white/80 uppercase tracking-wider">
-              Quick Links
+              {quickLinksTitle}
             </h4>
             <ul className="space-y-2">
-              {['About', 'Academics', 'Admission', 'Organizations', 'Data Privacy Act', 'Sitemap'].map((item) => (
+              {quickLinks.map((item: string) => (
                 <li key={item}>
-                  <a href="#" className="text-[13px] text-white/50 hover:text-white transition-colors">
+                  <Link to={getLinkHref(item)} className="text-[13px] text-white/50 hover:text-white transition-colors">
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -42,14 +77,14 @@ const Footer: React.FC = () => {
           {/* Journal Info */}
           <div className="space-y-4">
             <h4 className="text-[12px] font-semibold text-white/80 uppercase tracking-wider">
-              {settings.site_title}
+              {journalLinksTitle}
             </h4>
             <ul className="space-y-2">
-              {['Submission Guidelines', 'Editorial Board', 'Publication Ethics', 'Open Access Policy', 'Contact Editorial Office'].map((item) => (
+              {journalLinks.map((item: string) => (
                 <li key={item}>
-                  <a href="#" className="text-[13px] text-white/50 hover:text-white transition-colors">
+                  <Link to={getLinkHref(item)} className="text-[13px] text-white/50 hover:text-white transition-colors">
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -61,11 +96,20 @@ const Footer: React.FC = () => {
       <div className="border-t border-white/10">
         <div className="container-custom py-4 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-[12px] text-white/40">
-            © {new Date().getFullYear()} Filamer Christian University, Inc. All rights reserved.
+            {copyrightText.includes('{year}')
+              ? copyrightText.replace('{year}', new Date().getFullYear().toString())
+              : copyrightText}
           </p>
-          <a href="#" className="text-[12px] text-white/40 hover:text-white transition-colors">
-            Official Facebook Page
-          </a>
+          {facebookText && (
+            <a 
+              href={facebookUrl} 
+              target={facebookUrl !== '#' ? '_blank' : '_self'} 
+              rel="noreferrer" 
+              className="text-[12px] text-white/40 hover:text-white transition-colors"
+            >
+              {facebookText}
+            </a>
+          )}
         </div>
       </div>
     </footer>
