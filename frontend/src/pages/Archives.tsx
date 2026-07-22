@@ -243,7 +243,7 @@ const Archives: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col w-full font-sans">
-      <div className="w-full space-y-8 flex flex-col">
+      <div className="w-full space-y-4 flex flex-col">
         {/* Page Header */}
         <PageHeader 
           title="Archives Repository" 
