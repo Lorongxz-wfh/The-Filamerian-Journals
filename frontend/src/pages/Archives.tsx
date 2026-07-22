@@ -12,6 +12,7 @@ import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
 import Select from '@/components/ui/Select';
+import Button from '@/components/ui/Button';
 import { formatVolumeName } from '@/lib/utils';
 
 interface Author {
@@ -334,13 +335,16 @@ const Archives: React.FC = () => {
             </div>
 
             {(selectedYear !== 'all' || selectedCategory !== 'all' || searchInputValue || sortBy !== 'newest') && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="px-2 py-1.5 text-[10px] font-mono text-muted hover:text-red-600 hover:bg-red-50 border border-dashed border-border hover:border-red-200 transition-all shrink-0 uppercase tracking-wider flex items-center gap-1"
-                title="Reset Filters"
+                className="h-[34px] px-2.5 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center gap-1.5 font-medium"
+                title="Reset All Filters"
               >
-                <RotateCcw className="h-3 w-3" /> Reset
-              </button>
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>Reset</span>
+              </Button>
             )}
           </div>
 
