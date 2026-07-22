@@ -26,13 +26,13 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 
 import Contact from '@/pages/Contact';
 import About from '@/pages/About';
-
 import WebsiteSettings from '@/pages/dashboard/WebsiteSettings';
 import Toaster from '@/components/ui/Toaster';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
+import { Analytics } from '@vercel/analytics/react';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -45,8 +45,9 @@ function App() {
     <SettingsProvider>
       <ErrorBoundary>
         <Router>
-        <ScrollToTop />
-        <Routes>
+          <ScrollToTop />
+          <Analytics />
+          <Routes>
         {/* Public Website Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
         <Route path="/search" element={<PublicLayout><Search /></PublicLayout>} />
