@@ -189,7 +189,7 @@ const WebsiteSettings: React.FC = () => {
               />
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Home Text (HTML Supported)</label>
+                  <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Home Text</label>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] uppercase text-muted font-semibold tracking-wider">Show Home Text</span>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -198,11 +198,9 @@ const WebsiteSettings: React.FC = () => {
                     </label>
                   </div>
                 </div>
-                <textarea 
-                  value={settings.home_about_us}
-                  onChange={(e) => handleSettingsChange('home_about_us', e.target.value)}
-                  disabled={settings.show_about_us === 'false'}
-                  className="w-full px-3 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors min-h-[160px] font-mono disabled:opacity-50"
+                <RichTextEditor 
+                  value={settings.home_about_us || ''}
+                  onChange={(val) => handleSettingsChange('home_about_us', val)}
                 />
               </div>
             </div>
