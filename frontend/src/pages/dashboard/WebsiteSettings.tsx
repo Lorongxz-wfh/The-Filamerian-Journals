@@ -354,7 +354,7 @@ const WebsiteSettings: React.FC = () => {
           </div>
 
           <Textarea 
-            label="Content (HTML Supported)" hint={<a href="https://www.w3schools.com/html/" target="_blank" rel="noreferrer" className="text-secondary hover:underline">HTML Guide</a>} required rows={12} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="font-mono" placeholder="<h3>Heading</h3><p>Content goes here...</p><ul><li>Point 1</li></ul>"
+            label="Content" required rows={12} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="font-sans whitespace-pre-wrap" placeholder="Content goes here..."
           />
           
           <div className="flex justify-end gap-3 pt-4 mt-6">

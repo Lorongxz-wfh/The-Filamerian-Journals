@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -42,7 +42,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
     doi: '',
     status: 'Draft',
     authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }] as AuthorData[],
-    keyword_names: [] as string[],
+    keywords_string: '',
     page_start: '',
     page_end: ''
   });
@@ -71,7 +71,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
                 suffix: a.suffix || ''
               }))
             : [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
-          keyword_names: editingArticle.keywords && editingArticle.keywords.length > 0 ? editingArticle.keywords.map((k: any) => k.name) : [],
+          keywords_string: editingArticle.keywords && editingArticle.keywords.length > 0 ? editingArticle.keywords.map((k: any) => k.name).join(', ') : '',
           page_start: '',
           page_end: ''
         });
@@ -83,7 +83,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           doi: '',
           status: 'Draft',
           authors: [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
-          keyword_names: [],
+          keywords_string: '',
           page_start: '',
           page_end: ''
         });
@@ -94,15 +94,6 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setIsDirtyForm(true);
-  };
-
-  const handleArrayChange = (field: 'keyword_names', index: number, value: string) => {
-    setFormData(prev => {
-      const newArray = [...prev[field]];
-      newArray[index] = value;
-      return { ...prev, [field]: newArray };
-    });
     setIsDirtyForm(true);
   };
 
@@ -125,15 +116,6 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
     setIsDirtyForm(true);
   };
 
-  const addArrayItem = (field: 'keyword_names') => {
-    setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
-    setIsDirtyForm(true);
-  };
-
-  const removeArrayItem = (field: 'keyword_names', index: number) => {
-    setFormData(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
-    setIsDirtyForm(true);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,8 +145,9 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           if (author.suffix) payload.append(`authors[${index}][suffix]`, author.suffix);
         }
       });
-      formData.keyword_names.forEach(name => {
-        if (name.trim()) payload.append('keyword_names[]', name.trim());
+      const keywordArray = formData.keywords_string.split(',').map(k => k.trim()).filter(k => k);
+      keywordArray.forEach(name => {
+        payload.append('keyword_names[]', name);
       });
       
       if (pdfFile) {
@@ -257,32 +240,10 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
             ))}
           </div>
 
-          <div className="md:col-span-2 space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Keywords</label>
-              <button type="button" onClick={() => addArrayItem('keyword_names')} className="text-[11px] font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                <Plus className="h-3 w-3" /> Add Keyword
-              </button>
-            </div>
-            {formData.keyword_names.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {formData.keyword_names.map((kw, idx) => (
-                  <div key={idx} className="flex items-center gap-1 bg-white border border-border pr-1 focus-within:border-primary transition-colors rounded-sm">
-                    <input 
-                      type="text" 
-                      value={kw}
-                      onChange={(e) => handleArrayChange('keyword_names', idx, e.target.value)}
-                      placeholder="Keyword"
-                      style={{ width: `${Math.max(kw.length + 1, 9)}ch` }}
-                      className="px-2 py-1 text-[13px] bg-transparent focus:outline-none placeholder:text-muted/60 max-w-full"
-                    />
-                    <button type="button" onClick={() => removeArrayItem('keyword_names', idx)} className="p-1 text-red-500 hover:bg-red-50 transition-colors shrink-0 rounded-sm">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="md:col-span-2">
+            <Input 
+              label="Keywords (Comma separated)" name="keywords_string" value={formData.keywords_string} onChange={handleInputChange} placeholder="e.g. Research, Study, Analysis"
+            />
           </div>
 
           <div className="md:col-span-2">

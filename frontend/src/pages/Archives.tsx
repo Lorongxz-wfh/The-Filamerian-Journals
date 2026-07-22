@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, List, Columns, Calendar, Filter, Eye, Layers, Search, Grid, GraduationCap } from 'lucide-react';
+import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Calendar, Filter, Eye, Layers, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
@@ -67,8 +67,8 @@ const Archives: React.FC = () => {
   const [journals, setJournals] = useState<Journal[]>(initialArchives);
   const [loading, setLoading] = useState(initialArchives.length === 0);
 
-  // View Mode: 'shelf' (Option 1) | 'split' (Option 2) | 'bento' (Option 3) | 'list' (Classic List)
-  const [viewMode, setViewMode] = useState<'shelf' | 'split' | 'bento' | 'list'>('shelf');
+  // View Mode: 'shelf' (Option 1) | 'split' (Option 2)
+  const [viewMode, setViewMode] = useState<'shelf' | 'split'>('shelf');
 
   // Filters & Search
   const [selectedYear, setSelectedYear] = useState<string>('all');
@@ -87,9 +87,7 @@ const Archives: React.FC = () => {
   const [citationArticle, setCitationArticle] = useState<any>(null);
   const [citationContext, setCitationContext] = useState<any>({});
   
-  // Accordion state for List View & Bento View
-  const [expandedJournal, setExpandedJournal] = useState<number | null>(null);
-  const [expandedVolume, setExpandedVolume] = useState<string | null>(null);
+
 
   // PDF Viewer Modal State
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
@@ -161,23 +159,7 @@ const Archives: React.FC = () => {
     return Array.from(cats).sort();
   }, [allVolumes]);
 
-  // Group Journals by Category for Option 3 (Bento Grid)
-  const categoryBentoGroups = useMemo(() => {
-    const map = new Map<string, Journal[]>();
-    journals.forEach((j) => {
-      const catName = typeof j.category === 'object' && j.category !== null ? j.category.name : (j.category || 'Uncategorized');
-      if (!map.has(catName)) {
-        map.set(catName, []);
-      }
-      map.get(catName)!.push(j);
-    });
-    return Array.from(map.entries()).map(([catName, jList]) => ({
-      categoryName: catName,
-      journals: jList,
-      totalVolumes: jList.reduce((s, j) => s + (j.volumes?.length || 0), 0),
-      totalArticles: jList.reduce((s, j) => s + (j.volumes?.reduce((vs, v) => vs + (v.articles?.length || 0), 0) || 0), 0),
-    }));
-  }, [journals]);
+
 
   // Filter volumes based on user selections and search query
   const filteredVolumes = useMemo(() => {
@@ -321,26 +303,6 @@ const Archives: React.FC = () => {
               <Columns className="h-3.5 w-3.5" />
               <span>Split</span>
             </button>
-            <button
-              onClick={() => setViewMode('bento')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
-                viewMode === 'bento' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
-              }`}
-              title="Discipline / Category Bento Grid"
-            >
-              <Grid className="h-3.5 w-3.5" />
-              <span>Bento</span>
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
-                viewMode === 'list' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
-              }`}
-              title="Classic List View"
-            >
-              <List className="h-3.5 w-3.5" />
-              <span>List</span>
-            </button>
           </div>
         </div>
 
@@ -349,101 +311,6 @@ const Archives: React.FC = () => {
           <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
             <Spinner text="Loading archive library..." />
           </div>
-        ) : viewMode === 'bento' ? (
-          /* ========================================================= */
-          /* OPTION 3: DISCIPLINE / CATEGORY BENTO GRID               */
-          /* ========================================================= */
-          categoryBentoGroups.length === 0 ? (
-            <EmptyState
-              title="No categories found"
-              description="No archived categories available."
-              className="border border-border bg-surface py-16"
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {categoryBentoGroups.map((group) => (
-                <div
-                  key={group.categoryName}
-                  className="border border-border bg-surface flex flex-col justify-between p-6 space-y-6 hover:border-primary/40 transition-colors group relative overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-
-                  {/* Bento Header */}
-                  <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <GraduationCap className="h-4 w-4 text-primary" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-primary px-2 py-0.5">
-                          Academic Discipline
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-bold text-primary uppercase tracking-wide">
-                        {group.categoryName}
-                      </h3>
-                    </div>
-                    <div className="text-right shrink-0 font-mono text-xs text-muted">
-                      <span className="font-bold text-primary text-sm block">{group.totalArticles}</span>
-                      <span>articles</span>
-                    </div>
-                  </div>
-
-                  {/* Bento Content - Journals & Volumes List */}
-                  <div className="space-y-4 flex-1">
-                    {group.journals.map((j) => (
-                      <div key={j.id} className="bg-background border border-border p-4 space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h4 className="text-[13px] font-bold text-primary uppercase leading-tight">
-                              {j.title}
-                            </h4>
-                            <span className="text-[11px] text-muted font-mono">ISSN: {j.issn || '-'}</span>
-                          </div>
-                          <span className="text-[10px] font-semibold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider shrink-0">
-                            {j.volumes?.length || 0} Vol(s)
-                          </span>
-                        </div>
-
-                        {/* Volumes Badge List */}
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {j.volumes?.map((v) => (
-                            <button
-                              key={v.id}
-                              onClick={() => setActiveVolumeModal({
-                                id: v.id,
-                                volume_number: v.volume_number,
-                                year: v.year,
-                                journal: {
-                                  id: j.id,
-                                  title: j.title,
-                                  slug: j.slug,
-                                  categoryName: group.categoryName,
-                                  issn: j.issn,
-                                  cover_image: j.cover_image,
-                                },
-                                articles: v.articles || [],
-                              })}
-                              className="px-2.5 py-1 bg-surface border border-border text-[11px] font-medium text-primary hover:bg-primary hover:text-white transition-all flex items-center gap-1.5"
-                            >
-                              <span className="font-semibold">{formatVolumeName(v.volume_number)}</span>
-                              <span className="text-muted group-hover:text-white/80 font-mono">({v.year})</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Bento Footer */}
-                  <div className="pt-2 flex items-center justify-between text-xs text-muted">
-                    <span>{group.journals.length} Journal(s) archived</span>
-                    <span className="font-semibold text-primary group-hover:text-secondary transition-colors">
-                      {group.totalVolumes} Volume Issue(s) →
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
         ) : viewMode === 'split' ? (
           /* ========================================================= */
           /* OPTION 2: SPLIT VIEW (LIST LEFT, LIVE PREVIEW RIGHT)     */
@@ -689,143 +556,7 @@ const Archives: React.FC = () => {
               ))}
             </div>
           )
-        ) : (
-          /* ========================================================= */
-          /* CLASSIC ACCORDION LIST VIEW                              */
-          /* ========================================================= */
-          journals.length === 0 ? (
-            <EmptyState
-              title="No journals found"
-              description="There are no journals with archived volumes yet."
-              className="border border-border bg-surface py-12"
-            />
-          ) : (
-            <div className="space-y-3">
-              {journals.map((journal) => {
-                const isOpen = expandedJournal === journal.id;
-                const articleCount = journal.volumes?.reduce(
-                  (s, v) => s + (v.articles?.length || 0), 0
-                ) || 0;
-
-                return (
-                  <div key={journal.id} className="border border-border bg-surface">
-                    <button
-                      onClick={() => {
-                        setExpandedJournal(isOpen ? null : journal.id);
-                        setExpandedVolume(null);
-                      }}
-                      className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-background transition-colors"
-                    >
-                      <div className="flex items-center gap-4 min-w-0">
-                        <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
-                        <div className="min-w-0">
-                          <span className="text-[14px] font-medium text-primary block truncate">{journal.title}</span>
-                          <span className="text-[11px] text-muted">
-                            {journal.volumes?.length || 0} volume{(journal.volumes?.length || 0) !== 1 ? 's' : ''} · {articleCount} articles · ISSN {journal.issn || '-'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0 ml-4">
-                        <span className="text-[11px] text-muted bg-background px-2 py-0.5">
-                          {typeof journal.category === 'object' && journal.category !== null ? journal.category.name : (journal.category || 'Uncategorized')}
-                        </span>
-                        <ChevronDown className={`h-4 w-4 text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                      </div>
-                    </button>
-
-                    {isOpen && (
-                      <div className="border-t border-border">
-                        {journal.volumes?.length === 0 && (
-                          <div className="px-6 py-6 text-[12px] text-muted text-center bg-background">No volumes available.</div>
-                        )}
-                        {journal.volumes?.map((vol) => {
-                          const volKey = `${journal.id}-${vol.volume_number}`;
-                          const volOpen = expandedVolume === volKey;
-
-                          return (
-                            <div key={vol.id} className="border-b border-border last:border-b-0">
-                              <button
-                                onClick={() => setExpandedVolume(volOpen ? null : volKey)}
-                                className="w-full flex items-center justify-between px-6 py-3 hover:bg-background/50 transition-colors text-left"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="text-[13px] font-semibold text-primary">{formatVolumeName(vol.volume_number)}</span>
-                                  <span className="text-[11px] text-muted">({vol.year})</span>
-                                  <span className="text-[11px] text-muted/60">
-                                    — {vol.articles?.length || 0} article{(vol.articles?.length || 0) !== 1 ? 's' : ''}
-                                  </span>
-                                </div>
-                                <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform ${volOpen ? 'rotate-180' : ''}`} />
-                              </button>
-
-                              {volOpen && (
-                                <div className="bg-background">
-                                  <div className="divide-y divide-border">
-                                    {vol.articles?.map((article) => (
-                                      <div
-                                        key={article.id}
-                                        className="px-8 py-3 hover:bg-surface transition-colors group cursor-pointer"
-                                        onClick={() => handleArticlePdfView(article.id)}
-                                      >
-                                        <div className="flex items-start justify-between gap-4">
-                                          <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
-                                              <FileText className="h-3.5 w-3.5 text-primary/20 shrink-0" />
-                                              <h4 className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
-                                                {article.title}
-                                              </h4>
-                                            </div>
-                                            <p className="text-[11px] text-muted mt-0.5 pl-5">
-                                              {article.authors?.map((a) => a.name).join(', ') || 'Unknown'}
-                                            </p>
-                                            <div className="flex items-center gap-4 mt-1 pl-5 text-[10px] text-muted/50">
-                                              {article.page_start && article.page_end && (
-                                                <span>pp. {article.page_start}-{article.page_end}</span>
-                                              )}
-                                              {article.doi && <span>DOI: {article.doi}</span>}
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setCitationArticle(article);
-                                                  setCitationContext({
-                                                    journalTitle: journal.title,
-                                                    volumeNumber: vol.volume_number,
-                                                    year: vol.year,
-                                                  });
-                                                }}
-                                                className="text-[11px] font-semibold text-muted hover:text-primary transition-colors flex items-center gap-1 ml-auto"
-                                              >
-                                                <Quote className="h-3 w-3" /> Cite
-                                              </button>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                    {vol.articles?.length === 0 && (
-                                      <div className="px-8 py-3 text-[11px] text-muted">No articles found in this volume.</div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-
-                        <Link
-                          to={`/journals/${journal.slug}`}
-                          className="block px-6 py-3 text-[12px] font-medium text-primary/50 hover:text-primary transition-colors text-center border-t border-border"
-                        >
-                          View full journal →
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )
-        )}
+        ) : null}
 
         {/* Pagination Bar */}
         {!loading && lastPage > 1 && (
