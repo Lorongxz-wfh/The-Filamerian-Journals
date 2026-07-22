@@ -193,6 +193,15 @@ const Archives: React.FC = () => {
     });
   }, [allVolumes, selectedYear, selectedCategory, debouncedSearchQuery, sortBy]);
 
+  // Auto-select the top volume on the left whenever filters, search, or sort changes
+  useEffect(() => {
+    if (filteredVolumes.length > 0) {
+      setSelectedSplitVolume(filteredVolumes[0]);
+    } else {
+      setSelectedSplitVolume(null);
+    }
+  }, [filteredVolumes]);
+
   const groupedByJournal = useMemo(() => {
     const map: { [journalId: number]: { journal: any; volumes: VolumeItem[] } } = {};
     filteredVolumes.forEach((vol) => {
