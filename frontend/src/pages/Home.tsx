@@ -222,16 +222,16 @@ const Home: React.FC = () => {
               className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] relative"
             >
               {latestArticles.map((article) => (
-                <Link key={article.id} to={`/articles/${article.id}`} className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px] flex flex-col border border-primary bg-primary p-6 hover:bg-secondary hover:border-secondary hover:-translate-y-1 hover:shadow-xl transition-all duration-300 snap-start h-[260px] group relative overflow-hidden">
-                  {/* Subtle accent line on hover */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <Link key={article.id} to={`/articles/${article.id}`} className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px] flex flex-col border border-primary/20 bg-primary p-6 hover:bg-[#002152] hover:border-secondary/80 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 snap-start h-[260px] group relative overflow-hidden rounded-none">
+                  {/* Subtle Gold accent line on hover */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[10px] font-bold text-secondary uppercase tracking-wider group-hover:text-primary transition-colors">
+                    <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
                       {article.volume?.journal?.title || 'Unknown Journal'}
                     </span>
                   </div>
-                  <h3 className="text-[15px] font-bold text-white uppercase tracking-wider mb-3 line-clamp-2 transition-colors">
+                  <h3 className="text-[15px] font-bold text-white uppercase tracking-wider mb-3 line-clamp-2 group-hover:text-white transition-colors">
                     {article.title}
                   </h3>
                   <p className="text-[13px] text-white/80 leading-relaxed line-clamp-3 mb-5 flex-grow transition-colors">
@@ -239,7 +239,7 @@ const Home: React.FC = () => {
                   </p>
                   <div className="flex items-center justify-between text-[11px] text-white/70 uppercase tracking-wider truncate pt-4 border-t border-white/20 transition-colors">
                     <span className="truncate pr-4">{article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}</span>
-                    <span className="shrink-0 group-hover:translate-x-1 transition-transform text-white">→</span>
+                    <span className="shrink-0 group-hover:translate-x-1.5 group-hover:text-secondary font-bold text-white transition-all">→</span>
                   </div>
                 </Link>
               ))}
