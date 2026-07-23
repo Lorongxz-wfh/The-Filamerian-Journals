@@ -71,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // User management
         Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
         Route::post('/users/{user}/approve', [\App\Http\Controllers\Api\UserController::class, 'approve']);
+        Route::post('/users/{user}/toggle-status', [\App\Http\Controllers\Api\UserController::class, 'toggleStatus']);
         // System Health & Logs
         Route::get('/system/health', [\App\Http\Controllers\Api\SystemController::class, 'health']);
         Route::delete('/system/logs', [\App\Http\Controllers\Api\SystemController::class, 'clearLogs']);

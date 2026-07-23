@@ -68,6 +68,14 @@ class UserController extends Controller
             'role' => 'nullable|string|exists:roles,name',
         ]);
 
+        // If changing role away from Super Admin, ensure at least one active Super Admin remains
+        if (!empty($validated['role']) && $validated['role'] !== 'Super Admin' && $user->hasRole('Super Admin')) {
+            $activeSuperAdmins = User::role('Super Admin')->where('is_disabled', false)->where('id', '!=', $user->id)->count();
+            if ($activeSuperAdmins === 0) {
+                return response()->json(['message' => 'Action forbidden. At least one active Super Admin is required.'], 422);
+            }
+        }
+
         $user->update([
             'name' => $validated['name'] ?? $user->name,
             'email' => $validated['email'] ?? $user->email,
@@ -83,19 +91,64 @@ class UserController extends Controller
         return response()->json($user->load('roles'));
     }
 
+    public function toggleStatus(User $user)
+    {
+        // Cannot disable yourself
+        if ($user->id === auth()->id()) {
+            return response()->json(['message' => 'You cannot disable your own account.'], 422);
+        }
+
+        // If disabling a Super Admin, ensure at least one active Super Admin remains
+        if (!$user->is_disabled && $user->hasRole('Super Admin')) {
+            $activeSuperAdmins = User::role('Super Admin')->where('is_disabled', false)->where('id', '!=', $user->id)->count();
+            if ($activeSuperAdmins === 0) {
+                return response()->json(['message' => 'Cannot disable the last active Super Admin account.'], 422);
+            }
+        }
+
+        $newDisabledState = !$user->is_disabled;
+        $user->update([
+            'is_disabled' => $newDisabledState,
+            'disabled_at' => $newDisabledState ? now() : null,
+        ]);
+
+        $actionText = $newDisabledState ? 'Disabled' : 'Enabled';
+        \App\Services\ActivityLogger::log("{$actionText} User", "{$actionText} user account for {$user->name}", get_class($user), $user->id);
+
+        return response()->json([
+            'message' => "User account {$actionText} successfully.",
+            'user' => $user->load('roles')
+        ]);
+    }
+
     public function destroy(User $user)
     {
-        // Prevent deleting yourself
+        // 1. Prevent deleting yourself
         if ($user->id === auth()->id()) {
-            return response()->json(['message' => 'Cannot delete your own account.'], 403);
+            return response()->json(['message' => 'You cannot delete your own account.'], 422);
+        }
+
+        // 2. User must be disabled first
+        if (!$user->is_disabled) {
+            return response()->json(['message' => 'User must be disabled before permanently deleting.'], 422);
+        }
+
+        // 3. Prevent deleting if last Super Admin
+        if ($user->hasRole('Super Admin')) {
+            $superAdminCount = User::role('Super Admin')->count();
+            if ($superAdminCount <= 1) {
+                return response()->json(['message' => 'Cannot delete the only Super Admin account.'], 422);
+            }
         }
 
         $name = $user->name;
         $class = get_class($user);
 
+        // Revoke tokens and soft delete
+        $user->tokens()->delete();
         $user->delete();
 
-        \App\Services\ActivityLogger::log('Deleted User', "Deleted user account for {$name}", $class, null);
+        \App\Services\ActivityLogger::log('Deleted User', "Soft-deleted user account for {$name}", $class, null);
 
         return response()->noContent();
     }

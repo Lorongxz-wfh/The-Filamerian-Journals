@@ -62,6 +62,12 @@ class AuthController extends Controller
             ]);
         }
         
+        if ($user->is_disabled) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account has been disabled by an administrator. Please contact support.'],
+            ]);
+        }
+
         if (! $user->is_approved) {
             throw ValidationException::withMessages([
                 'email' => ['Your account is pending administrator approval.'],

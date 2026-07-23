@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: LucideIcon;
-  variant?: 'default' | 'danger' | 'success';
+  variant?: 'default' | 'danger' | 'success' | 'warning';
 }
 
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -13,6 +13,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       default: 'text-muted/60 hover:text-primary hover:bg-black/5',
       danger: 'text-muted/60 hover:text-red-500 hover:bg-red-500/10',
       success: 'text-muted/60 hover:text-emerald-500 hover:bg-emerald-50',
+      warning: 'text-muted/60 hover:text-amber-500 hover:bg-amber-50',
     };
 
     return (

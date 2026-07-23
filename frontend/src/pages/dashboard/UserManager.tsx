@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit2, Trash2, CheckCircle, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle, Users, Power } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -26,6 +26,8 @@ interface User {
   email: string;
   roles?: { name: string }[];
   is_approved: boolean;
+  is_disabled: boolean;
+  disabled_at?: string | null;
   created_at: string;
 }
 
@@ -179,8 +181,24 @@ const UserManager: React.FC = () => {
     }
   };
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
   const handleDelete = (id: number) => setDeleteTarget(id);
   const handleApprove = (id: number) => setApproveTarget(id);
+
+  const handleToggleStatus = async (user: User) => {
+    if (user.id === currentUser.id) {
+      toast.error('You cannot disable your own account.');
+      return;
+    }
+    try {
+      const res = await api.post(`/users/${user.id}/toggle-status`);
+      await fetchUsers();
+      toast.success(res.data.message);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to change user status.');
+    }
+  };
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
@@ -229,8 +247,8 @@ const UserManager: React.FC = () => {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead className="w-24 text-right">Actions</TableHead>
+            <TableHead>Role & Status</TableHead>
+            <TableHead className="w-32 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -243,40 +261,85 @@ const UserManager: React.FC = () => {
               </TableCell>
             </TableRow>
           ) : (
-            users.map((user) => (
-              <TableRow key={user.id} className="group">
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
-                      {user.name.charAt(0).toUpperCase()}
+            users.map((user) => {
+              const isSelf = user.id === currentUser.id;
+              return (
+                <TableRow key={user.id} className={`group ${user.is_disabled ? 'bg-red-50/20 opacity-75' : ''}`}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-medium text-primary flex items-center gap-1.5">
+                          {user.name}
+                          {isSelf && (
+                            <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary px-1.5 py-0.2 rounded">You</span>
+                          )}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[13px] font-medium text-primary">{user.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted">{user.email}</TableCell>
-                <TableCell>
-                  <div className="flex flex-col items-start gap-1">
-                    <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')}>
-                      {user.roles?.[0]?.name || 'No Role'}
-                    </Badge>
-                    {!user.is_approved && (
-                      <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
-                        Pending Approval
+                  </TableCell>
+                  <TableCell className="text-muted">{user.email}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')}>
+                        {user.roles?.[0]?.name || 'No Role'}
                       </Badge>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    {!user.is_approved && (
-                      <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
-                    )}
-                    <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit" />
-                    <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(user.id)} title="Delete" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+
+                      {user.is_disabled ? (
+                        <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+                          Disabled
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">
+                          Active
+                        </Badge>
+                      )}
+
+                      {!user.is_approved && (
+                        <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
+                          Pending Approval
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      {!user.is_approved && (
+                        <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
+                      )}
+                      
+                      {/* Disable / Enable Button */}
+                      <IconButton 
+                        icon={Power} 
+                        variant={user.is_disabled ? 'success' : 'warning'} 
+                        onClick={() => handleToggleStatus(user)} 
+                        disabled={isSelf}
+                        title={isSelf ? 'Cannot disable self' : user.is_disabled ? 'Enable Account' : 'Disable Account'} 
+                      />
+
+                      <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit" />
+
+                      {/* Soft Delete Button (Only enabled if user is disabled & not self) */}
+                      <IconButton 
+                        icon={Trash2} 
+                        variant="danger" 
+                        onClick={() => handleDelete(user.id)} 
+                        disabled={isSelf || !user.is_disabled}
+                        title={
+                          isSelf 
+                            ? 'Cannot delete self' 
+                            : !user.is_disabled 
+                            ? 'Must disable user before deleting' 
+                            : 'Permanently Delete User'
+                        } 
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })
           )}
         </TableBody>
       </Table>
