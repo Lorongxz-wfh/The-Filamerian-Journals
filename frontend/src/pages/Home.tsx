@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
 import { ChevronRight, ChevronLeft, ArrowRight, Search } from 'lucide-react';
@@ -185,6 +185,13 @@ const Home: React.FC = () => {
         return catName === activeTab;
       });
 
+  const totalPublishedArticles = useMemo(() => {
+    return journals.reduce((sum, j) => {
+      const volArticles = j.volumes?.reduce((vSum, v) => vSum + (v.articles_count || v.articles?.length || 0), 0) || 0;
+      return sum + volArticles;
+    }, 0);
+  }, [journals]);
+
   const [homeLayout, setHomeLayout] = useState<'original' | 'editorial' | 'bento' | 'minimal'>('original');
 
   return (
@@ -237,13 +244,13 @@ const Home: React.FC = () => {
           <div className="border border-border bg-surface p-8 lg:p-12 relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
-                <span>Filamer Christian University</span> · <span>Open Access Repository</span>
+                <span>Filamer Christian University</span>
               </div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
-                Peer-Reviewed Scholarly Journals & Faculty Research
+                The Filamerian Journals
               </h1>
               <p className="text-muted text-sm leading-relaxed max-w-xl">
-                Explore interdisciplinary research, capstones, case studies, and faculty theses published across various academic disciplines.
+                Explore official academic journals, capstones, case studies, and faculty research published across various academic disciplines.
               </p>
 
               {/* Interactive Search Hero Bar */}
@@ -266,18 +273,18 @@ const Home: React.FC = () => {
                 </button>
               </form>
               
-              {/* Quick Metrics Bar */}
+              {/* Quick Metrics Bar (Live Dynamic Backend Data) */}
               <div className="pt-4 flex flex-wrap gap-8 border-t border-border">
                 <div>
-                  <div className="text-2xl font-bold text-primary font-mono">{journals.length || 12}</div>
+                  <div className="text-2xl font-bold text-primary font-mono">{journals.length || 0}</div>
                   <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-primary font-mono">150+</div>
+                  <div className="text-2xl font-bold text-primary font-mono">{totalPublishedArticles || 0}</div>
                   <div className="text-xs text-muted uppercase tracking-wider font-medium">Published Papers</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-primary font-mono">{categoriesList.length || 4}</div>
+                  <div className="text-2xl font-bold text-primary font-mono">{categoriesList.length || 0}</div>
                   <div className="text-xs text-muted uppercase tracking-wider font-medium">Research Fields</div>
                 </div>
               </div>
@@ -318,8 +325,8 @@ const Home: React.FC = () => {
                     {latestArticles.slice(0, 4).map((art) => (
                       <Link key={art.id} to={`/articles/${art.id}`} className="border border-border bg-surface p-5 hover:border-primary transition-colors flex flex-col justify-between h-[230px] group">
                         <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">{art.volume?.journal?.title || 'Journal Paper'}</span>
-                          <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2">{art.title}</h4>
+                          <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">{art.volume?.journal?.title || 'Journal Paper'}</span>
+                          <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2.5">{art.title}</h4>
                           <p className="text-xs text-muted line-clamp-3">{art.abstract}</p>
                         </div>
                         <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between">Read Paper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" /></span>
