@@ -199,38 +199,13 @@ const Archives: React.FC = () => {
     });
   }, [allVolumes, selectedYear, selectedCategory, debouncedSearchQuery, sortBy]);
 
-  const [isFilterLoading, setIsFilterLoading] = useState<boolean>(false);
-  const [isSplitChanging, setIsSplitChanging] = useState<boolean>(false);
-
-  // Trigger feedback when viewMode layout switches
-  const handleViewModeChange = (mode: 'shelf' | 'split') => {
-    if (mode === viewMode) return;
-    setIsFilterLoading(true);
-    setViewMode(mode);
-    setTimeout(() => setIsFilterLoading(false), 200);
-  };
-
-  const handleSplitVolumeSelect = (vol: VolumeItem) => {
-    if (selectedSplitVolume?.id === vol.id) return;
-    setIsSplitChanging(true);
-    setSelectedSplitVolume(vol);
-    setTimeout(() => setIsSplitChanging(false), 200);
-  };
-
-  // Trigger skeleton loading on left & right when filters, search, or sort changes
+  // Remove artificial timers — filtering client-side is instant!
   useEffect(() => {
-    setIsFilterLoading(true);
-    setIsSplitChanging(true);
     if (filteredVolumes.length > 0) {
       setSelectedSplitVolume(filteredVolumes[0]);
     } else {
       setSelectedSplitVolume(null);
     }
-    const timer = setTimeout(() => {
-      setIsFilterLoading(false);
-      setIsSplitChanging(false);
-    }, 200);
-    return () => clearTimeout(timer);
   }, [filteredVolumes]);
 
   const groupedByJournal = useMemo(() => {
@@ -381,7 +356,7 @@ const Archives: React.FC = () => {
           {/* View Mode Switcher (Icon-only to stay compact on all screens) */}
           <div className="flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
             <button
-              onClick={() => handleViewModeChange('shelf')}
+              onClick={() => setViewMode('shelf')}
               className={`p-1.5 transition-colors ${
                 viewMode === 'shelf' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
@@ -390,7 +365,7 @@ const Archives: React.FC = () => {
               <LayoutGrid className="h-3.5 w-3.5" />
             </button>
             <button
-              onClick={() => handleViewModeChange('split')}
+              onClick={() => setViewMode('split')}
               className={`p-1.5 transition-colors ${
                 viewMode === 'split' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
@@ -403,9 +378,36 @@ const Archives: React.FC = () => {
 
         {/* Content Section */}
         {loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
-            <Spinner text="Loading archive library..." />
-          </div>
+          viewMode === 'shelf' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="border border-border bg-surface flex flex-col justify-between p-5 space-y-4 h-[320px]">
+                  <Skeleton className="w-full aspect-[3/4] rounded-none" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-1/3" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                  <div className="pt-3 border-t border-border flex justify-between">
+                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-5 border border-border bg-surface p-4 space-y-3 min-h-[400px]">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full rounded-none" />
+                ))}
+              </div>
+              <div className="lg:col-span-7 border border-border bg-surface p-6 space-y-4 min-h-[600px]">
+                <Skeleton className="h-32 w-full rounded-none" />
+                <Skeleton className="h-20 w-full rounded-none" />
+                <Skeleton className="h-20 w-full rounded-none" />
+              </div>
+            </div>
+          )
         ) : viewMode === 'split' ? (
           /* ========================================================= */
           /* OPTION 2: SPLIT VIEW (LIST LEFT, LIVE PREVIEW RIGHT)     */
@@ -417,21 +419,11 @@ const Archives: React.FC = () => {
                 <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
                 </span>
-                <span className="text-[11px] font-mono text-muted">{isFilterLoading ? '...' : `${filteredVolumes.length} volumes`}</span>
+                <span className="text-[11px] font-mono text-muted">{filteredVolumes.length} volumes</span>
               </div>
 
               <div className="divide-y divide-border overflow-y-auto max-h-[640px] flex-1">
-                {isFilterLoading ? (
-                  <div className="p-4 space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="p-3 space-y-2 border border-border/50">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    ))}
-                  </div>
-                ) : filteredVolumes.length === 0 ? (
+                {filteredVolumes.length === 0 ? (
                   <div className="p-8 text-center text-xs text-muted flex flex-col items-center justify-center h-full space-y-2">
                     <BookOpen className="h-6 w-6 text-muted/40" />
                     <p className="font-semibold text-primary">No volumes found</p>
@@ -609,17 +601,7 @@ const Archives: React.FC = () => {
           /* ========================================================= */
           /* OPTION 1: VISUAL LIBRARY SHELF (GRID OF VOLUME COVERS)     */
           /* ========================================================= */
-          isFilterLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="border border-border bg-surface p-5 space-y-4">
-                  <Skeleton className="h-44 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              ))}
-            </div>
-          ) : filteredVolumes.length === 0 ? (
+          filteredVolumes.length === 0 ? (
             <EmptyState
               title="No volumes found"
               description="No archived volume issues match your selected filters."
