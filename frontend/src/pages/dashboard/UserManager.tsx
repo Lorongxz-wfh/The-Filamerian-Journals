@@ -41,8 +41,7 @@ type UserFormData = z.infer<typeof userFormSchema>;
 const getRoleVariant = (role: string) => {
   switch (role) {
     case 'Super Admin': return 'destructive';
-    case 'Editor': return 'secondary';
-    case 'Staff': return 'success';
+    case 'Admin': return 'secondary';
     default: return 'default';
   }
 };
@@ -326,8 +325,7 @@ const UserManager: React.FC = () => {
             onChange={(val) => setValue('role', String(val), { shouldValidate: true })}
             options={[
               { value: "Super Admin", label: "Super Admin" },
-              { value: "Editor", label: "Editor" },
-              { value: "Staff", label: "Staff" }
+              { value: "Admin", label: "Admin" }
             ]}
           />
 

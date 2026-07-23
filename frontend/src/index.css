@@ -122,6 +122,7 @@
   .ProseMirror h1 { font-size: 1.25rem; }
   .ProseMirror h2 { font-size: 1.1rem; }
 
-  .ProseMirror ul { list-style-type: disc; padding-left: 1.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
-  .ProseMirror ol { list-style-type: decimal; padding-left: 1.25rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .ProseMirror ul, .prose ul, ul.list-disc { list-style-type: disc !important; padding-left: 1.5rem !important; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .ProseMirror ol, .prose ol, ol.list-decimal { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .ProseMirror li, .prose li { display: list-item !important; margin-top: 0.25rem; margin-bottom: 0.25rem; }
 }
