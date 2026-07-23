@@ -249,11 +249,18 @@ const Home: React.FC = () => {
                   <span>Filamer Christian University</span>
                 </div>
                 <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
-                  The Filamerian Journals
+                  {settings.site_title || 'The Filamerian Journals'}
                 </h1>
-                <p className="text-muted text-sm leading-relaxed max-w-xl">
-                  The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
-                </p>
+                {settings.about_us ? (
+                  <div 
+                    className="text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(settings.about_us) }}
+                  />
+                ) : (
+                  <p className="text-muted text-sm leading-relaxed max-w-xl">
+                    The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
+                  </p>
+                )}
 
                 {/* Interactive Search Hero Bar */}
                 <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl pt-1">
@@ -347,13 +354,13 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Content Section: Full Width Latest Research Output & Academic Journals */}
-          <div className="space-y-12 border-t border-border pt-8">
-            {/* Latest Research Output (3 columns) */}
+          {/* Content Section: Full Width Latest Articles & Recently Updated Journals */}
+          <div className="space-y-10 border-t border-border pt-8">
+            {/* Latest Articles (Top 3 latest articles) */}
             {latestArticles.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Research Output</h2>
+                  <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Articles</h2>
                   <Link to="/archives" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">Explore Archives →</Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -371,42 +378,46 @@ const Home: React.FC = () => {
               </div>
             )}
 
-            {/* Compact Publications & Journals Grid (3 columns) */}
+            {/* Recently Updated Journals (Most recently updated journals) */}
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between border-b border-border pb-3">
-                <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Academic Journals</h2>
+                <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Recently Updated Journals</h2>
                 <Link to="/journals" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">View All Journals →</Link>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {journals.slice(0, 6).map((j) => (
-                  <Link
-                    key={j.id}
-                    to={`/journals/${j.slug}`}
-                    className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
-                  >
-                    {/* Compact Journal Cover Image */}
-                    <div className="w-16 h-22 shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
-                      {j.cover_image ? (
-                        <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <div className="text-[9px] font-bold text-primary text-center uppercase line-clamp-3 leading-tight">{j.title}</div>
-                      )}
-                    </div>
+                {journals
+                  .slice()
+                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                  .slice(0, 6)
+                  .map((j) => (
+                    <Link
+                      key={j.id}
+                      to={`/journals/${j.slug}`}
+                      className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
+                    >
+                      {/* Compact Journal Cover Image */}
+                      <div className="w-16 h-22 shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
+                        {j.cover_image ? (
+                          <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        ) : (
+                          <div className="text-[9px] font-bold text-primary text-center uppercase line-clamp-3 leading-tight">{j.title}</div>
+                        )}
+                      </div>
 
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
-                        {typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
-                      </span>
-                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
-                        {j.title}
-                      </h4>
-                      <span className="text-[11px] text-muted block font-mono">
-                        {j.volumes?.length || 0} Volume(s) Published
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
+                          {typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
+                        </span>
+                        <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
+                          {j.title}
+                        </h4>
+                        <span className="text-[11px] text-muted block font-mono">
+                          {j.volumes?.length || 0} Volume(s) Published
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
               </div>
             </div>
           </div>
