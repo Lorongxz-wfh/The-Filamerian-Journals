@@ -13,6 +13,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { formatVolumeName } from '@/lib/utils';
 
 interface Author {
@@ -194,13 +195,25 @@ const Archives: React.FC = () => {
     });
   }, [allVolumes, selectedYear, selectedCategory, debouncedSearchQuery, sortBy]);
 
+  const [isSplitChanging, setIsSplitChanging] = useState<boolean>(false);
+
+  const handleSplitVolumeSelect = (vol: VolumeItem) => {
+    if (selectedSplitVolume?.id === vol.id) return;
+    setIsSplitChanging(true);
+    setSelectedSplitVolume(vol);
+    setTimeout(() => setIsSplitChanging(false), 200);
+  };
+
   // Auto-select the top volume on the left whenever filters, search, or sort changes
   useEffect(() => {
+    setIsSplitChanging(true);
     if (filteredVolumes.length > 0) {
       setSelectedSplitVolume(filteredVolumes[0]);
     } else {
       setSelectedSplitVolume(null);
     }
+    const timer = setTimeout(() => setIsSplitChanging(false), 200);
+    return () => clearTimeout(timer);
   }, [filteredVolumes]);
 
   const groupedByJournal = useMemo(() => {
@@ -404,7 +417,7 @@ const Archives: React.FC = () => {
                     return (
                       <button
                         key={`${vol.journal.id}-${vol.id}`}
-                        onClick={() => setSelectedSplitVolume(vol)}
+                        onClick={() => handleSplitVolumeSelect(vol)}
                         className={`w-full text-left p-4 transition-all flex items-start justify-between gap-3 group relative ${
                           isSelected
                             ? 'bg-primary/5 border-l-4 border-l-primary font-medium'
@@ -437,7 +450,14 @@ const Archives: React.FC = () => {
 
               {/* RIGHT COLUMN: Live Selected Issue Preview Panel (7/12 cols) */}
               <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
-                {selectedSplitVolume ? (
+                {isSplitChanging ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-28 w-full mb-4" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : selectedSplitVolume ? (
                   <>
                     <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start">
                       <div className="w-24 h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-md">

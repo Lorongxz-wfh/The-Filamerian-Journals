@@ -52,6 +52,14 @@ const JournalDetail: React.FC = () => {
   const [journal, setJournal] = useState<Journal | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedVol, setExpandedVol] = useState<number | null>(null);
+  const [isVolumeChanging, setIsVolumeChanging] = useState<boolean>(false);
+  
+  const handleVolumeSelect = (volNum: number) => {
+    if (volNum === expandedVol) return;
+    setIsVolumeChanging(true);
+    setExpandedVol(volNum);
+    setTimeout(() => setIsVolumeChanging(false), 200);
+  };
   
 
   // PDF Viewer Modal State
@@ -261,7 +269,7 @@ const JournalDetail: React.FC = () => {
                   return (
                     <button
                       key={vol.id}
-                      onClick={() => setExpandedVol(vol.volume_number)}
+                      onClick={() => handleVolumeSelect(vol.volume_number)}
                       className={`w-full text-left p-4 transition-all flex items-start justify-between gap-3 group relative ${
                         isSelected
                           ? 'bg-primary/5 border-l-4 border-l-primary font-medium'
@@ -288,7 +296,14 @@ const JournalDetail: React.FC = () => {
 
             {/* RIGHT COLUMN: Selected Volume Preview (8/12 cols) */}
             <div className="lg:col-span-8 border border-border bg-surface flex flex-col">
-              {journal.volumes.find(v => v.volume_number === expandedVol) ? (
+              {isVolumeChanging ? (
+                <div className="p-8 space-y-4">
+                  <Skeleton className="h-6 w-1/3 mb-4" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : journal.volumes.find(v => v.volume_number === expandedVol) ? (
                 (() => {
                   const activeVol = journal.volumes.find(v => v.volume_number === expandedVol)!;
                   return (

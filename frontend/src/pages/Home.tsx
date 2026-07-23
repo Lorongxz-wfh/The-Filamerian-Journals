@@ -8,6 +8,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Seo } from '@/components/ui/Seo';
 import PageWrapper from '@/components/layout/PageWrapper';
 import Spinner from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useSettings } from '@/contexts/SettingsContext';
 
 // Dynamic categories fetched from API
@@ -34,11 +35,19 @@ const DEFAULT_ABOUT_US = '<h2 class="text-xl font-bold uppercase tracking-wider 
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
+  const [isTabChanging, setIsTabChanging] = useState<boolean>(false);
   const [journals, setJournals] = useState<Journal[]>([]);
   const [latestArticles, setLatestArticles] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleTabChange = (cat: string) => {
+    if (cat === activeTab) return;
+    setIsTabChanging(true);
+    setActiveTab(cat);
+    setTimeout(() => setIsTabChanging(false), 200);
+  };
 
   const { settings } = useSettings();
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
@@ -276,7 +285,7 @@ const Home: React.FC = () => {
                 {availableCategories.map((cat) => (
                   <button
                     key={cat}
-                    onClick={() => setActiveTab(cat)}
+                    onClick={() => handleTabChange(cat)}
                     className={`text-[12px] font-medium pb-1 transition-colors whitespace-nowrap shrink-0 ${
                       activeTab === cat
                         ? 'font-semibold text-primary border-b-2 border-primary'
@@ -290,9 +299,15 @@ const Home: React.FC = () => {
             </div>
 
             <div className="flex-1 flex flex-col mb-8">
-              {loading ? (
-                <div className="flex-1 flex flex-col items-center justify-center min-h-[40vh]">
-                  <Spinner text="Loading journals..." />
+              {loading || isTabChanging ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="border border-border p-5 space-y-4 max-w-[260px] mx-auto w-full h-[320px]">
+                      <Skeleton className="h-40 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ))}
                 </div>
               ) : filteredJournals.length === 0 ? (
                 <EmptyState title="No journals" description="No journals in this category." className="flex-1 flex flex-col items-center justify-center py-12 border border-border bg-surface mt-4 min-h-[40vh]" />
