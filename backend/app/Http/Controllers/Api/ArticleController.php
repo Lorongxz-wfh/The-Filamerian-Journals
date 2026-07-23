@@ -142,7 +142,13 @@ class ArticleController extends Controller
     public function showPublic(Article $article)
     {
         // Public endpoint to retrieve article metadata for SEO/Google Scholar
-        return new ArticleResource($article->load(['volume.journal', 'authors', 'keywords']));
+        $article->load(['volume.journal', 'authors', 'keywords']);
+
+        if ($article->volume && $article->volume->journal && $article->volume->journal->status === 'Draft') {
+            abort(404, 'Article not found.');
+        }
+
+        return new ArticleResource($article);
     }
 
     public function getRelated(Article $article)
@@ -152,6 +158,9 @@ class ArticleController extends Controller
             ->where('volume_id', $article->volume_id)
             ->where('id', '!=', $article->id)
             ->where('status', 'Published') // Only show Published articles
+            ->whereHas('volume.journal', function ($q) {
+                $q->where('status', 'Published');
+            })
             ->inRandomOrder()
             ->take(4)
             ->get();
@@ -164,6 +173,9 @@ class ArticleController extends Controller
         // Fetch the 10 most recently published articles for the carousel
         $latest = Article::with(['volume.journal', 'authors'])
             ->where('status', 'Published')
+            ->whereHas('volume.journal', function ($q) {
+                $q->where('status', 'Published');
+            })
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();

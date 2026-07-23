@@ -49,7 +49,7 @@ class SearchController extends Controller
 
         // Search Journals
         if ($type === 'all' || $type === 'journals') {
-            $journalQuery = Journal::with('category');
+            $journalQuery = Journal::with('category')->where('status', 'Published');
 
             if (!empty(trim($q))) {
                 $journalQuery->where(function ($query) use ($term) {
@@ -87,7 +87,11 @@ class SearchController extends Controller
 
         // Search Articles
         if ($type === 'all' || $type === 'articles') {
-            $articleQuery = Article::with(['volume.journal.category', 'authors'])->where('status', 'Published');
+            $articleQuery = Article::with(['volume.journal.category', 'authors'])
+                ->where('status', 'Published')
+                ->whereHas('volume.journal', function ($q) {
+                    $q->where('status', 'Published');
+                });
 
             if (!empty(trim($q))) {
                 $articleQuery->where(function ($query) use ($term) {
