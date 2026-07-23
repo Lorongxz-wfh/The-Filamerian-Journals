@@ -205,6 +205,14 @@ const Contact: React.FC = () => {
             >
               {loading ? 'Sending...' : 'Send Message'}
             </Button>
+
+            {/* Data Privacy Notice */}
+            <div className="pt-4 border-t border-border/60 text-[11px] text-muted leading-relaxed space-y-1">
+              <strong className="text-primary uppercase tracking-wider block text-[10px]">Data Privacy Notice:</strong>
+              <p>
+                Filamer Christian University respects your privacy. Any personal information shared in this form will be used only for the purpose intended and handled in accordance with the Data Privacy Act of 2012 / RA 10173.
+              </p>
+            </div>
           </form>
         </div>
       </div>
