@@ -182,15 +182,19 @@ const Contact: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Message</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Message</label>
+                <span className="text-[10px] font-mono text-muted">{formData.message.length}/2000</span>
+              </div>
               <textarea 
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 required
-                rows={3}
+                maxLength={2000}
+                rows={4}
                 className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors resize-none"
-                placeholder="How can we help you?"
+                placeholder="How can we help you? (Max 2,000 characters)"
               />
             </div>
 

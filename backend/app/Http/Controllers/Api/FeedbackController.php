@@ -21,7 +21,7 @@ class FeedbackController extends Controller
             'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
             'category' => 'required|string|in:System Issue,Journal Suggestion,Other',
-            'message' => 'required|string'
+            'message' => 'required|string|max:2000'
         ]);
 
         $feedback = Feedback::create($validated);
