@@ -21,6 +21,7 @@ import FileUploadZone from '@/components/ui/FileUploadZone';
 import { toast } from 'sonner';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
 import Pagination from '@/components/ui/Pagination';
+import Badge from '@/components/ui/Badge';
 
 interface Journal {
   id: number;
@@ -29,6 +30,7 @@ interface Journal {
   description: string;
   category: any;
   category_id: number | null;
+  status: 'Published' | 'Draft';
   publisher: string | null;
   issn: string;
   frequency: string;
@@ -45,6 +47,7 @@ const journalFormSchema = z.object({
   slug: z.string().optional(),
   description: z.string().optional(),
   category_id: z.string().min(1, 'Category is required'),
+  status: z.enum(['Published', 'Draft']),
   publisher: z.string().optional(),
   issn: z.string().optional(),
   frequency: z.string().optional(),
@@ -129,7 +132,10 @@ const MyJournals: React.FC = () => {
     }
   });
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const selectedCategoryId = watch('category_id');
+  const selectedStatus = watch('status');
   const descriptionValue = watch('description') || '';
 
   useEffect(() => {
@@ -145,7 +151,6 @@ const MyJournals: React.FC = () => {
       setLoading(true);
       const params = new URLSearchParams();
       params.append('page', page.toString());
-      params.append('with_volumes', '1');
       if (debouncedFilter) params.append('search', debouncedFilter);
       if (categoryFilter) params.append('category', categoryFilter);
 
@@ -191,6 +196,7 @@ const MyJournals: React.FC = () => {
         slug: journal.slug || '',
         description: journal.description || '',
         category_id: journal.category_id ? String(journal.category_id) : '',
+        status: journal.status || 'Published',
         publisher: journal.publisher || '',
         issn: journal.issn || '',
         frequency: journal.frequency || '',
@@ -204,6 +210,7 @@ const MyJournals: React.FC = () => {
         slug: '',
         description: '',
         category_id: '',
+        status: 'Published',
         publisher: '',
         issn: '',
         frequency: '',
@@ -242,6 +249,7 @@ const MyJournals: React.FC = () => {
       payload.append('slug', data.slug || '');
       payload.append('description', data.description || '');
       payload.append('category_id', data.category_id);
+      payload.append('status', data.status);
       payload.append('publisher', data.publisher || '');
       payload.append('issn', data.issn || '');
       payload.append('frequency', data.frequency || '');
@@ -282,13 +290,15 @@ const MyJournals: React.FC = () => {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/journals/${deleteTarget}`);
       await fetchJournals();
       toast.success('Journal deleted successfully');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Delete failed:', err);
-      toast.error('Failed to delete journal.');
+      toast.error(err.response?.data?.message || 'Failed to delete journal.');
     } finally {
+      setIsDeleting(false);
       setDeleteTarget(null);
     }
   };
@@ -379,9 +389,19 @@ const MyJournals: React.FC = () => {
                 <TableCell>
                   <div className="flex items-center gap-3 min-w-0">
                     <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
-                    <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
-                      {journal.title}
-                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
+                        {journal.title}
+                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <Badge 
+                          variant={journal.status === 'Draft' ? 'outline' : 'secondary'} 
+                          className={journal.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0' : 'text-[9px] px-1.5 py-0'}
+                        >
+                          {journal.status || 'Published'}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className="text-muted truncate">
@@ -484,6 +504,19 @@ const MyJournals: React.FC = () => {
             </div>
             
             <div>
+              <Select 
+                label="Publication Status" 
+                required 
+                value={selectedStatus} 
+                onChange={(val) => setValue('status', val as 'Published' | 'Draft', { shouldValidate: true })}
+                options={[
+                  { value: "Published", label: "Published (Visible publicly)" },
+                  { value: "Draft", label: "Draft / Hidden (Internal only)" }
+                ]}
+              />
+            </div>
+            
+            <div>
               <Input 
                 label="Year Published" 
                 placeholder="e.g. 2024"
@@ -569,6 +602,7 @@ const MyJournals: React.FC = () => {
         onConfirm={confirmDelete}
         title="Delete Journal"
         message="Are you sure you want to delete this journal? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

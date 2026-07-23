@@ -168,15 +168,19 @@ const Articles: React.FC = () => {
     setDeleteTarget(id);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/articles/${deleteTarget}`);
       await fetchData();
       toast.success('Article deleted successfully');
     } catch (err) {
       toast.error('Failed to delete article');
     } finally {
+      setIsDeleting(false);
       setDeleteTarget(null);
     }
   };
@@ -366,6 +370,7 @@ const Articles: React.FC = () => {
         onConfirm={confirmDelete}
         title="Delete Article"
         message="Are you sure you want to delete this article? This action cannot be undone."
+        isLoading={isDeleting}
       />
     </div>
   );

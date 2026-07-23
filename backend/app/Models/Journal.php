@@ -14,6 +14,7 @@ class Journal extends Model
         'slug',
         'description',
         'category_id',
+        'status',
         'issn',
         'frequency',
         'editor',

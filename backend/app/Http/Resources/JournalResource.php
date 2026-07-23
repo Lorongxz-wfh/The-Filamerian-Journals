@@ -20,6 +20,7 @@ class JournalResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'category_id' => $this->category_id,
+            'status' => $this->status ?? 'Published',
             'category' => $this->whenLoaded('category', function () {
                 return $this->category ? [
                     'id' => $this->category->id,

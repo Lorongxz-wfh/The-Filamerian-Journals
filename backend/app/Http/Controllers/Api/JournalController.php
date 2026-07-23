@@ -17,6 +17,10 @@ class JournalController extends Controller
     {
         $query = Journal::with('category');
 
+        if ($request->is('api/public/*') || $request->is('public/*')) {
+            $query->where('status', 'Published');
+        }
+
         if ($request->filled('search')) {
             $search = strtolower($request->query('search'));
             $query->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
@@ -63,6 +67,7 @@ class JournalController extends Controller
             'slug' => 'nullable|string|max:255|unique:journals,slug',
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
+            'status' => 'nullable|string|in:Published,Draft',
             'publisher' => 'nullable|string|max:255',
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
@@ -70,6 +75,10 @@ class JournalController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
         ]);
+
+        if (empty($validated['status'])) {
+            $validated['status'] = 'Published';
+        }
 
         // Auto-generate slug from title if not provided
         if (empty($validated['slug'])) {
@@ -118,8 +127,12 @@ class JournalController extends Controller
             $journal = $journalModel;
         }
 
+        if (($request->is('api/public/*') || $request->is('public/*')) && $journal->status === 'Draft') {
+            abort(404, 'Journal not found.');
+        }
+
         $journal->load(['category', 'volumes.articles' => function ($q) use ($request) {
-            if ($request->is('api/public/*')) {
+            if ($request->is('api/public/*') || $request->is('public/*')) {
                 $q->where('status', 'Published');
             }
             $q->orderBy('order', 'asc')->with('authors');
@@ -138,6 +151,7 @@ class JournalController extends Controller
             'slug' => 'string|max:255|unique:journals,slug,' . $journal->id,
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
+            'status' => 'nullable|string|in:Published,Draft',
             'publisher' => 'nullable|string|max:255',
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
@@ -186,6 +200,17 @@ class JournalController extends Controller
      */
     public function destroy(Journal $journal)
     {
+        // Count total articles associated with volumes of this journal
+        $articleCount = \App\Models\Article::whereHas('volume', function($q) use ($journal) {
+            $q->where('journal_id', $journal->id);
+        })->count();
+
+        if ($articleCount > 0) {
+            return response()->json([
+                'message' => "Cannot delete '{$journal->title}' because it contains {$articleCount} published/associated article(s). Please unpublish or remove the articles first."
+            ], 422);
+        }
+
         // Delete cover image if exists
         if ($journal->cover_image) {
             \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);

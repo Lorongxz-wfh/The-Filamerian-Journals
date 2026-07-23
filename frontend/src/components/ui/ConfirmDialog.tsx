@@ -48,6 +48,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           variant={isDestructive ? 'danger' : 'primary'} 
           onClick={onConfirm} 
           isLoading={isLoading}
+          disabled={isLoading}
         >
           {confirmText}
         </Button>
