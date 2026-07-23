@@ -11,7 +11,7 @@ export default function ScrollToTop() {
 
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 300);
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [pathname, search]);
@@ -19,8 +19,8 @@ export default function ScrollToTop() {
   if (!loading) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-secondary overflow-hidden pointer-events-none animate-pulse">
-      <div className="h-full bg-primary/90 w-full animate-in fade-in slide-in-from-left duration-300" />
+    <div className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-secondary shadow-md overflow-hidden pointer-events-none">
+      <div className="h-full bg-secondary w-full animate-pulse transition-all duration-500" />
     </div>
   );
 }
