@@ -54,6 +54,9 @@ const ArticleDetail: React.FC = () => {
   const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
 
   useEffect(() => {
+    setLoading(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     const fetchArticle = async () => {
       try {
         const res = await api.get(`/public/articles/${id}`);
