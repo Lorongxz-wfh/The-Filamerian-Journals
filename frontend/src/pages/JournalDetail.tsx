@@ -59,6 +59,7 @@ const JournalDetail: React.FC = () => {
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     const fetchJournal = async () => {
       try {
         const res = await api.get(`/public/journals/${slug}`);
