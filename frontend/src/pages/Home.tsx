@@ -240,41 +240,44 @@ const Home: React.FC = () => {
       {/* ========================================================= */}
       {homeLayout === 'editorial' && (
         <div className="space-y-12 w-full">
-          {/* Editorial Hero Banner */}
-          <div className="border border-border bg-surface p-8 lg:p-12 relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
-                <span>Filamer Christian University</span>
-              </div>
-              <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
-                The Filamerian Journals
-              </h1>
-              <p className="text-muted text-sm leading-relaxed max-w-xl">
-                Explore official academic journals, capstones, case studies, and faculty research published across various academic disciplines.
-              </p>
-
-              {/* Interactive Search Hero Bar */}
-              <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl">
-                <div className="relative flex-1">
-                  <Search className="h-4 w-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={heroSearchQuery}
-                    onChange={(e) => setHeroSearchQuery(e.target.value)}
-                    placeholder="Search articles, keywords, authors, or DOI..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-background border border-border text-xs text-primary placeholder:text-muted focus:outline-none focus:border-primary transition-colors shadow-xs"
-                  />
+          {/* Editorial Hero Banner (Edge-to-Edge Merged Layout) */}
+          <div className="border border-border bg-surface relative overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+            {/* Left Content Section (7 cols with padding) */}
+            <div className="lg:col-span-7 p-8 lg:p-12 space-y-6 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
+                  <span>Filamer Christian University</span>
                 </div>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-secondary hover:text-primary transition-colors shadow-sm shrink-0 flex items-center gap-1.5"
-                >
-                  Search
-                </button>
-              </form>
+                <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
+                  The Filamerian Journals
+                </h1>
+                <p className="text-muted text-sm leading-relaxed max-w-xl">
+                  The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
+                </p>
+
+                {/* Interactive Search Hero Bar */}
+                <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl pt-2">
+                  <div className="relative flex-1">
+                    <Search className="h-4 w-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={heroSearchQuery}
+                      onChange={(e) => setHeroSearchQuery(e.target.value)}
+                      placeholder="Search articles, keywords, authors, or DOI..."
+                      className="w-full pl-10 pr-4 py-2.5 bg-background border border-border text-xs text-primary placeholder:text-muted focus:outline-none focus:border-primary transition-colors shadow-xs"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-secondary hover:text-primary transition-colors shadow-sm shrink-0 flex items-center gap-1.5"
+                  >
+                    Search
+                  </button>
+                </form>
+              </div>
               
               {/* Quick Metrics Bar (Live Dynamic Backend Data) */}
-              <div className="pt-4 flex flex-wrap gap-8 border-t border-border">
+              <div className="pt-6 flex flex-wrap gap-8 border-t border-border mt-4">
                 <div>
                   <div className="text-2xl font-bold text-primary font-mono">{journals.length || 0}</div>
                   <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
@@ -290,10 +293,10 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Integrated University Announcements Widget */}
-            <div className="lg:col-span-5 border border-border bg-background flex flex-col justify-between overflow-hidden h-full">
+            {/* Right Side: Seamless Merged University Announcements Section (5 cols) */}
+            <div className="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-border bg-background flex flex-col justify-between overflow-hidden">
               {/* Header Bar */}
-              <div className="bg-primary px-5 py-3 flex items-center justify-between border-b border-border">
+              <div className="bg-primary px-6 py-4 flex items-center justify-between border-b border-border">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-secondary" />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-white">
@@ -306,7 +309,7 @@ const Home: React.FC = () => {
               </div>
 
               {/* Main Content Area */}
-              <div className="p-5 space-y-4 divide-y divide-border flex-1 flex flex-col justify-center">
+              <div className="p-6 space-y-4 divide-y divide-border flex-1 flex flex-col justify-center">
                 {announcements.slice(0, 2).map((item, i) => (
                   <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-4' : ''}`}>
                     <div className="flex items-center justify-between mb-1.5">
@@ -335,7 +338,7 @@ const Home: React.FC = () => {
               </div>
 
               {/* Footer Bar */}
-              <div className="bg-surface px-5 py-2.5 border-t border-border flex items-center justify-between">
+              <div className="bg-surface px-6 py-3 border-t border-border flex items-center justify-between">
                 <span className="text-[10px] text-muted font-medium">FCU Official Bulletin</span>
                 <Link to="/announcements" className="text-[11px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
                   Read Bulletins <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
