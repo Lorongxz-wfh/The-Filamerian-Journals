@@ -172,12 +172,12 @@ const JournalDetail: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 items-stretch">
         {/* Left: Cover Column */}
         <div className="lg:col-span-3 shrink-0">
-          <div className="relative w-full max-w-[280px] mx-auto lg:mx-0 aspect-[3/4] overflow-hidden bg-surface border border-border shadow-sm">
+          <div className="relative group w-full max-w-[280px] mx-auto lg:mx-0 aspect-[3/4] overflow-hidden bg-surface border border-border shadow-md rounded-xs">
             {journal.cover_image ? (
               <img 
                 src={getFileUrl(journal.cover_image)} 
                 alt={journal.title} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -188,6 +188,22 @@ const JournalDetail: React.FC = () => {
               <BookOpen className="h-10 w-10 text-primary/30 mb-2" />
               <span className="text-muted text-[11px] font-bold uppercase tracking-wider">No Cover</span>
             </div>
+
+            {/* Floating Glassmorphic PDF Reader Button at Bottom Center */}
+            {journal.pdf_url && (
+              <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-primary/95 via-primary/80 to-transparent pt-8 flex justify-center items-center">
+                <button 
+                  onClick={() => {
+                    setIsPdfModalOpen(true);
+                    setPdfViewUrl(`${getFileUrl(journal.pdf_url!)}#toolbar=0`);
+                  }}
+                  className="w-full max-w-[90%] inline-flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/90 hover:bg-secondary text-white hover:text-primary backdrop-blur-md border border-white/20 hover:border-secondary shadow-lg hover:shadow-secondary/20 transition-all duration-300 text-[11px] font-bold uppercase tracking-wider group/btn"
+                >
+                  <BookOpen className="h-3.5 w-3.5 text-secondary group-hover/btn:text-primary transition-colors shrink-0" />
+                  <span className="truncate">Read Journal PDF</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -206,21 +222,6 @@ const JournalDetail: React.FC = () => {
             className="text-[13px] text-muted leading-relaxed prose prose-sm max-w-none" 
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(journal.description || 'No description available.') }}
           />
-
-          {journal.pdf_url && (
-            <div className="pt-2">
-              <button 
-                onClick={() => {
-                  setIsPdfModalOpen(true);
-                  setPdfViewUrl(`${getFileUrl(journal.pdf_url)}#toolbar=0`);
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-[12px] font-medium hover:bg-secondary hover:text-primary transition-colors tracking-wide shadow-sm"
-              >
-                <BookOpen className="h-4 w-4" />
-                Read Full Journal PDF
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Right: Metadata Sidebar Card */}
