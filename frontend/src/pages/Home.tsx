@@ -240,10 +240,10 @@ const Home: React.FC = () => {
       {/* ========================================================= */}
       {homeLayout === 'editorial' && (
         <div className="space-y-12 w-full">
-          {/* Editorial Hero Banner */}
-          <div className="border border-border bg-surface p-8 lg:p-10 relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Editorial Hero Banner (Flush 8/4 Edge Split, Same Height) */}
+          <div className="border border-border bg-surface relative overflow-hidden grid grid-cols-1 lg:grid-cols-12">
             {/* Left Content Section (8 cols) */}
-            <div className="lg:col-span-8 space-y-6">
+            <div className="lg:col-span-8 p-8 lg:p-10 space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
                   <span>Filamer Christian University</span>
@@ -293,8 +293,8 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Narrower Standalone University Announcements Card (4 cols, 3 Announcements Max) */}
-            <div className="lg:col-span-4 border border-border bg-background flex flex-col justify-between overflow-hidden shadow-sm h-full min-h-[380px]">
+            {/* Right Side: Narrower Edge-Merged Announcements Section (4 cols, 3 Announcements Max, Flush Top/Right/Bottom) */}
+            <div className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-border bg-background flex flex-col justify-between overflow-hidden">
               {/* Header Bar */}
               <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border">
                 <div className="flex items-center gap-1.5">
@@ -308,10 +308,10 @@ const Home: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Main Content Area (Fits Max 3 Items) */}
+              {/* Main Content Area (Fits 3 Items cleanly) */}
               <div className="p-4 space-y-3 divide-y divide-border flex-1 flex flex-col justify-center">
                 {announcements.slice(0, 3).map((item, i) => (
-                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3' : ''}`}>
+                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-2.5' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 py-0.5 uppercase tracking-wider">
                         Notice
