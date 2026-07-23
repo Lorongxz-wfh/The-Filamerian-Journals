@@ -7,7 +7,6 @@ import CitationModal from '@/components/ui/CitationModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import Modal from '@/components/ui/Modal';
 import EmptyState from '@/components/ui/EmptyState';
-import Spinner from '@/components/ui/Spinner';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
@@ -436,7 +435,7 @@ const Archives: React.FC = () => {
                     return (
                       <button
                         key={`${vol.journal.id}-${vol.id}`}
-                        onClick={() => handleSplitVolumeSelect(vol)}
+                        onClick={() => setSelectedSplitVolume(vol)}
                         className={`w-full text-left p-4 transition-all flex items-start justify-between gap-3 group relative ${
                           isSelected
                             ? 'bg-primary/5 border-l-4 border-l-primary font-medium'
@@ -470,14 +469,7 @@ const Archives: React.FC = () => {
 
             {/* RIGHT COLUMN: Live Selected Issue Preview Panel (7/12 cols) */}
             <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
-              {isFilterLoading || isSplitChanging ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-28 w-full mb-4" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                </div>
-              ) : selectedSplitVolume ? (
+              {selectedSplitVolume ? (
                 <>
                   <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start">
                     <div className="w-24 h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-md">
