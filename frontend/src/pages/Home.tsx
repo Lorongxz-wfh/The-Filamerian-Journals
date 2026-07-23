@@ -240,10 +240,10 @@ const Home: React.FC = () => {
       {/* ========================================================= */}
       {homeLayout === 'editorial' && (
         <div className="space-y-12 w-full">
-          {/* Editorial Hero Banner (Flush 8/4 Edge Split, Same Height) */}
-          <div className="border border-border bg-surface relative overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-            {/* Left Content Section (8 cols) */}
-            <div className="lg:col-span-8 p-8 lg:p-10 space-y-6 flex flex-col justify-between">
+          {/* Editorial Hero Banner (Two Separate Side-by-Side Cards with Gap) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            {/* Left Content Card (8 cols) */}
+            <div className="lg:col-span-8 border border-border bg-surface p-8 lg:p-10 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
                   <span>Filamer Christian University</span>
@@ -277,7 +277,7 @@ const Home: React.FC = () => {
               </div>
               
               {/* Quick Metrics Bar (Live Dynamic Backend Data) */}
-              <div className="pt-5 flex flex-wrap gap-8 border-t border-border mt-2">
+              <div className="pt-5 flex flex-wrap gap-8 border-t border-border mt-6">
                 <div>
                   <div className="text-2xl font-bold text-primary font-mono">{journals.length || 0}</div>
                   <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
@@ -293,8 +293,8 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Narrower Edge-Merged Announcements Section (4 cols, 3 Announcements Max, Flush Top/Right/Bottom) */}
-            <div className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-border bg-background flex flex-col justify-between overflow-hidden">
+            {/* Right Side: Separate University Announcements Card (4 cols, 3 Announcements Max) */}
+            <div className="lg:col-span-4 border border-border bg-background flex flex-col justify-between overflow-hidden">
               {/* Header Bar */}
               <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border">
                 <div className="flex items-center gap-1.5">
