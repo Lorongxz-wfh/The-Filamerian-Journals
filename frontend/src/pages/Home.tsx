@@ -290,42 +290,55 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: University Announcements Widget */}
-            <div className="lg:col-span-5 border border-border bg-background p-6 space-y-4 shadow-xl relative flex flex-col justify-between min-h-[300px]">
-              <div>
-                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-primary px-2.5 py-1 inline-block">
+            {/* Right Side: High-End University Announcements Widget */}
+            <div className="lg:col-span-5 border-2 border-primary/20 bg-background shadow-2xl relative flex flex-col justify-between overflow-hidden">
+              {/* Header Bar */}
+              <div className="bg-primary px-5 py-3 flex items-center justify-between border-b border-secondary/30">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-white">
                     University Announcements
                   </span>
-                  <Link to="/announcements" className="text-[11px] font-semibold text-muted hover:text-primary transition-colors">
-                    All News →
-                  </Link>
                 </div>
-
-                <div className="space-y-3.5 divide-y divide-border/60">
-                  {announcements.slice(0, 2).map((item, i) => (
-                    <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3' : ''}`}>
-                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider block mb-1">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2">
-                        {item.title}
-                      </h4>
-                      <div
-                        className="text-[11px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1 leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
-                      />
-                    </Link>
-                  ))}
-                  {announcements.length === 0 && (
-                    <p className="text-xs text-muted py-6 text-center">No announcements posted.</p>
-                  )}
-                </div>
+                <Link to="/announcements" className="text-[10px] font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors">
+                  All News →
+                </Link>
               </div>
 
-              <div className="pt-3 border-t border-border flex justify-end">
-                <Link to="/announcements" className="text-xs font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1">
-                  Read All Announcements <ArrowRight className="h-3.5 w-3.5" />
+              {/* Main Content Area */}
+              <div className="p-5 space-y-3.5 divide-y divide-border/60">
+                {announcements.slice(0, 2).map((item, i) => (
+                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3.5' : ''}`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-mono font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider">
+                        Notice
+                      </span>
+                      <span className="text-[10px] font-mono text-muted">
+                        {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2 uppercase">
+                      {item.title}
+                    </h4>
+                    <div
+                      className="text-[11px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
+                    />
+                  </Link>
+                ))}
+                {announcements.length === 0 && (
+                  <div className="py-8 text-center space-y-1">
+                    <p className="text-xs font-semibold text-primary">No Active Bulletins</p>
+                    <p className="text-[11px] text-muted">Check back later for university research updates.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Banner */}
+              <div className="bg-surface px-5 py-3 border-t border-border flex items-center justify-between">
+                <span className="text-[10px] text-muted font-medium">Filamer Christian University Bulletin</span>
+                <Link to="/announcements" className="text-xs font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
+                  Read Bulletins <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
