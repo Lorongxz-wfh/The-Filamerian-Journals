@@ -364,7 +364,7 @@ const JournalDetail: React.FC = () => {
         isOpen={isPdfModalOpen} 
         onClose={() => setIsPdfModalOpen(false)} 
         pdfUrl={pdfViewUrl}
-        allowDownload={true}
+        allowDownload={false}
       />
     </PageWrapper>
   );
