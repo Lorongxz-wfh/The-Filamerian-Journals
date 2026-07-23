@@ -129,11 +129,20 @@ class UserController extends Controller
         }
 
         // 2. User must be disabled first
-        if (!$user->is_disabled) {
+        if (!$user->is_disabled || !$user->disabled_at) {
             return response()->json(['message' => 'User must be disabled before permanently deleting.'], 422);
         }
 
-        // 3. Prevent deleting if last Super Admin
+        // 3. Enforce 24-hour waiting period after disabling
+        $hoursSinceDisabled = now()->diffInHours($user->disabled_at);
+        if ($hoursSinceDisabled < 24) {
+            $hoursLeft = 24 - $hoursSinceDisabled;
+            return response()->json([
+                'message' => "Account safety period active. Please wait {$hoursLeft} more hour(s) before permanently deleting this account."
+            ], 422);
+        }
+
+        // 4. Prevent deleting if last Super Admin
         if ($user->hasRole('Super Admin')) {
             $superAdminCount = User::role('Super Admin')->count();
             if ($superAdminCount <= 1) {

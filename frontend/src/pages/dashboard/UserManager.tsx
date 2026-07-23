@@ -248,7 +248,7 @@ const UserManager: React.FC = () => {
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role & Status</TableHead>
-            <TableHead className="w-32 text-right">Actions</TableHead>
+            <TableHead className="w-24 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -310,31 +310,7 @@ const UserManager: React.FC = () => {
                         <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
                       )}
                       
-                      {/* Disable / Enable Button */}
-                      <IconButton 
-                        icon={Power} 
-                        variant={user.is_disabled ? 'success' : 'warning'} 
-                        onClick={() => handleToggleStatus(user)} 
-                        disabled={isSelf}
-                        title={isSelf ? 'Cannot disable self' : user.is_disabled ? 'Enable Account' : 'Disable Account'} 
-                      />
-
-                      <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit" />
-
-                      {/* Soft Delete Button (Only enabled if user is disabled & not self) */}
-                      <IconButton 
-                        icon={Trash2} 
-                        variant="danger" 
-                        onClick={() => handleDelete(user.id)} 
-                        disabled={isSelf || !user.is_disabled}
-                        title={
-                          isSelf 
-                            ? 'Cannot delete self' 
-                            : !user.is_disabled 
-                            ? 'Must disable user before deleting' 
-                            : 'Permanently Delete User'
-                        } 
-                      />
+                      <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit User & Manage Status" />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -353,7 +329,7 @@ const UserManager: React.FC = () => {
       )}
 
       {/* Modal with Zod & React Hook Form */}
-      <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && handleCloseModal()} title={editingUser ? 'Edit User' : 'New User'}>
+      <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && handleCloseModal()} title={editingUser ? 'Edit User & Management' : 'New User'}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {serverError && <div className="p-3 bg-red-50 text-red-700 text-[13px] rounded">{serverError}</div>}
           
@@ -391,6 +367,98 @@ const UserManager: React.FC = () => {
               { value: "Admin", label: "Admin" }
             ]}
           />
+
+          {/* Account Status & Danger Zone inside Edit Modal */}
+          {editingUser && (() => {
+            const isSelf = editingUser.id === currentUser.id;
+            const disabledAt = editingUser.disabled_at ? new Date(editingUser.disabled_at) : null;
+            const now = new Date();
+            const hoursElapsed = disabledAt ? Math.floor((now.getTime() - disabledAt.getTime()) / (1000 * 60 * 60)) : 0;
+            const hoursRemaining = Math.max(0, 24 - hoursElapsed);
+            const canDeletePermanently = editingUser.is_disabled && hoursRemaining === 0;
+
+            return (
+              <div className="pt-4 border-t border-border mt-6 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted">Account Safety & Status</h4>
+                
+                {isSelf ? (
+                  <p className="text-xs text-muted italic bg-muted/10 p-2.5 rounded border border-border">
+                    You cannot disable or delete your own logged-in account.
+                  </p>
+                ) : (
+                  <div className="space-y-3 bg-surface p-3.5 border border-border rounded">
+                    {/* Status Toggle Box */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-semibold text-primary">Account Access</div>
+                        <div className="text-[11px] text-muted">
+                          {editingUser.is_disabled ? 'Account is currently disabled' : 'Account is active and permitted to login'}
+                        </div>
+                      </div>
+
+                      {editingUser.is_disabled ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            await handleToggleStatus(editingUser);
+                            handleCloseModal();
+                          }}
+                          className="border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-xs"
+                        >
+                          <Power className="h-3.5 w-3.5 mr-1" /> Enable Account
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            await handleToggleStatus(editingUser);
+                            handleCloseModal();
+                          }}
+                          className="border-amber-600 text-amber-700 hover:bg-amber-50 text-xs"
+                        >
+                          <Power className="h-3.5 w-3.5 mr-1" /> Disable Account First
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Permanent Delete Section (Shows when disabled with 24-hour countdown) */}
+                    {editingUser.is_disabled && (
+                      <div className="pt-3 border-t border-border/80 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-semibold text-red-600">Permanent Deletion</div>
+                          <div className="text-[11px] text-muted">
+                            {canDeletePermanently ? (
+                              <span className="text-red-600 font-medium">Safety period complete. Ready for permanent deletion.</span>
+                            ) : (
+                              <span>24-Hour Safety Period: <strong>{hoursRemaining} hour(s) remaining</strong> before permanent delete unlocks.</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="sm"
+                          disabled={!canDeletePermanently}
+                          onClick={() => {
+                            handleDelete(editingUser.id);
+                            handleCloseModal();
+                          }}
+                          className="text-xs flex items-center gap-1"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" /> Delete Permanently
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
             <Button type="button" variant="ghost" onClick={handleCloseModal}>
