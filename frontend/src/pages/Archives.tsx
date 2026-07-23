@@ -190,12 +190,25 @@ const Archives: React.FC = () => {
       if (sortBy === 'oldest') return (a.year || 0) - (b.year || 0);
       if (sortBy === 'title_asc') return a.journal.title.localeCompare(b.journal.title);
       if (sortBy === 'title_desc') return b.journal.title.localeCompare(a.journal.title);
-      if (sortBy === 'volume_desc') return Number(b.volume_number) - Number(a.volume_number);
+      if (sortBy === 'volume_desc') {
+        const numA = parseInt(String(a.volume_number).replace(/\D/g, ''), 10) || 0;
+        const numB = parseInt(String(b.volume_number).replace(/\D/g, ''), 10) || 0;
+        return numB - numA;
+      }
       return 0;
     });
   }, [allVolumes, selectedYear, selectedCategory, debouncedSearchQuery, sortBy]);
 
+  const [isFilterLoading, setIsFilterLoading] = useState<boolean>(false);
   const [isSplitChanging, setIsSplitChanging] = useState<boolean>(false);
+
+  // Trigger feedback when viewMode layout switches
+  const handleViewModeChange = (mode: 'shelf' | 'split') => {
+    if (mode === viewMode) return;
+    setIsFilterLoading(true);
+    setViewMode(mode);
+    setTimeout(() => setIsFilterLoading(false), 200);
+  };
 
   const handleSplitVolumeSelect = (vol: VolumeItem) => {
     if (selectedSplitVolume?.id === vol.id) return;
@@ -204,15 +217,19 @@ const Archives: React.FC = () => {
     setTimeout(() => setIsSplitChanging(false), 200);
   };
 
-  // Auto-select the top volume on the left whenever filters, search, or sort changes
+  // Trigger skeleton loading on left & right when filters, search, or sort changes
   useEffect(() => {
+    setIsFilterLoading(true);
     setIsSplitChanging(true);
     if (filteredVolumes.length > 0) {
       setSelectedSplitVolume(filteredVolumes[0]);
     } else {
       setSelectedSplitVolume(null);
     }
-    const timer = setTimeout(() => setIsSplitChanging(false), 200);
+    const timer = setTimeout(() => {
+      setIsFilterLoading(false);
+      setIsSplitChanging(false);
+    }, 200);
     return () => clearTimeout(timer);
   }, [filteredVolumes]);
 
@@ -364,7 +381,7 @@ const Archives: React.FC = () => {
           {/* View Mode Switcher (Icon-only to stay compact on all screens) */}
           <div className="flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
             <button
-              onClick={() => setViewMode('shelf')}
+              onClick={() => handleViewModeChange('shelf')}
               className={`p-1.5 transition-colors ${
                 viewMode === 'shelf' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
@@ -373,7 +390,7 @@ const Archives: React.FC = () => {
               <LayoutGrid className="h-3.5 w-3.5" />
             </button>
             <button
-              onClick={() => setViewMode('split')}
+              onClick={() => handleViewModeChange('split')}
               className={`p-1.5 transition-colors ${
                 viewMode === 'split' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
@@ -393,25 +410,35 @@ const Archives: React.FC = () => {
           /* ========================================================= */
           /* OPTION 2: SPLIT VIEW (LIST LEFT, LIVE PREVIEW RIGHT)     */
           /* ========================================================= */
-          filteredVolumes.length === 0 ? (
-            <EmptyState
-              title="No volumes found"
-              description="No archived volume issues match your selected filters."
-              className="border border-border bg-surface py-16"
-            />
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* LEFT COLUMN: Scrollable Volume Issues List (5/12 cols) */}
-              <div className="lg:col-span-5 border border-border bg-surface flex flex-col max-h-[700px] overflow-hidden">
-                <div className="p-3.5 border-b border-border bg-background flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
-                  </span>
-                  <span className="text-[11px] font-mono text-muted">{filteredVolumes.length} volumes</span>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* LEFT COLUMN: Scrollable Volume Issues List (5/12 cols) */}
+            <div className="lg:col-span-5 border border-border bg-surface flex flex-col min-h-[400px] max-h-[700px] overflow-hidden">
+              <div className="p-3.5 border-b border-border bg-background flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
+                </span>
+                <span className="text-[11px] font-mono text-muted">{isFilterLoading ? '...' : `${filteredVolumes.length} volumes`}</span>
+              </div>
 
-                <div className="divide-y divide-border overflow-y-auto max-h-[640px]">
-                  {filteredVolumes.map((vol) => {
+              <div className="divide-y divide-border overflow-y-auto max-h-[640px] flex-1">
+                {isFilterLoading ? (
+                  <div className="p-4 space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="p-3 space-y-2 border border-border/50">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredVolumes.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-muted flex flex-col items-center justify-center h-full space-y-2">
+                    <BookOpen className="h-6 w-6 text-muted/40" />
+                    <p className="font-semibold text-primary">No volumes found</p>
+                    <p>Try adjusting your search query or filters.</p>
+                  </div>
+                ) : (
+                  filteredVolumes.map((vol) => {
                     const isSelected = selectedSplitVolume?.id === vol.id && selectedSplitVolume?.journal.id === vol.journal.id;
 
                     return (
@@ -444,145 +471,155 @@ const Archives: React.FC = () => {
                         <ChevronDown className={`h-4 w-4 text-muted shrink-0 -rotate-90 transition-transform ${isSelected ? 'text-primary translate-x-1' : ''}`} />
                       </button>
                     );
-                  })}
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: Live Selected Issue Preview Panel (7/12 cols) */}
-              <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
-                {isSplitChanging ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-28 w-full mb-4" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
-                ) : selectedSplitVolume ? (
-                  <>
-                    <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start">
-                      <div className="w-24 h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-md">
-                        {selectedSplitVolume.journal.cover_image ? (
-                          <img
-                            src={getFileUrl(selectedSplitVolume.journal.cover_image)}
-                            alt={selectedSplitVolume.journal.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                          />
-                        ) : (
-                          <BookOpen className="h-8 w-8 text-primary/30" />
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[10px] font-bold text-secondary bg-primary px-2.5 py-1 uppercase tracking-wider">
-                            {formatVolumeName(selectedSplitVolume.volume_number)}
-                          </span>
-                          <span className="text-xs font-mono font-bold text-primary border border-border px-2 py-0.5">
-                            Year {selectedSplitVolume.year}
-                          </span>
-                          <span className="text-xs text-muted">
-                            ISSN: {selectedSplitVolume.journal.issn || '-'}
-                          </span>
-                        </div>
-
-                        <h3 className="text-base font-bold text-primary uppercase tracking-wide">
-                          {selectedSplitVolume.journal.title}
-                        </h3>
-
-                        <p className="text-xs text-muted">
-                          Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · Contains {selectedSplitVolume.articles.length} published article(s).
-                        </p>
-
-                        <div className="pt-2">
-                          <Link
-                            to={`/journals/${selectedSplitVolume.journal.slug}`}
-                            className="text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
-                          >
-                            View Main Journal Page →
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 flex-1">
-                      <div className="flex items-center justify-between border-b border-border pb-2">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-primary" /> Table of Contents
-                        </h4>
-                        <span className="text-[11px] font-mono text-muted">{selectedSplitVolume.articles.length} articles</span>
-                      </div>
-
-                      {selectedSplitVolume.articles.length === 0 ? (
-                        <div className="p-8 text-center bg-background border border-border text-xs text-muted">
-                          No articles published in this volume issue.
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-border border border-border bg-background max-h-[440px] overflow-y-auto">
-                          {selectedSplitVolume.articles.map((article) => (
-                            <div
-                              key={article.id}
-                              className="p-4 hover:bg-surface transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <h5 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase leading-snug">
-                                  {article.title}
-                                </h5>
-                                <p className="text-xs text-muted mt-1">
-                                  {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
-                                </p>
-                                <div className="flex items-center gap-4 mt-2 text-[11px] text-muted/60">
-                                  {article.page_start && article.page_end && (
-                                    <span>pp. {article.page_start}-{article.page_end}</span>
-                                  )}
-                                  {article.doi && <span>DOI: {article.doi}</span>}
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                                <button
-                                  onClick={() => {
-                                    setCitationArticle(article);
-                                    setCitationContext({
-                                      journalTitle: selectedSplitVolume.journal.title,
-                                      volumeNumber: selectedSplitVolume.volume_number,
-                                      year: selectedSplitVolume.year,
-                                    });
-                                  }}
-                                  className="px-3 py-1.5 border border-border text-xs font-semibold text-muted hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5 bg-surface"
-                                >
-                                  <Quote className="h-3 w-3" /> Cite
-                                </button>
-                                {article.pdf_path && (
-                                  <button
-                                    onClick={() => handleArticlePdfView(article.id)}
-                                    className="px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-secondary hover:text-primary transition-colors flex items-center gap-1.5 shadow-sm"
-                                  >
-                                    <Eye className="h-3 w-3" /> Read PDF
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-muted space-y-3">
-                    <BookOpen className="h-10 w-10 text-primary/20" />
-                    <p className="text-sm font-medium text-primary">Select a volume issue from the left</p>
-                    <p className="text-xs">Select any issue on the left list to view its complete table of contents and articles.</p>
-                  </div>
+                  })
                 )}
               </div>
             </div>
-          )
+
+            {/* RIGHT COLUMN: Live Selected Issue Preview Panel (7/12 cols) */}
+            <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
+              {isFilterLoading || isSplitChanging ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-28 w-full mb-4" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : selectedSplitVolume ? (
+                <>
+                  <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start">
+                    <div className="w-24 h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-md">
+                      {selectedSplitVolume.journal.cover_image ? (
+                        <img
+                          src={getFileUrl(selectedSplitVolume.journal.cover_image)}
+                          alt={selectedSplitVolume.journal.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <BookOpen className="h-8 w-8 text-primary/30" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold text-secondary bg-primary px-2.5 py-1 uppercase tracking-wider">
+                          {formatVolumeName(selectedSplitVolume.volume_number)}
+                        </span>
+                        <span className="text-xs font-mono font-bold text-primary border border-border px-2 py-0.5">
+                          Year {selectedSplitVolume.year}
+                        </span>
+                        <span className="text-xs text-muted">
+                          ISSN: {selectedSplitVolume.journal.issn || '-'}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base font-bold text-primary uppercase tracking-wide">
+                        {selectedSplitVolume.journal.title}
+                      </h3>
+
+                      <p className="text-xs text-muted">
+                        Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · Contains {selectedSplitVolume.articles.length} published article(s).
+                      </p>
+
+                      <div className="pt-2">
+                        <Link
+                          to={`/journals/${selectedSplitVolume.journal.slug}`}
+                          className="text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
+                        >
+                          View Main Journal Page →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 flex-1">
+                    <div className="flex items-center justify-between border-b border-border pb-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" /> Table of Contents
+                      </h4>
+                      <span className="text-[11px] font-mono text-muted">{selectedSplitVolume.articles.length} articles</span>
+                    </div>
+
+                    {selectedSplitVolume.articles.length === 0 ? (
+                      <div className="p-8 text-center bg-background border border-border text-xs text-muted">
+                        No articles published in this volume issue.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-border border border-border bg-background max-h-[440px] overflow-y-auto">
+                        {selectedSplitVolume.articles.map((article) => (
+                          <div
+                            key={article.id}
+                            className="p-4 hover:bg-surface transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <h5 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase leading-snug">
+                                {article.title}
+                              </h5>
+                              <p className="text-xs text-muted mt-1">
+                                {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
+                              </p>
+                              <div className="flex items-center gap-4 mt-2 text-[11px] text-muted/60">
+                                {article.page_start && article.page_end && (
+                                  <span>pp. {article.page_start}-{article.page_end}</span>
+                                )}
+                                {article.doi && <span>DOI: {article.doi}</span>}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                              <button
+                                onClick={() => {
+                                  setCitationArticle(article);
+                                  setCitationContext({
+                                    journalTitle: selectedSplitVolume.journal.title,
+                                    volumeNumber: selectedSplitVolume.volume_number,
+                                    year: selectedSplitVolume.year,
+                                  });
+                                }}
+                                className="px-3 py-1.5 border border-border text-xs font-semibold text-muted hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5 bg-surface"
+                              >
+                                <Quote className="h-3 w-3" /> Cite
+                              </button>
+                              {article.pdf_path && (
+                                <button
+                                  onClick={() => handleArticlePdfView(article.id)}
+                                  className="px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-secondary hover:text-primary transition-colors flex items-center gap-1.5 shadow-sm"
+                                >
+                                  <Eye className="h-3 w-3" /> Read PDF
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-muted space-y-3">
+                  <BookOpen className="h-10 w-10 text-primary/20" />
+                  <p className="text-sm font-medium text-primary">No Volume Selected</p>
+                  <p className="text-xs">No volume issue matches your selected search or filter criteria.</p>
+                </div>
+              )}
+            </div>
+          </div>
         ) : viewMode === 'shelf' ? (
           /* ========================================================= */
           /* OPTION 1: VISUAL LIBRARY SHELF (GRID OF VOLUME COVERS)     */
           /* ========================================================= */
-          filteredVolumes.length === 0 ? (
+          isFilterLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="border border-border bg-surface p-5 space-y-4">
+                  <Skeleton className="h-44 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : filteredVolumes.length === 0 ? (
             <EmptyState
               title="No volumes found"
               description="No archived volume issues match your selected filters."
