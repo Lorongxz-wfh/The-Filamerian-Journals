@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 
@@ -40,11 +41,17 @@ const BreadcrumbItem = React.forwardRef<HTMLLIElement, React.LiHTMLAttributes<HT
 );
 BreadcrumbItem.displayName = 'BreadcrumbItem';
 
-const BreadcrumbLink = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement> & { asChild?: boolean }>(
-  ({ className, ...props }, ref) => (
-    <a
+export type BreadcrumbLinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
+  to?: string;
+  href?: string;
+};
+
+const BreadcrumbLink = React.forwardRef<HTMLAnchorElement, BreadcrumbLinkProps>(
+  ({ className, to, href, ...props }, ref) => (
+    <Link
       ref={ref}
-      className={cn('transition-colors hover:text-primary', className)}
+      to={to || href || '#'}
+      className={cn('transition-colors hover:text-primary cursor-pointer', className)}
       {...props}
     />
   )

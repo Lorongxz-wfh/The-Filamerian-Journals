@@ -153,7 +153,26 @@ const ArticleDetail: React.FC = () => {
   if (loading) {
     return (
       <PageWrapper className="flex flex-col w-full">
-        <Skeleton className="h-4 w-44 mb-3" />
+        {/* Breadcrumbs Navigation Skeleton */}
+        <Breadcrumbs className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/journals">Journals</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <Skeleton className="h-4 w-32 inline-block align-middle" />
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <Skeleton className="h-4 w-40 inline-block align-middle" />
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumbs>
         
         <div className="bg-surface border border-border p-8 md:p-12 space-y-6">
           <div className="flex flex-col md:flex-row justify-between gap-8">

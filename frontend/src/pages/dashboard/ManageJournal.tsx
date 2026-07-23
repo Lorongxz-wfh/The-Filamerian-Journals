@@ -129,7 +129,7 @@ const ManageJournal: React.FC = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="font-semibold text-primary truncate max-w-md">
-                  {journal?.title || 'Journal Volumes'}
+                  {journal?.title || <Skeleton className="h-4 w-40 inline-block align-middle" />}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

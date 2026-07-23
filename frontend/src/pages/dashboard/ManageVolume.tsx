@@ -316,20 +316,20 @@ const ManageVolume: React.FC = () => {
               <BreadcrumbItem>
                 <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
               </BreadcrumbItem>
-              {volume?.journal && (
-                <>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href={`/dashboard/journals/${volume.journal.slug}`}>
-                      {volume.journal.title}
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                </>
-              )}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                {volume?.journal ? (
+                  <BreadcrumbLink href={`/dashboard/journals/${volume.journal.slug}`}>
+                    {volume.journal.title}
+                  </BreadcrumbLink>
+                ) : (
+                  <Skeleton className="h-4 w-32 inline-block align-middle" />
+                )}
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="font-semibold text-primary">
-                  {volume ? `Volume ${volume.volume_number} (${volume.year})` : 'Volume Details'}
+                  {volume ? `Volume ${volume.volume_number} (${volume.year})` : <Skeleton className="h-4 w-24 inline-block align-middle" />}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
