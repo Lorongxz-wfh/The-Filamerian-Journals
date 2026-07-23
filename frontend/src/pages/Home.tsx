@@ -340,7 +340,7 @@ const Home: React.FC = () => {
                 <span className="text-[10px] font-bold text-secondary uppercase tracking-widest border border-secondary px-3 py-1 inline-block">
                   Filamer Christian University
                 </span>
-                <h1 className="text-2xl lg:text-3xl font-bold uppercase tracking-wide">
+                <h1 className="text-2xl lg:text-3xl font-bold uppercase tracking-wide !text-white">
                   The Filamerian Journals Database
                 </h1>
                 <p className="text-white/80 text-xs sm:text-sm max-w-lg leading-relaxed">
