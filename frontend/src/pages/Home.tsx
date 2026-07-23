@@ -290,12 +290,12 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: High-End University Announcements Widget */}
-            <div className="lg:col-span-5 border-2 border-primary/20 bg-background shadow-2xl relative flex flex-col justify-between overflow-hidden">
+            {/* Right Side: Integrated University Announcements Widget */}
+            <div className="lg:col-span-5 border border-border bg-background flex flex-col justify-between overflow-hidden h-full">
               {/* Header Bar */}
-              <div className="bg-primary px-5 py-3 flex items-center justify-between border-b border-secondary/30">
+              <div className="bg-primary px-5 py-3 flex items-center justify-between border-b border-border">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-secondary" />
                   <span className="text-[11px] font-bold uppercase tracking-widest text-white">
                     University Announcements
                   </span>
@@ -306,11 +306,11 @@ const Home: React.FC = () => {
               </div>
 
               {/* Main Content Area */}
-              <div className="p-5 space-y-3.5 divide-y divide-border/60">
+              <div className="p-5 space-y-4 divide-y divide-border flex-1 flex flex-col justify-center">
                 {announcements.slice(0, 2).map((item, i) => (
-                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3.5' : ''}`}>
+                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-4' : ''}`}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-mono font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
                         Notice
                       </span>
                       <span className="text-[10px] font-mono text-muted">
@@ -334,11 +334,11 @@ const Home: React.FC = () => {
                 )}
               </div>
 
-              {/* Footer Banner */}
-              <div className="bg-surface px-5 py-3 border-t border-border flex items-center justify-between">
-                <span className="text-[10px] text-muted font-medium">Filamer Christian University Bulletin</span>
-                <Link to="/announcements" className="text-xs font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
-                  Read Bulletins <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              {/* Footer Bar */}
+              <div className="bg-surface px-5 py-2.5 border-t border-border flex items-center justify-between">
+                <span className="text-[10px] text-muted font-medium">FCU Official Bulletin</span>
+                <Link to="/announcements" className="text-[11px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
+                  Read Bulletins <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
