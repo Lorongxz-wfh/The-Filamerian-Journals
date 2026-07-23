@@ -378,32 +378,58 @@ const Archives: React.FC = () => {
         {/* Content Section */}
         {loading ? (
           viewMode === 'shelf' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="border border-border bg-surface flex flex-col justify-between p-5 space-y-4 h-[320px]">
-                  <Skeleton className="w-full aspect-[3/4] rounded-none" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-3 w-1/3" />
-                    <Skeleton className="h-4 w-full" />
-                  </div>
-                  <div className="pt-3 border-t border-border flex justify-between">
-                    <Skeleton className="h-3 w-12" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
+            <div className="space-y-10">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-4 w-24" />
                 </div>
-              ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="border border-border bg-surface flex flex-col justify-between p-5 space-y-4">
+                      <Skeleton className="w-full aspect-[3/4]" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                      <div className="pt-3 border-t border-border flex justify-between">
+                        <Skeleton className="h-3 w-10" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <div className="lg:col-span-5 border border-border bg-surface p-4 space-y-3 min-h-[400px]">
+              <div className="lg:col-span-5 border border-border bg-surface flex flex-col divide-y divide-border min-h-[400px]">
+                <div className="p-3.5 border-b border-border bg-background flex items-center justify-between">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full rounded-none" />
+                  <div key={i} className="p-4 space-y-2">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
                 ))}
               </div>
-              <div className="lg:col-span-7 border border-border bg-surface p-6 space-y-4 min-h-[600px]">
-                <Skeleton className="h-32 w-full rounded-none" />
-                <Skeleton className="h-20 w-full rounded-none" />
-                <Skeleton className="h-20 w-full rounded-none" />
+              <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
+                <div className="border-b border-border pb-6 flex gap-6 items-start">
+                  <Skeleton className="w-24 h-32 shrink-0" />
+                  <div className="space-y-3 flex-1">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <div className="space-y-3 flex-1">
+                  <Skeleton className="h-4 w-32 mb-4" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
               </div>
             </div>
           )
