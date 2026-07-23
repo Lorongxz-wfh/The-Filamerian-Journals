@@ -240,10 +240,10 @@ const Home: React.FC = () => {
       {/* ========================================================= */}
       {homeLayout === 'editorial' && (
         <div className="space-y-12 w-full">
-          {/* Editorial Hero Banner (Edge-to-Edge Merged Layout) */}
-          <div className="border border-border bg-surface relative overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-            {/* Left Content Section (7 cols with padding) */}
-            <div className="lg:col-span-7 p-8 lg:p-12 space-y-6 flex flex-col justify-between">
+          {/* Editorial Hero Banner */}
+          <div className="border border-border bg-surface p-8 lg:p-10 relative overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Content Section (8 cols) */}
+            <div className="lg:col-span-8 space-y-6">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
                   <span>Filamer Christian University</span>
@@ -256,7 +256,7 @@ const Home: React.FC = () => {
                 </p>
 
                 {/* Interactive Search Hero Bar */}
-                <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl pt-2">
+                <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl pt-1">
                   <div className="relative flex-1">
                     <Search className="h-4 w-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
@@ -277,7 +277,7 @@ const Home: React.FC = () => {
               </div>
               
               {/* Quick Metrics Bar (Live Dynamic Backend Data) */}
-              <div className="pt-6 flex flex-wrap gap-8 border-t border-border mt-4">
+              <div className="pt-5 flex flex-wrap gap-8 border-t border-border mt-2">
                 <div>
                   <div className="text-2xl font-bold text-primary font-mono">{journals.length || 0}</div>
                   <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
@@ -293,38 +293,38 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Seamless Merged University Announcements Section (5 cols) */}
-            <div className="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-border bg-background flex flex-col justify-between overflow-hidden">
+            {/* Right Side: Narrower Standalone University Announcements Card (4 cols, 3 Announcements Max) */}
+            <div className="lg:col-span-4 border border-border bg-background flex flex-col justify-between overflow-hidden shadow-sm h-full min-h-[380px]">
               {/* Header Bar */}
-              <div className="bg-primary px-6 py-4 flex items-center justify-between border-b border-border">
-                <div className="flex items-center gap-2">
+              <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border">
+                <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-secondary" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-white">
-                    University Announcements
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white">
+                    Announcements
                   </span>
                 </div>
-                <Link to="/announcements" className="text-[10px] font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors">
+                <Link to="/announcements" className="text-[9px] font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors">
                   All News →
                 </Link>
               </div>
 
-              {/* Main Content Area */}
-              <div className="p-6 space-y-4 divide-y divide-border flex-1 flex flex-col justify-center">
-                {announcements.slice(0, 2).map((item, i) => (
-                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-4' : ''}`}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
+              {/* Main Content Area (Fits Max 3 Items) */}
+              <div className="p-4 space-y-3 divide-y divide-border flex-1 flex flex-col justify-center">
+                {announcements.slice(0, 3).map((item, i) => (
+                  <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3' : ''}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 py-0.5 uppercase tracking-wider">
                         Notice
                       </span>
-                      <span className="text-[10px] font-mono text-muted">
-                        {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      <span className="text-[9px] font-mono text-muted">
+                        {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
-                    <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2 uppercase">
+                    <h4 className="text-[12px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2 uppercase">
                       {item.title}
                     </h4>
                     <div
-                      className="text-[11px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1 leading-relaxed"
+                      className="text-[10px] text-muted line-clamp-1 prose prose-sm max-w-none mt-0.5 leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
                     />
                   </Link>
@@ -332,16 +332,16 @@ const Home: React.FC = () => {
                 {announcements.length === 0 && (
                   <div className="py-8 text-center space-y-1">
                     <p className="text-xs font-semibold text-primary">No Active Bulletins</p>
-                    <p className="text-[11px] text-muted">Check back later for university research updates.</p>
+                    <p className="text-[10px] text-muted">Check back later for updates.</p>
                   </div>
                 )}
               </div>
 
               {/* Footer Bar */}
-              <div className="bg-surface px-6 py-3 border-t border-border flex items-center justify-between">
-                <span className="text-[10px] text-muted font-medium">FCU Official Bulletin</span>
-                <Link to="/announcements" className="text-[11px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
-                  Read Bulletins <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+              <div className="bg-surface px-4 py-2 border-t border-border flex items-center justify-between">
+                <span className="text-[9px] text-muted font-medium">FCU Official Bulletin</span>
+                <Link to="/announcements" className="text-[10px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
+                  Read All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
             </div>
