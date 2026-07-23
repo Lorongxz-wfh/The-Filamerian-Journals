@@ -266,10 +266,10 @@ const Archives: React.FC = () => {
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 bg-surface px-3 py-2.5 border border-border mb-8">
-          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-surface px-3 py-2 border border-border mb-8">
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
             {/* Search within Archives (Debounced) */}
-            <div className="relative w-full sm:w-44">
+            <div className="relative flex-1 sm:flex-none sm:w-44 min-w-[140px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
               <input
                 type="text"
@@ -283,7 +283,7 @@ const Archives: React.FC = () => {
             {/* Year Filter */}
             <div className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0">Year:</span>
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Year:</span>
               <div className="w-24">
                 <Select
                   value={selectedYear}
@@ -292,7 +292,7 @@ const Archives: React.FC = () => {
                     { value: 'all', label: 'All Years' },
                     ...availableYears.map((y) => ({ value: String(y), label: String(y) }))
                   ]}
-                  className="py-1 px-2.5 text-xs"
+                  className="py-1 px-2 text-xs"
                 />
               </div>
             </div>
@@ -300,8 +300,8 @@ const Archives: React.FC = () => {
             {/* Category Filter */}
             <div className="flex items-center gap-1">
               <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0">Field:</span>
-              <div className="w-32">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Field:</span>
+              <div className="w-28 sm:w-32">
                 <Select
                   value={selectedCategory}
                   onChange={(val) => setSelectedCategory(String(val))}
@@ -309,7 +309,7 @@ const Archives: React.FC = () => {
                     { value: 'all', label: 'All Fields' },
                     ...availableCategories.map((c) => ({ value: c, label: c }))
                   ]}
-                  className="py-1 px-2.5 text-xs"
+                  className="py-1 px-2 text-xs"
                 />
               </div>
             </div>
@@ -317,19 +317,19 @@ const Archives: React.FC = () => {
             {/* Sort By Dropdown */}
             <div className="flex items-center gap-1">
               <ArrowUpDown className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0">Sort:</span>
-              <div className="w-32">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Sort:</span>
+              <div className="w-24 sm:w-28">
                 <Select
                   value={sortBy}
                   onChange={(val) => setSortBy(val as any)}
                   options={[
-                    { value: 'newest', label: 'Newest First' },
-                    { value: 'oldest', label: 'Oldest First' },
-                    { value: 'title_asc', label: 'Title (A–Z)' },
-                    { value: 'title_desc', label: 'Title (Z–A)' },
-                    { value: 'volume_desc', label: 'Vol (High-Low)' }
+                    { value: 'newest', label: 'Newest' },
+                    { value: 'oldest', label: 'Oldest' },
+                    { value: 'title_asc', label: 'Title A–Z' },
+                    { value: 'title_desc', label: 'Title Z–A' },
+                    { value: 'volume_desc', label: 'Vol High–Low' }
                   ]}
-                  className="py-1 px-2.5 text-xs"
+                  className="py-1 px-2 text-xs"
                 />
               </div>
             </div>
@@ -339,7 +339,7 @@ const Archives: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="h-[30px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center gap-1 font-medium"
+                className="h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center gap-1 font-medium"
                 title="Reset All Filters"
               >
                 <RotateCcw className="h-3 w-3" />
@@ -348,27 +348,25 @@ const Archives: React.FC = () => {
             )}
           </div>
 
-          {/* View Mode Switcher */}
-          <div className="flex items-center gap-1 bg-background border border-border p-1 shrink-0">
+          {/* View Mode Switcher (Icon-only to stay compact on all screens) */}
+          <div className="flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
             <button
               onClick={() => setViewMode('shelf')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
-                viewMode === 'shelf' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+              className={`p-1.5 transition-colors ${
+                viewMode === 'shelf' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
-              title="Visual Cover Grid Shelf"
+              title="Shelf View"
             >
               <LayoutGrid className="h-3.5 w-3.5" />
-              <span>Shelf</span>
             </button>
             <button
               onClick={() => setViewMode('split')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-colors ${
-                viewMode === 'split' ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+              className={`p-1.5 transition-colors ${
+                viewMode === 'split' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
-              title="Split View (List Left, Live Preview Right)"
+              title="Split View"
             >
               <Columns className="h-3.5 w-3.5" />
-              <span>Split</span>
             </button>
           </div>
         </div>

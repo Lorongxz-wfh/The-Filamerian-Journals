@@ -156,7 +156,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
           {/* Dropdown Menu */}
           {isOpen && (
-            <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-sm shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute z-50 min-w-full w-max max-w-[280px] left-0 mt-1 bg-white border border-border rounded-sm shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
               <ul 
                 id="custom-select-listbox"
                 role="listbox"
@@ -184,15 +184,15 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                         }}
                         onMouseEnter={() => setFocusedIndex(index)}
                         className={cn(
-                          "relative flex items-center px-4 py-2 text-[13px] cursor-pointer transition-colors",
+                          "relative flex items-center justify-between gap-4 px-3.5 py-2 text-[13px] cursor-pointer transition-colors whitespace-nowrap",
                           option.group ? "pl-6" : "",
                           isSelected ? "bg-primary/5 text-primary font-medium" : "text-foreground",
                           isFocused && !isSelected && "bg-gray-100",
                         )}
                       >
-                        <span className="truncate pr-6">{option.label}</span>
+                        <span className="whitespace-nowrap pr-2">{option.label}</span>
                         {isSelected && (
-                          <span className="absolute right-4 flex items-center text-primary">
+                          <span className="flex items-center text-primary shrink-0">
                             <Check className="h-4 w-4" />
                           </span>
                         )}
