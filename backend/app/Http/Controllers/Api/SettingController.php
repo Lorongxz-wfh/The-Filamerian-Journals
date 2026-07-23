@@ -36,6 +36,8 @@ class SettingController extends Controller
         // Clear the cache whenever settings are saved
         Cache::forget('public_settings');
 
+        \App\Services\ActivityLogger::log('Updated Website Settings', 'Updated website layout & configuration settings', \App\Models\Setting::class, null);
+
         return response()->json(['message' => 'Settings updated successfully']);
     }
 }

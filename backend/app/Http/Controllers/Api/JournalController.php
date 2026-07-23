@@ -115,11 +115,9 @@ class JournalController extends Controller
     public function show(Request $request, $journal)
     {
         if (!($journal instanceof Journal)) {
-            $journalModel = Journal::where('slug', $journal);
-            if (is_numeric($journal)) {
-                $journalModel = $journalModel->orWhere('id', $journal);
-            }
-            $journalModel = $journalModel->first();
+            $journalModel = is_numeric($journal)
+                ? Journal::where('id', $journal)->orWhere('slug', $journal)->first()
+                : Journal::where('slug', $journal)->first();
             
             if (!$journalModel) {
                 abort(404, 'Journal not found.');
@@ -229,11 +227,9 @@ class JournalController extends Controller
     public function servePdf($journal, Request $request)
     {
         if (!($journal instanceof Journal)) {
-            $journalModel = Journal::where('slug', $journal);
-            if (is_numeric($journal)) {
-                $journalModel = $journalModel->orWhere('id', $journal);
-            }
-            $journalModel = $journalModel->first();
+            $journalModel = is_numeric($journal)
+                ? Journal::where('id', $journal)->orWhere('slug', $journal)->first()
+                : Journal::where('slug', $journal)->first();
 
             if (!$journalModel) {
                 abort(404, 'Journal not found.');

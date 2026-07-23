@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router';
-import { ArrowLeft, Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router';
+import { Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -10,6 +10,14 @@ import Input from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import {
+  Breadcrumbs,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/Breadcrumbs';
 
 interface Volume {
   id: number;
@@ -113,9 +121,19 @@ const ManageJournal: React.FC = () => {
       <DashboardHeader
         title={<span className="line-clamp-1">{journal?.title || <Skeleton className="h-7 w-64 rounded inline-block" />}</span>}
         preTitle={
-          <Link to="/dashboard/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-4">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
-          </Link>
+          <Breadcrumbs className="mb-4">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="font-semibold text-primary truncate max-w-md">
+                  {journal?.title || 'Journal Volumes'}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumbs>
         }
       >
         <Button onClick={() => handleOpenVolModal()} disabled={!journal} className="shrink-0 flex items-center gap-2">

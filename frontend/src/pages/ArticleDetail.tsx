@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, BookOpen, Quote } from 'lucide-react';
+import { BookOpen, Quote } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
 import Modal from '@/components/ui/Modal';
@@ -9,6 +9,14 @@ import PageWrapper from '@/components/layout/PageWrapper';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatVolumeName } from '@/lib/utils';
 import PdfViewer from '@/components/ui/PdfViewer';
+import {
+  Breadcrumbs,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/Breadcrumbs';
 
 interface Author {
   id: number;
@@ -191,9 +199,44 @@ const ArticleDetail: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col w-full">
-      <Link to={article.volume?.journal?.slug ? `/journals/${article.volume.journal.slug}` : "/journals"} className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-3">
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to {article.volume?.journal?.title || 'Journal'}
-      </Link>
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/journals">Journals</BreadcrumbLink>
+          </BreadcrumbItem>
+          {article.volume?.journal && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href={`/journals/${article.volume.journal.slug}`}>
+                  {article.volume.journal.title}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
+          {article.volume && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <span className="text-muted text-xs">
+                  {formatVolumeName(article.volume.volume_number)} ({article.volume.year})
+                </span>
+              </BreadcrumbItem>
+            </>
+          )}
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-semibold text-primary truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+              {article.title}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumbs>
 
       <div className="bg-surface border border-border p-8 md:p-12">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">

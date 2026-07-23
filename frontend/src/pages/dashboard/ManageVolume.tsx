@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams } from 'react-router';
 import { Reorder, useDragControls } from 'framer-motion';
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical } from 'lucide-react';
+import { ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import {
+  Breadcrumbs,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/Breadcrumbs';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -303,11 +311,29 @@ const ManageVolume: React.FC = () => {
       <DashboardHeader
         title={<span className="line-clamp-1">{volume ? `${volume.volume_number} (${volume.year})` : <Skeleton className="h-7 w-48 rounded inline-block" />}</span>}
         preTitle={
-          <div className="flex items-center gap-2 text-[12px] text-muted mb-4">
-            <Link to={`/dashboard/journals/${volume?.journal?.slug || ''}`} className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to {volume?.journal?.title || 'Journal'}
-            </Link>
-          </div>
+          <Breadcrumbs className="mb-4">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
+              </BreadcrumbItem>
+              {volume?.journal && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href={`/dashboard/journals/${volume.journal.slug}`}>
+                      {volume.journal.title}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="font-semibold text-primary">
+                  {volume ? `Volume ${volume.volume_number} (${volume.year})` : 'Volume Details'}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumbs>
         }
       >
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">

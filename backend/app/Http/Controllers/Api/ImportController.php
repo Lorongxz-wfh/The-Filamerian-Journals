@@ -227,11 +227,12 @@ class ImportController extends Controller
             'journals.*.volume_year' => 'nullable|numeric',
         ]);
 
+        $journalsData = $validated['journals'];
         $importedCount = 0;
         DB::beginTransaction();
 
         try {
-            foreach ($validated['journals'] as $row) {
+            foreach ($journalsData as $row) {
                 // Category
                 $categoryId = null;
                 if (!empty($row['category'])) {
@@ -278,6 +279,8 @@ class ImportController extends Controller
             }
 
             DB::commit();
+
+            \App\Services\ActivityLogger::log('Bulk Imported Journals', "Bulk imported {$importedCount} journals", Journal::class, null);
 
             return response()->json([
                 'message' => "Successfully imported {$importedCount} journals.",

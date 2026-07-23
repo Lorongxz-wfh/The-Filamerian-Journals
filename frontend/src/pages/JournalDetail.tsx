@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
-import { ArrowLeft, BookOpen, ChevronDown, FileText } from 'lucide-react';
+import { BookOpen, ChevronDown, FileText } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import DOMPurify from 'dompurify';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
@@ -8,6 +8,14 @@ import EmptyState from '@/components/ui/EmptyState';
 import PageWrapper from '@/components/layout/PageWrapper';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatVolumeName } from '@/lib/utils';
+import {
+  Breadcrumbs,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/Breadcrumbs';
 
 interface Author {
   id: number;
@@ -163,10 +171,24 @@ const JournalDetail: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col">
-      {/* Back button and metadata header */}
-      <Link to="/journals" className="inline-flex items-center gap-2 text-[12px] text-muted hover:text-primary transition-colors mb-3">
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to Journals
-      </Link>
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/journals">Journals</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-semibold text-primary truncate max-w-[240px] sm:max-w-md">
+              {journal.title}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumbs>
 
       {/* Header Container */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 items-stretch">

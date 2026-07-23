@@ -268,17 +268,24 @@ class ArticleController extends Controller
             $article->keywords()->sync($keywordIds);
         }
 
+        \App\Services\ActivityLogger::log('Updated Article', "Updated article: {$article->title}", get_class($article), $article->id);
+
         return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
     }
 
     public function destroy(Article $article)
     {
+        $title = $article->title;
+        $class = get_class($article);
+
         // Delete PDF if exists
         if ($article->pdf_path) {
             \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
         }
 
         $article->delete();
+
+        \App\Services\ActivityLogger::log('Deleted Article', "Deleted article: {$title}", $class, null);
 
         return response()->noContent();
     }
