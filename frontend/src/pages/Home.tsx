@@ -290,125 +290,107 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Side: Featured Journal Cover Highlight */}
-            <div className="lg:col-span-5 border border-primary/20 bg-background p-6 space-y-4 shadow-xl relative">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-primary px-2.5 py-1 inline-block">
-                Editor's Pick Highlight
-              </span>
-              <h3 className="text-lg font-bold text-primary uppercase line-clamp-2">
-                {journals[0]?.title || 'The Filamerian Multidisciplinary Journal'}
-              </h3>
-              <p className="text-xs text-muted line-clamp-3">
-                {journals[0]?.description || 'Featured volume containing peer-reviewed studies in education, technology, and health sciences.'}
-              </p>
-              <Link
-                to={journals[0] ? `/journals/${journals[0].slug}` : '/journals'}
-                className="inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-secondary uppercase tracking-wider pt-2"
-              >
-                Read Featured Issue <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Content Grid: 8 Cols Main Content + 4 Cols Announcements Sidebar */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-border pt-8">
-            {/* Main Content Column (8/12) */}
-            <div className="lg:col-span-8 space-y-10">
-              {/* Latest Research Output */}
-              {latestArticles.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Research Output</h2>
-                    <Link to="/archives" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">Explore Archives →</Link>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {latestArticles.slice(0, 4).map((art) => (
-                      <Link key={art.id} to={`/articles/${art.id}`} className="border border-border bg-surface p-5 hover:border-primary transition-colors flex flex-col justify-between h-[230px] group">
-                        <div className="space-y-2">
-                          <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">{art.volume?.journal?.title || 'Journal Paper'}</span>
-                          <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2.5">{art.title}</h4>
-                          <p className="text-xs text-muted line-clamp-3">{art.abstract}</p>
-                        </div>
-                        <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between">Read Paper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" /></span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Compact Publications & Journals Grid */}
-              <div className="space-y-4 pt-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Academic Journals</h2>
-                  <Link to="/journals" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">View All Journals →</Link>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {journals.slice(0, 6).map((j) => (
-                    <Link
-                      key={j.id}
-                      to={`/journals/${j.slug}`}
-                      className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
-                    >
-                      {/* Compact Journal Cover Image */}
-                      <div className="w-16 h-22 shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
-                        {j.cover_image ? (
-                          <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        ) : (
-                          <div className="text-[9px] font-bold text-primary text-center uppercase line-clamp-3 leading-tight">{j.title}</div>
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
-                          {typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
-                        </span>
-                        <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
-                          {j.title}
-                        </h4>
-                        <span className="text-[11px] text-muted block font-mono">
-                          {j.volumes?.length || 0} Volume(s) Published
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Announcements Sidebar (4/12) */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="border border-border bg-surface p-6 space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-primary">University Announcements</h3>
-                  <Link to="/announcements" className="text-[11px] font-semibold text-muted hover:text-primary">All News →</Link>
+            {/* Right Side: University Announcements Widget */}
+            <div className="lg:col-span-5 border border-border bg-background p-6 space-y-4 shadow-xl relative flex flex-col justify-between min-h-[300px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-primary px-2.5 py-1 inline-block">
+                    University Announcements
+                  </span>
+                  <Link to="/announcements" className="text-[11px] font-semibold text-muted hover:text-primary transition-colors">
+                    All News →
+                  </Link>
                 </div>
 
-                <div className="space-y-4 divide-y divide-border">
-                  {announcements.slice(0, 3).map((item, i) => (
-                    <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3.5' : ''}`}>
+                <div className="space-y-3.5 divide-y divide-border/60">
+                  {announcements.slice(0, 2).map((item, i) => (
+                    <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-3' : ''}`}>
                       <span className="text-[10px] font-bold text-secondary uppercase tracking-wider block mb-1">
                         {new Date(item.created_at).toLocaleDateString()}
                       </span>
-                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug">
+                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2">
                         {item.title}
                       </h4>
                       <div
-                        className="text-[12px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1"
+                        className="text-[11px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1 leading-relaxed"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
                       />
                     </Link>
                   ))}
                   {announcements.length === 0 && (
-                    <p className="text-xs text-muted py-4 text-center">No announcements posted.</p>
+                    <p className="text-xs text-muted py-6 text-center">No announcements posted.</p>
                   )}
                 </div>
+              </div>
 
-                <div className="pt-3 border-t border-border flex justify-center">
-                  <Link to="/announcements" className="px-5 py-1.5 bg-[#d83526] hover:bg-red-700 text-white text-xs font-semibold rounded-full transition-all shadow-xs">
-                    See All News
-                  </Link>
+              <div className="pt-3 border-t border-border flex justify-end">
+                <Link to="/announcements" className="text-xs font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1">
+                  Read All Announcements <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Section: Full Width Latest Research Output & Academic Journals */}
+          <div className="space-y-12 border-t border-border pt-8">
+            {/* Latest Research Output (3 columns) */}
+            {latestArticles.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Research Output</h2>
+                  <Link to="/archives" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">Explore Archives →</Link>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {latestArticles.slice(0, 3).map((art) => (
+                    <Link key={art.id} to={`/articles/${art.id}`} className="border border-border bg-surface p-5 hover:border-primary transition-colors flex flex-col justify-between h-[230px] group">
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">{art.volume?.journal?.title || 'Journal Paper'}</span>
+                        <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2.5">{art.title}</h4>
+                        <p className="text-xs text-muted line-clamp-3">{art.abstract}</p>
+                      </div>
+                      <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between">Read Paper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" /></span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Compact Publications & Journals Grid (3 columns) */}
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Academic Journals</h2>
+                <Link to="/journals" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">View All Journals →</Link>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {journals.slice(0, 6).map((j) => (
+                  <Link
+                    key={j.id}
+                    to={`/journals/${j.slug}`}
+                    className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
+                  >
+                    {/* Compact Journal Cover Image */}
+                    <div className="w-16 h-22 shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
+                      {j.cover_image ? (
+                        <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="text-[9px] font-bold text-primary text-center uppercase line-clamp-3 leading-tight">{j.title}</div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
+                        {typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
+                      </span>
+                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
+                        {j.title}
+                      </h4>
+                      <span className="text-[11px] text-muted block font-mono">
+                        {j.volumes?.length || 0} Volume(s) Published
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
