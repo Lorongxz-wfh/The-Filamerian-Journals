@@ -281,6 +281,7 @@ class ArticleController extends Controller
         }
 
         \App\Services\ActivityLogger::log('Updated Article', "Updated article: {$article->title}", get_class($article), $article->id);
+        \Illuminate\Support\Facades\Cache::forget('public_settings');
 
         return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
     }
@@ -298,6 +299,7 @@ class ArticleController extends Controller
         $article->delete();
 
         \App\Services\ActivityLogger::log('Deleted Article', "Deleted article: {$title}", $class, null);
+        \Illuminate\Support\Facades\Cache::forget('public_settings');
 
         return response()->noContent();
     }

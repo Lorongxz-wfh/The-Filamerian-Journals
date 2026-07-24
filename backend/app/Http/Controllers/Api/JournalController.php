@@ -49,7 +49,7 @@ class JournalController extends Controller
                 if ($request->is('api/public/*') || $request->is('public/*')) {
                     $q->where('status', 'Published');
                 }
-                $q->orderBy('articles.order', 'asc')->with('authors');
+                $q->orderBy('order', 'asc')->with('authors');
             }]);
         }
 
