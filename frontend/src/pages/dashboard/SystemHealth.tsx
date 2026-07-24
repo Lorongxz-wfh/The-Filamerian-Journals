@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
+import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 
@@ -88,7 +89,24 @@ const SystemHealth: React.FC = () => {
     <div className="space-y-8 font-sans w-full">
       <DashboardHeader 
         title="System Status" 
-      />
+      >
+        <button
+          onClick={async () => {
+            if (!confirm('Seed sample journals, volumes, articles, and categories into database?')) return;
+            try {
+              toast.loading('Seeding database content...', { id: 'seed-db' });
+              await api.post('/system/seed');
+              toast.success('Database seeded successfully!', { id: 'seed-db' });
+              fetchHealth();
+            } catch (err: any) {
+              toast.error('Failed to seed: ' + (err.response?.data?.message || err.message), { id: 'seed-db' });
+            }
+          }}
+          className="px-4 py-2 bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" /> Seed Sample Data
+        </button>
+      </DashboardHeader>
 
       {loading && !health ? (
         <div className="space-y-8 w-full">
