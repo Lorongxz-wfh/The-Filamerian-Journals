@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
-import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
+import { RefreshCw, FileText, BookOpen, Users, RotateCcw } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { toast } from 'sonner';
 
 interface RecordCounts {
   articles: number;
@@ -47,10 +49,32 @@ const formatBytes = (bytes: number, decimals = 2) => {
 const SystemHealth: React.FC = () => {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     fetchHealth();
   }, []);
+
+  const handleResetDatabase = async () => {
+    try {
+      setIsResetting(true);
+      const res = await api.post('/system/reset-database');
+      toast.success(res.data.message || 'Database successfully reset and seeded!');
+      localStorage.removeItem('filamerian_home_cache');
+      localStorage.removeItem('journals_cache');
+      localStorage.removeItem('categories_cache');
+      localStorage.removeItem('archives_cache');
+      localStorage.removeItem('resources_cache');
+      fetchHealth();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Database reset failed');
+    } finally {
+      setIsResetting(false);
+      setIsResetModalOpen(false);
+    }
+  };
 
   const fetchHealth = async () => {
     try {
@@ -200,8 +224,19 @@ const SystemHealth: React.FC = () => {
         </div>
       </div>
 
-      {/* Manual Refresh Action */}
-      <div className="flex justify-end">
+      {/* System Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsResetModalOpen(true)}
+            disabled={isResetting}
+            className="flex items-center gap-2 text-xs font-mono font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/30 px-4 py-2 transition-colors disabled:opacity-50"
+          >
+            <RotateCcw className={`h-3.5 w-3.5 ${isResetting ? 'animate-spin' : ''}`} />
+            {isResetting ? 'RESETTING DATABASE...' : 'RUN MIGRATE:FRESH --SEED'}
+          </button>
+        </div>
+
         <button
           onClick={fetchHealth}
           disabled={loading}
@@ -211,6 +246,17 @@ const SystemHealth: React.FC = () => {
           [ REFRESH STATUS ]
         </button>
       </div>
+
+      <ConfirmDialog
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={handleResetDatabase}
+        title="Reset & Re-Seed Database"
+        message="Are you sure you want to run 'migrate:fresh --seed'? This will wipe all current database data and restore initial seed data (default accounts, sample journals & articles). This action cannot be undone."
+        confirmText="Yes, Reset Database"
+        isDestructive={true}
+        isLoading={isResetting}
+      />
         </>
       )}
     </div>
