@@ -366,6 +366,13 @@ const JournalDetail: React.FC = () => {
                           <Link 
                             key={article.id} 
                             to={`/articles/${article.id}`}
+                            state={{
+                              articleTitle: article.title,
+                              journalTitle: journal.title,
+                              journalSlug: journal.slug,
+                              volumeNumber: activeVol.volume_number,
+                              year: activeVol.year,
+                            }}
                             className="px-6 py-5 hover:bg-background/50 transition-colors group cursor-pointer block"
                           >
                             <div className="flex items-start justify-between gap-4">

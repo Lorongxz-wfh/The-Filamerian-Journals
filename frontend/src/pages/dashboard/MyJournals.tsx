@@ -383,7 +383,7 @@ const MyJournals: React.FC = () => {
             sortedJournals.map((journal) => (
               <TableRow
                 key={journal.id}
-                onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
+                onClick={() => navigate(`/dashboard/journals/${journal.slug}`, { state: { journalTitle: journal.title } })}
                 className="group cursor-pointer"
               >
                 <TableCell>
@@ -417,7 +417,7 @@ const MyJournals: React.FC = () => {
                   <div className="flex items-center justify-end gap-1">
                     <IconButton 
                       icon={Settings2} 
-                      onClick={() => navigate(`/dashboard/journals/${journal.slug}`)} 
+                      onClick={() => navigate(`/dashboard/journals/${journal.slug}`, { state: { journalTitle: journal.title } })} 
                       title="Manage Volumes" 
                     />
                     <IconButton 

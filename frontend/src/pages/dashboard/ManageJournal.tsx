@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -38,6 +38,9 @@ const ManageJournal: React.FC = () => {
   const [journal, setJournal] = useState<Journal | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedVol, setExpandedVol] = useState<number | null>(null);
+  
+  const location = useLocation();
+  const state = location.state as any;
 
   // Volume Modal
   const [isVolModalOpen, setIsVolModalOpen] = useState(false);
@@ -119,17 +122,17 @@ const ManageJournal: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <DashboardHeader
-        title={<span className="line-clamp-1">{journal?.title || <Skeleton className="h-7 w-64 rounded inline-block" />}</span>}
+        title={<span className="line-clamp-1">{journal?.title || state?.journalTitle || <Skeleton className="h-7 w-64 rounded inline-block" />}</span>}
         preTitle={
           <Breadcrumbs className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
+                <BreadcrumbLink to="/dashboard/journals">My Journals</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="font-semibold text-primary truncate max-w-md">
-                  {journal?.title || <Skeleton className="h-4 w-40 inline-block align-middle" />}
+                  {journal?.title || state?.journalTitle || <Skeleton className="h-4 w-40 inline-block align-middle" />}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -167,7 +170,7 @@ const ManageJournal: React.FC = () => {
             <div key={vol.id} className="border border-border bg-surface">
               <div 
                 className="flex items-center justify-between p-4 cursor-pointer hover:bg-background/50 transition-colors"
-                onClick={() => navigate(`/dashboard/volumes/${vol.id}`)}
+                onClick={() => navigate(`/dashboard/volumes/${vol.id}`, { state: { journalTitle: journal.title, journalSlug: journal.slug, volumeNumber: vol.volume_number, year: vol.year } })}
               >
                 <div className="flex items-center gap-3">
                   <BookOpen className="h-4 w-4 text-primary/30" />

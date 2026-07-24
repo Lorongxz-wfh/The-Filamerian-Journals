@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams, Link, useLocation } from 'react-router';
 import { BookOpen, Quote } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
@@ -47,6 +47,8 @@ interface Article {
 
 const ArticleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const state = location.state as any;
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -157,19 +159,48 @@ const ArticleDetail: React.FC = () => {
         <Breadcrumbs className="mb-4">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              <BreadcrumbLink to="/">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/journals">Journals</BreadcrumbLink>
+              <BreadcrumbLink to="/journals">Journals</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
+            {state?.journalTitle ? (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbLink to={`/journals/${state.journalSlug}`}>
+                    {state.journalTitle}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <span className="text-muted text-xs">
+                    {formatVolumeName(state.volumeNumber)} ({state.year})
+                  </span>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            ) : (
+              <>
+                <BreadcrumbItem>
+                  <Skeleton className="h-4 w-32 inline-block align-middle" />
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <Skeleton className="h-4 w-20 inline-block align-middle" />
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )}
             <BreadcrumbItem>
-              <Skeleton className="h-4 w-32 inline-block align-middle" />
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <Skeleton className="h-4 w-40 inline-block align-middle" />
+              {state?.articleTitle ? (
+                <BreadcrumbPage className="font-semibold text-primary truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+                  {state.articleTitle}
+                </BreadcrumbPage>
+              ) : (
+                <Skeleton className="h-4 w-40 inline-block align-middle" />
+              )}
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumbs>
@@ -222,17 +253,17 @@ const ArticleDetail: React.FC = () => {
       <Breadcrumbs className="mb-4">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink to="/">Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/journals">Journals</BreadcrumbLink>
+            <BreadcrumbLink to="/journals">Journals</BreadcrumbLink>
           </BreadcrumbItem>
           {article.volume?.journal && (
             <>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/journals/${article.volume.journal.slug}`}>
+                <BreadcrumbLink to={`/journals/${article.volume.journal.slug}`}>
                   {article.volume.journal.title}
                 </BreadcrumbLink>
               </BreadcrumbItem>

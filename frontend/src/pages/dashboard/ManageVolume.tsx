@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useLocation } from 'react-router';
 import { Reorder, useDragControls } from 'framer-motion';
 import { ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
@@ -168,6 +168,8 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
 
 const ManageVolume: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const state = location.state as any;
   const [volume, setVolume] = useState<Volume | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -309,18 +311,18 @@ const ManageVolume: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <DashboardHeader
-        title={<span className="line-clamp-1">{volume ? `${volume.volume_number} (${volume.year})` : <Skeleton className="h-7 w-48 rounded inline-block" />}</span>}
+        title={<span className="line-clamp-1">{volume ? `${volume.volume_number} (${volume.year})` : state ? `${state.volumeNumber} (${state.year})` : <Skeleton className="h-7 w-48 rounded inline-block" />}</span>}
         preTitle={
           <Breadcrumbs className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
+                <BreadcrumbLink to="/dashboard/journals">My Journals</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                {volume?.journal ? (
-                  <BreadcrumbLink href={`/dashboard/journals/${volume.journal.slug}`}>
-                    {volume.journal.title}
+                {volume?.journal || state?.journalTitle ? (
+                  <BreadcrumbLink to={`/dashboard/journals/${volume?.journal?.slug || state?.journalSlug}`}>
+                    {volume?.journal?.title || state?.journalTitle}
                   </BreadcrumbLink>
                 ) : (
                   <Skeleton className="h-4 w-32 inline-block align-middle" />
@@ -329,7 +331,7 @@ const ManageVolume: React.FC = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="font-semibold text-primary">
-                  {volume ? `Volume ${volume.volume_number} (${volume.year})` : <Skeleton className="h-4 w-24 inline-block align-middle" />}
+                  {volume || state?.volumeNumber ? `Volume ${volume?.volume_number || state?.volumeNumber} (${volume?.year || state?.year})` : <Skeleton className="h-4 w-24 inline-block align-middle" />}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
