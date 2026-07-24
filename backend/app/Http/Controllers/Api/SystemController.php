@@ -147,28 +147,4 @@ class SystemController extends Controller
 
         return response()->json(['message' => 'System logs cleared successfully.']);
     }
-
-    public function resetDatabase(Request $request)
-    {
-        try {
-            // Force migrate:fresh --seed with Artisan call
-            \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
-                '--seed' => true,
-                '--force' => true,
-            ]);
-
-            \Illuminate\Support\Facades\Cache::flush();
-
-            \App\Services\ActivityLogger::log('Reset Database', 'Super Admin triggered migrate:fresh --seed on database', \App\Models\User::class, $request->user()->id);
-
-            return response()->json([
-                'message' => 'Database successfully reset and re-seeded!',
-                'output' => \Illuminate\Support\Facades\Artisan::output()
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Database reset failed: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 }

@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
-import { RefreshCw, FileText, BookOpen, Users, RotateCcw } from 'lucide-react';
+import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { toast } from 'sonner';
 
 interface RecordCounts {
   articles: number;
@@ -30,6 +28,8 @@ interface StorageData {
 interface HealthData {
   status: string;
   backend_provider?: string;
+  laravel_version?: string;
+  php_version?: string;
   database: DatabaseData;
   storage: StorageData;
   storage_disk?: string;
@@ -49,32 +49,10 @@ const formatBytes = (bytes: number, decimals = 2) => {
 const SystemHealth: React.FC = () => {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     fetchHealth();
   }, []);
-
-  const handleResetDatabase = async () => {
-    try {
-      setIsResetting(true);
-      const res = await api.post('/system/reset-database');
-      toast.success(res.data.message || 'Database successfully reset and seeded!');
-      localStorage.removeItem('filamerian_home_cache');
-      localStorage.removeItem('journals_cache');
-      localStorage.removeItem('categories_cache');
-      localStorage.removeItem('archives_cache');
-      localStorage.removeItem('resources_cache');
-      fetchHealth();
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || 'Database reset failed');
-    } finally {
-      setIsResetting(false);
-      setIsResetModalOpen(false);
-    }
-  };
 
   const fetchHealth = async () => {
     try {
@@ -123,140 +101,109 @@ const SystemHealth: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Main Connection Status Bento */}
+          {/* Status Banners */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* API / Backend Card */}
-            <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
+            {/* System Status */}
+            <div className="bg-surface border border-border p-6 space-y-3 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted uppercase tracking-wider">Backend</span>
-                <span className="flex h-2 w-2 relative">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.status === 'Operational' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.status === 'Operational' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">API Core Status</span>
+                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  health?.status === 'Operational' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                }`}>
+                  {health?.status || 'Unknown'}
                 </span>
               </div>
-              <div>
-                <div className="text-xl font-bold text-primary tracking-tight font-mono">{health?.status}</div>
-                <div className="text-xs text-muted mt-2 font-mono uppercase tracking-wider">[ {health?.backend_provider || 'Backend Service Active'} ]</div>
+              <div className="text-2xl font-bold text-primary font-display">
+                {health?.status === 'Operational' ? 'Healthy' : 'Issues Detected'}
               </div>
-              <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${health?.status === 'Operational' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
+              <p className="text-[12px] text-muted font-mono">
+                Framework: Laravel {health?.laravel_version || 'N/A'} (PHP {health?.php_version || 'N/A'})
+              </p>
             </div>
 
-        {/* Database Card */}
-        <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted uppercase tracking-wider">Database</span>
-            <span className="flex h-2 w-2 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dbStatusText === 'Connected' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${dbStatusText === 'Connected' ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-            </span>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-primary tracking-tight font-mono">
-              {dbStatusText === 'Connected' ? `Connected (${formatBytes(dbSizeBytes)})` : dbStatusText}
+            {/* Database Status */}
+            <div className="bg-surface border border-border p-6 space-y-3 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Database ({dbDriverText || 'SQL'})</span>
+                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  dbStatusText === 'Connected' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                }`}>
+                  {dbStatusText}
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-primary font-display truncate">
+                {dbHostText || dbTypeText || 'Active Connection'}
+              </div>
+              <p className="text-[12px] text-muted font-mono">
+                Storage Used: {formatBytes(dbSizeBytes)}
+              </p>
             </div>
-            <div className="text-[11px] text-muted mt-2 font-mono">
-              {dbTypeText} {dbDriverText ? `(${dbDriverText})` : ''} {dbHostText ? `// ${dbHostText}` : ''}
-            </div>
-          </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${dbStatusText === 'Connected' ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}></div>
-        </div>
 
-        {/* Storage Card */}
-        <div className="bg-card border border-border p-6 flex flex-col justify-between min-h-[150px] relative overflow-hidden group hover:border-primary/40 transition-colors">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted uppercase tracking-wider">Storage</span>
-            <span className="flex h-2 w-2 relative">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${storageDiskText === 'r2' ? 'bg-amber-400' : 'bg-zinc-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${storageDiskText === 'r2' ? 'bg-amber-500' : 'bg-zinc-500'}`}></span>
-            </span>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-primary tracking-tight font-mono">
-              {storageTypeText} ({formatBytes(storageSizeBytes)})
-            </div>
-            <div className="text-[11px] text-muted mt-2 font-mono truncate">
-              {storageDiskText === 'r2' ? `Bucket: ${storageBucketText || 'Configured'}` : 'Local Server Drive'}
-            </div>
-          </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-[3px] ${storageDiskText === 'r2' ? 'bg-amber-500/30' : 'bg-zinc-500/30'}`}></div>
-        </div>
-      </div>
-
-      {/* Record Totals Bento */}
-      <div className="bg-card border border-border p-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Resource Totals</h3>
-          <span className="text-xs font-mono text-muted">
-            Last Synced: {new Date(health?.timestamp || '').toLocaleTimeString()}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
-            <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-none">
-              <FileText className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
-              <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.articles}</div>
+            {/* Storage Provider */}
+            <div className="bg-surface border border-border p-6 space-y-3 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Media Storage</span>
+                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                  {storageDiskText?.toUpperCase()}
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-primary font-display truncate">
+                {storageTypeText}
+              </div>
+              <p className="text-[12px] text-muted font-mono">
+                {storageBucketText ? `Bucket: ${storageBucketText}` : `Stored Media: ${formatBytes(storageSizeBytes)}`}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
-            <div className="p-3 bg-blue-500/10 text-blue-500 rounded-none">
-              <BookOpen className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
-              <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.journals}</div>
+          {/* Database Metrics Grid */}
+          <div className="bg-surface border border-border p-6 space-y-6">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Database Entity Metrics</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
+                <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-none">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
+                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.articles}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
+                <div className="p-3 bg-blue-500/10 text-blue-500 rounded-none">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
+                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.journals}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
+                <div className="p-3 bg-purple-500/10 text-purple-500 rounded-none">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
+                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.users}</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
-            <div className="p-3 bg-purple-500/10 text-purple-500 rounded-none">
-              <Users className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
-              <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.users}</div>
-            </div>
+          {/* Manual Refresh Action */}
+          <div className="flex justify-end">
+            <button
+              onClick={fetchHealth}
+              disabled={loading}
+              className="flex items-center gap-2 text-xs font-mono font-bold text-muted hover:text-primary transition-colors border border-border px-4 py-2 hover:bg-surface"
+            >
+              <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+              [ REFRESH STATUS ]
+            </button>
           </div>
-        </div>
-      </div>
-
-      {/* System Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsResetModalOpen(true)}
-            disabled={isResetting}
-            className="flex items-center gap-2 text-xs font-mono font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/30 px-4 py-2 transition-colors disabled:opacity-50"
-          >
-            <RotateCcw className={`h-3.5 w-3.5 ${isResetting ? 'animate-spin' : ''}`} />
-            {isResetting ? 'RESETTING DATABASE...' : 'RUN MIGRATE:FRESH --SEED'}
-          </button>
-        </div>
-
-        <button
-          onClick={fetchHealth}
-          disabled={loading}
-          className="flex items-center gap-2 text-xs font-mono font-bold text-muted hover:text-primary transition-colors border border-border px-4 py-2 hover:bg-surface"
-        >
-          <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-          [ REFRESH STATUS ]
-        </button>
-      </div>
-
-      <ConfirmDialog
-        isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
-        onConfirm={handleResetDatabase}
-        title="Reset & Re-Seed Database"
-        message="Are you sure you want to run 'migrate:fresh --seed'? This will wipe all current database data and restore initial seed data (default accounts, sample journals & articles). This action cannot be undone."
-        confirmText="Yes, Reset Database"
-        isDestructive={true}
-        isLoading={isResetting}
-      />
         </>
       )}
     </div>
