@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         // Admin User (Primary User)
         $admin = User::updateOrCreate(
             ['email' => 'admin@filamerian.com'],
-            ['name' => 'Primary Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
+            ['name' => 'Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
         );
         $admin->assignRole('Admin');
 
