@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
-import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 
