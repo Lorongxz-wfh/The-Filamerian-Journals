@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('authors', function (Blueprint $table) {
-            $table->string('name')->nullable()->change();
             $table->string('first_name')->nullable()->after('name');
             $table->string('middle_name')->nullable()->after('first_name');
             $table->string('last_name')->nullable()->after('middle_name');
@@ -27,7 +26,6 @@ return new class extends Migration
     {
         Schema::table('authors', function (Blueprint $table) {
             $table->dropColumn(['first_name', 'middle_name', 'last_name', 'suffix']);
-            $table->string('name')->nullable(false)->change();
         });
     }
 };
