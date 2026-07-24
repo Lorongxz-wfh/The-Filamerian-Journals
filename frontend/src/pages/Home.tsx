@@ -126,19 +126,6 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Instantly load from localStorage (Stale-While-Revalidate)
-      const cachedHome = localStorage.getItem('filamerian_home_cache');
-      if (cachedHome) {
-        try {
-          const { journals: cJournals, latest: cLatest, announcements: cAnn } = JSON.parse(cachedHome);
-          if (cJournals) setJournals(cJournals);
-          if (cLatest) setLatestArticles(cLatest);
-          if (cAnn) setAnnouncements(cAnn);
-          setLoading(false); // Stop loading spinner instantly if cache exists
-        } catch(e) {}
-      }
-
-      // 2. Fetch fresh data in the background
       try {
         const [jrnRes, latestRes, annRes, catRes] = await Promise.all([
           api.get('/public/journals?with_volumes=1'),
@@ -156,13 +143,6 @@ const Home: React.FC = () => {
         setLatestArticles(freshLatest);
         setAnnouncements(freshAnnouncements);
         setCategoriesList(freshCategories);
-        
-        // Update Local Cache
-        localStorage.setItem('filamerian_home_cache', JSON.stringify({
-          journals: freshJournals,
-          latest: freshLatest,
-          announcements: freshAnnouncements
-        }));
       } catch (err) {
         console.error('Failed to fetch public data', err);
       } finally {

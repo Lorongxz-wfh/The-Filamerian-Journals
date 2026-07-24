@@ -14,16 +14,14 @@ interface Resource {
 }
 
 const About: React.FC = () => {
-  const initialResources = JSON.parse(localStorage.getItem('resources_cache') || '[]');
-  const [resources, setResources] = useState<Resource[]>(initialResources);
+  const [resources, setResources] = useState<Resource[]>([]);
   
   const [activeTab, setActiveTab] = useState<string>(() => {
     const hash = location.hash.replace('#', '');
-    if (hash && initialResources.find((r: Resource) => r.slug === hash)) return hash;
-    return initialResources.length > 0 ? initialResources[0].slug : '';
+    return hash || '';
   });
   
-  const [loading, setLoading] = useState(initialResources.length === 0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -31,7 +29,6 @@ const About: React.FC = () => {
         const res = await api.get('/public/resources');
         const data = res.data.data;
         setResources(data);
-        localStorage.setItem('resources_cache', JSON.stringify(data));
         
         // If we didn't have an active tab set from cache, set it now
         if (!activeTab || !data.find((r: Resource) => r.slug === activeTab)) {

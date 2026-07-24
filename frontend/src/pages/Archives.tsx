@@ -65,9 +65,8 @@ interface VolumeItem {
 }
 
 const Archives: React.FC = () => {
-  const initialArchives = JSON.parse(localStorage.getItem('archives_cache') || '[]');
-  const [journals, setJournals] = useState<Journal[]>(initialArchives);
-  const [loading, setLoading] = useState(initialArchives.length === 0);
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // View Mode: 'shelf' (Option 1) | 'split' (Option 2)
   const [viewMode, setViewMode] = useState<'shelf' | 'split'>('shelf');
@@ -113,10 +112,6 @@ const Archives: React.FC = () => {
         setJournals(res.data.data);
         setCurrentPage(res.data.meta?.current_page || 1);
         setLastPage(res.data.meta?.last_page || 1);
-
-        if (currentPage === 1) {
-          localStorage.setItem('archives_cache', JSON.stringify(res.data.data));
-        }
       } catch (err) {
         console.error('Failed to fetch archives', err);
       } finally {

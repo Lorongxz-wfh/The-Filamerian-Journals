@@ -23,9 +23,6 @@ interface Journal {
 }
 
 const Journals: React.FC = () => {
-  const initialJournals = JSON.parse(localStorage.getItem('journals_cache') || '[]');
-  const initialCategories = JSON.parse(localStorage.getItem('categories_cache') || '["All"]');
-
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
@@ -51,9 +48,9 @@ const Journals: React.FC = () => {
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [fromYear, setFromYear] = useState('');
   const [toYear, setToYear] = useState('');
-  const [journals, setJournals] = useState<Journal[]>(initialJournals);
-  const [availableCategories, setAvailableCategories] = useState<string[]>(initialCategories);
-  const [loading, setLoading] = useState(initialJournals.length === 0);
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   
   // Pagination State
@@ -128,15 +125,10 @@ const Journals: React.FC = () => {
         setCurrentPage(jrnRes.data.meta?.current_page || 1);
         setLastPage(jrnRes.data.meta?.last_page || 1);
 
-        if (currentPage === 1 && selectedCategories.length === 0 && selectedYears.length === 0) {
-          localStorage.setItem('journals_cache', JSON.stringify(newJournals));
-        }
-        
         const categoriesRes = await api.get('/public/categories');
         const catsArray = categoriesRes.data.data.map((c: any) => c.slug) || [];
         const newCategories = ['All', ...catsArray];
         setAvailableCategories(newCategories);
-        localStorage.setItem('categories_cache', JSON.stringify(newCategories));
       } catch (err) {
         console.error('Failed to fetch journals', err);
       } finally {
