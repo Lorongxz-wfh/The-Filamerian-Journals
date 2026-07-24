@@ -48,14 +48,7 @@ class JournalController extends Controller
 
         // Eager-load nested relationships when requested
         if ($request->boolean('with_volumes')) {
-            $query->with(['volumes' => function ($vq) {
-                $vq->orderBy('year', 'desc');
-            }, 'volumes.articles' => function ($q) use ($request) {
-                if ($request->is('api/public/*') || $request->is('public/*')) {
-                    $q->where('status', 'Published');
-                }
-                $q->with('authors');
-            }]);
+            $query->with(['volumes.articles.authors']);
         }
 
         // Standardize pagination to 15
@@ -134,12 +127,7 @@ class JournalController extends Controller
             abort(404, 'Journal not found.');
         }
 
-        $journal->load(['category', 'volumes.articles' => function ($q) use ($request) {
-            if ($request->is('api/public/*') || $request->is('public/*')) {
-                $q->where('status', 'Published');
-            }
-            $q->with('authors');
-        }]);
+        $journal->load(['category', 'volumes.articles.authors']);
 
         return new JournalResource($journal);
     }
