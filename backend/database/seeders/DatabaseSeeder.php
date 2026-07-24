@@ -14,11 +14,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
+        $seeders = [
             RoleSeeder::class,
             UserSeeder::class,
             ResourceSeeder::class,
-            ContentSeeder::class,
-        ]);
+        ];
+
+        // Only seed sample journals, volumes, articles in Dev / Staging
+        if (app()->environment('local', 'dev', 'staging', 'testing') || env('APP_ENV') !== 'production') {
+            $seeders[] = ContentSeeder::class;
+        }
+
+        $this->call($seeders);
     }
 }

@@ -101,6 +101,7 @@ class ContentSeeder extends Seeder
                     'issn' => $data['issn'],
                     'frequency' => $data['frequency'],
                     'editor' => $data['editor'],
+                    'status' => 'Published',
                     'cover_image' => null,
                     'pdf_path' => null,
                 ]
