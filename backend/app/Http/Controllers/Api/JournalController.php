@@ -18,7 +18,10 @@ class JournalController extends Controller
         $query = Journal::with('category');
 
         if ($request->is('api/public/*') || $request->is('public/*')) {
-            $query->where('status', 'Published');
+            $query->where(function($q) {
+                $q->where('status', 'Published')
+                  ->orWhereNull('status');
+            });
         }
 
         if ($request->filled('search')) {
