@@ -147,25 +147,4 @@ class SystemController extends Controller
 
         return response()->json(['message' => 'System logs cleared successfully.']);
     }
-
-    public function seedDatabase()
-    {
-        try {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
-                '--class' => 'Database\\Seeders\\ContentSeeder',
-                '--force' => true
-            ]);
-            
-            \Illuminate\Support\Facades\Cache::flush();
-
-            return response()->json([
-                'message' => 'Database successfully seeded with sample journals, volumes, articles, and categories!',
-                'output' => \Illuminate\Support\Facades\Artisan::output()
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to seed database: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 }
