@@ -20,12 +20,13 @@ class ContentSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = [
-            'Undergraduate',
-            'Graduate School',
-            'Institutional',
-            'Multidisciplinary'
-        ];
+        \Illuminate\Support\Facades\DB::transaction(function () {
+            $categories = [
+                'Undergraduate',
+                'Graduate School',
+                'Institutional',
+                'Multidisciplinary'
+            ];
 
         // Seed Categories
         $categoryModels = [];
@@ -195,5 +196,6 @@ class ContentSeeder extends Seeder
                 ]
             );
         }
+        });
     }
 }
