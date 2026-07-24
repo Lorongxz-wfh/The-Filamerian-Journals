@@ -18,6 +18,9 @@ php artisan storage:link --force
 
 # Optimize Laravel
 echo "Optimizing..."
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
 php artisan optimize
 
 echo "--- Build Finished ---"
