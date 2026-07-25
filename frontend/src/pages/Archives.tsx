@@ -104,7 +104,7 @@ const Archives: React.FC = () => {
     setTimeout(() => {
       setSelectedSplitVolume(vol);
       setIsVolumeLoading(false);
-    }, 300);
+    }, 400);
   };
   
 
@@ -503,29 +503,38 @@ const Archives: React.FC = () => {
             <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-6 space-y-6 min-h-[600px]">
               {isVolumeLoading ? (
                 <>
-                  <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start animate-pulse">
-                    <Skeleton className="w-24 h-32 rounded" />
+                  {/* Header skeleton — mirrors actual cover + journal info block */}
+                  <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-6 items-start">
+                    <div className="w-24 h-32 shrink-0 bg-background border border-border" />
                     <div className="flex-1 min-w-0 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Skeleton className="h-4 w-24 rounded" />
-                        <Skeleton className="h-4 w-16 rounded" />
-                        <Skeleton className="h-4 w-20 rounded" />
+                        <Skeleton className="h-5 w-16" />
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-4 w-24" />
                       </div>
-                      <Skeleton className="h-5 w-48 rounded" />
-                      <Skeleton className="h-4 w-64 rounded" />
-                      <Skeleton className="h-4 w-32 rounded" />
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                      <Skeleton className="h-3 w-28 mt-2" />
                     </div>
                   </div>
+                  {/* Table of contents skeleton */}
                   <div className="space-y-4 flex-1">
-                    <Skeleton className="h-4 w-32 rounded" />
-                    <div className="divide-y divide-border border border-border bg-background max-h-[440px] overflow-y-auto space-y-2">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pulse">
-                          <div className="min-w-0 flex-1 space-y-1">
-                            <Skeleton className="h-4 w-3/4 rounded" />
-                            <Skeleton className="h-3 w-1/2 rounded" />
+                    <div className="flex items-center justify-between border-b border-border pb-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                    <div className="divide-y divide-border border border-border bg-background">
+                      {[...Array(2)].map((_, i) => (
+                        <div key={i} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/2" />
+                            <div className="flex items-center gap-4 mt-1">
+                              <Skeleton className="h-3 w-14" />
+                              <Skeleton className="h-3 w-32" />
+                            </div>
                           </div>
-                          <Skeleton className="h-8 w-16 rounded" />
+                          <Skeleton className="h-7 w-14 shrink-0" />
                         </div>
                       ))}
                     </div>

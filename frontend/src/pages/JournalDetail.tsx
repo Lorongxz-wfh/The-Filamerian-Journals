@@ -336,29 +336,41 @@ const JournalDetail: React.FC = () => {
             <div className="lg:col-span-8 border border-border bg-surface flex flex-col">
               {isVolumeChanging ? (
                 <div className="flex flex-col">
-                  {/* Header bar skeleton — matches actual vol header */}
+                  {/* Header bar skeleton — exact match to real vol header DOM */}
                   <div className="p-6 border-b border-border bg-background flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-14" />
-                      <Skeleton className="h-5 w-20" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-[26px] w-14" />
+                        <Skeleton className="h-[26px] w-24" />
+                      </div>
                     </div>
-                    <Skeleton className="h-4 w-32" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3.5 w-3.5" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
                   </div>
-                  {/* Article row skeletons — matches actual article card height */}
+                  {/* Article row skeletons — exact match to real article card */}
                   <div className="divide-y divide-border flex-1">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="px-6 py-5 flex items-start justify-between gap-4">
-                        <div className="min-w-0 flex-grow space-y-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-3 w-1/3" />
-                          <Skeleton className="h-3 w-full" />
-                          <Skeleton className="h-3 w-5/6" />
-                          <div className="flex items-center gap-4 mt-1">
-                            <Skeleton className="h-3 w-16" />
-                            <Skeleton className="h-3 w-32" />
+                        <div className="min-w-0 flex-grow">
+                          {/* Title — text-[13px] font-bold leading-snug, ~2 lines */}
+                          <Skeleton className="h-[13px] w-3/4 mt-[2px]" />
+                          {/* Authors — text-[12px] mt-1 */}
+                          <Skeleton className="h-[12px] w-1/3 mt-[5px]" />
+                          {/* Abstract — text-[12px] leading-relaxed line-clamp-2, mt-2 */}
+                          <Skeleton className="h-[12px] w-full mt-[10px]" />
+                          <Skeleton className="h-[12px] w-5/6 mt-[4px]" />
+                          {/* pp / DOI — mt-3 text-[11px] */}
+                          <div className="flex items-center gap-4 mt-[14px]">
+                            <Skeleton className="h-[20px] w-14" />
+                            <Skeleton className="h-[11px] w-32" />
                           </div>
                         </div>
-                        <Skeleton className="h-7 w-14 shrink-0" />
+                        {/* Read → button — px-2 py-1 border */}
+                        <div className="shrink-0 pt-1">
+                          <Skeleton className="h-[26px] w-14" />
+                        </div>
                       </div>
                     ))}
                   </div>
