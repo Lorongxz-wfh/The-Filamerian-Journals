@@ -66,7 +66,7 @@ const JournalDetail: React.FC = () => {
     if (volNum === expandedVol) return;
     setIsVolumeChanging(true);
     setExpandedVol(volNum);
-    setTimeout(() => setIsVolumeChanging(false), 200);
+    setTimeout(() => setIsVolumeChanging(false), 400);
   };
   
 
@@ -335,11 +335,33 @@ const JournalDetail: React.FC = () => {
             {/* RIGHT COLUMN: Selected Volume Preview (8/12 cols) */}
             <div className="lg:col-span-8 border border-border bg-surface flex flex-col">
               {isVolumeChanging ? (
-                <div className="p-8 space-y-4">
-                  <Skeleton className="h-6 w-1/3 mb-4" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
+                <div className="flex flex-col">
+                  {/* Header bar skeleton — matches actual vol header */}
+                  <div className="p-6 border-b border-border bg-background flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-5 w-14" />
+                      <Skeleton className="h-5 w-20" />
+                    </div>
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  {/* Article row skeletons — matches actual article card height */}
+                  <div className="divide-y divide-border flex-1">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="px-6 py-5 flex items-start justify-between gap-4">
+                        <div className="min-w-0 flex-grow space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/3" />
+                          <Skeleton className="h-3 w-full" />
+                          <Skeleton className="h-3 w-5/6" />
+                          <div className="flex items-center gap-4 mt-1">
+                            <Skeleton className="h-3 w-16" />
+                            <Skeleton className="h-3 w-32" />
+                          </div>
+                        </div>
+                        <Skeleton className="h-7 w-14 shrink-0" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : journal.volumes.find(v => v.volume_number === expandedVol) ? (
                 (() => {
