@@ -12,6 +12,9 @@ import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Pagination from '@/components/ui/Pagination';
+
+const PER_PAGE = 10;
 
 interface Announcement {
   id: number;
@@ -24,7 +27,11 @@ const ManageAnnouncements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
-  
+  const [debouncedFilter, setDebouncedFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Announcement | null>(null);
   const [formData, setFormData] = useState({ title: '', body: '' });
@@ -32,11 +39,26 @@ const ManageAnnouncements: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
+  // Debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilter(filter);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [filter]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/announcements');
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('per_page', PER_PAGE.toString());
+      if (debouncedFilter) params.append('search', debouncedFilter);
+      const res = await api.get(`/announcements?${params.toString()}`);
       setAnnouncements(res.data.data);
+      setLastPage(res.data.meta?.last_page || 1);
+      setTotal(res.data.meta?.total || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -46,7 +68,7 @@ const ManageAnnouncements: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, debouncedFilter]);
 
   const handleOpenModal = (item: Announcement | null = null) => {
     setError(null);
@@ -97,8 +119,6 @@ const ManageAnnouncements: React.FC = () => {
     }
   };
 
-  const filtered = announcements.filter(a => a.title.toLowerCase().includes(filter.toLowerCase()));
-
   return (
     <div className="space-y-8">
       <DashboardHeader title="Announcements">
@@ -115,7 +135,13 @@ const ManageAnnouncements: React.FC = () => {
         />
       </div>
 
-      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
+      {!loading && (
+        <p className="text-[11px] text-muted">
+          Showing {announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
+        </p>
+      )}
+
+      <div className="border border-border bg-surface overflow-x-auto relative">
         <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
           <div className="col-span-8">Title</div>
           <div className="col-span-3">Date</div>
@@ -123,17 +149,17 @@ const ManageAnnouncements: React.FC = () => {
         </div>
         
         {loading ? (
-          <ListSkeleton colSpans={[4, 6, 2]} rows={5} />
-        ) : filtered.length === 0 ? (
+          <ListSkeleton colSpans={[4, 6, 2]} rows={PER_PAGE} />
+        ) : announcements.length === 0 ? (
           <EmptyState title="No announcements" description="No announcements found." className="border-0 bg-transparent py-16" />
         ) : (
-          filtered.map((item) => (
+          announcements.map((item) => (
             <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-background transition-colors group cursor-default items-center">
               <div className="col-span-8 flex items-center gap-3">
                 <Megaphone className="h-4 w-4 text-primary/30 shrink-0" />
                 <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
               </div>
-              <div className="col-span-3 text-[12px] text-muted">{new Date(item.created_at).toLocaleDateString()}</div>
+              <div className="col-span-3 text-[12px] text-muted">{new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
               <div className="col-span-1 flex justify-end gap-2">
                 <IconButton icon={Edit2} onClick={() => handleOpenModal(item)} title="Edit" />
                 <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(item.id)} title="Delete" />
@@ -142,6 +168,14 @@ const ManageAnnouncements: React.FC = () => {
           ))
         )}
       </div>
+
+      {!loading && total > 0 && (
+        <Pagination
+          currentPage={page}
+          lastPage={lastPage}
+          onPageChange={setPage}
+        />
+      )}
 
       <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingItem ? 'Edit Announcement' : 'New Announcement'}>
         <form onSubmit={handleSubmit} className="space-y-4">

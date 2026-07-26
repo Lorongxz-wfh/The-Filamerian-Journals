@@ -17,6 +17,8 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 import Badge from '@/components/ui/Badge';
 import Pagination from '@/components/ui/Pagination';
 
+const PER_PAGE = 10;
+
 interface Article {
   id: number;
   title: string;
@@ -48,6 +50,7 @@ const Articles: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [articles, setArticles] = useState<Article[]>([]);
   const [journalsData, setJournalsData] = useState<any[]>([]);
+  const [categoriesData, setCategoriesData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [filter, setFilter] = useState('');
@@ -55,6 +58,7 @@ const Articles: React.FC = () => {
   const [tab, setTab] = useState<'all' | 'Published' | 'Draft'>('all');
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -64,37 +68,41 @@ const Articles: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [initialVolumeId, setInitialVolumeId] = useState<string>('');
 
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  // Default sort: newest first
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
+    key: 'created_at',
+    direction: 'desc',
+  });
+
+  // Category filter (replaces journal filter)
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const sortedArticles = React.useMemo(() => {
     let sortableItems = [...articles];
-    if (sortConfig !== null) {
-      sortableItems.sort((a, b) => {
-        let aVal: any = a[sortConfig.key as keyof Article];
-        let bVal: any = b[sortConfig.key as keyof Article];
-        
-        if (sortConfig.key === 'journal') {
-          aVal = a.volume?.journal?.title || '';
-          bVal = b.volume?.journal?.title || '';
-        } else if (sortConfig.key === 'volume') {
-          aVal = a.volume?.volume_number || '';
-          bVal = b.volume?.volume_number || '';
-        }
+    sortableItems.sort((a, b) => {
+      let aVal: any = a[sortConfig.key as keyof Article];
+      let bVal: any = b[sortConfig.key as keyof Article];
+      
+      if (sortConfig.key === 'journal') {
+        aVal = a.volume?.journal?.title || '';
+        bVal = b.volume?.journal?.title || '';
+      } else if (sortConfig.key === 'volume') {
+        aVal = a.volume?.volume_number || '';
+        bVal = b.volume?.volume_number || '';
+      }
 
-        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
     return sortableItems;
   }, [articles, sortConfig]);
 
   const requestSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
   };
 
   // Debounce search filter
@@ -106,30 +114,30 @@ const Articles: React.FC = () => {
     return () => clearTimeout(handler);
   }, [filter]);
 
-  // Reset page when tab changes
-  useEffect(() => {
-    setPage(1);
-  }, [tab]);
-
-  const [journalFilter, setJournalFilter] = useState('');
+  // Reset page when tab or category changes
+  useEffect(() => { setPage(1); }, [tab, categoryFilter]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       params.append('page', page.toString());
+      params.append('per_page', PER_PAGE.toString());
       if (debouncedFilter) params.append('search', debouncedFilter);
       if (tab !== 'all') params.append('status', tab);
-      if (journalFilter) params.append('journal_id', journalFilter);
+      if (categoryFilter) params.append('category', categoryFilter);
 
-      const [artRes, jrnRes] = await Promise.all([
+      const [artRes, jrnRes, catRes] = await Promise.all([
         api.get(`/articles?${params.toString()}`),
-        api.get('/journals?with_volumes=1')
+        api.get('/journals?with_volumes=1'),
+        api.get('/categories'),
       ]);
       
       setArticles(artRes.data.data);
       setLastPage(artRes.data.meta?.last_page || 1);
+      setTotal(artRes.data.meta?.total || 0);
       setJournalsData(jrnRes.data.data);
+      setCategoriesData(catRes.data.data || []);
     } catch (err) {
       console.error('Failed to fetch data:', err);
       toast.error('Failed to load articles');
@@ -140,7 +148,7 @@ const Articles: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, debouncedFilter, tab, journalFilter]);
+  }, [page, debouncedFilter, tab, categoryFilter]);
 
   const handleOpenModal = (article: Article | null = null, initialOverrides: any = {}) => {
     setEditingArticle(article);
@@ -157,16 +165,12 @@ const Articles: React.FC = () => {
       const artId = Number(searchParams.get('article_id'));
       if (articles.length > 0) {
         const target = articles.find(a => a.id === artId);
-        if (target) {
-          handleOpenModal(target);
-        }
+        if (target) handleOpenModal(target);
       }
     }
   }, [searchParams, articles]);
 
-  const handleDelete = (id: number) => {
-    setDeleteTarget(id);
-  };
+  const handleDelete = (id: number) => setDeleteTarget(id);
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -235,6 +239,7 @@ const Articles: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Status tabs */}
             <div className="flex gap-1 border border-border bg-surface">
               {tabs.map((t) => (
                 <button
@@ -248,15 +253,16 @@ const Articles: React.FC = () => {
                 </button>
               ))}
             </div>
+            {/* Category filter */}
             <div className="flex items-center gap-2">
-              <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
+              <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Category:</label>
               <div className="w-[200px]">
                 <Select
-                  value={journalFilter}
-                  onChange={(val) => { setJournalFilter(val as string); setPage(1); }}
+                  value={categoryFilter}
+                  onChange={(val) => setCategoryFilter(val as string)}
                   options={[
-                    { value: '', label: 'All Journals' },
-                    ...journalsData.map(j => ({ value: j.id.toString(), label: j.title }))
+                    { value: '', label: 'All Categories' },
+                    ...categoriesData.map(c => ({ value: c.slug, label: c.name }))
                   ]}
                 />
               </div>
@@ -268,6 +274,13 @@ const Articles: React.FC = () => {
             onChange={(e) => setFilter(e.target.value)}
           />
         </div>
+
+        {/* Result count */}
+        {!loading && (
+          <p className="text-[11px] text-muted">
+            Showing {sortedArticles.length} of {total} article{total !== 1 ? 's' : ''}
+          </p>
+        )}
 
         <Table>
         <TableHeader>
@@ -290,7 +303,7 @@ const Articles: React.FC = () => {
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRowSkeleton columns={6} rows={5} />
+            <TableRowSkeleton columns={6} rows={PER_PAGE} />
           ) : sortedArticles.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="h-32 text-center">
@@ -323,7 +336,9 @@ const Articles: React.FC = () => {
                     {article.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-muted">{new Date(article.created_at).toLocaleDateString()}</TableCell>
+                <TableCell className="text-muted">
+                  {new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">
                     {article.pdf_url && (
@@ -339,7 +354,8 @@ const Articles: React.FC = () => {
         </TableBody>
       </Table>
 
-      {!loading && lastPage > 1 && (
+      {/* Always show pagination when there are results */}
+      {!loading && lastPage >= 1 && total > 0 && (
         <Pagination
           currentPage={page}
           lastPage={lastPage}
