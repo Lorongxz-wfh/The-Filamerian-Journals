@@ -57,8 +57,6 @@ const Articles: React.FC = () => {
   const [debouncedFilter, setDebouncedFilter] = useState('');
   const [tab, setTab] = useState<'all' | 'Published' | 'Draft'>('all');
   const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [total, setTotal] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -98,6 +96,11 @@ const Articles: React.FC = () => {
     return sortableItems;
   }, [articles, sortConfig]);
 
+  // Client-side pagination derived values
+  const totalCount = sortedArticles.length;
+  const lastPage = Math.max(1, Math.ceil(totalCount / PER_PAGE));
+  const pagedArticles = sortedArticles.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
   const requestSort = (key: string) => {
     setSortConfig((prev) => ({
       key,
@@ -114,15 +117,13 @@ const Articles: React.FC = () => {
     return () => clearTimeout(handler);
   }, [filter]);
 
-  // Reset page when tab or category changes
-  useEffect(() => { setPage(1); }, [tab, categoryFilter]);
+  // Reset page when filters/sort change
+  useEffect(() => { setPage(1); }, [tab, categoryFilter, debouncedFilter, sortConfig]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      params.append('page', page.toString());
-      params.append('per_page', PER_PAGE.toString());
       if (debouncedFilter) params.append('search', debouncedFilter);
       if (tab !== 'all') params.append('status', tab);
       if (categoryFilter) params.append('category', categoryFilter);
@@ -134,8 +135,6 @@ const Articles: React.FC = () => {
       ]);
       
       setArticles(artRes.data.data);
-      setLastPage(artRes.data.meta?.last_page || 1);
-      setTotal(artRes.data.meta?.total || 0);
       setJournalsData(jrnRes.data.data);
       setCategoriesData(catRes.data.data || []);
     } catch (err) {
@@ -148,7 +147,7 @@ const Articles: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, debouncedFilter, tab, categoryFilter]);
+  }, [debouncedFilter, tab, categoryFilter]);
 
   const handleOpenModal = (article: Article | null = null, initialOverrides: any = {}) => {
     setEditingArticle(article);
@@ -278,7 +277,7 @@ const Articles: React.FC = () => {
         {/* Result count */}
         {!loading && (
           <p className="text-[11px] text-muted">
-            Showing {sortedArticles.length} of {total} article{total !== 1 ? 's' : ''}
+            Showing {Math.min((page - 1) * PER_PAGE + 1, totalCount)}–{Math.min(page * PER_PAGE, totalCount)} of {totalCount} article{totalCount !== 1 ? 's' : ''}
           </p>
         )}
 
@@ -311,7 +310,7 @@ const Articles: React.FC = () => {
               </TableCell>
             </TableRow>
           ) : (
-            sortedArticles.map((article) => (
+            pagedArticles.map((article) => (
               <TableRow 
                 key={article.id} 
                 className={`group ${articleHasPdf(article) ? 'cursor-pointer' : ''}`}
@@ -354,8 +353,7 @@ const Articles: React.FC = () => {
         </TableBody>
       </Table>
 
-      {/* Always show pagination when there are results */}
-      {!loading && lastPage >= 1 && total > 0 && (
+      {!loading && totalCount > 0 && (
         <Pagination
           currentPage={page}
           lastPage={lastPage}
