@@ -90,9 +90,9 @@ const MyJournals: React.FC = () => {
         if (sortConfig.key === 'category') {
           aVal = a.category?.name || '';
           bVal = b.category?.name || '';
-        } else if (sortConfig.key === 'volumes') {
-          aVal = a.volumes?.length || 0;
-          bVal = b.volumes?.length || 0;
+        } else if (sortConfig.key === 'updated_at') {
+          aVal = a.updated_at || '';
+          bVal = b.updated_at || '';
         }
 
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -361,8 +361,8 @@ const MyJournals: React.FC = () => {
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('category')}>
               <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
             </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors text-center" onClick={() => requestSort('volumes')}>
-              <div className="flex items-center justify-center gap-1">Volumes {getSortIcon('volumes')}</div>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
+              <div className="flex items-center gap-1">Last Updated {getSortIcon('updated_at')}</div>
             </TableHead>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
               <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
@@ -407,8 +407,10 @@ const MyJournals: React.FC = () => {
                 <TableCell className="text-muted truncate">
                   {journal.category?.name || '-'}
                 </TableCell>
-                <TableCell className="text-center text-muted">
-                  {journal.volumes?.length || 0}
+                <TableCell className="text-muted text-[12px]">
+                  {journal.updated_at
+                    ? new Date(journal.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                    : '-'}
                 </TableCell>
                 <TableCell className="text-muted truncate">
                   {journal.editor || '-'}
