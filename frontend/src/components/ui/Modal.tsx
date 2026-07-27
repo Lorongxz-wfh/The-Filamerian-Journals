@@ -49,29 +49,32 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/60 transition-opacity cursor-pointer" 
+        className="fixed inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity cursor-pointer" 
         onClick={handleAttemptClose}
       />
       
+      {/* Panel */}
       <div className={cn(
-        "relative bg-surface border border-border w-full max-w-lg shadow-xl flex flex-col max-h-[90vh]",
+        "relative bg-surface border border-border/60 w-full max-w-lg shadow-2xl shadow-black/20 flex flex-col max-h-[90vh]",
         className
       )}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-          <h2 className="text-lg uppercase tracking-wider">{title}</h2>
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-primary">{title}</h2>
           <button 
             onClick={handleAttemptClose}
-            className="text-muted hover:text-primary transition-colors cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center text-muted hover:text-primary hover:bg-black/5 transition-colors cursor-pointer"
+            aria-label="Close"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
         
         {/* Body */}
-        <div className={cn("p-6 overflow-y-auto flex-grow flex flex-col", bodyClassName)}>
+        <div className={cn("px-6 py-5 overflow-y-auto flex-grow flex flex-col", bodyClassName)}>
           {children}
         </div>
       </div>
