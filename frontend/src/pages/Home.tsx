@@ -1,17 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router';
-import JournalCard from '@/components/ui/JournalCard';
-import { ChevronRight, ChevronLeft, ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import api, { getFileUrl } from '@/services/api';
-import EmptyState from '@/components/ui/EmptyState';
 import { Seo } from '@/components/ui/Seo';
 import PageWrapper from '@/components/layout/PageWrapper';
-import Spinner from '@/components/ui/Spinner';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useSettings } from '@/contexts/SettingsContext';
-
-// Dynamic categories fetched from API
 
 interface Journal {
   id: number;
@@ -22,6 +17,7 @@ interface Journal {
   cover_image: string | null;
   volumes?: any[];
   created_at: string;
+  updated_at: string;
 }
 
 interface Announcement {
@@ -31,12 +27,25 @@ interface Announcement {
   created_at: string;
 }
 
-const DEFAULT_ABOUT_US = '<h2 class="text-xl font-bold uppercase tracking-wider text-primary">The Filamerian Journals</h2>\n  <p class="text-[14px] text-muted leading-relaxed">\n    <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n  </p>';
+interface Article {
+  id: number;
+  title: string;
+  abstract: string;
+  authors?: { name: string }[];
+  volume?: { journal?: { title: string } };
+  created_at: string;
+}
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<string>('All');
-  const [heroSearchQuery, setHeroSearchQuery] = useState<string>('');
+  const { settings } = useSettings();
+
+  const [heroSearchQuery, setHeroSearchQuery] = useState('');
+  const [journals, setJournals] = useState<Journal[]>([]);
+  const [latestArticles, setLatestArticles] = useState<Article[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const handleHeroSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,85 +53,6 @@ const Home: React.FC = () => {
       navigate(`/search?q=${encodeURIComponent(heroSearchQuery.trim())}`);
     }
   };
-  const [isTabChanging, setIsTabChanging] = useState<boolean>(false);
-  const [journals, setJournals] = useState<Journal[]>([]);
-  const [latestArticles, setLatestArticles] = useState<any[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [categoriesList, setCategoriesList] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const handleTabChange = (cat: string) => {
-    if (cat === activeTab) return;
-    setIsTabChanging(true);
-    setActiveTab(cat);
-    setTimeout(() => setIsTabChanging(false), 200);
-  };
-
-  const { settings } = useSettings();
-  const [activeScrollIndex, setActiveScrollIndex] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const observerRef = React.useRef<ResizeObserver | null>(null);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const { clientWidth } = scrollContainerRef.current;
-      scrollContainerRef.current.scrollBy({ left: direction === 'left' ? -clientWidth : clientWidth, behavior: 'smooth' });
-    }
-  };
-
-  const calculatePages = React.useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    if (maxScroll <= 1) {
-      setTotalPages(1);
-      return;
-    }
-    // Count pages as how many full clientWidths fit, capped at number of articles
-    const pages = Math.ceil(container.scrollWidth / container.clientWidth);
-    setTotalPages(Math.max(1, pages));
-  }, []);
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const container = e.currentTarget;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    if (maxScroll > 0) {
-      const scrollRatio = container.scrollLeft / maxScroll;
-      const active = Math.min(Math.round(scrollRatio * (totalPages - 1)), totalPages - 1);
-      setActiveScrollIndex(active);
-    }
-  };
-
-  const scrollToDot = (index: number) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    if (maxScroll <= 0 || totalPages <= 1) return;
-    const targetScroll = (maxScroll / (totalPages - 1)) * index;
-    container.scrollTo({ left: targetScroll, behavior: 'smooth' });
-  };
-
-  // Use ResizeObserver to reliably detect when the container's scroll size changes
-  // (fires after paint, unlike setTimeout which often fires before DOM is laid out)
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    observerRef.current?.disconnect();
-    observerRef.current = new ResizeObserver(() => {
-      calculatePages();
-    });
-    observerRef.current.observe(container);
-
-    // Also recalculate on window resize
-    window.addEventListener('resize', calculatePages);
-    return () => {
-      observerRef.current?.disconnect();
-      window.removeEventListener('resize', calculatePages);
-    };
-  }, [latestArticles, calculatePages]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,20 +61,15 @@ const Home: React.FC = () => {
           api.get('/public/journals?with_volumes=1'),
           api.get('/public/articles/latest'),
           api.get('/public/announcements'),
-          api.get('/public/categories')
+          api.get('/public/categories'),
         ]);
-        
-        const freshJournals = jrnRes.data.data;
-        const freshLatest = latestRes.data.data;
-        const freshAnnouncements = annRes.data.data.slice(0, 3);
-        const freshCategories = (catRes.data.data || []).map((c: any) => c.name);
 
-        setJournals(freshJournals);
-        setLatestArticles(freshLatest);
-        setAnnouncements(freshAnnouncements);
-        setCategoriesList(freshCategories);
+        setJournals(jrnRes.data.data || []);
+        setLatestArticles(latestRes.data.data || []);
+        setAnnouncements((annRes.data.data || []).slice(0, 3));
+        setCategoriesList((catRes.data.data || []).map((c: any) => c.name));
       } catch (err) {
-        console.error('Failed to fetch public data', err);
+        console.error('Failed to fetch home page data', err);
       } finally {
         setLoading(false);
       }
@@ -152,152 +77,141 @@ const Home: React.FC = () => {
     fetchData();
   }, []);
 
-  const availableCategories = ['All', ...categoriesList];
-  
-  const showTagline = settings.show_tagline === 'true';
-  const showAboutUs = settings.show_about_us !== 'false';
-  const aboutUsHtml = settings.home_about_us || DEFAULT_ABOUT_US;
-
-  const filteredJournals = activeTab === 'All'
-    ? journals
-    : journals.filter((j) => {
-        const catName = typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category;
-        return catName === activeTab;
-      });
-
   const totalPublishedArticles = useMemo(() => {
     return journals.reduce((sum, j) => {
-      const volArticles = j.volumes?.reduce((vSum, v) => vSum + (v.articles_count || v.articles?.length || 0), 0) || 0;
+      const volArticles = j.volumes?.reduce(
+        (vSum, v) => vSum + (v.articles_count || v.articles?.length || 0),
+        0
+      ) || 0;
       return sum + volArticles;
     }, 0);
   }, [journals]);
 
-  const [homeLayout, setHomeLayout] = useState<'original' | 'editorial' | 'bento' | 'minimal'>('original');
+  const recentJournals = useMemo(
+    () =>
+      [...journals]
+        .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime())
+        .slice(0, 6),
+    [journals]
+  );
+
+  const siteTitle = settings.site_title || 'The Filamerian Journals';
+  const aboutHtml = settings.about_us || settings.home_about_us || '';
 
   return (
     <PageWrapper className="flex flex-col relative pb-16">
-      <Seo title="Home" description="Home page of The Filamerian Journals" />
+      <Seo
+        title="Home"
+        description={`${siteTitle} — Official online database of academic journals, faculty research, theses, and case studies.`}
+      />
 
-      {/* Floating Demo Switcher (Local Host Only) */}
-      <div className="fixed bottom-6 right-6 z-[999] bg-primary/95 text-white p-2.5 rounded-full shadow-2xl border border-secondary flex items-center gap-1.5 backdrop-blur-md">
-        <span className="text-[10px] font-bold text-secondary uppercase tracking-widest px-2">Demo Revamp:</span>
-        <button
-          onClick={() => setHomeLayout('original')}
-          className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-            homeLayout === 'original' ? 'bg-secondary text-primary shadow-sm' : 'hover:bg-white/10 text-white/80'
-          }`}
-        >
-          Original
-        </button>
-        <button
-          onClick={() => setHomeLayout('editorial')}
-          className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-            homeLayout === 'editorial' ? 'bg-secondary text-primary shadow-sm' : 'hover:bg-white/10 text-white/80'
-          }`}
-        >
-          Option 1: Editorial
-        </button>
-        <button
-          onClick={() => setHomeLayout('bento')}
-          className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-            homeLayout === 'bento' ? 'bg-secondary text-primary shadow-sm' : 'hover:bg-white/10 text-white/80'
-          }`}
-        >
-          Option 2: Bento Grid
-        </button>
-        <button
-          onClick={() => setHomeLayout('minimal')}
-          className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-            homeLayout === 'minimal' ? 'bg-secondary text-primary shadow-sm' : 'hover:bg-white/10 text-white/80'
-          }`}
-        >
-          Option 3: Minimal
-        </button>
-      </div>
+      <div className="space-y-12 w-full">
 
-      {/* ========================================================= */}
-      {/* OPTION 1: EDITORIAL ACADEMIC SHOWCASE                    */}
-      {/* ========================================================= */}
-      {homeLayout === 'editorial' && (
-        <div className="space-y-12 w-full">
-          {/* Editorial Hero Banner (Two Separate Side-by-Side Cards with Gap) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            {/* Left Content Card (8 cols) */}
-            <div className="lg:col-span-8 border border-border bg-surface p-8 lg:p-10 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
-                  <span>Filamer Christian University</span>
-                </div>
-                <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
-                  {settings.site_title || 'The Filamerian Journals'}
-                </h1>
-                {settings.about_us ? (
-                  <div 
-                    className="text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(settings.about_us) }}
+        {/* ── Hero Banner ──────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+          {/* Left: Site intro + search + stats */}
+          <div className="lg:col-span-8 border border-border bg-surface p-8 lg:p-10 flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
+                <span>Filamer Christian University</span>
+              </div>
+
+              <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
+                {siteTitle}
+              </h1>
+
+              {aboutHtml ? (
+                <div
+                  className="text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }}
+                />
+              ) : (
+                <p className="text-muted text-sm leading-relaxed max-w-xl">
+                  The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
+                </p>
+              )}
+
+              {/* Hero Search */}
+              <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl pt-1">
+                <div className="relative flex-1">
+                  <Search className="h-4 w-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={heroSearchQuery}
+                    onChange={(e) => setHeroSearchQuery(e.target.value)}
+                    placeholder="Search articles, keywords, authors, or DOI..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-background border border-border text-xs text-primary placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
                   />
-                ) : (
-                  <p className="text-muted text-sm leading-relaxed max-w-xl">
-                    The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
-                  </p>
-                )}
-
-                {/* Interactive Search Hero Bar */}
-                <form onSubmit={handleHeroSearch} className="flex items-center gap-2 max-w-xl pt-1">
-                  <div className="relative flex-1">
-                    <Search className="h-4 w-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={heroSearchQuery}
-                      onChange={(e) => setHeroSearchQuery(e.target.value)}
-                      placeholder="Search articles, keywords, authors, or DOI..."
-                      className="w-full pl-10 pr-4 py-2.5 bg-background border border-border text-xs text-primary placeholder:text-muted focus:outline-none focus:border-primary transition-colors shadow-xs"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-secondary hover:text-primary transition-colors shadow-sm shrink-0 flex items-center gap-1.5"
-                  >
-                    Search
-                  </button>
-                </form>
-              </div>
-              
-              {/* Quick Metrics Bar (Live Dynamic Backend Data) */}
-              <div className="pt-5 flex flex-wrap gap-8 border-t border-border mt-6">
-                <div>
-                  <div className="text-2xl font-bold text-primary font-mono">{journals.length || 0}</div>
-                  <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-primary font-mono">{totalPublishedArticles || 0}</div>
-                  <div className="text-xs text-muted uppercase tracking-wider font-medium">Published Papers</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-primary font-mono">{categoriesList.length || 0}</div>
-                  <div className="text-xs text-muted uppercase tracking-wider font-medium">Research Fields</div>
-                </div>
-              </div>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-secondary hover:text-primary transition-colors shrink-0 flex items-center gap-1.5"
+                >
+                  Search
+                </button>
+              </form>
             </div>
 
-            {/* Right Side: Separate University Announcements Card (4 cols, 3 Announcements Max) */}
-            <div className="lg:col-span-4 border border-border bg-background flex flex-col justify-between overflow-hidden">
-              {/* Header Bar */}
-              <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-secondary" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white">
-                    Announcements
-                  </span>
-                </div>
-                <Link to="/announcements" className="text-[9px] font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors">
-                  All News →
-                </Link>
-              </div>
+            {/* Live Stats */}
+            <div className="pt-5 flex flex-wrap gap-8 border-t border-border mt-6">
+              {loading ? (
+                <>
+                  <Skeleton className="h-10 w-20" />
+                  <Skeleton className="h-10 w-20" />
+                  <Skeleton className="h-10 w-20" />
+                </>
+              ) : (
+                <>
+                  <div>
+                    <div className="text-2xl font-bold text-primary font-mono">{journals.length}</div>
+                    <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-primary font-mono">{totalPublishedArticles}</div>
+                    <div className="text-xs text-muted uppercase tracking-wider font-medium">Published Papers</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-primary font-mono">{categoriesList.length}</div>
+                    <div className="text-xs text-muted uppercase tracking-wider font-medium">Research Fields</div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
-              {/* Main Content Area (Fits 3 Items cleanly) */}
-              <div className="p-4 space-y-3 divide-y divide-border flex-1 flex flex-col justify-center">
-                {announcements.slice(0, 3).map((item, i) => (
+          {/* Right: Announcements Panel */}
+          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden">
+            {/* Header Bar */}
+            <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border shrink-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-secondary" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white">Announcements</span>
+              </div>
+              <Link to="/announcements" className="text-[9px] font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors">
+                All News →
+              </Link>
+            </div>
+
+            {/* Announcements List */}
+            <div className="p-4 space-y-3 divide-y divide-border flex-1 flex flex-col justify-center">
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
+                    </div>
+                  ))}
+                </div>
+              ) : announcements.length === 0 ? (
+                <div className="py-8 text-center space-y-1">
+                  <p className="text-xs font-semibold text-primary">No Active Bulletins</p>
+                  <p className="text-[10px] text-muted">Check back later for updates.</p>
+                </div>
+              ) : (
+                announcements.map((item, i) => (
                   <Link to="/announcements" key={item.id} className={`group block ${i > 0 ? 'pt-2.5' : ''}`}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 py-0.5 uppercase tracking-wider">
@@ -315,418 +229,140 @@ const Home: React.FC = () => {
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
                     />
                   </Link>
+                ))
+              )}
+            </div>
+
+            {/* Footer Bar */}
+            <div className="bg-surface px-4 py-2 border-t border-border flex items-center justify-between shrink-0">
+              <span className="text-[9px] text-muted font-medium">FCU Official Bulletin</span>
+              <Link to="/announcements" className="text-[10px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
+                Read All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Content Sections ─────────────────────────────────────── */}
+        <div className="space-y-10 border-t border-border pt-8">
+
+          {/* Latest Articles */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Articles</h2>
+              <Link to="/archives" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">
+                Explore Archives →
+              </Link>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border border-border bg-surface p-5 h-[230px] space-y-3">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-4/5" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
                 ))}
-                {announcements.length === 0 && (
-                  <div className="py-8 text-center space-y-1">
-                    <p className="text-xs font-semibold text-primary">No Active Bulletins</p>
-                    <p className="text-[10px] text-muted">Check back later for updates.</p>
-                  </div>
-                )}
               </div>
-
-              {/* Footer Bar */}
-              <div className="bg-surface px-4 py-2 border-t border-border flex items-center justify-between">
-                <span className="text-[9px] text-muted font-medium">FCU Official Bulletin</span>
-                <Link to="/announcements" className="text-[10px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
-                  Read All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Section: Full Width Latest Articles & Recently Updated Journals */}
-          <div className="space-y-10 border-t border-border pt-8">
-            {/* Latest Articles (Top 3 latest articles) */}
-            {latestArticles.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Articles</h2>
-                  <Link to="/archives" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">Explore Archives →</Link>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {latestArticles.slice(0, 3).map((art) => (
-                    <Link key={art.id} to={`/articles/${art.id}`} className="border border-border bg-surface p-5 hover:border-primary transition-colors flex flex-col justify-between h-[230px] group">
-                      <div className="space-y-2">
-                        <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">{art.volume?.journal?.title || 'Journal Paper'}</span>
-                        <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2.5">{art.title}</h4>
-                        <p className="text-xs text-muted line-clamp-3">{art.abstract}</p>
-                      </div>
-                      <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between">Read Paper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" /></span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recently Updated Journals (Most recently updated journals) */}
-            <div className="space-y-4 pt-2">
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Recently Updated Journals</h2>
-                <Link to="/journals" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">View All Journals →</Link>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {journals
-                  .slice()
-                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                  .slice(0, 6)
-                  .map((j) => (
-                    <Link
-                      key={j.id}
-                      to={`/journals/${j.slug}`}
-                      className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
-                    >
-                      {/* Compact Journal Cover Image */}
-                      <div className="w-16 h-22 shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
-                        {j.cover_image ? (
-                          <img src={getFileUrl(j.cover_image)} alt={j.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        ) : (
-                          <div className="text-[9px] font-bold text-primary text-center uppercase line-clamp-3 leading-tight">{j.title}</div>
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
-                          {typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
-                        </span>
-                        <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
-                          {j.title}
-                        </h4>
-                        <span className="text-[11px] text-muted block font-mono">
-                          {j.volumes?.length || 0} Volume(s) Published
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* OPTION 2: MODERN BENTO GRID                               */}
-      {/* ========================================================= */}
-      {homeLayout === 'bento' && (
-        <div className="space-y-8 w-full">
-          {/* Bento Grid Header */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Main Hero Card (8 cols) */}
-            <div className="lg:col-span-8 border border-border bg-primary text-white p-8 lg:p-10 flex flex-col justify-between min-h-[300px] relative overflow-hidden group">
-              <div className="space-y-4 z-10">
-                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest border border-secondary px-3 py-1 inline-block">
-                  Filamer Christian University
-                </span>
-                <h1 className="text-2xl lg:text-3xl font-bold uppercase tracking-wide !text-white">
-                  The Filamerian Journals Database
-                </h1>
-                <p className="text-white/80 text-xs sm:text-sm max-w-lg leading-relaxed">
-                  Access published academic journals, faculty research papers, thesis archives, and case studies.
-                </p>
-              </div>
-              <div className="pt-6 z-10 flex items-center gap-4">
-                <Link to="/journals" className="px-5 py-2 bg-secondary text-primary font-bold text-xs uppercase tracking-wider hover:bg-white transition-colors">
-                  Browse Publications
-                </Link>
-                <Link to="/archives" className="px-5 py-2 border border-white/30 text-white font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-colors">
-                  Search Archives
-                </Link>
-              </div>
-            </div>
-
-            {/* Quick Stats Bento Box (4 cols) */}
-            <div className="lg:col-span-4 border border-border bg-surface p-6 flex flex-col justify-between space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-primary border-b border-border pb-2">Repository Stats</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-background border border-border">
-                  <span className="text-xs text-muted uppercase font-semibold">Active Journals</span>
-                  <span className="text-base font-bold text-primary font-mono">{journals.length || 12}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-background border border-border">
-                  <span className="text-xs text-muted uppercase font-semibold">Total Articles</span>
-                  <span className="text-base font-bold text-primary font-mono">150+</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-background border border-border">
-                  <span className="text-xs text-muted uppercase font-semibold">Access Level</span>
-                  <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 uppercase">Free Open Access</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bento Research Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {journals.slice(0, 6).map((j) => (
-              <div key={j.id} className="border border-border bg-surface p-5 space-y-3 flex flex-col justify-between hover:border-primary transition-all">
-                <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
-                    {typeof j.category === 'object' && j.category !== null ? j.category.name : j.category}
-                  </span>
-                  <h4 className="text-sm font-bold text-primary uppercase line-clamp-2">{j.title}</h4>
-                  <p className="text-xs text-muted line-clamp-3">{j.description}</p>
-                </div>
-                <Link to={`/journals/${j.slug}`} className="text-xs font-semibold text-primary hover:text-secondary pt-3 border-t border-border flex items-center justify-between">
-                  View Journal <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* OPTION 3: MINIMALIST POLISH                               */}
-      {/* ========================================================= */}
-      {homeLayout === 'minimal' && (
-        <div className="space-y-12 w-full">
-          <div className="text-center space-y-3 max-w-2xl mx-auto py-4">
-            <span className="text-[11px] font-bold text-secondary bg-primary px-3 py-1 uppercase tracking-widest inline-block">Official University Database</span>
-            <h1 className="text-2xl lg:text-3xl font-serif font-bold text-primary">The Filamerian Journals</h1>
-            <p className="text-xs text-muted leading-relaxed">
-              Official online database of published academic journals, case studies, capstones, and faculty research at Filamer Christian University.
-            </p>
-          </div>
-
-          {/* 3 Quick Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-y border-border py-8">
-            <Link to="/journals" className="p-6 border border-border bg-surface hover:bg-background transition-colors space-y-2 text-center">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Academic Journals</h4>
-              <p className="text-xs text-muted">Browse active research publications by academic discipline.</p>
-            </Link>
-            <Link to="/archives" className="p-6 border border-border bg-surface hover:bg-background transition-colors space-y-2 text-center">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Archive Library</h4>
-              <p className="text-xs text-muted">Search past volumes and issue collections across all years.</p>
-            </Link>
-            <Link to="/announcements" className="p-6 border border-border bg-surface hover:bg-background transition-colors space-y-2 text-center">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-primary">University News</h4>
-              <p className="text-xs text-muted">Read call for papers, submission guidelines, and updates.</p>
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* ORIGINAL LAYOUT (CURRENT DEFAULT)                        */}
-      {/* ========================================================= */}
-      {homeLayout === 'original' && (
-        <>
-          {/* Hero Section */}
-          {((settings.tagline && showTagline) || (aboutUsHtml && showAboutUs)) && (
-            <div className="w-full px-[10%] text-center mb-5 flex flex-col items-center">
-              {settings.tagline && showTagline && (
-                <div className="mb-4 text-[12px] font-bold text-secondary uppercase tracking-widest bg-primary px-4 py-1.5 inline-block">
-                  {settings.tagline}
-                </div>
-              )}
-              {aboutUsHtml && showAboutUs && (
-                <div 
-                  className="space-y-1.5 w-full"
-                  dangerouslySetInnerHTML={{ __html: aboutUsHtml }} 
-                />
-              )}
-            </div>
-          )}
-
-          <div className="w-full flex-1 flex flex-col">
-            {/* Latest Publications */}
-            {latestArticles.length > 0 && (
-              <div className="mb-12 relative group/carousel">
-                <div className="flex items-center justify-between border-b border-border mb-6 overflow-x-auto min-h-[40px] pb-2 gap-4">
-                  <h2 className="text-lg font-bold uppercase tracking-wider shrink-0 text-primary flex items-center gap-3">
-                    Latest Articles
-                  </h2>
-                  
-                  {/* Scroll Indicators / Buttons */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button 
-                      onClick={() => scroll('left')}
-                      className="p-1.5 border border-border text-muted hover:text-primary hover:border-primary transition-colors bg-surface"
-                      aria-label="Scroll left"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => scroll('right')}
-                      className="p-1.5 border border-border text-muted hover:text-primary hover:border-primary transition-colors bg-surface"
-                      aria-label="Scroll right"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div 
-                  ref={scrollContainerRef}
-                  onScroll={handleScroll}
-                  className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] relative"
-                >
-                  {latestArticles.map((article) => (
-                    <Link key={article.id} to={`/articles/${article.id}`} className="shrink-0 w-[85vw] sm:w-[340px] lg:w-[380px] flex flex-col border border-primary bg-primary p-6 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 snap-start h-[260px] group relative overflow-hidden">
-                      {/* Subtle Gold accent line on hover */}
-                      <div className="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                      
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
-                          {article.volume?.journal?.title || 'Unknown Journal'}
-                        </span>
-                      </div>
-                      <h3 className="text-[15px] font-bold text-white uppercase tracking-wider mb-3 line-clamp-2">
-                        {article.title}
-                      </h3>
-                      <p className="text-[13px] text-white/80 leading-relaxed line-clamp-3 mb-5 flex-grow">
-                        {article.abstract || 'No abstract available.'}
-                      </p>
-                      <div className="flex items-center justify-between text-[11px] text-white/70 uppercase tracking-wider truncate pt-4 border-t border-white/20">
-                        <span className="truncate pr-4">{article.authors?.map((a: any) => a.name).join(', ') || 'Unknown'}</span>
-                        <ArrowRight className="h-4 w-4 shrink-0 text-white/70 group-hover:text-secondary group-hover:translate-x-1 transition-all mr-3" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Dots Indicator */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => scrollToDot(i)}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          activeScrollIndex === i 
-                            ? 'w-6 bg-secondary' 
-                            : 'w-2 bg-border hover:bg-muted'
-                        }`}
-                        aria-label={`Go to slide ${i + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-9 xl:gap-[60px] items-start">
-              {/* Journals Grid */}
-              <div className="lg:col-span-9 flex flex-col">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border mb-4 min-h-[40px] pb-2 gap-4">
-                  <h2 className="text-lg font-bold uppercase tracking-wider shrink-0">
-                    Academic Journals
-                  </h2>
-                  <div className="flex items-center overflow-x-auto max-w-full sm:max-w-[60%] md:max-w-[70%] gap-4 sm:gap-6 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                    {availableCategories.map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => handleTabChange(cat)}
-                        className={`text-[12px] font-medium pb-1 transition-colors whitespace-nowrap shrink-0 ${
-                          activeTab === cat
-                            ? 'font-semibold text-primary border-b-2 border-primary'
-                            : 'text-muted hover:text-primary'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col mb-8">
-                  {loading || isTabChanging ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="border border-border p-5 space-y-4 max-w-[260px] mx-auto w-full h-[320px]">
-                          <Skeleton className="h-40 w-full" />
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : filteredJournals.length === 0 ? (
-                    <EmptyState title="No journals" description="No journals in this category." className="flex-1 flex flex-col items-center justify-center py-12 border border-border bg-surface mt-4 min-h-[40vh]" />
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                      {filteredJournals.slice(0, 15).map((j) => {
-                        const latestVol = j.volumes?.[0];
-                        
-                        return (
-                          <JournalCard
-                            key={j.id}
-                            slug={j.slug}
-                            title={j.title}
-                            description={j.description}
-                            date={latestVol?.year ? latestVol.year.toString() : new Date(j.created_at).getFullYear().toString()}
-                            volume={j.volumes?.length ? `${j.volumes.length} Volume/s` : 'No Volumes'}
-                            image={getFileUrl(j.cover_image)}
-                            category={typeof j.category === 'object' && j.category !== null ? (j.category as any).name : j.category}
-                            viewMode="grid"
-                            className="h-full flex flex-col justify-start border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 py-6 px-[15px] max-w-[260px] mx-auto w-full min-h-[320px]"
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-center mt-auto">
+            ) : latestArticles.length === 0 ? (
+              <p className="text-sm text-muted py-4">No articles published yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {latestArticles.slice(0, 3).map((art) => (
                   <Link
-                    to="/journals"
-                    className="px-6 py-2.5 border border-border text-[13px] font-medium text-primary hover:bg-primary hover:text-white transition-colors"
+                    key={art.id}
+                    to={`/articles/${art.id}`}
+                    className="border border-border bg-surface p-5 hover:border-primary transition-colors flex flex-col justify-between h-[230px] group"
                   >
-                    View All Publications
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">
+                        {art.volume?.journal?.title || 'Journal Paper'}
+                      </span>
+                      <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2.5">
+                        {art.title}
+                      </h4>
+                      <p className="text-xs text-muted line-clamp-3">{art.abstract}</p>
+                    </div>
+                    <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between">
+                      Read Paper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                    </span>
                   </Link>
-                </div>
+                ))}
               </div>
+            )}
+          </div>
 
-              {/* Sidebar */}
-              <div className="lg:col-span-3 space-y-9">
-                {/* Announcements */}
-                <div className="border border-border bg-surface p-5 flex flex-col">
-                  <Link to="/announcements" className="flex items-center justify-between mb-4 pb-3 border-b border-border group">
-                    <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
-                      Announcements
-                    </h3>
-                    <ChevronRight className="h-4 w-4 text-muted group-hover:text-primary transition-colors" />
-                  </Link>
+          {/* Recently Updated Journals */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Recently Updated Journals</h2>
+              <Link to="/journals" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">
+                View All Journals →
+              </Link>
+            </div>
 
-                  {loading ? (
-                    <Spinner text="Loading news..." size="sm" className="py-8" />
-                  ) : (
-                    <div className="space-y-4 flex-1 flex flex-col justify-between">
-                      <div>
-                        {announcements.slice(0, 3).map((item, i) => (
-                          <Link to="/announcements" key={item.id} className="group block">
-                            <span className="text-[11px] font-medium text-secondary uppercase tracking-wider">
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </span>
-                            <h4 className="text-[13px] font-semibold text-primary group-hover:text-secondary transition-colors leading-snug mt-0.5">
-                              {item.title}
-                            </h4>
-                            <div 
-                              className="text-[12px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1"
-                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
-                            />
-                            {i < 2 && <div className="border-b border-border mt-3.5" />}
-                          </Link>
-                        ))}
-                        {announcements.length === 0 && (
-                          <p className="text-xs text-muted">No announcements posted.</p>
-                        )}
-                      </div>
-                      
-                      {/* Clean bottom button */}
-                      {announcements.length > 0 && (
-                        <div className="pt-3 border-t border-border mt-4 flex justify-center">
-                           <Link to="/announcements" className="px-5 py-1.5 bg-[#d83526] hover:bg-red-700 text-white text-xs font-medium rounded-full transition-all shadow-xs hover:shadow-sm">
-                             See All News
-                           </Link>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="border border-border bg-surface p-4 flex gap-4 items-center">
+                    <Skeleton className="w-16 h-[84px] shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : recentJournals.length === 0 ? (
+              <p className="text-sm text-muted py-4">No journals available yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {recentJournals.map((j) => (
+                  <Link
+                    key={j.id}
+                    to={`/journals/${j.slug}`}
+                    className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
+                  >
+                    {/* Journal Cover */}
+                    <div className="w-16 h-[84px] shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
+                      {j.cover_image ? (
+                        <img
+                          src={getFileUrl(j.cover_image)}
+                          alt={j.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="text-[9px] font-bold text-primary text-center uppercase line-clamp-3 leading-tight">
+                          {j.title}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
+
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">
+                        {typeof j.category === 'object' && j.category !== null
+                          ? (j.category as any).name
+                          : j.category || 'Journal'}
+                      </span>
+                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
+                        {j.title}
+                      </h4>
+                      <span className="text-[11px] text-muted block font-mono">
+                        {j.volumes?.length || 0} Volume{(j.volumes?.length || 0) !== 1 ? 's' : ''} Published
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            </div>
+            )}
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </PageWrapper>
   );
 };
