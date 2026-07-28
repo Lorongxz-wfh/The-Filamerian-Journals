@@ -109,7 +109,7 @@ const Home: React.FC = () => {
       <div className="space-y-12 w-full">
 
         {/* ── Hero Banner ──────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
           {/* Left: Site intro + search + stats */}
           <div className="lg:col-span-8 border border-border bg-surface p-8 lg:p-10 flex flex-col justify-between">
@@ -181,8 +181,8 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Announcements Panel */}
-          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden h-full">
+          {/* Right: Announcements Panel — Fixed height to match natural hero height without expanding */}
+          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden h-[420px]">
             {/* Header Bar */}
             <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border shrink-0">
               <div className="flex items-center gap-1.5">
