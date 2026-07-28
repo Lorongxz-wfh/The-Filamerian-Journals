@@ -199,12 +199,15 @@ const Home: React.FC = () => {
             {/* Announcements List — Clean 3 items fitting height without scrollbar */}
             <div className="p-4 flex-1 flex flex-col justify-between overflow-hidden divide-y divide-border/40">
               {loading ? (
-                <div className="space-y-3">
+                <div className="flex-1 flex flex-col justify-between py-1">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="space-y-1.5 py-1">
-                      <Skeleton className="h-3 w-16" />
+                    <div key={i} className="space-y-2 py-2 border-b border-border/20 last:border-b-0">
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-3 w-12" />
+                      </div>
                       <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-3 w-3/4" />
+                      <Skeleton className="h-3 w-4/5" />
                     </div>
                   ))}
                 </div>

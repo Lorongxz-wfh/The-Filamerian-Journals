@@ -17,7 +17,8 @@ const formatBytes = (bytes: number, decimals = 2) => {
 
 const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState<Record<string, string>>({
-    max_upload_size: '10',
+    max_pdf_upload_size: '10',
+    max_image_upload_size: '5',
     session_timeout: '120',
     maintenance_mode: '0',
   });
@@ -96,19 +97,38 @@ const SystemSettings: React.FC = () => {
                 </div>
 
                 <div className="space-y-4 text-[13px]">
-                  {/* Max Upload Size */}
+                  {/* Max PDF Upload Size */}
                   <div className="flex items-center justify-between py-2 border-b border-border/60">
                     <div>
-                      <span className="font-medium text-primary block">Max Upload Size (MB)</span>
-                      <span className="text-[11px] text-muted">Applies to all PDF articles and cover images</span>
+                      <span className="font-medium text-primary block">Max PDF Upload Size (MB)</span>
+                      <span className="text-[11px] text-muted">Applies to all article and journal PDF documents</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <input 
                         type="number" 
                         min="1"
                         max="500"
-                        value={settings.max_upload_size || '10'}
-                        onChange={(e) => handleChange('max_upload_size', e.target.value)}
+                        value={settings.max_pdf_upload_size || '10'}
+                        onChange={(e) => handleChange('max_pdf_upload_size', e.target.value)}
+                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                      />
+                      <span className="text-xs font-mono text-muted">MB</span>
+                    </div>
+                  </div>
+
+                  {/* Max Image Upload Size */}
+                  <div className="flex items-center justify-between py-2 border-b border-border/60">
+                    <div>
+                      <span className="font-medium text-primary block">Max Image Upload Size (MB)</span>
+                      <span className="text-[11px] text-muted">Applies to cover images and resource graphics</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <input 
+                        type="number" 
+                        min="1"
+                        max="100"
+                        value={settings.max_image_upload_size || '5'}
+                        onChange={(e) => handleChange('max_image_upload_size', e.target.value)}
                         className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
                       />
                       <span className="text-xs font-mono text-muted">MB</span>

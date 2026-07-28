@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Menu, Search, X, ChevronRight, Bell } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
@@ -63,6 +63,22 @@ const Navbar = () => {
     fetchResults();
   }, [debouncedSearch]);
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       setIsDropdownOpen(false);
@@ -71,7 +87,13 @@ const Navbar = () => {
     }
   };
   return (
-    <nav className="bg-primary sticky top-0 z-50 shadow-md border-b border-white/10">
+    <>
+      {settings.maintenance_mode === '1' && (
+        <div className="bg-amber-600 text-white text-[11px] font-bold uppercase tracking-wider py-1.5 px-4 text-center flex items-center justify-center gap-2">
+          <span>⚠️ Scheduled System Maintenance Active — Public Submissions Temporarily Paused</span>
+        </div>
+      )}
+      <nav className="bg-primary sticky top-0 z-50 shadow-md border-b border-white/10">
       <div className="container-custom flex h-16 items-center justify-between gap-4 lg:gap-6">
         {/* Brand — flush left */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
@@ -86,6 +108,7 @@ const Navbar = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search journals, articles, authors..."
                 value={searchQuery}
@@ -94,16 +117,22 @@ const Navbar = () => {
                   if (searchQuery.trim()) setIsDropdownOpen(true);
                 }}
                 onKeyDown={handleSearch}
-                className="w-full pl-10 pr-10 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
+                className="w-full pl-10 pr-16 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
               />
-              {searchQuery && (
-                <button 
-                  onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                {searchQuery ? (
+                  <button 
+                    onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
+                    className="text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center pointer-events-auto"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted/70 bg-white border border-border rounded shadow-2xs">
+                    Ctrl K
+                  </kbd>
+                )}
+              </div>
               
               <SearchDropdown 
                 query={debouncedSearch}
@@ -312,6 +341,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
     </nav>
+    </>
   );
 };
 

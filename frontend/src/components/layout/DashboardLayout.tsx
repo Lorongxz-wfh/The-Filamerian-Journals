@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import api from '@/services/api';
 import { Outlet } from 'react-router';
 import SplashLoader from '@/components/ui/SplashLoader';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ interface Notification {
 const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { settings } = useSettings();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -82,7 +84,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     };
     fetchResults();
   }, [debouncedSearch]);
-  
+
+  const dashSearchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        dashSearchInputRef.current?.focus();
+      } else if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) {
+        e.preventDefault();
+        dashSearchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       setIsDropdownOpen(false);
@@ -106,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },
-    { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'], inDev: true },
+    { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
   ];
 
@@ -367,6 +385,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
       {/* Main Content */}
       <div className="flex-grow flex flex-col min-w-0 h-screen overflow-hidden">
+        {settings.maintenance_mode === '1' && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-700 px-6 py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-between shrink-0">
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              Maintenance Mode Active — Public visitors see a scheduled maintenance notice
+            </span>
+            <Link to="/dashboard/settings" className="underline hover:text-amber-900 transition-colors">
+              Configure Settings
+            </Link>
+          </div>
+        )}
         {/* Dashboard Header */}
         <header className="h-14 bg-surface border-b border-border flex items-center justify-between px-6 shrink-0">
           
@@ -385,6 +414,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
               <input
+                ref={dashSearchInputRef}
                 type="text"
                 placeholder="Global search..."
                 value={searchQuery}
@@ -393,8 +423,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
                   if (searchQuery.trim()) setIsDropdownOpen(true);
                 }}
                 onKeyDown={handleSearch}
-                className="w-full pl-9 pr-4 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
+                className="w-full pl-9 pr-14 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
               />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted/70 bg-surface border border-border rounded shadow-2xs">
+                  Ctrl K
+                </kbd>
+              </div>
               <SearchDropdown 
                 query={debouncedSearch}
                 results={searchResults}

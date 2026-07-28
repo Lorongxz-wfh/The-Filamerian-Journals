@@ -70,8 +70,8 @@ class JournalController extends Controller
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
-            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
+            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
         ]);
 
         if (empty($validated['status'])) {
@@ -147,8 +147,8 @@ class JournalController extends Controller
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
-            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
+            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
         ]);
 
         try {

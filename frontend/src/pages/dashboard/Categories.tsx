@@ -20,6 +20,7 @@ interface Category {
   slug: string;
   description: string;
   order?: number;
+  journals_count?: number;
 }
 
 interface CategoryRowProps {
@@ -109,6 +110,8 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
     );
   }
 
+  const hasJournals = (cat.journals_count || 0) > 0;
+
   return (
     <tr className="hover:bg-background transition-colors group">
       <td className="px-5 py-4">
@@ -125,10 +128,23 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
       <td className="px-5 py-4 text-[12px] text-muted hidden md:table-cell truncate max-w-xs">
         {cat.description || '-'}
       </td>
+      <td className="px-5 py-4 text-center">
+        <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+          hasJournals ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-muted/10 text-muted'
+        }`}>
+          {cat.journals_count || 0} journal{(cat.journals_count || 0) !== 1 ? 's' : ''}
+        </span>
+      </td>
       <td className="px-5 py-4 text-right">
         <div className="flex items-center justify-end gap-1">
           <IconButton icon={Edit2} title="Edit" onClick={() => openModal(cat)} />
-          <IconButton icon={Trash2} title="Delete" variant="danger" onClick={() => setDeleteId(cat.id)} />
+          <IconButton 
+            icon={Trash2} 
+            title={hasJournals ? "Cannot delete category while assigned to journals" : "Delete"} 
+            variant="danger" 
+            disabled={hasJournals}
+            onClick={() => !hasJournals && setDeleteId(cat.id)} 
+          />
         </div>
       </td>
     </tr>
@@ -242,8 +258,8 @@ const Categories: React.FC = () => {
       toast.success('Category deleted successfully');
       setDeleteId(null);
       fetchCategories();
-    } catch (err) {
-      toast.error('Failed to delete category');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete category');
     }
   };
 
@@ -334,6 +350,7 @@ const Categories: React.FC = () => {
                 <th className="px-5 py-3">Category Name</th>
                 <th className="px-5 py-3">Slug</th>
                 <th className="px-5 py-3 hidden md:table-cell">Description</th>
+                <th className="px-5 py-3 text-center">Journals</th>
                 <th className="px-5 py-3 w-20 text-right">Actions</th>
               </tr>
             </thead>

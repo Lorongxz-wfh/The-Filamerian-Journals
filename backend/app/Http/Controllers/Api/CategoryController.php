@@ -12,7 +12,7 @@ class CategoryController extends Controller
     public function index()
     {
         return response()->json([
-            'data' => Category::orderBy('order', 'asc')->orderBy('id', 'asc')->get()
+            'data' => Category::withCount('journals')->orderBy('order', 'asc')->orderBy('id', 'asc')->get()
         ]);
     }
 
@@ -76,6 +76,14 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        $journalCount = $category->journals()->count();
+        if ($journalCount > 0) {
+            return response()->json([
+                'message' => "Cannot delete category '{$category->name}' because it is assigned to {$journalCount} journal(s). Please reassign or remove the associated journals first."
+            ], 422);
+        }
+
+        \App\Services\ActivityLogger::log('Deleted Category', "Deleted category '{$category->name}'", Category::class, $category->id);
         $category->delete();
         return response()->noContent();
     }
