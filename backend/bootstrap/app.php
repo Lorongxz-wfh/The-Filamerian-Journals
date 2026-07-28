@@ -24,5 +24,26 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->reportable(function (\Throwable $e) {
+            try {
+                // Ignore standard ValidationExceptions and AuthenticationExceptions from cluttering error logs
+                if ($e instanceof \Illuminate\Validation\ValidationException || $e instanceof \Illuminate\Auth\AuthenticationException) {
+                    return;
+                }
+
+                \App\Models\SystemError::create([
+                    'level' => 'error',
+                    'message' => $e->getMessage() ?: get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'path' => request()->fullUrl(),
+                    'method' => request()->method(),
+                    'user_id' => auth()->id(),
+                    'stack_trace' => $e->getTraceAsString(),
+                    'is_resolved' => false,
+                ]);
+            } catch (\Throwable $loggingError) {
+                // Prevent error logger itself from throwing an exception
+            }
+        });
     })->create();

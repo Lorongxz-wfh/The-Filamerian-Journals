@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
-import { RefreshCw, FileText, BookOpen, Users } from 'lucide-react';
+import { FileText, BookOpen, Users } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 
@@ -50,8 +50,13 @@ const SystemHealth: React.FC = () => {
   const [health, setHealth] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [errors, setErrors] = useState<any[]>([]);
+  const [loadingErrors, setLoadingErrors] = useState(false);
+  const [expandedErrorId, setExpandedErrorId] = useState<number | null>(null);
+
   useEffect(() => {
     fetchHealth();
+    fetchErrors();
   }, []);
 
   const fetchHealth = async () => {
@@ -73,22 +78,47 @@ const SystemHealth: React.FC = () => {
     }
   };
 
+  const fetchErrors = async () => {
+    try {
+      setLoadingErrors(true);
+      const res = await api.get('/system/errors');
+      setErrors(res.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch system error logs', err);
+    } finally {
+      setLoadingErrors(false);
+    }
+  };
+
+  const toggleResolveError = async (id: number) => {
+    try {
+      await api.put(`/system/errors/${id}/resolve`);
+      fetchErrors();
+    } catch (err) {
+      console.error('Failed to toggle error status', err);
+    }
+  };
+
+  const handleClearResolvedErrors = async () => {
+    try {
+      await api.delete('/system/errors/clear');
+      fetchErrors();
+    } catch (err) {
+      console.error('Failed to clear resolved logs', err);
+    }
+  };
+
   const dbStatusText = typeof health?.database === 'object' ? health.database?.status : (typeof health?.database === 'string' ? health.database : 'Disconnected');
-  const dbDriverText = typeof health?.database === 'object' ? health.database?.driver : '';
-  const dbTypeText = typeof health?.database === 'object' ? health.database?.type : '';
-  const dbHostText = typeof health?.database === 'object' ? health.database?.host : '';
+  const dbDriverText = typeof health?.database === 'object' ? health.database?.driver : 'MySQL';
   const dbSizeBytes = typeof health?.database === 'object' ? (health.database?.size_bytes || 0) : 0;
 
   const storageTypeText = typeof health?.storage === 'object' ? health.storage?.type : (health?.storage_disk === 'r2' ? 'Cloudflare R2' : 'Local Storage');
   const storageDiskText = typeof health?.storage === 'object' ? health.storage?.disk : (health?.storage_disk || 'local');
-  const storageBucketText = typeof health?.storage === 'object' ? health.storage?.bucket : '';
   const storageSizeBytes = typeof health?.storage === 'object' ? (health.storage?.size_bytes || 0) : 0;
 
   return (
     <div className="space-y-8 font-sans w-full">
-      <DashboardHeader 
-        title="System Status" 
-      />
+      <DashboardHeader title="System Status" />
 
       {loading && !health ? (
         <div className="space-y-8 w-full">
@@ -100,69 +130,55 @@ const SystemHealth: React.FC = () => {
           <Skeleton className="h-[220px] w-full" />
         </div>
       ) : (
-        <>
-          {/* Status Banners */}
+        <div className="space-y-8">
+          {/* Health Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* System Status */}
-            <div className="bg-surface border border-border p-6 space-y-3 relative overflow-hidden">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">API Core Status</span>
-                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                  health?.status === 'Operational' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                }`}>
-                  {health?.status || 'Unknown'}
+            <div className="border border-border bg-surface p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Application</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                  {health?.status || 'Operational'}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-primary font-display">
-                {health?.status === 'Operational' ? 'Healthy' : 'Issues Detected'}
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-primary font-mono">{health?.laravel_version ? `Laravel ${health.laravel_version}` : 'Laravel 11'}</p>
+                <p className="text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
               </div>
-              <p className="text-[12px] text-muted font-mono">
-                Framework: Laravel {health?.laravel_version || 'N/A'} (PHP {health?.php_version || 'N/A'})
-              </p>
             </div>
 
-            {/* Database Status */}
-            <div className="bg-surface border border-border p-6 space-y-3 relative overflow-hidden">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Database ({dbDriverText || 'SQL'})</span>
-                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                  dbStatusText === 'Connected' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
-                }`}>
+            <div className="border border-border bg-surface p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Database ({dbDriverText.toUpperCase()})</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {dbStatusText}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-primary font-display truncate">
-                {dbHostText || dbTypeText || 'Active Connection'}
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-primary font-mono">{formatBytes(dbSizeBytes)}</p>
+                <p className="text-xs text-muted font-mono">Active Connection</p>
               </div>
-              <p className="text-[12px] text-muted font-mono">
-                Storage Used: {formatBytes(dbSizeBytes)}
-              </p>
             </div>
 
-            {/* Storage Provider */}
-            <div className="bg-surface border border-border p-6 space-y-3 relative overflow-hidden">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Media Storage</span>
-                <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                  {storageDiskText?.toUpperCase()}
+            <div className="border border-border bg-surface p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Storage Provider</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                  {storageDiskText.toUpperCase()}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-primary font-display truncate">
-                {storageTypeText}
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-primary font-mono">{formatBytes(storageSizeBytes)}</p>
+                <p className="text-xs text-muted font-mono">{storageTypeText}</p>
               </div>
-              <p className="text-[12px] text-muted font-mono">
-                {storageBucketText ? `Bucket: ${storageBucketText}` : `Stored Media: ${formatBytes(storageSizeBytes)}`}
-              </p>
             </div>
           </div>
 
-          {/* Database Metrics Grid */}
+          {/* Database Entity Metrics */}
           <div className="bg-surface border border-border p-6 space-y-6">
             <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Database Entity Metrics</h3>
-            
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
-                <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-none">
+              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
+                <div className="p-3 bg-emerald-500/10 text-emerald-500">
                   <FileText className="h-5 w-5" />
                 </div>
                 <div>
@@ -171,8 +187,8 @@ const SystemHealth: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
-                <div className="p-3 bg-blue-500/10 text-blue-500 rounded-none">
+              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
+                <div className="p-3 bg-blue-500/10 text-blue-500">
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
@@ -181,8 +197,8 @@ const SystemHealth: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50 hover:border-primary/20 transition-colors">
-                <div className="p-3 bg-purple-500/10 text-purple-500 rounded-none">
+              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
+                <div className="p-3 bg-purple-500/10 text-purple-500">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
@@ -193,18 +209,94 @@ const SystemHealth: React.FC = () => {
             </div>
           </div>
 
-          {/* Manual Refresh Action */}
-          <div className="flex justify-end">
-            <button
-              onClick={fetchHealth}
-              disabled={loading}
-              className="flex items-center gap-2 text-xs font-mono font-bold text-muted hover:text-primary transition-colors border border-border px-4 py-2 hover:bg-surface"
-            >
-              <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-              [ REFRESH STATUS ]
-            </button>
+          {/* System Error Tracker & QA Logs */}
+          <div className="border border-border bg-surface p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-3">
+                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">System Error Tracker & QA Exception Logs</h2>
+                <span className="text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-2 py-0.5">
+                  {errors.filter(e => !e.is_resolved).length} Unresolved
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchErrors}
+                  className="px-2.5 py-1 text-xs border border-border hover:bg-background transition-colors"
+                >
+                  Refresh Logs
+                </button>
+                <button
+                  onClick={handleClearResolvedErrors}
+                  className="px-2.5 py-1 text-xs border border-border text-muted hover:text-primary hover:bg-background transition-colors"
+                >
+                  Clear Resolved
+                </button>
+              </div>
+            </div>
+
+            {loadingErrors ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : errors.length === 0 ? (
+              <div className="py-8 text-center space-y-1">
+                <p className="text-xs font-semibold text-emerald-600">No Exception Logged</p>
+                <p className="text-[11px] text-muted">System is running cleanly without recorded errors.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border overflow-hidden border border-border">
+                {errors.map((err) => (
+                  <div key={err.id} className="p-3 text-[12px] space-y-2 hover:bg-background/50 transition-colors">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 shrink-0 ${
+                          err.level === 'client_error' ? 'bg-amber-500/10 text-amber-700 border border-amber-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                        }`}>
+                          {err.level}
+                        </span>
+                        <span className="font-mono text-xs font-semibold text-primary truncate">
+                          {err.message}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-[10px] font-mono text-muted">
+                          {new Date(err.created_at).toLocaleTimeString()}
+                        </span>
+                        <button
+                          onClick={() => setExpandedErrorId(expandedErrorId === err.id ? null : err.id)}
+                          className="text-[11px] text-primary hover:underline"
+                        >
+                          {expandedErrorId === err.id ? 'Hide Stack Trace' : 'View Stack Trace'}
+                        </button>
+                        <button
+                          onClick={() => toggleResolveError(err.id)}
+                          className={`text-[10px] font-bold px-2 py-0.5 ${
+                            err.is_resolved ? 'bg-emerald-500/10 text-emerald-600' : 'bg-background border border-border text-muted hover:text-primary'
+                          }`}
+                        >
+                          {err.is_resolved ? 'Resolved' : 'Mark Resolved'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-[11px] font-mono text-muted">
+                      <span>Path: {err.path || '-'}</span>
+                      {err.file && <span>File: {err.file}:{err.line}</span>}
+                      {err.user && <span>User: {err.user.name} ({err.user.email})</span>}
+                    </div>
+
+                    {expandedErrorId === err.id && err.stack_trace && (
+                      <pre className="p-3 bg-black/90 text-emerald-400 font-mono text-[10px] overflow-x-auto max-h-48 border border-border">
+                        {err.stack_trace}
+                      </pre>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

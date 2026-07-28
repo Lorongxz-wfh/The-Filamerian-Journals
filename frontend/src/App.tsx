@@ -50,53 +50,55 @@ function App() {
           <ScrollToTop />
           <Analytics />
           <SpeedInsights />
-          <Routes>
-        {/* Public Website Routes */}
-        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-        <Route path="/search" element={<PublicLayout><Search /></PublicLayout>} />
-        <Route path="/journals" element={<PublicLayout><Journals /></PublicLayout>} />
-        <Route path="/journals/:slug" element={<PublicLayout><JournalDetail /></PublicLayout>} />
-        <Route path="/articles/:id" element={<PublicLayout><ArticleDetail /></PublicLayout>} />
-        <Route path="/archives" element={<PublicLayout><Archives /></PublicLayout>} />
-        <Route path="/announcements" element={<PublicLayout><Announcements /></PublicLayout>} />
-        <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-        <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
-        <Route path="/pending-verification" element={<PublicLayout><PendingVerification /></PublicLayout>} />
+          <ErrorBoundary>
+            <Routes>
+              {/* Public Website Routes */}
+              <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+              <Route path="/search" element={<PublicLayout><Search /></PublicLayout>} />
+              <Route path="/journals" element={<PublicLayout><Journals /></PublicLayout>} />
+              <Route path="/journals/:slug" element={<PublicLayout><JournalDetail /></PublicLayout>} />
+              <Route path="/articles/:id" element={<PublicLayout><ArticleDetail /></PublicLayout>} />
+              <Route path="/archives" element={<PublicLayout><Archives /></PublicLayout>} />
+              <Route path="/announcements" element={<PublicLayout><Announcements /></PublicLayout>} />
+              <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+              <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+              <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+              <Route path="/pending-verification" element={<PublicLayout><PendingVerification /></PublicLayout>} />
 
-        {/* Dashboard System Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Overview />} />
-          <Route path="health" element={<SystemHealth />} />
-          <Route path="journals" element={<MyJournals />} />
-          <Route path="categories" element={<Categories />} />
-          <Route path="journals/:slug" element={<ManageJournal />} />
-          <Route path="volumes/:id" element={<ManageVolume />} />
-          <Route path="articles" element={<Articles />} />
-          <Route path="authors" element={<ManageAuthors />} />
-          <Route path="import" element={<BulkImport />} />
-          <Route path="announcements" element={<ManageAnnouncements />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="feedback" element={<Feedback />} />
-          <Route path="users" element={<UserManager />} />
-          <Route path="logs" element={<ActivityLogs />} />
-          <Route path="website" element={<WebsiteSettings />} />
-          <Route path="settings" element={<SystemSettings />} />
-          <Route path="search" element={<Search />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Route>
+              {/* Dashboard System Routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Overview />} />
+                <Route path="health" element={<SystemHealth />} />
+                <Route path="journals" element={<MyJournals />} />
+                <Route path="categories" element={<Categories />} />
+                <Route path="journals/:slug" element={<ManageJournal />} />
+                <Route path="volumes/:id" element={<ManageVolume />} />
+                <Route path="articles" element={<Articles />} />
+                <Route path="authors" element={<ManageAuthors />} />
+                <Route path="import" element={<BulkImport />} />
+                <Route path="announcements" element={<ManageAnnouncements />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="feedback" element={<Feedback />} />
+                <Route path="users" element={<UserManager />} />
+                <Route path="logs" element={<ActivityLogs />} />
+                <Route path="website" element={<WebsiteSettings />} />
+                <Route path="settings" element={<SystemSettings />} />
+                <Route path="search" element={<Overview />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-        <Toaster position="bottom-right" />
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ErrorBoundary>
+          <Toaster position="bottom-right" />
         </Router>
       </ErrorBoundary>
     </SettingsProvider>

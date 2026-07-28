@@ -73,13 +73,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
         Route::post('/users/{user}/approve', [\App\Http\Controllers\Api\UserController::class, 'approve']);
         Route::post('/users/{user}/toggle-status', [\App\Http\Controllers\Api\UserController::class, 'toggleStatus']);
-        // System Health & Logs
+        // System Health, Errors & Logs
         Route::get('/system/health', [\App\Http\Controllers\Api\SystemController::class, 'health']);
         Route::delete('/system/logs', [\App\Http\Controllers\Api\SystemController::class, 'clearLogs']);
+        Route::get('/system/errors', [\App\Http\Controllers\Api\SystemErrorController::class, 'index']);
+        Route::put('/system/errors/{error}/resolve', [\App\Http\Controllers\Api\SystemErrorController::class, 'resolve']);
+        Route::delete('/system/errors/clear', [\App\Http\Controllers\Api\SystemErrorController::class, 'clear']);
         Route::get('/dashboard/logs', [\App\Http\Controllers\Api\DashboardController::class, 'logs']);
     });
     }); // End EnsureUserIsApproved group
 });
+
+// Client Error Logging Endpoint (Public / Auth)
+Route::post('/public/client-error', [\App\Http\Controllers\Api\SystemErrorController::class, 'storeClientError']);
 
 // Public Routes — no auth required
 Route::get('/public/search', [\App\Http\Controllers\Api\SearchController::class, 'index']);
