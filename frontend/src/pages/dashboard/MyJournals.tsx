@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
+import { truncateMiddle } from '@/lib/utils';
 import Modal from '@/components/ui/Modal';
 
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -403,7 +404,7 @@ const MyJournals: React.FC = () => {
               <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
             </TableHead>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
-              <div className="flex items-center gap-1">Last Updated {getSortIcon('updated_at')}</div>
+              <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
             </TableHead>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
               <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
@@ -431,8 +432,8 @@ const MyJournals: React.FC = () => {
                   <div className="flex items-center gap-3 min-w-0">
                     <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate">
-                        {journal.title}
+                      <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate" title={journal.title}>
+                        {truncateMiddle(journal.title, 42)}
                       </span>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <Badge 

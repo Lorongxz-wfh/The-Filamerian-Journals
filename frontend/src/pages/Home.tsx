@@ -182,7 +182,7 @@ const Home: React.FC = () => {
           </div>
 
           {/* Right: Announcements Panel */}
-          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden">
+          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden h-full">
             {/* Header Bar */}
             <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border shrink-0">
               <div className="flex items-center gap-1.5">
@@ -195,11 +195,11 @@ const Home: React.FC = () => {
             </div>
 
             {/* Announcements List */}
-            <div className="p-4 space-y-0 divide-y divide-border flex-1 flex flex-col justify-between overflow-hidden">
+            <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-around overflow-hidden">
               {loading ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="space-y-2 py-2">
+                    <div key={i} className="space-y-1.5 py-1">
                       <Skeleton className="h-3 w-16" />
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-3 w-3/4" />
@@ -213,22 +213,20 @@ const Home: React.FC = () => {
                 </div>
               ) : (
                 announcements.map((item) => (
-                  <Link to="/announcements" key={item.id} className={`group flex flex-col justify-between py-3 flex-1 transition-colors hover:bg-surface/50 px-1 -mx-1`}>
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
-                          Notice
-                        </span>
-                        <span className="text-[10px] font-mono text-muted">
-                          {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      </div>
-                      <h4 className="text-[12px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2">
-                        {item.title}
-                      </h4>
+                  <Link to="/announcements" key={item.id} className="group block py-1.5 border-b border-border/40 last:border-b-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 py-0.2 uppercase tracking-wider">
+                        Notice
+                      </span>
+                      <span className="text-[9px] font-mono text-muted">
+                        {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </span>
                     </div>
+                    <h4 className="text-[11px] font-bold text-primary group-hover:text-secondary transition-colors leading-tight line-clamp-1">
+                      {item.title}
+                    </h4>
                     <div
-                      className="text-[11px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1.5 leading-relaxed"
+                      className="text-[10px] text-muted line-clamp-1 prose prose-sm max-w-none mt-0.5 leading-snug"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
                     />
                   </Link>

@@ -149,20 +149,27 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
   // Collapsed pill view when confirmed
   if (!isEditing && (author.first_name || author.last_name)) {
     return (
-      <div className="flex items-center gap-2 mb-2 group">
+      <div className="group relative w-full mb-2">
         <div
           onClick={() => setIsEditing(true)}
-          className="flex-grow px-3 py-2 border border-border text-[13px] bg-background hover:border-primary/50 cursor-text transition-colors"
+          className="w-full px-3 py-2 pr-10 border border-border text-[13px] bg-background hover:border-primary/50 cursor-text transition-colors flex items-center justify-between"
         >
-          <span>{formatName()}</span>
-          {author.id ? (
-            <span className="ml-2 text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">existing</span>
-          ) : (
-            <span className="ml-2 text-[10px] text-blue-500 font-semibold uppercase tracking-wider">new ✓</span>
-          )}
+          <div>
+            <span>{formatName()}</span>
+            {author.id ? (
+              <span className="ml-2 text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">existing</span>
+            ) : (
+              <span className="ml-2 text-[10px] text-blue-500 font-semibold uppercase tracking-wider">new ✓</span>
+            )}
+          </div>
         </div>
         {onRemove && (
-          <button type="button" onClick={onRemove} className="p-2 text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
+          <button 
+            type="button" 
+            onClick={onRemove} 
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-red-500 hover:bg-red-50 rounded transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10"
+            title="Remove author"
+          >
             <X className="h-4 w-4" />
           </button>
         )}
@@ -230,7 +237,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
         <button
           type="button"
           onClick={onRemove}
-          className="absolute -top-2 -right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-rose-50 text-rose-500 border border-border p-1 shadow-md rounded cursor-pointer"
+          className="absolute right-2 top-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-rose-50 text-rose-500 border border-border p-1 shadow-sm rounded cursor-pointer"
           title="Remove author row"
         >
           <X className="h-3.5 w-3.5" />

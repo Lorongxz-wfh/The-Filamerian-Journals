@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { FileText, Plus, Edit2, Trash2, Eye, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
+import { truncateMiddle } from '@/lib/utils';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { toast } from 'sonner';
@@ -296,7 +297,7 @@ const Articles: React.FC = () => {
               <div className="flex items-center gap-1">Submitted {getSortIcon('created_at')}</div>
             </TableHead>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
-              <div className="flex items-center gap-1">Last Updated {getSortIcon('updated_at')}</div>
+              <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
             </TableHead>
             <TableHead className="w-28 text-right">Actions</TableHead>
           </TableRow>
@@ -321,8 +322,8 @@ const Articles: React.FC = () => {
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-primary/20 shrink-0" />
-                      <span className="text-[13px] font-medium text-primary truncate max-w-[260px]">
-                        {article.title}
+                      <span className="text-[13px] font-medium text-primary truncate max-w-[280px]" title={article.title}>
+                        {truncateMiddle(article.title, 42)}
                       </span>
                     </div>
                     <div className="mt-1 pl-6">
