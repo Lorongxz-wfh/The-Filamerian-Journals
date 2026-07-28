@@ -272,4 +272,59 @@ class JournalController extends Controller
             }, 200, $headers);
         }
     }
+
+    public function serveCover($journal, Request $request)
+    {
+        if (!($journal instanceof Journal)) {
+            $journalModel = is_numeric($journal)
+                ? Journal::where('id', $journal)->orWhere('slug', $journal)->first()
+                : Journal::where('slug', $journal)->first();
+
+            if (!$journalModel) {
+                abort(404, 'Journal not found.');
+            }
+            $journal = $journalModel;
+        }
+
+        if (!$journal->cover_image) {
+            abort(404, 'Journal cover image not found.');
+        }
+
+        $rawPath = $journal->cover_image;
+        if (str_starts_with($rawPath, 'http://') || str_starts_with($rawPath, 'https://')) {
+            return redirect()->away($rawPath);
+        }
+
+        $cleanPath = ltrim(str_replace(['storage/', '/storage/'], '', $rawPath), '/');
+
+        $diskName = config('filesystems.default');
+        $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
+
+        if (!$disk->exists($cleanPath)) {
+            if ($diskName !== 'public' && \Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath)) {
+                $disk = \Illuminate\Support\Facades\Storage::disk('public');
+            } else {
+                abort(404, 'Cover image file not found on storage server.');
+            }
+        }
+
+        $mimeType = 'image/jpeg';
+        try {
+            $mimeType = $disk->mimeType($cleanPath) ?: 'image/jpeg';
+        } catch (\Throwable $t) {}
+
+        $headers = [
+            'Access-Control-Allow-Origin' => '*',
+            'Content-Type' => $mimeType,
+            'Cache-Control' => 'public, max-age=86400',
+        ];
+
+        try {
+            return $disk->response($cleanPath, null, $headers);
+        } catch (\Throwable $e) {
+            return response()->stream(function () use ($disk, $cleanPath) {
+                echo $disk->get($cleanPath);
+            }, 200, $headers);
+        }
+    }
 }
