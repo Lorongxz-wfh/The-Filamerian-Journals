@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
-import { Plus, Edit2, Trash2, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Tag, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
@@ -18,6 +18,7 @@ interface Category {
   name: string;
   slug: string;
   description: string;
+  order?: number;
 }
 
 const Categories: React.FC = () => {
@@ -30,11 +31,19 @@ const Categories: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
+  // Reordering state
+  const [isReordering, setIsReordering] = useState(false);
+  const [originalCategories, setOriginalCategories] = useState<Category[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
       const res = await api.get('/categories');
-      setCategories(res.data.data);
+      const cats = res.data.data || [];
+      setCategories(cats);
+      setOriginalCategories(cats);
+      setIsReordering(false);
     } catch (err) {
       toast.error('Failed to load categories');
     } finally {
@@ -45,6 +54,37 @@ const Categories: React.FC = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const moveCategory = (index: number, direction: 'up' | 'down') => {
+    const newItems = [...categories];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newItems.length) return;
+
+    const temp = newItems[index];
+    newItems[index] = newItems[targetIndex];
+    newItems[targetIndex] = temp;
+    setCategories(newItems);
+  };
+
+  const handleSaveOrder = async () => {
+    try {
+      setIsSavingOrder(true);
+      const ids = categories.map(c => c.id);
+      await api.post('/categories/reorder', { category_ids: ids });
+      toast.success('Category order updated successfully');
+      setOriginalCategories(categories);
+      setIsReordering(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to save category order');
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
+  const handleCancelReorder = () => {
+    setCategories(originalCategories);
+    setIsReordering(false);
+  };
 
   const openModal = (cat?: Category) => {
     if (cat) {
@@ -98,43 +138,100 @@ const Categories: React.FC = () => {
   return (
     <div className="space-y-8">
       <DashboardHeader title="Journal Categories">
-        <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Category
-        </Button>
+        <div className="flex items-center gap-3">
+          {!isReordering ? (
+            <>
+              {categories.length > 1 && (
+                <Button variant="outline" onClick={() => setIsReordering(true)} className="shrink-0 flex items-center gap-2">
+                  <GripVertical className="h-4 w-4" /> Edit Order
+                </Button>
+              )}
+              <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2">
+                <Plus className="h-4 w-4" /> Add Category
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={handleCancelReorder} disabled={isSavingOrder}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveOrder} isLoading={isSavingOrder}>
+                Save Order
+              </Button>
+            </>
+          )}
+        </div>
       </DashboardHeader>
 
-      {/* Search Input */}
-      <div className="flex justify-end">
-        <SearchInput
-          placeholder="Search categories..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-      </div>
+      {/* Search Input (disabled during reorder) */}
+      {!isReordering && (
+        <div className="flex justify-end">
+          <SearchInput
+            placeholder="Search categories..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
+      )}
+
+      {/* Reorder Info Banner */}
+      {isReordering && (
+        <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <GripVertical className="h-4 w-4 text-primary" />
+            <span>Use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order across the navbar dropdown and website filters.</span>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
         <table className="w-full min-w-[600px]">
           <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
             <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
+              {isReordering && <th className="px-3 py-3 w-12 text-center">Order</th>}
               <th className="px-5 py-3">Category Name</th>
               <th className="px-5 py-3">Slug</th>
               <th className="px-5 py-3 hidden md:table-cell">Description</th>
-              <th className="px-5 py-3 w-20"></th>
+              <th className="px-5 py-3 w-20 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <TableRowSkeleton columns={4} rows={5} />
-            ) : filtered.length === 0 ? (
+              <TableRowSkeleton columns={isReordering ? 5 : 4} rows={5} />
+            ) : (isReordering ? categories : filtered).length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-0">
+                <td colSpan={isReordering ? 5 : 4} className="p-0">
                   <EmptyState title="No categories found" description="There are no categories matching your criteria." className="bg-transparent border-0 py-16" />
                 </td>
               </tr>
             ) : (
-              filtered.map((cat) => (
+              (isReordering ? categories : filtered).map((cat, idx) => (
                 <tr key={cat.id} className="hover:bg-background transition-colors group">
+                  {isReordering && (
+                    <td className="px-3 py-4 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveCategory(idx, 'up')}
+                          disabled={idx === 0}
+                          className="p-1 hover:bg-black/10 disabled:opacity-20 text-primary transition-colors cursor-pointer"
+                          title="Move Up"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveCategory(idx, 'down')}
+                          disabled={idx === categories.length - 1}
+                          className="p-1 hover:bg-black/10 disabled:opacity-20 text-primary transition-colors cursor-pointer"
+                          title="Move Down"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Tag className="h-4 w-4 text-primary/30 shrink-0" />
@@ -150,10 +247,12 @@ const Categories: React.FC = () => {
                     {cat.description || '-'}
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <IconButton icon={Edit2} title="Edit" onClick={() => openModal(cat)} />
-                      <IconButton icon={Trash2} title="Delete" variant="danger" onClick={() => setDeleteId(cat.id)} />
-                    </div>
+                    {!isReordering && (
+                      <div className="flex items-center justify-end gap-1">
+                        <IconButton icon={Edit2} title="Edit" onClick={() => openModal(cat)} />
+                        <IconButton icon={Trash2} title="Delete" variant="danger" onClick={() => setDeleteId(cat.id)} />
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))

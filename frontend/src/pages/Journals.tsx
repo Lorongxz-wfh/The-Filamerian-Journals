@@ -49,6 +49,7 @@ const Journals: React.FC = () => {
   const [fromYear, setFromYear] = useState('');
   const [toYear, setToYear] = useState('');
   const [journals, setJournals] = useState<Journal[]>([]);
+  const [categoryList, setCategoryList] = useState<Array<{ id: number; name: string; slug: string }>>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>(['All']);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
@@ -126,7 +127,9 @@ const Journals: React.FC = () => {
         setLastPage(jrnRes.data.meta?.last_page || 1);
 
         const categoriesRes = await api.get('/public/categories');
-        const catsArray = categoriesRes.data.data.map((c: any) => c.slug) || [];
+        const catsList = categoriesRes.data.data || [];
+        setCategoryList(catsList);
+        const catsArray = catsList.map((c: any) => c.slug);
         const newCategories = ['All', ...catsArray];
         setAvailableCategories(newCategories);
       } catch (err) {
@@ -249,17 +252,21 @@ const Journals: React.FC = () => {
               </button>
               {openSections.subject && (
                 <div className="px-4 pb-4 space-y-2.5">
-                  {actualCategories.map(cat => (
-                    <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(cat)}
-                        onChange={() => toggleCategory(cat)}
-                        className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
-                      />
-                      <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{cat}</span>
-                    </label>
-                  ))}
+                  {(categoryList.length > 0 ? categoryList : actualCategories.map(slug => ({ id: slug, name: slug, slug }))).map(catObj => {
+                    const slug = typeof catObj === 'string' ? catObj : catObj.slug;
+                    const label = typeof catObj === 'string' ? catObj : catObj.name;
+                    return (
+                      <label key={slug} className="flex items-center gap-2.5 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(slug)}
+                          onChange={() => toggleCategory(slug)}
+                          className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                        />
+                        <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -336,17 +343,21 @@ const Journals: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4 mb-6">
             {/* Active Filter Chips */}
             <div className="flex items-center gap-2 flex-wrap min-h-[32px] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-              {selectedCategories.map(cat => (
-                <span
-                  key={cat}
-                  className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[11px] font-medium px-2.5 py-1 uppercase tracking-wider"
-                >
-                  {cat}
-                  <button onClick={() => toggleCategory(cat)} className="hover:text-red-600 transition-colors">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
+              {selectedCategories.map(cat => {
+                const matchedObj = categoryList.find(c => c.slug === cat || c.name === cat);
+                const chipLabel = matchedObj ? matchedObj.name : cat;
+                return (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[11px] font-medium px-2.5 py-1 uppercase tracking-wider"
+                  >
+                    {chipLabel}
+                    <button onClick={() => toggleCategory(cat)} className="hover:text-red-600 transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                );
+              })}
               {selectedYears.map(year => (
                 <span
                   key={year}

@@ -12,7 +12,7 @@ class CategoryController extends Controller
     public function index()
     {
         return response()->json([
-            'data' => Category::orderBy('name')->get()
+            'data' => Category::orderBy('order', 'asc')->orderBy('id', 'asc')->get()
         ]);
     }
 
@@ -27,6 +27,9 @@ class CategoryController extends Controller
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
         }
+
+        $maxOrder = Category::max('order') ?? 0;
+        $validated['order'] = $maxOrder + 1;
 
         $category = Category::create($validated);
 
@@ -53,6 +56,22 @@ class CategoryController extends Controller
         $category->update($validated);
 
         return response()->json(['data' => $category]);
+    }
+
+    public function reorder(Request $request)
+    {
+        $validated = $request->validate([
+            'category_ids' => 'required|array',
+            'category_ids.*' => 'exists:categories,id',
+        ]);
+
+        foreach ($validated['category_ids'] as $index => $id) {
+            Category::where('id', $id)->update(['order' => $index]);
+        }
+
+        \App\Services\ActivityLogger::log('Reordered Categories', 'Reordered categories list', Category::class, null);
+
+        return response()->json(['message' => 'Categories reordered successfully']);
     }
 
     public function destroy(Category $category)

@@ -30,10 +30,10 @@ class ContentSeeder extends Seeder
 
         // Seed Categories
         $categoryModels = [];
-        foreach ($categories as $cat) {
+        foreach ($categories as $index => $cat) {
             $categoryModels[$cat] = Category::firstOrCreate(
                 ['name' => $cat],
-                ['slug' => Str::slug($cat)]
+                ['slug' => Str::slug($cat), 'order' => $index]
             );
         }
 
