@@ -72,8 +72,8 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
               }))
             : [{ first_name: '', middle_name: '', last_name: '', suffix: '' }],
           keywords_string: editingArticle.keywords && editingArticle.keywords.length > 0 ? editingArticle.keywords.map((k: any) => k.name).join(', ') : '',
-          page_start: '',
-          page_end: ''
+          page_start: editingArticle.page_start || '',
+          page_end: editingArticle.page_end || ''
         });
       } else {
         setFormData({
@@ -255,6 +255,17 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           <div className="md:col-span-2">
             <Input 
               label="DOI (Optional)" name="doi" value={formData.doi || ''} onChange={handleInputChange} placeholder="10.1234/example"
+            />
+          </div>
+
+          <div>
+            <Input
+              label="Page Start (Optional)" name="page_start" value={formData.page_start || ''} onChange={handleInputChange} placeholder="e.g. 1"
+            />
+          </div>
+          <div>
+            <Input
+              label="Page End (Optional)" name="page_end" value={formData.page_end || ''} onChange={handleInputChange} placeholder="e.g. 15"
             />
           </div>
 

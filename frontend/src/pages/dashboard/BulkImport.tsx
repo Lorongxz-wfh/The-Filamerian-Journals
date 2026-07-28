@@ -13,6 +13,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 interface Journal {
   id: number;
   title: string;
+  volumes?: { id: number; year: number; volume_number: string }[];
 }
 
 interface Volume {
@@ -84,7 +85,7 @@ const BulkImport: React.FC = () => {
 
   const fetchJournals = async () => {
     try {
-      const res = await api.get('/journals');
+      const res = await api.get('/journals?with_volumes=1');
       setJournals(res.data.data);
     } catch (err) {
       toast.error('Failed to load journals');
@@ -297,7 +298,11 @@ const BulkImport: React.FC = () => {
                 onChange={(val) => setSelectedJournal(String(val))}
                 options={[
                   { value: '', label: 'Choose a journal...' },
-                  ...journals.map(j => ({ value: String(j.id), label: j.title }))
+                  ...journals.map(j => {
+                    const years = (j.volumes || []).map((v: any) => v.year).filter(Boolean).sort();
+                    const yearLabel = years.length > 0 ? ` (${years[0]})` : '';
+                    return { value: String(j.id), label: `${j.title}${yearLabel}` };
+                  })
                 ]}
               />
               

@@ -9,9 +9,27 @@ use Illuminate\Http\Request;
 
 class AuthorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return AuthorResource::collection(Author::paginate(15));
+        $query = Author::query();
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('first_name', 'like', "%{$s}%")
+                  ->orWhere('last_name', 'like', "%{$s}%")
+                  ->orWhere('middle_name', 'like', "%{$s}%")
+                  ->orWhere('email', 'like', "%{$s}%");
+            });
+        }
+
+        $sortBy  = in_array($request->sort_by, ['first_name', 'last_name', 'email', 'created_at']) ? $request->sort_by : 'last_name';
+        $sortDir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
+        $query->orderBy($sortBy, $sortDir);
+
+        $perPage = min((int) ($request->per_page ?? 15), 100);
+
+        return AuthorResource::collection($query->paginate($perPage));
     }
 
     public function store(Request $request)
