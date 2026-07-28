@@ -60,12 +60,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
       <div
         style={{ willChange: 'transform' }}
         className={cn(
-          "relative bg-surface border border-border/60 w-full max-w-lg shadow-xl flex flex-col max-h-[90vh]",
+          "relative bg-surface border border-border/60 w-full max-w-lg shadow-xl flex flex-col max-h-[90vh] font-sans",
           className
         )}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-primary">{title}</h2>
+          <h2 className="text-[13px] font-bold uppercase tracking-[0.1em] text-primary font-sans">{title}</h2>
           <button 
             onClick={handleAttemptClose}
             className="w-7 h-7 flex items-center justify-center text-muted hover:text-primary hover:bg-black/5 transition-colors cursor-pointer"

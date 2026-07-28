@@ -106,7 +106,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'], inDev: true },
-    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'], inDev: true },
+    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
   ];
 
   const handleLogout = async () => {
@@ -231,21 +231,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
             Navigation
           </span>
-          {visibleMenuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
-                location.pathname === item.path
-                  ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
-                  : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              <span>{item.label}</span>
-            </Link>
-          ))}
+          {visibleMenuItems.map((item) => {
+            const hasUnread = (item.path === '/dashboard/feedback' || item.path === '/dashboard/announcements');
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
+                  location.pathname === item.path
+                    ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
+                    : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
+                {hasUnread && (
+                  <span className="ml-auto w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/50" title="Active Updates" />
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         {visibleAdminItems.length > 0 && (

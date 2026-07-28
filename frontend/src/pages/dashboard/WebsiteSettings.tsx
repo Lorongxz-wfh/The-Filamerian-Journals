@@ -173,33 +173,12 @@ const WebsiteSettings: React.FC = () => {
                 value={settings.site_title} 
                 onChange={(e) => handleSettingsChange('site_title', e.target.value)}
               />
-              <Input 
-                label="Tagline" 
-                value={settings.tagline} 
-                onChange={(e) => handleSettingsChange('tagline', e.target.value)}
-                hint={
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase text-muted font-semibold tracking-wider">Show Tagline</span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settings.show_tagline !== 'false'} onChange={(e) => handleSettingsChange('show_tagline', e.target.checked ? 'true' : 'false')} />
-                      <div className="w-8 h-4 bg-muted/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-3 after:w-3 after:transition-all peer-checked:bg-primary border border-border"></div>
-                    </label>
-                  </div>
-                }
-              />
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Home Text</label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase text-muted font-semibold tracking-wider">Show Home Text</span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settings.show_about_us !== 'false'} onChange={(e) => handleSettingsChange('show_about_us', e.target.checked ? 'true' : 'false')} />
-                      <div className="w-8 h-4 bg-muted/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-3 after:w-3 after:transition-all peer-checked:bg-primary border border-border"></div>
-                    </label>
-                  </div>
+                  <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Hero Text</label>
                 </div>
                 <RichTextEditor 
-                  value={settings.home_about_us || ''}
+                  value={settings.home_about_us || 'The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.'}
                   onChange={(val) => handleSettingsChange('home_about_us', val)}
                 />
               </div>

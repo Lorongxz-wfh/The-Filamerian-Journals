@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router';
-import { Menu, Search, X, ChevronRight } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -21,6 +21,7 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasAnnouncements] = useState(true);
   interface Category {
     id: number;
     name: string;
@@ -162,6 +163,18 @@ const Navbar = () => {
           </Link>
           <Link to="/contact" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/contact') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             Contact
+          </Link>
+
+          {/* Announcements Icon Link with Red Notification Badge */}
+          <Link 
+            to="/announcements" 
+            className={`relative p-1.5 flex items-center justify-center transition-colors ${path.startsWith('/announcements') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}
+            title="Announcements & News"
+          >
+            <Bell className="h-4 w-4" />
+            {hasAnnouncements && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 ring-2 ring-primary animate-pulse" />
+            )}
           </Link>
           
           <div className="flex items-center h-full ml-2">

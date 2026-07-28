@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
 import { Plus, Edit2, Trash2, Tag, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
+import { Reorder, useDragControls } from 'framer-motion';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
@@ -20,6 +21,119 @@ interface Category {
   description: string;
   order?: number;
 }
+
+interface CategoryRowProps {
+  cat: Category;
+  idx: number;
+  isLast: boolean;
+  isReordering: boolean;
+  moveCategory: (index: number, direction: 'up' | 'down') => void;
+  openModal: (cat: Category) => void;
+  setDeleteId: (id: number) => void;
+  setIsReordering: (val: boolean) => void;
+}
+
+const CategoryRow: React.FC<CategoryRowProps> = ({
+  cat,
+  idx,
+  isLast,
+  isReordering,
+  moveCategory,
+  openModal,
+  setDeleteId,
+  setIsReordering,
+}) => {
+  const controls = useDragControls();
+
+  if (isReordering) {
+    return (
+      <Reorder.Item
+        value={cat}
+        dragListener={false}
+        dragControls={controls}
+        className="flex items-center justify-between px-5 py-3 transition-colors bg-surface hover:bg-background/50 border-b border-border last:border-b-0"
+        whileDrag={{ 
+          scale: 1.01,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+          zIndex: 50,
+          backgroundColor: "var(--surface)"
+        }}
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* Drag Handle */}
+          <div
+            className="p-1.5 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 cursor-grab active:cursor-grabbing touch-none select-none transition-colors bg-primary/10 text-primary"
+            onPointerDown={(e) => {
+              setIsReordering(true);
+              controls.start(e);
+            }}
+            title="Drag to reorder"
+          >
+            <GripVertical className="h-4 w-4 stroke-[2.5]" />
+          </div>
+
+          {/* Up / Down Buttons */}
+          <div className="flex flex-col gap-0.5 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
+            <button 
+              type="button"
+              onClick={() => moveCategory(idx, 'up')}
+              disabled={idx === 0}
+              title="Move Up"
+              className="p-1 rounded text-gray-400 hover:text-primary hover:bg-black/5 disabled:opacity-20 transition-all cursor-pointer"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </button>
+            <button 
+              type="button"
+              onClick={() => moveCategory(idx, 'down')}
+              disabled={isLast}
+              title="Move Down"
+              className="p-1 rounded text-gray-400 hover:text-primary hover:bg-black/5 disabled:opacity-20 transition-all cursor-pointer"
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Category Info */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Tag className="h-4 w-4 text-primary/30 shrink-0" />
+            <span className="text-[13px] font-semibold text-primary truncate">
+              {cat.name}
+            </span>
+            <span className="text-[11px] font-mono text-muted">
+              ({cat.slug})
+            </span>
+          </div>
+        </div>
+      </Reorder.Item>
+    );
+  }
+
+  return (
+    <tr className="hover:bg-background transition-colors group">
+      <td className="px-5 py-4">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Tag className="h-4 w-4 text-primary/30 shrink-0" />
+          <span className="text-[13px] font-medium text-primary truncate">
+            {cat.name}
+          </span>
+        </div>
+      </td>
+      <td className="px-5 py-4 text-[12px] text-muted font-mono">
+        {cat.slug}
+      </td>
+      <td className="px-5 py-4 text-[12px] text-muted hidden md:table-cell truncate max-w-xs">
+        {cat.description || '-'}
+      </td>
+      <td className="px-5 py-4 text-right">
+        <div className="flex items-center justify-end gap-1">
+          <IconButton icon={Edit2} title="Edit" onClick={() => openModal(cat)} />
+          <IconButton icon={Trash2} title="Delete" variant="danger" onClick={() => setDeleteId(cat.id)} />
+        </div>
+      </td>
+    </tr>
+  );
+};
 
 const Categories: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -64,6 +178,10 @@ const Categories: React.FC = () => {
     newItems[index] = newItems[targetIndex];
     newItems[targetIndex] = temp;
     setCategories(newItems);
+  };
+
+  const handleReorderList = (newCats: Category[]) => {
+    setCategories(newCats);
   };
 
   const handleSaveOrder = async () => {
@@ -163,7 +281,7 @@ const Categories: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Search Input (disabled during reorder) */}
+      {/* Search Input (on the Right side) */}
       {!isReordering && (
         <div className="flex justify-end">
           <SearchInput
@@ -179,86 +297,66 @@ const Categories: React.FC = () => {
         <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GripVertical className="h-4 w-4 text-primary" />
-            <span>Use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order across the navbar dropdown and website filters.</span>
+            <span>Drag items using the handle or use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order.</span>
           </div>
         </div>
       )}
 
-      {/* Table */}
+      {/* Content Area */}
       <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
-        <table className="w-full min-w-[600px]">
-          <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
-            <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
-              {isReordering && <th className="px-3 py-3 w-12 text-center">Order</th>}
-              <th className="px-5 py-3">Category Name</th>
-              <th className="px-5 py-3">Slug</th>
-              <th className="px-5 py-3 hidden md:table-cell">Description</th>
-              <th className="px-5 py-3 w-20 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {loading ? (
-              <TableRowSkeleton columns={isReordering ? 5 : 4} rows={5} />
-            ) : (isReordering ? categories : filtered).length === 0 ? (
-              <tr>
-                <td colSpan={isReordering ? 5 : 4} className="p-0">
-                  <EmptyState title="No categories found" description="There are no categories matching your criteria." className="bg-transparent border-0 py-16" />
-                </td>
+        {isReordering ? (
+          <Reorder.Group axis="y" values={categories} onReorder={handleReorderList} className="divide-y divide-border">
+            {categories.map((cat, idx) => (
+              <CategoryRow
+                key={cat.id}
+                cat={cat}
+                idx={idx}
+                isLast={idx === categories.length - 1}
+                isReordering={true}
+                moveCategory={moveCategory}
+                openModal={openModal}
+                setDeleteId={setDeleteId}
+                setIsReordering={setIsReordering}
+              />
+            ))}
+          </Reorder.Group>
+        ) : (
+          <table className="w-full min-w-[600px]">
+            <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
+              <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
+                <th className="px-5 py-3">Category Name</th>
+                <th className="px-5 py-3">Slug</th>
+                <th className="px-5 py-3 hidden md:table-cell">Description</th>
+                <th className="px-5 py-3 w-20 text-right">Actions</th>
               </tr>
-            ) : (
-              (isReordering ? categories : filtered).map((cat, idx) => (
-                <tr key={cat.id} className="hover:bg-background transition-colors group">
-                  {isReordering && (
-                    <td className="px-3 py-4 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => moveCategory(idx, 'up')}
-                          disabled={idx === 0}
-                          className="p-1 hover:bg-black/10 disabled:opacity-20 text-primary transition-colors cursor-pointer"
-                          title="Move Up"
-                        >
-                          <ArrowUp className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveCategory(idx, 'down')}
-                          disabled={idx === categories.length - 1}
-                          className="p-1 hover:bg-black/10 disabled:opacity-20 text-primary transition-colors cursor-pointer"
-                          title="Move Down"
-                        >
-                          <ArrowDown className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  )}
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Tag className="h-4 w-4 text-primary/30 shrink-0" />
-                      <span className="text-[13px] font-medium text-primary truncate">
-                        {cat.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-[12px] text-muted font-mono">
-                    {cat.slug}
-                  </td>
-                  <td className="px-5 py-4 text-[12px] text-muted hidden md:table-cell truncate max-w-xs">
-                    {cat.description || '-'}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    {!isReordering && (
-                      <div className="flex items-center justify-end gap-1">
-                        <IconButton icon={Edit2} title="Edit" onClick={() => openModal(cat)} />
-                        <IconButton icon={Trash2} title="Delete" variant="danger" onClick={() => setDeleteId(cat.id)} />
-                      </div>
-                    )}
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                <TableRowSkeleton columns={4} rows={5} />
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="p-0">
+                    <EmptyState title="No categories found" description="There are no categories matching your criteria." className="bg-transparent border-0 py-16" />
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filtered.map((cat, idx) => (
+                  <CategoryRow
+                    key={cat.id}
+                    cat={cat}
+                    idx={idx}
+                    isLast={idx === filtered.length - 1}
+                    isReordering={false}
+                    moveCategory={moveCategory}
+                    openModal={openModal}
+                    setDeleteId={setDeleteId}
+                    setIsReordering={setIsReordering}
+                  />
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <Modal 

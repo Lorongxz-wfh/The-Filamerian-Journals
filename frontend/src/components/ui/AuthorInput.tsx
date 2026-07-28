@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Check, UserPlus } from 'lucide-react';
+import { X, UserPlus } from 'lucide-react';
 import api from '@/services/api';
 import AuthorFormFields, { type AuthorFieldValues } from '@/components/ui/AuthorFormFields';
 
@@ -170,7 +170,6 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
     );
   }
 
-  const hasData = author.first_name || author.last_name || author.middle_name || author.suffix;
   const isComplete = !!(author.first_name && author.last_name);
   const showCreateNew = showDropdown && lastQuery.length >= 2 && !isSearching && !author.id;
 
@@ -227,30 +226,18 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
         )}
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
-        {(!hasData && onRemove) ? (
-          <button type="button" onClick={onRemove} className="p-2 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100 h-[36px]" title="Remove">
+      {onRemove && (
+        <div className="flex items-center shrink-0 pt-1">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1.5 text-muted hover:text-red-600 hover:bg-red-50 transition-colors"
+            title="Remove author"
+          >
             <X className="h-4 w-4" />
           </button>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => { setShowDropdown(false); if (isComplete) setIsEditing(false); }}
-              disabled={!isComplete}
-              className="p-2 bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:bg-gray-200 disabled:text-gray-400 h-[36px]"
-              title={isComplete ? 'Confirm author' : 'Enter first and last name'}
-            >
-              <Check className="h-4 w-4" />
-            </button>
-            {onRemove && (
-              <button type="button" onClick={onRemove} className="p-2 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors border border-rose-100 h-[36px]" title="Remove">
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

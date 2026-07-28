@@ -197,16 +197,18 @@ const ManageAuthors: React.FC = () => {
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <SearchInput
-          placeholder="Search by name or email..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
         {!loading && (
           <p className="text-[11px] text-muted shrink-0">
             {total} author{total !== 1 ? 's' : ''}
           </p>
         )}
+        <div className="w-full sm:w-auto flex justify-end">
+          <SearchInput
+            placeholder="Search by name or email..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
       </div>
 
       <Table>

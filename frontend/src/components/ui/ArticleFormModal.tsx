@@ -252,21 +252,22 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
             />
           </div>
 
-          <div className="md:col-span-2">
-            <Input 
-              label="DOI (Optional)" name="doi" value={formData.doi || ''} onChange={handleInputChange} placeholder="10.1234/example"
-            />
-          </div>
-
-          <div>
-            <Input
-              label="Page Start (Optional)" name="page_start" value={formData.page_start || ''} onChange={handleInputChange} placeholder="e.g. 1"
-            />
-          </div>
-          <div>
-            <Input
-              label="Page End (Optional)" name="page_end" value={formData.page_end || ''} onChange={handleInputChange} placeholder="e.g. 15"
-            />
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+              <Input 
+                label="DOI (Optional)" name="doi" value={formData.doi || ''} onChange={handleInputChange} placeholder="10.1234/example"
+              />
+            </div>
+            <div className="md:col-span-1">
+              <Input
+                label="Page Start" name="page_start" value={formData.page_start || ''} onChange={handleInputChange} placeholder="e.g. 1"
+              />
+            </div>
+            <div className="md:col-span-1">
+              <Input
+                label="Page End" name="page_end" value={formData.page_end || ''} onChange={handleInputChange} placeholder="e.g. 15"
+              />
+            </div>
           </div>
 
           <div className="md:col-span-2">

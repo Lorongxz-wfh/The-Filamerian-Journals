@@ -127,19 +127,20 @@ const ManageAnnouncements: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <SearchInput 
-          placeholder="Search announcements..." 
-          value={filter} 
-          onChange={(e) => setFilter(e.target.value)} 
-        />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {!loading && (
+          <p className="text-[11px] text-muted">
+            Showing {announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
+          </p>
+        )}
+        <div className="w-full sm:w-auto flex justify-end">
+          <SearchInput 
+            placeholder="Search announcements..." 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)} 
+          />
+        </div>
       </div>
-
-      {!loading && (
-        <p className="text-[11px] text-muted">
-          Showing {announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
-        </p>
-      )}
 
       <div className="border border-border bg-surface overflow-x-auto relative">
         <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
