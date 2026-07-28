@@ -134,8 +134,8 @@ class ContentSeeder extends Seeder
                             'page_end' => $pageEnd,
                             'doi' => "10.1234/fcu.{$year}." . str_pad($jIndex, 2, '0', STR_PAD_LEFT) . "." . str_pad($v, 2, '0', STR_PAD_LEFT) . "." . str_pad($a, 2, '0', STR_PAD_LEFT),
                             'pdf_path' => null,
-                            'views_count' => rand(50, 500),
-                            'downloads_count' => rand(10, 200),
+                            'views_count' => 0,
+                            'downloads_count' => 0,
                             'order' => $a,
                         ]
                     );

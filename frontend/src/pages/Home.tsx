@@ -96,7 +96,8 @@ const Home: React.FC = () => {
   );
 
   const siteTitle = settings.site_title || 'The Filamerian Journals';
-  const aboutHtml = settings.about_us || settings.home_about_us || '';
+  // Priority: settings.about_us → settings.home_about_us → hardcoded FCU default
+  const aboutHtml = settings.about_us || settings.home_about_us || '';;
 
   return (
     <PageWrapper className="flex flex-col relative pb-16">

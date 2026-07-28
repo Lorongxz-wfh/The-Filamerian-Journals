@@ -232,7 +232,7 @@ const Overview: React.FC = () => {
               {[
                 { label: 'Create New Journal', desc: 'Start a new publication', path: '/dashboard/journals', icon: BookOpen },
                 { label: 'Add Article', desc: 'Submit research paper', path: '/dashboard/articles', icon: FileText },
-                { label: 'Manage Authors', desc: 'View author directory', path: '/dashboard/users', icon: Users },
+                { label: 'Manage Authors', desc: 'View author directory', path: '/dashboard/authors', icon: Users },
               ].map((action) => (
                 <Link
                   key={action.label}
@@ -246,7 +246,7 @@ const Overview: React.FC = () => {
                     <p className="text-[13px] font-medium text-primary group-hover:text-primary transition-colors">{action.label}</p>
                     <p className="text-[11px] text-muted mt-0.5">{action.desc}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted/30 group-hover:text-primary group-hover:-translate-x-1 transition-all" />
+                  <ArrowRight className="h-4 w-4 text-muted/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </Link>
               ))}
             </div>

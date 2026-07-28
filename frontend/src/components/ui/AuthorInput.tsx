@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Check } from 'lucide-react';
 import api from '@/services/api';
+import AuthorFormFields, { type AuthorFieldValues } from '@/components/ui/AuthorFormFields';
 
-export interface AuthorData {
+export interface AuthorData extends AuthorFieldValues {
   id?: number; // populated when selected from existing author
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  suffix: string;
 }
 
 interface AuthorInputProps {
@@ -33,7 +30,6 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
   // Autocomplete state
   const [suggestions, setSuggestions] = useState<AuthorSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [activeField, setActiveField] = useState<'first_name' | 'last_name' | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Close when clicking outside
@@ -76,12 +72,14 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
     }, 300);
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    onChange({ ...author, [name]: value, id: undefined }); // clear id when manually editing
-    if (name === 'first_name' || name === 'last_name') {
-      setActiveField(name as 'first_name' | 'last_name');
-      searchAuthors(value);
+  const handleChange = (values: AuthorFieldValues) => {
+    const changed = { ...author, ...values, id: undefined };
+    onChange(changed);
+    // Trigger autocomplete on changed name fields
+    if (values.first_name !== author.first_name) {
+      searchAuthors(values.first_name);
+    } else if (values.last_name !== author.last_name) {
+      searchAuthors(values.last_name);
     }
   };
 
@@ -95,8 +93,6 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
     });
     setShowSuggestions(false);
     setSuggestions([]);
-    setActiveField(null);
-    // Auto-collapse after selecting
     setIsEditing(false);
   };
 
@@ -119,7 +115,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
     return formatted;
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       setShowSuggestions(false);
     }
@@ -159,109 +155,30 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
 
   return (
     <div ref={containerRef} className="flex items-start gap-2 mb-3 pb-3 border-b border-border/50 relative last:border-b-0 last:pb-0 last:mb-0">
-      <div className="flex-grow grid grid-cols-1 sm:grid-cols-[3fr_2.5fr_2.5fr_1fr] gap-2">
-        {/* First Name with autocomplete */}
-        <div className="relative">
-          <input
-            type="text"
-            name="first_name"
-            value={author.first_name}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              setActiveField('first_name');
-              if (author.first_name.length >= 2) searchAuthors(author.first_name);
-            }}
-            autoFocus={isInitialEmpty}
-            autoComplete="off"
-            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
-          />
-          {!author.first_name && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-[13px] text-gray-400">First Name <span className="text-red-500">*</span></span>
-            </div>
-          )}
-          {/* Autocomplete dropdown on first_name */}
-          {showSuggestions && activeField === 'first_name' && (
-            <div className="absolute top-full left-0 right-0 z-50 bg-white border border-border shadow-lg mt-0.5 max-h-48 overflow-y-auto">
-              {suggestions.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(s); }}
-                  className="w-full text-left px-3 py-2 text-[12px] hover:bg-primary/5 border-b border-border/40 last:border-b-0 flex flex-col"
-                >
-                  <span className="font-semibold text-primary">{s.name}</span>
-                  {s.first_name && <span className="text-muted">{s.first_name} {s.middle_name || ''} {s.last_name}</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="flex-grow relative">
+        <AuthorFormFields
+          values={author}
+          onChange={handleChange}
+          autoFocus={isInitialEmpty}
+          onKeyDown={handleKeyDown}
+        />
 
-        {/* Middle Name */}
-        <div>
-          <input
-            type="text"
-            name="middle_name"
-            value={author.middle_name}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Middle Name / Initial"
-            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
-          />
-        </div>
-
-        {/* Last Name with autocomplete */}
-        <div className="relative">
-          <input
-            type="text"
-            name="last_name"
-            value={author.last_name}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              setActiveField('last_name');
-              if (author.last_name.length >= 2) searchAuthors(author.last_name);
-            }}
-            autoComplete="off"
-            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
-          />
-          {!author.last_name && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-[13px] text-gray-400">Last Name <span className="text-red-500">*</span></span>
-            </div>
-          )}
-          {/* Autocomplete dropdown on last_name */}
-          {showSuggestions && activeField === 'last_name' && (
-            <div className="absolute top-full left-0 right-0 z-50 bg-white border border-border shadow-lg mt-0.5 max-h-48 overflow-y-auto">
-              {suggestions.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(s); }}
-                  className="w-full text-left px-3 py-2 text-[12px] hover:bg-primary/5 border-b border-border/40 last:border-b-0 flex flex-col"
-                >
-                  <span className="font-semibold text-primary">{s.name}</span>
-                  {s.first_name && <span className="text-muted">{s.first_name} {s.middle_name || ''} {s.last_name}</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Suffix */}
-        <div>
-          <input
-            type="text"
-            name="suffix"
-            value={author.suffix}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Suffix"
-            className="w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary"
-          />
-        </div>
+        {/* Autocomplete dropdown — positioned under the active field */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 z-50 bg-white border border-border shadow-lg mt-0.5 max-h-48 overflow-y-auto w-full sm:w-1/2">
+            {suggestions.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(s); }}
+                className="w-full text-left px-3 py-2 text-[12px] hover:bg-primary/5 border-b border-border/40 last:border-b-0 flex flex-col"
+              >
+                <span className="font-semibold text-primary">{s.name}</span>
+                <span className="text-muted text-[10px]">{[s.first_name, s.middle_name, s.last_name].filter(Boolean).join(' ')}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-1 shrink-0">

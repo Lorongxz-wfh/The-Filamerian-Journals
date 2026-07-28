@@ -13,6 +13,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Pagination from '@/components/ui/Pagination';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import AuthorFormFields from '@/components/ui/AuthorFormFields';
 
 const PER_PAGE = 15;
 
@@ -276,36 +277,17 @@ const ManageAuthors: React.FC = () => {
             </div>
           )}
 
-          {/* Same 4-field layout as ArticleFormModal AuthorInput */}
-          <div className="grid grid-cols-1 sm:grid-cols-[3fr_2.5fr_2.5fr_1fr] gap-3">
-            <Input
-              label="First Name"
-              required
-              autoFocus
-              value={form.first_name}
-              onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-              placeholder="First Name"
-            />
-            <Input
-              label="Middle Name / Initial"
-              value={form.middle_name}
-              onChange={(e) => setForm({ ...form, middle_name: e.target.value })}
-              placeholder="Middle"
-            />
-            <Input
-              label="Last Name"
-              required
-              value={form.last_name}
-              onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-              placeholder="Last Name"
-            />
-            <Input
-              label="Suffix"
-              value={form.suffix}
-              onChange={(e) => setForm({ ...form, suffix: e.target.value })}
-              placeholder="Jr."
-            />
-          </div>
+          {/* Shared 4-field name grid component */}
+          <AuthorFormFields
+            values={{
+              first_name: form.first_name,
+              middle_name: form.middle_name,
+              last_name: form.last_name,
+              suffix: form.suffix,
+            }}
+            onChange={(v) => setForm((f) => ({ ...f, ...v }))}
+            autoFocus
+          />
 
           <Input
             label="Email (optional)"
