@@ -42,7 +42,7 @@ class ArticleController extends Controller
             'volume_id' => 'required|exists:volumes,id',
             'title' => 'required|string|max:255',
             'abstract' => 'nullable|string',
-            'pdf_path' => 'nullable|file|mimes:pdf|max:10240', // 10MB max
+            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
             'page_start' => 'nullable|integer',
             'page_end' => 'nullable|integer',
             'doi' => 'nullable|string|max:255',
@@ -189,7 +189,7 @@ class ArticleController extends Controller
             'volume_id' => 'exists:volumes,id',
             'title' => 'string|max:255',
             'abstract' => 'nullable|string',
-            'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
+            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
             'page_start' => 'nullable|integer',
             'page_end' => 'nullable|integer',
             'doi' => 'nullable|string|max:255',

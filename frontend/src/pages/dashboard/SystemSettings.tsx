@@ -1,44 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Database, Shield } from 'lucide-react';
+import { Database, Shield, Server, CheckCircle2, HardDrive } from 'lucide-react';
 import api from '@/services/api';
 import { FormSkeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
 
+const formatBytes = (bytes: number, decimals = 2) => {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
 const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState<Record<string, string>>({
     max_upload_size: '10',
-    notify_new_submission: '1',
-    notify_review_completion: '1',
-    notify_user_registration: '0',
-    notify_system_health: '1',
+    session_timeout: '120',
+    maintenance_mode: '0',
   });
+  const [usedStorageBytes, setUsedStorageBytes] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/public/settings');
-        if (Object.keys(res.data.data).length > 0) {
-          setSettings(prev => ({ ...prev, ...res.data.data }));
+        setLoading(true);
+        const [settingsRes, healthRes] = await Promise.allSettled([
+          api.get('/public/settings'),
+          api.get('/system/health'),
+        ]);
+
+        if (settingsRes.status === 'fulfilled' && Object.keys(settingsRes.value.data?.data || {}).length > 0) {
+          setSettings(prev => ({ ...prev, ...settingsRes.value.data.data }));
+        }
+
+        if (healthRes.status === 'fulfilled') {
+          const health = healthRes.value.data;
+          const storageSize = typeof health?.storage === 'object' ? (health.storage?.size_bytes || 0) : 0;
+          setUsedStorageBytes(storageSize);
         }
       } catch (err) {
-        console.error('Failed to fetch settings', err);
+        console.error('Failed to fetch settings or system health', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchSettings();
+
+    fetchData();
   }, []);
 
   const handleChange = (key: string, value: string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleCheckboxChange = (key: string, checked: boolean) => {
-    setSettings(prev => ({ ...prev, [key]: checked ? '1' : '0' }));
+  const handleToggleChange = (key: string) => {
+    setSettings(prev => ({ ...prev, [key]: prev[key] === '1' ? '0' : '1' }));
   };
 
   const handleSave = async () => {
@@ -54,100 +74,174 @@ const SystemSettings: React.FC = () => {
     }
   };
 
+  // Quota: 50 GB default
+  const totalQuotaBytes = 50 * 1024 * 1024 * 1024;
+  const storagePercentage = Math.min(100, Math.max(0, (usedStorageBytes / totalQuotaBytes) * 100));
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans w-full max-w-5xl">
       <DashboardHeader title="System Settings" />
 
       {loading ? (
         <FormSkeleton rows={6} />
       ) : (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Email */}
-        <div className="border border-border bg-surface p-6 space-y-5">
-          <div className="flex items-center gap-3 border-b border-border pb-3">
-            <Mail className="h-4 w-4 text-primary/40" />
-            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Email Notifications</h2>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Storage & Upload Configuration */}
+            <div className="border border-border bg-surface p-6 space-y-5 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 border-b border-border pb-3">
+                  <Database className="h-4 w-4 text-primary/50" />
+                  <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Storage & File Limits</h2>
+                </div>
+
+                <div className="space-y-4 text-[13px]">
+                  {/* Max Upload Size */}
+                  <div className="flex items-center justify-between py-2 border-b border-border/60">
+                    <div>
+                      <span className="font-medium text-primary block">Max Upload Size (MB)</span>
+                      <span className="text-[11px] text-muted">Applies to all PDF articles and cover images</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <input 
+                        type="number" 
+                        min="1"
+                        max="500"
+                        value={settings.max_upload_size || '10'}
+                        onChange={(e) => handleChange('max_upload_size', e.target.value)}
+                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                      />
+                      <span className="text-xs font-mono text-muted">MB</span>
+                    </div>
+                  </div>
+
+                  {/* Storage Usage Meter */}
+                  <div className="space-y-2 py-2 border-b border-border/60">
+                    <div className="flex justify-between items-center text-[12px]">
+                      <span className="text-muted flex items-center gap-1.5">
+                        <HardDrive className="h-3.5 w-3.5 text-muted" />
+                        Storage Used
+                      </span>
+                      <span className="font-mono text-xs text-primary font-semibold">
+                        {formatBytes(usedStorageBytes)} / 50 GB
+                      </span>
+                    </div>
+                    {/* Visual Progress Bar */}
+                    <div className="w-full h-2 bg-background border border-border/60 overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-500"
+                        style={{ width: `${Math.max(1, storagePercentage)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Supported Formats */}
+                  <div className="flex justify-between items-center py-1.5">
+                    <span className="text-muted">Allowed Formats</span>
+                    <div className="flex items-center gap-1">
+                      {['PDF', 'DOCX', 'JPG', 'PNG', 'WEBP'].map((fmt) => (
+                        <span key={fmt} className="text-[10px] font-mono font-bold bg-background border border-border px-1.5 py-0.5 text-primary uppercase">
+                          {fmt}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security & Authentication */}
+            <div className="border border-border bg-surface p-6 space-y-5 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 border-b border-border pb-3">
+                  <Shield className="h-4 w-4 text-primary/50" />
+                  <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Security & Governance</h2>
+                </div>
+
+                <div className="space-y-4 text-[13px]">
+                  {/* Maintenance Mode Switch */}
+                  <div className="flex items-center justify-between py-2 border-b border-border/60">
+                    <div>
+                      <span className="font-medium text-primary flex items-center gap-1.5">
+                        Maintenance Mode
+                        {settings.maintenance_mode === '1' && (
+                          <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.2">
+                            Active
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[11px] text-muted">Restrict non-admin public access during maintenance</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleChange('maintenance_mode')}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        settings.maintenance_mode === '1' ? 'bg-primary' : 'bg-muted/30'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          settings.maintenance_mode === '1' ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Session Timeout */}
+                  <div className="flex items-center justify-between py-2 border-b border-border/60">
+                    <div>
+                      <span className="font-medium text-primary block">Session Timeout</span>
+                      <span className="text-[11px] text-muted">Inactivity duration before requiring re-login</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <input 
+                        type="number" 
+                        min="15"
+                        max="1440"
+                        value={settings.session_timeout || '120'}
+                        onChange={(e) => handleChange('session_timeout', e.target.value)}
+                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                      />
+                      <span className="text-xs font-mono text-muted">min</span>
+                    </div>
+                  </div>
+
+                  {/* Auth Framework Badges */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-border/60">
+                    <span className="text-muted">Authentication Engine</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5">
+                      <CheckCircle2 className="h-3 w-3" /> Laravel Sanctum
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-muted">Access Control (RBAC)</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5">
+                      <CheckCircle2 className="h-3 w-3" /> Spatie Permission
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
-          <div className="space-y-4">
-            {[
-              { key: 'notify_new_submission', label: 'New submission alerts' },
-              { key: 'notify_review_completion', label: 'Review completion alerts' },
-              { key: 'notify_user_registration', label: 'User registration alerts' },
-              { key: 'notify_system_health', label: 'System health alerts' },
-            ].map((opt) => (
-              <label key={opt.key} className="flex items-center justify-between cursor-pointer group">
-                <span className="text-[13px] text-primary/80">{opt.label}</span>
-                <input 
-                  type="checkbox" 
-                  checked={settings[opt.key] === '1'} 
-                  onChange={(e) => handleCheckboxChange(opt.key, e.target.checked)}
-                  className="h-4 w-4 accent-primary" 
-                />
-              </label>
-            ))}
+
+          {/* Action Bar */}
+          <div className="flex items-center justify-between border-t border-border pt-4">
+            <div className="flex items-center gap-2 text-xs text-muted">
+              <Server className="h-3.5 w-3.5" />
+              <span>All changes take effect immediately across API services.</span>
+            </div>
+            <Button 
+              onClick={handleSave}
+              isLoading={saving}
+              className="px-6"
+            >
+              {saving ? 'Saving...' : 'Save Settings'}
+            </Button>
           </div>
         </div>
-
-        {/* Storage */}
-        <div className="border border-border bg-surface p-6 space-y-5">
-          <div className="flex items-center gap-3 border-b border-border pb-3">
-            <Database className="h-4 w-4 text-primary/40" />
-            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Storage</h2>
-          </div>
-          <div className="space-y-3 text-[13px]">
-            <div className="flex justify-between py-1.5 border-b border-border items-center">
-              <span className="text-muted">Max upload size (MB)</span>
-              <input 
-                type="number" 
-                value={settings.max_upload_size}
-                onChange={(e) => handleChange('max_upload_size', e.target.value)}
-                className="w-20 px-2 py-1 bg-background border border-border text-[13px] text-right focus:outline-none focus:border-primary transition-colors" 
-              />
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-border">
-              <span className="text-muted">Storage used</span>
-              <span className="font-medium text-primary">0.0 GB / 50 GB</span>
-            </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-muted">Allowed formats</span>
-              <span className="font-medium text-primary">PDF, DOCX, JPG, PNG</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Security */}
-        <div className="border border-border bg-surface p-6 space-y-5 lg:col-span-2 max-w-2xl">
-          <div className="flex items-center gap-3 border-b border-border pb-3">
-            <Shield className="h-4 w-4 text-primary/40" />
-            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Security</h2>
-          </div>
-          <div className="space-y-3 text-[13px]">
-            <div className="flex justify-between py-1.5 border-b border-border">
-              <span className="text-muted">Authentication</span>
-              <span className="font-medium text-emerald-600">Sanctum Active</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-border">
-              <span className="text-muted">RBAC</span>
-              <span className="font-medium text-emerald-600">Spatie Enabled</span>
-            </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-muted">Session timeout</span>
-              <span className="font-medium text-primary">120 minutes</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end pt-2">
-        <Button 
-          onClick={handleSave}
-          isLoading={saving}
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </div>
-        </>
       )}
     </div>
   );

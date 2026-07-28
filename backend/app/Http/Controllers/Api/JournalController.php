@@ -70,8 +70,8 @@ class JournalController extends Controller
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
+            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
         ]);
 
         if (empty($validated['status'])) {
@@ -147,8 +147,8 @@ class JournalController extends Controller
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf_path' => 'nullable|file|mimes:pdf|max:10240',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
+            'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxUploadSizeKb(),
         ]);
 
         try {
