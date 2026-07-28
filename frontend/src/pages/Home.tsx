@@ -109,7 +109,7 @@ const Home: React.FC = () => {
       <div className="space-y-12 w-full">
 
         {/* ── Hero Banner ──────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
           {/* Left: Site intro + search + stats */}
           <div className="lg:col-span-8 border border-border bg-surface p-8 lg:p-10 flex flex-col justify-between">
@@ -181,10 +181,10 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Announcements Panel — Fixed height to match natural hero height without expanding */}
-          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden h-[420px]">
+          {/* Right: Announcements Panel */}
+          <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden h-full">
             {/* Header Bar */}
-            <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-border shrink-0">
+            <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-secondary/30 shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-secondary" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white">Announcements</span>
@@ -194,8 +194,8 @@ const Home: React.FC = () => {
               </Link>
             </div>
 
-            {/* Announcements List */}
-            <div className="p-4 space-y-3 flex-1 flex flex-col justify-between overflow-y-auto min-h-0">
+            {/* Announcements List — Clean 3 items fitting height without scrollbar */}
+            <div className="p-4 flex-1 flex flex-col justify-between overflow-hidden divide-y divide-border/40">
               {loading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
@@ -213,20 +213,22 @@ const Home: React.FC = () => {
                 </div>
               ) : (
                 announcements.map((item) => (
-                  <Link to="/announcements" key={item.id} className="group block pb-2.5 border-b border-border/40 last:border-b-0 last:pb-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 py-0.5 uppercase tracking-wider">
-                        Notice
-                      </span>
-                      <span className="text-[10px] font-mono text-muted">
-                        {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                      </span>
+                  <Link to="/announcements" key={item.id} className="group flex flex-col justify-between py-2 flex-1 first:pt-0 last:pb-0">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 py-0.2 uppercase tracking-wider">
+                          Notice
+                        </span>
+                        <span className="text-[10px] font-mono text-muted">
+                          {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                      <h4 className="text-[12px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2">
+                        {item.title}
+                      </h4>
                     </div>
-                    <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors leading-snug line-clamp-2">
-                      {item.title}
-                    </h4>
                     <div
-                      className="text-[11px] text-muted line-clamp-3 prose prose-sm max-w-none mt-1 leading-relaxed"
+                      className="text-[11px] text-muted line-clamp-2 prose prose-sm max-w-none mt-1 leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body) }}
                     />
                   </Link>
@@ -235,7 +237,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Footer Bar */}
-            <div className="bg-surface px-4 py-2 border-t border-border flex items-center justify-between shrink-0">
+            <div className="bg-surface px-4 py-2.5 border-t border-border flex items-center justify-between shrink-0">
               <span className="text-[9px] text-muted font-medium">FCU Official Bulletin</span>
               <Link to="/announcements" className="text-[10px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
                 Read All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />

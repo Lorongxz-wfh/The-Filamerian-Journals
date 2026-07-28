@@ -71,7 +71,7 @@ const Navbar = () => {
     }
   };
   return (
-    <nav className="bg-primary sticky top-0 z-50">
+    <nav className="bg-primary sticky top-0 z-50 shadow-md border-b border-white/10">
       <div className="container-custom flex h-16 items-center justify-between gap-4 lg:gap-6">
         {/* Brand — flush left */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
