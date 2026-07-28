@@ -85,12 +85,12 @@ class JournalController extends Controller
 
         try {
             if ($request->hasFile('cover_image')) {
-                $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
+                $path = $request->file('cover_image')->store('journals/covers', config('filesystems.default'));
                 $validated['cover_image'] = $path;
             }
 
             if ($request->hasFile('pdf_path')) {
-                $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
+                $path = $request->file('pdf_path')->store('journals/pdfs', config('filesystems.default'));
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
@@ -156,10 +156,10 @@ class JournalController extends Controller
                 // Delete old image
                 if ($journal->cover_image) {
                     try {
-                        \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);
+                        \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($journal->cover_image);
                     } catch (\Throwable $t) {}
                 }
-                $path = $request->file('cover_image')->store('journals/covers', env('FILESYSTEM_DISK', 'public'));
+                $path = $request->file('cover_image')->store('journals/covers', config('filesystems.default'));
                 $validated['cover_image'] = $path;
             }
 
@@ -167,10 +167,10 @@ class JournalController extends Controller
                 // Delete old PDF
                 if ($journal->pdf_path) {
                     try {
-                        \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->pdf_path);
+                        \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($journal->pdf_path);
                     } catch (\Throwable $t) {}
                 }
-                $path = $request->file('pdf_path')->store('journals/pdfs', env('FILESYSTEM_DISK', 'public'));
+                $path = $request->file('pdf_path')->store('journals/pdfs', config('filesystems.default'));
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
@@ -204,12 +204,12 @@ class JournalController extends Controller
 
         // Delete cover image if exists
         if ($journal->cover_image) {
-            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->cover_image);
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($journal->cover_image);
         }
 
         // Delete PDF if exists
         if ($journal->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($journal->pdf_path);
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($journal->pdf_path);
         }
 
         $journal->delete();

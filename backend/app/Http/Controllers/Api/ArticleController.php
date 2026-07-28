@@ -64,7 +64,7 @@ class ArticleController extends Controller
 
         try {
             if ($request->hasFile('pdf_path')) {
-                $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
+                $path = $request->file('pdf_path')->store('articles', config('filesystems.default'));
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
@@ -214,10 +214,10 @@ class ArticleController extends Controller
                 // Delete old file
                 if ($article->pdf_path) {
                     try {
-                        \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
+                        \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($article->pdf_path);
                     } catch (\Throwable $t) {}
                 }
-                $path = $request->file('pdf_path')->store('articles', env('FILESYSTEM_DISK', 'public'));
+                $path = $request->file('pdf_path')->store('articles', config('filesystems.default'));
                 $validated['pdf_path'] = $path;
             }
         } catch (\Throwable $e) {
@@ -293,7 +293,7 @@ class ArticleController extends Controller
 
         // Delete PDF if exists
         if ($article->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($article->pdf_path);
+            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($article->pdf_path);
         }
 
         $article->delete();
@@ -349,7 +349,7 @@ class ArticleController extends Controller
 
         $cleanPath = ltrim(str_replace(['storage/', '/storage/'], '', $rawPath), '/');
 
-        $diskName = env('FILESYSTEM_DISK', 'public');
+        $diskName = config('filesystems.default');
         $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
 
         if (!$disk->exists($cleanPath)) {
