@@ -123,14 +123,14 @@ const ManageAnnouncements: React.FC = () => {
     <div className="space-y-8">
       <DashboardHeader title="Announcements">
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> New Announcement
+          <Plus className="h-4 w-4" /> Announcement
         </Button>
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {!loading && (
           <p className="text-[11px] text-muted">
-            Showing {announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
+            Showing {total > 0 ? 1 : 0}–{announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
           </p>
         )}
         <div className="w-full sm:w-auto flex justify-end">

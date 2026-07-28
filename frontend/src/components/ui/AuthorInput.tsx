@@ -174,8 +174,8 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
   const showCreateNew = showDropdown && lastQuery.length >= 2 && !isSearching && !author.id;
 
   return (
-    <div ref={containerRef} className="flex items-start gap-2 mb-3 pb-3 border-b border-border/50 relative last:border-b-0 last:pb-0 last:mb-0">
-      <div className="flex-grow relative">
+    <div ref={containerRef} className="group relative w-full mb-3 pb-3 border-b border-border/50 last:border-b-0 last:pb-0 last:mb-0">
+      <div className="w-full relative">
         <AuthorFormFields
           values={author}
           onChange={handleChange}
@@ -227,16 +227,14 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
       </div>
 
       {onRemove && (
-        <div className="flex items-center shrink-0 pt-1">
-          <button
-            type="button"
-            onClick={onRemove}
-            className="p-1.5 text-muted hover:text-red-600 hover:bg-red-50 transition-colors"
-            title="Remove author"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="absolute -top-2 -right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-rose-50 text-rose-500 border border-border p-1 shadow-md rounded cursor-pointer"
+          title="Remove author row"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );

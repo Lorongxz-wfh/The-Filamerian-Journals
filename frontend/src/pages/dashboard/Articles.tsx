@@ -31,6 +31,7 @@ interface Article {
   keywords?: any[];
   volume: any;
   created_at: string;
+  updated_at?: string;
 }
 
 const getStatusVariant = (status: string) => {
@@ -227,10 +228,10 @@ const Articles: React.FC = () => {
             onClick={() => navigate('/dashboard/import?tab=articles')}
             className="shrink-0 flex items-center gap-2"
           >
-            <Upload className="h-4 w-4" /> Bulk Import
+            <Upload className="h-4 w-4" /> Import
           </Button>
           <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Submit Article
+            <Plus className="h-4 w-4" /> Article
           </Button>
         </div>
       </DashboardHeader>
@@ -291,11 +292,11 @@ const Articles: React.FC = () => {
               <div className="flex items-center gap-1">Journal {getSortIcon('journal')}</div>
             </TableHead>
             <TableHead>Authors</TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('status')}>
-              <div className="flex items-center gap-1">Status {getSortIcon('status')}</div>
-            </TableHead>
             <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('created_at')}>
               <div className="flex items-center gap-1">Submitted {getSortIcon('created_at')}</div>
+            </TableHead>
+            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
+              <div className="flex items-center gap-1">Last Updated {getSortIcon('updated_at')}</div>
             </TableHead>
             <TableHead className="w-28 text-right">Actions</TableHead>
           </TableRow>
@@ -317,11 +318,18 @@ const Articles: React.FC = () => {
                 onClick={() => articleHasPdf(article) && viewPdf(article)}
               >
                 <TableCell>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="h-4 w-4 text-primary/20 shrink-0" />
-                    <span className="text-[13px] font-medium text-primary truncate max-w-[260px]">
-                      {article.title}
-                    </span>
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary/20 shrink-0" />
+                      <span className="text-[13px] font-medium text-primary truncate max-w-[260px]">
+                        {article.title}
+                      </span>
+                    </div>
+                    <div className="mt-1 pl-6">
+                      <Badge variant={getStatusVariant(article.status)}>
+                        {article.status}
+                      </Badge>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className="text-muted truncate max-w-[180px]">
@@ -330,13 +338,13 @@ const Articles: React.FC = () => {
                 <TableCell className="text-muted">
                   {article.authors?.map(a => a.name).join(', ') || '-'}
                 </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(article.status)}>
-                    {article.status}
-                  </Badge>
-                </TableCell>
                 <TableCell className="text-muted">
                   {new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </TableCell>
+                <TableCell className="text-muted">
+                  {article.updated_at
+                    ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                    : '-'}
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-1">

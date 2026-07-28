@@ -228,18 +228,25 @@ const UserManager: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <DashboardHeader title="User Manager">
+      <DashboardHeader title="User Management">
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add User
+          <Plus className="h-4 w-4" /> User
         </Button>
       </DashboardHeader>
 
-      <div className="flex justify-end">
-        <SearchInput 
-          placeholder="Search users by name or email..." 
-          value={filter} 
-          onChange={(e) => setFilter(e.target.value)} 
-        />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {!loading && (
+          <p className="text-[11px] text-muted">
+            Showing {users.length > 0 ? Math.min((page - 1) * 10 + 1, users.length) : 0}–{users.length} of {users.length} user{users.length !== 1 ? 's' : ''}
+          </p>
+        )}
+        <div className="w-full sm:w-auto flex justify-end">
+          <SearchInput 
+            placeholder="Search users by name or email..." 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)} 
+          />
+        </div>
       </div>
 
       <Table>

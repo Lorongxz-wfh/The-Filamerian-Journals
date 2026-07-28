@@ -48,6 +48,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [readPages, setReadPages] = useState<Record<string, boolean>>({});
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const notifRef = useRef<HTMLDivElement>(null);
@@ -232,11 +233,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             Navigation
           </span>
           {visibleMenuItems.map((item) => {
-            const hasUnread = (item.path === '/dashboard/feedback' || item.path === '/dashboard/announcements');
+            const isCurrentPage = location.pathname === item.path;
+            const isRead = readPages[item.path] || isCurrentPage;
+            const hasUnread = !isRead && (item.path === '/dashboard/feedback' || item.path === '/dashboard/announcements');
             return (
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => setReadPages(prev => ({ ...prev, [item.path]: true }))}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
                   location.pathname === item.path

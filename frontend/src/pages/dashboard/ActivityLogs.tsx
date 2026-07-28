@@ -89,8 +89,8 @@ const ActivityLogs: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      {/* Sleek, Compact Inline Filter Toolbar (No wasting outer box space) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-1 pb-2">
+      {/* Sleek, Compact Inline Filter Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Action Filter */}
           <div className="flex items-center gap-2 w-48">
@@ -148,9 +148,11 @@ const ActivityLogs: React.FC = () => {
           )}
         </div>
 
-        <span className="text-[11px] font-mono text-muted">
-          Showing {logs.length} logs
-        </span>
+        {!loading && (
+          <span className="text-[11px] text-muted">
+            Showing {logs.length > 0 ? Math.min((page - 1) * 15 + 1, logs.length) : 0}–{logs.length} of {logs.length} activity logs
+          </span>
+        )}
       </div>
 
       {/* Scrollable Container with Sticky Header */}

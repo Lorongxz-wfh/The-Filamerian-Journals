@@ -172,7 +172,7 @@ const Navbar = () => {
             title="Announcements & News"
           >
             <Bell className="h-4 w-4" />
-            {hasAnnouncements && (
+            {hasAnnouncements && !path.startsWith('/announcements') && (
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 ring-2 ring-primary animate-pulse" />
             )}
           </Link>

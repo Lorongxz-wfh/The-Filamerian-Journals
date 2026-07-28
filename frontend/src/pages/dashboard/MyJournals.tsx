@@ -308,6 +308,22 @@ const MyJournals: React.FC = () => {
     return sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3 opacity-100" /> : <ArrowDown className="h-3 w-3 opacity-100" />;
   };
 
+  const [statusTab, setStatusTab] = useState<'all' | 'Published' | 'Draft'>('all');
+
+  const filteredJournals = React.useMemo(() => {
+    return sortedJournals.filter(j => {
+      if (statusTab !== 'all' && j.status !== statusTab) return false;
+      if (categoryFilter && j.category?.slug !== categoryFilter) return false;
+      return true;
+    });
+  }, [sortedJournals, statusTab, categoryFilter]);
+
+  const tabs = [
+    { key: 'all' as const, label: 'All' },
+    { key: 'Published' as const, label: 'Published' },
+    { key: 'Draft' as const, label: 'Draft' },
+  ];
+
   return (
     <div className="space-y-8">
       <DashboardHeader title="My Journals">
@@ -318,39 +334,64 @@ const MyJournals: React.FC = () => {
             className="shrink-0 flex items-center gap-2"
           >
             <Upload className="h-4 w-4" />
-            Bulk Import
+            Import
           </Button>
           <Button 
             onClick={() => handleOpenModal()}
             className="shrink-0 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            New Journal
+            Journal
           </Button>
         </div>
       </DashboardHeader>
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Filter:</label>
-            <div className="w-[200px]">
-              <Select
-                value={categoryFilter}
-                onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
-                options={[
-                  { value: '', label: 'All Categories' },
-                  ...availableCategories.map(cat => ({ value: cat.slug, label: cat.name }))
-                ]}
-              />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Status tabs */}
+            <div className="flex gap-1 border border-border bg-surface">
+              {tabs.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setStatusTab(t.key)}
+                  className={`px-4 py-2 text-[12px] font-medium transition-colors ${
+                    statusTab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Category filter */}
+            <div className="flex items-center gap-2">
+              <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Category:</label>
+              <div className="w-[200px]">
+                <Select
+                  value={categoryFilter}
+                  onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
+                  options={[
+                    { value: '', label: 'All Categories' },
+                    ...availableCategories.map(cat => ({ value: cat.slug, label: cat.name }))
+                  ]}
+                />
+              </div>
             </div>
           </div>
           <SearchInput 
-            placeholder="Search journals by title..."
+            placeholder="Search journals..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
         </div>
+
+        {/* Pagination Result Count */}
+        {!loading && (
+          <p className="text-[11px] text-muted">
+            Showing {filteredJournals.length > 0 ? Math.min((page - 1) * 10 + 1, filteredJournals.length) : 0}–{Math.min(page * 10, filteredJournals.length)} of {filteredJournals.length} journal{filteredJournals.length !== 1 ? 's' : ''}
+          </p>
+        )}
 
         <Table>
         <TableHeader>
@@ -373,14 +414,14 @@ const MyJournals: React.FC = () => {
         <TableBody>
           {loading ? (
             <TableRowSkeleton columns={5} rows={5} />
-          ) : sortedJournals.length === 0 ? (
+          ) : filteredJournals.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="h-32 text-center">
                 <EmptyState title="No journals" description="No journals match your criteria." className="bg-transparent border-0 py-16" />
               </TableCell>
             </TableRow>
           ) : (
-            sortedJournals.map((journal) => (
+            filteredJournals.map((journal) => (
               <TableRow
                 key={journal.id}
                 onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}

@@ -265,7 +265,7 @@ const Categories: React.FC = () => {
                 </Button>
               )}
               <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2">
-                <Plus className="h-4 w-4" /> Add Category
+                <Plus className="h-4 w-4" /> Category
               </Button>
             </>
           ) : (
@@ -281,14 +281,21 @@ const Categories: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Search Input (on the Right side) */}
+      {/* Search Input & Count Text */}
       {!isReordering && (
-        <div className="flex justify-end">
-          <SearchInput
-            placeholder="Search categories..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          {!loading && (
+            <p className="text-[11px] text-muted">
+              Showing {filtered.length > 0 ? 1 : 0}–{filtered.length} of {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
+            </p>
+          )}
+          <div className="w-full sm:w-auto flex justify-end">
+            <SearchInput
+              placeholder="Search categories..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
         </div>
       )}
 

@@ -192,14 +192,14 @@ const ManageAuthors: React.FC = () => {
     <div className="space-y-8">
       <DashboardHeader title="Authors">
         <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> New Author
+          <Plus className="h-4 w-4" /> Author
         </Button>
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {!loading && (
           <p className="text-[11px] text-muted shrink-0">
-            {total} author{total !== 1 ? 's' : ''}
+            Showing {total > 0 ? Math.min((page - 1) * PER_PAGE + 1, total) : 0}–{Math.min(page * PER_PAGE, total)} of {total} author{total !== 1 ? 's' : ''}
           </p>
         )}
         <div className="w-full sm:w-auto flex justify-end">
