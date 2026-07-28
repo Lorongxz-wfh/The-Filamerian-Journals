@@ -80,39 +80,43 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Search — center, fills available space */}
-        <div className="hidden md:block flex-grow max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
-            <input
-              type="text"
-              placeholder="Search journals, articles, authors..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => {
-                if (searchQuery.trim()) setIsDropdownOpen(true);
-              }}
-              onKeyDown={handleSearch}
-              className="w-full pl-10 pr-10 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-            
-            <SearchDropdown 
-              query={debouncedSearch}
-              results={searchResults}
-              loading={isSearchLoading}
-              isOpen={isDropdownOpen}
-              onClose={() => setIsDropdownOpen(false)}
-            />
+        {/* Search — center, fills available space (hidden on Home page to prevent double search) */}
+        {path !== '/' ? (
+          <div className="hidden md:block flex-grow max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
+              <input
+                type="text"
+                placeholder="Search journals, articles, authors..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim()) setIsDropdownOpen(true);
+                }}
+                onKeyDown={handleSearch}
+                className="w-full pl-10 pr-10 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+              
+              <SearchDropdown 
+                query={debouncedSearch}
+                results={searchResults}
+                loading={isSearchLoading}
+                isOpen={isDropdownOpen}
+                onClose={() => setIsDropdownOpen(false)}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex-grow max-w-md hidden md:block" />
+        )}
 
         {/* Nav links + Login — flush right */}
         <div className="hidden md:flex items-center gap-6 shrink-0 h-full">
