@@ -50,17 +50,19 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Backdrop — no blur to avoid GPU jank */}
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity cursor-pointer" 
+        className="fixed inset-0 bg-black/60 cursor-pointer" 
         onClick={handleAttemptClose}
       />
       
       {/* Panel */}
-      <div className={cn(
-        "relative bg-surface border border-border/60 w-full max-w-lg shadow-2xl shadow-black/20 flex flex-col max-h-[90vh]",
-        className
-      )}>
+      <div
+        style={{ willChange: 'transform' }}
+        className={cn(
+          "relative bg-surface border border-border/60 w-full max-w-lg shadow-xl flex flex-col max-h-[90vh]",
+          className
+        )}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-primary">{title}</h2>

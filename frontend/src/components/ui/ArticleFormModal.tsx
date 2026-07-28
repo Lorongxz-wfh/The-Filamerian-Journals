@@ -58,7 +58,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
       setIsDirtyForm(false);
       if (editingArticle) {
         setFormData({
-          volume_id: String(editingArticle.volume?.id || ''),
+          volume_id: String(editingArticle.volume?.id || editingArticle.volume_id || initialVolumeId || ''),
           title: editingArticle.title || '',
           abstract: editingArticle.abstract || '',
           doi: editingArticle.doi || '',

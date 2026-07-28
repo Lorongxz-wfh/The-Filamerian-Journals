@@ -184,45 +184,43 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
           onKeyDown={handleKeyDown}
         />
 
-        {/* Dropdown: suggestions + create-new option */}
+        {/* Dropdown: scrollable suggestions + pinned create-new */}
         {showDropdown && (
-          <div className="absolute top-full left-0 z-50 bg-white border border-border shadow-lg mt-0.5 w-full overflow-hidden">
+          <div className="absolute top-full left-0 z-50 bg-white border border-border shadow-lg mt-0.5 w-full flex flex-col">
 
-            {/* Existing matches */}
-            {suggestions.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(s); }}
-                className="w-full text-left px-3 py-2.5 text-[12px] hover:bg-primary/5 border-b border-border/40 last:border-b-0 flex items-start justify-between gap-2"
-              >
-                <div>
-                  <span className="font-semibold text-primary block">{s.name}</span>
-                  <span className="text-muted text-[10px]">{[s.first_name, s.middle_name, s.last_name, s.suffix].filter(Boolean).join(' ')}</span>
-                </div>
-                <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 font-bold uppercase tracking-wider shrink-0 mt-0.5">existing</span>
-              </button>
-            ))}
+            {/* Scrollable suggestions list — max ~4 items visible */}
+            {suggestions.length > 0 && (
+              <div className="max-h-36 overflow-y-auto">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); handleSelectSuggestion(s); }}
+                    className="w-full text-left px-3 py-2 text-[12px] hover:bg-primary/5 border-b border-border/40 last:border-b-0 flex items-center justify-between gap-2"
+                  >
+                    <span className="font-semibold text-primary truncate">{s.name}</span>
+                    <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 font-bold uppercase tracking-wider shrink-0">existing</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
-            {/* Create new author option — always shown when typing a name not yet confirmed */}
+            {/* Pinned create-new button — always visible when name is complete */}
             {showCreateNew && isComplete && (
               <button
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); handleConfirmNew(); }}
-                className="w-full text-left px-3 py-2.5 text-[12px] hover:bg-blue-50 flex items-center gap-2 border-t border-border/40 bg-white"
+                className="w-full text-left px-3 py-2 text-[12px] hover:bg-blue-50 flex items-center gap-2 border-t border-border/40 bg-white shrink-0"
               >
                 <UserPlus className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                <div>
-                  <span className="font-semibold text-blue-600">Create "{formatName()}" as new author</span>
-                  <span className="text-muted text-[10px] block">Will be saved to the author directory when you submit</span>
-                </div>
+                <span className="font-medium text-blue-600 truncate">+ Create "<span className="font-semibold">{formatName()}</span>" as new author</span>
               </button>
             )}
 
-            {/* When name is partially filled but not complete yet */}
+            {/* Hint when incomplete */}
             {showCreateNew && !isComplete && suggestions.length === 0 && (
-              <div className="px-3 py-2.5 text-[11px] text-muted italic">
-                Fill in First Name and Last Name to create a new author
+              <div className="px-3 py-2 text-[11px] text-muted italic">
+                Enter first and last name to create a new author
               </div>
             )}
           </div>
