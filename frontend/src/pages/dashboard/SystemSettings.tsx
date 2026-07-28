@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Shield, Server, CheckCircle2, HardDrive } from 'lucide-react';
 import api from '@/services/api';
-import { FormSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
@@ -74,16 +74,15 @@ const SystemSettings: React.FC = () => {
     }
   };
 
-  // Quota: 50 GB default
-  const totalQuotaBytes = 50 * 1024 * 1024 * 1024;
-  const storagePercentage = Math.min(100, Math.max(0, (usedStorageBytes / totalQuotaBytes) * 100));
-
   return (
-    <div className="space-y-8 font-sans w-full max-w-5xl">
+    <div className="space-y-8 font-sans w-full">
       <DashboardHeader title="System Settings" />
 
       {loading ? (
-        <FormSkeleton rows={6} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+          <Skeleton className="h-[240px] w-full" />
+          <Skeleton className="h-[240px] w-full" />
+        </div>
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -121,18 +120,11 @@ const SystemSettings: React.FC = () => {
                     <div className="flex justify-between items-center text-[12px]">
                       <span className="text-muted flex items-center gap-1.5">
                         <HardDrive className="h-3.5 w-3.5 text-muted" />
-                        Storage Used
+                        Media Storage Used
                       </span>
                       <span className="font-mono text-xs text-primary font-semibold">
-                        {formatBytes(usedStorageBytes)} / 50 GB
+                        {formatBytes(usedStorageBytes)}
                       </span>
-                    </div>
-                    {/* Visual Progress Bar */}
-                    <div className="w-full h-2 bg-background border border-border/60 overflow-hidden">
-                      <div 
-                        className="h-full bg-primary transition-all duration-500"
-                        style={{ width: `${Math.max(1, storagePercentage)}%` }}
-                      />
                     </div>
                   </div>
 

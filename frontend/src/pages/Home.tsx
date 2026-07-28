@@ -125,7 +125,9 @@ const Home: React.FC = () => {
               {aboutHtml ? (
                 <div
                   className="text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(aboutHtml) }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: DOMPurify.sanitize(aboutHtml.replace(/<h[12][^>]*>.*?<\/h[12]>/gi, '')) 
+                  }}
                 />
               ) : (
                 <p className="text-muted text-sm leading-relaxed max-w-xl">
