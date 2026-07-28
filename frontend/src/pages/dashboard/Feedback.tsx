@@ -68,7 +68,7 @@ const Feedback: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <DashboardHeader title="Feedback" />
+      <DashboardHeader title="User Feedback" />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
         {/* Message List */}

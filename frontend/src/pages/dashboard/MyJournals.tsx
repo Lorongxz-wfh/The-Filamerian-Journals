@@ -327,7 +327,7 @@ const MyJournals: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <DashboardHeader title="My Journals">
+      <DashboardHeader title="Journals">
         <div className="flex items-center gap-3">
           <Button 
             variant="outline"

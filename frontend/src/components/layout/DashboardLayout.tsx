@@ -111,17 +111,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
   const menuItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Admin'] },
-    { label: 'My Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Admin', 'Super Admin'] },
+    { label: 'Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Admin', 'Super Admin'] },
     { label: 'Articles', icon: FileText, path: '/dashboard/articles', roles: ['Admin', 'Super Admin'] },
     { label: 'Authors', icon: UserCheck, path: '/dashboard/authors', roles: ['Admin', 'Super Admin'] },
-    { label: 'Import', icon: Upload, path: '/dashboard/import', roles: ['Admin', 'Super Admin'] },
+    { label: 'Bulk Import', icon: Upload, path: '/dashboard/import', roles: ['Admin', 'Super Admin'] },
     { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Admin'] },
-    { label: 'Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
+    { label: 'User Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
   ];
 
   const adminItems = [
     { path: '/dashboard/categories', label: 'Categories', icon: BookOpen, roles: ['Super Admin', 'Admin'] },
-    { path: '/dashboard/users', label: 'User Management', icon: Users, roles: ['Super Admin'] },
+    { path: '/dashboard/users', label: 'User Accounts', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },
     { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },

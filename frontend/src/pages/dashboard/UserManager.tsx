@@ -228,7 +228,7 @@ const UserManager: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <DashboardHeader title="User Management">
+      <DashboardHeader title="User Accounts">
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
           <Plus className="h-4 w-4" /> User
         </Button>
