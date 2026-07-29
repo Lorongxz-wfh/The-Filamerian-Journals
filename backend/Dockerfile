@@ -26,6 +26,9 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . .
 
+# Generate unique build timestamp during Docker image build
+RUN date +%s > /var/www/html/BUILD_STAMP
+
 # Install PHP dependencies (with retry and source fallback for Github 400 errors)
 RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction || \
     composer install --no-dev --optimize-autoloader --prefer-source --no-interaction
