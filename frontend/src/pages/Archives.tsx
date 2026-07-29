@@ -615,9 +615,15 @@ const Archives: React.FC = () => {
                                 {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
                               </p>
                               <div className="flex items-center gap-4 mt-2 text-[11px] text-muted/60">
-                                {article.page_start && article.page_end && (
-                                  <span>pp. {article.page_start}-{article.page_end}</span>
-                                )}
+                                 {(article.page_start || article.page_end) && (
+                                   <span>
+                                     {article.page_start && article.page_end
+                                       ? `pp. ${article.page_start}–${article.page_end}`
+                                       : article.page_start
+                                       ? `p. ${article.page_start}`
+                                       : `p. ${article.page_end}`}
+                                   </span>
+                                 )}
                                 {article.doi && <span>DOI: {article.doi}</span>}
                               </div>
                             </div>
@@ -808,8 +814,14 @@ const Archives: React.FC = () => {
                           {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
                         </p>
                         <div className="flex items-center gap-4 mt-2 text-[11px] text-muted/60">
-                          {article.page_start && article.page_end && (
-                            <span>pp. {article.page_start}-{article.page_end}</span>
+                          {(article.page_start || article.page_end) && (
+                            <span>
+                              {article.page_start && article.page_end
+                                ? `pp. ${article.page_start}–${article.page_end}`
+                                : article.page_start
+                                ? `p. ${article.page_start}`
+                                : `p. ${article.page_end}`}
+                            </span>
                           )}
                           {article.doi && <span>DOI: {article.doi}</span>}
                         </div>

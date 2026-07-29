@@ -416,8 +416,14 @@ const JournalDetail: React.FC = () => {
                                   </p>
                                 )}
                                 <div className="flex items-center gap-4 mt-3 text-[11px] text-muted/50">
-                                  {article.page_start && article.page_end && (
-                                    <span className="bg-background border border-border px-1.5 py-0.5">pp. {article.page_start}-{article.page_end}</span>
+                                  {(article.page_start || article.page_end) && (
+                                    <span className="bg-background border border-border px-1.5 py-0.5 font-mono">
+                                      {article.page_start && article.page_end
+                                        ? `pp. ${article.page_start}–${article.page_end}`
+                                        : article.page_start
+                                        ? `p. ${article.page_start}`
+                                        : `p. ${article.page_end}`}
+                                    </span>
                                   )}
                                   {article.doi && <span>DOI: {article.doi}</span>}
                                 </div>

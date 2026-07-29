@@ -136,6 +136,12 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
       payload.append('abstract', formData.abstract);
       payload.append('doi', formData.doi);
       payload.append('status', formData.status);
+      if (formData.page_start !== '' && formData.page_start !== null) {
+        payload.append('page_start', formData.page_start);
+      }
+      if (formData.page_end !== '' && formData.page_end !== null) {
+        payload.append('page_end', formData.page_end);
+      }
       
       formData.authors.forEach((author, index) => {
         if (author.first_name || author.last_name) {
