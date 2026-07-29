@@ -16,7 +16,8 @@ import {
   Check,
   Loader2,
   Globe,
-  Upload
+  Upload,
+  HelpCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/services/api';
@@ -25,6 +26,7 @@ import SplashLoader from '@/components/ui/SplashLoader';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
+import KeyboardShortcutsModal from '@/components/ui/KeyboardShortcutsModal';
 import { toast } from 'sonner';
 
 
@@ -85,15 +87,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   }, [debouncedSearch]);
 
   const dashSearchInputRef = useRef<HTMLInputElement>(null);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) return;
+
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         dashSearchInputRef.current?.focus();
-      } else if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) {
+      } else if (e.key === '?') {
         e.preventDefault();
-        dashSearchInputRef.current?.focus();
+        setIsShortcutsOpen(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -444,7 +449,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end min-w-[40px] gap-4">
+          <div className="flex items-center justify-end min-w-[40px] gap-2">
+            <button
+              onClick={() => setIsShortcutsOpen(true)}
+              className="h-8 w-8 flex items-center justify-center text-muted hover:text-primary transition-colors rounded-none"
+              title="Keyboard Shortcuts & Help Guide (?)"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
 
             <div className="relative" ref={notifRef}>
               <button 
@@ -514,6 +526,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
         <main className="flex-grow p-6 overflow-y-auto">
           <Outlet />
         </main>
+
+        <KeyboardShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
       </div>
     </div>
   );

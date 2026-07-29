@@ -185,6 +185,18 @@ const Categories: React.FC = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) return;
+      if (e.key.toLowerCase() === 'n' && !isModalOpen) {
+        e.preventDefault();
+        openModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   const moveCategory = (index: number, direction: 'up' | 'down') => {
     const newItems = [...categories];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;

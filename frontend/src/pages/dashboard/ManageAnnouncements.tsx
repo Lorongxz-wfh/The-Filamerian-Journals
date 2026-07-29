@@ -70,6 +70,18 @@ const ManageAnnouncements: React.FC = () => {
     fetchData();
   }, [page, debouncedFilter]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) return;
+      if (e.key.toLowerCase() === 'n' && !isModalOpen) {
+        e.preventDefault();
+        handleOpenModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   const handleOpenModal = (item: Announcement | null = null) => {
     setError(null);
     setEditingItem(item);
