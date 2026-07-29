@@ -124,13 +124,13 @@ const Home: React.FC = () => {
 
               {aboutHtml ? (
                 <div
-                  className="text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none"
+                  className="text-left text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none [&_*]:text-left"
                   dangerouslySetInnerHTML={{ 
                     __html: DOMPurify.sanitize(aboutHtml.replace(/<h[12][^>]*>.*?<\/h[12]>/gi, '')) 
                   }}
                 />
               ) : (
-                <p className="text-muted text-sm leading-relaxed max-w-xl">
+                <p className="text-left text-muted text-sm leading-relaxed max-w-xl">
                   The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
                 </p>
               )}

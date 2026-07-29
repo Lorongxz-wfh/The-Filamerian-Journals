@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2, Archive, ArchiveRestore } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import { MessageListSkeleton } from '@/components/ui/Skeleton';
@@ -16,9 +16,11 @@ interface FeedbackItem {
   message: string;
   created_at: string;
   is_read: boolean;
+  is_archived?: boolean;
 }
 
 const Feedback: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,8 +34,9 @@ const Feedback: React.FC = () => {
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/feedbacks?page=${page}`);
-      setFeedbacks(res.data.data);
+      const isArchived = activeTab === 'archived';
+      const res = await api.get(`/feedbacks?archived=${isArchived ? 'true' : 'false'}&page=${page}`);
+      setFeedbacks(res.data.data || []);
       setLastPage(res.data.last_page || 1);
     } catch (err) {
       console.error('Failed to fetch feedbacks', err);
@@ -45,7 +48,8 @@ const Feedback: React.FC = () => {
 
   useEffect(() => {
     fetchFeedbacks();
-  }, [page]);
+    setSelected(null);
+  }, [page, activeTab]);
 
   const handleSelect = async (id: number) => {
     setSelected(id);
@@ -57,6 +61,18 @@ const Feedback: React.FC = () => {
       } catch (err) {
         console.error('Failed to mark read', err);
       }
+    }
+  };
+
+  const handleToggleArchive = async (id: number, currentArchived: boolean) => {
+    try {
+      await api.put(`/feedbacks/${id}`, { is_archived: !currentArchived });
+      toast.success(currentArchived ? 'Feedback restored to active inbox' : 'Feedback moved to archive');
+      setFeedbacks(feedbacks.filter(f => f.id !== id));
+      if (selected === id) setSelected(null);
+    } catch (err) {
+      console.error('Failed to update archive status', err);
+      toast.error('Failed to update feedback status');
     }
   };
 
@@ -80,8 +96,33 @@ const Feedback: React.FC = () => {
   const selectedItem = feedbacks.find((f) => f.id === selected);
 
   return (
-    <div className="space-y-8">
-      <DashboardHeader title="User Feedback" />
+    <div className="space-y-8 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <DashboardHeader title="User Feedback" />
+        <div className="flex items-center gap-1 border border-border bg-surface p-1 self-start sm:self-auto">
+          <button
+            onClick={() => { setActiveTab('active'); setPage(1); }}
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors ${
+              activeTab === 'active'
+                ? 'bg-primary text-white'
+                : 'text-muted hover:text-primary hover:bg-background'
+            }`}
+          >
+            Active Feedback
+          </button>
+          <button
+            onClick={() => { setActiveTab('archived'); setPage(1); }}
+            className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors flex items-center gap-1.5 ${
+              activeTab === 'archived'
+                ? 'bg-primary text-white'
+                : 'text-muted hover:text-primary hover:bg-background'
+            }`}
+          >
+            <Archive className="h-3.5 w-3.5" />
+            Archived Messages
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
         {/* Message List */}
@@ -91,7 +132,7 @@ const Feedback: React.FC = () => {
               <MessageListSkeleton rows={6} />
             ) : feedbacks.length === 0 ? (
               <div className="p-8 text-center text-muted text-[13px]">
-                No messages found.
+                {activeTab === 'archived' ? 'No archived feedback messages.' : 'No active feedback messages.'}
               </div>
             ) : (
               feedbacks.map((item) => (
@@ -144,13 +185,32 @@ const Feedback: React.FC = () => {
                     </span>
                     <h2 className="text-[15px] font-semibold text-primary leading-snug">{selectedItem.subject}</h2>
                   </div>
-                  <button 
-                    onClick={() => setDeleteTargetId(selectedItem.id)}
-                    className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"
-                    title="Delete message"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleToggleArchive(selectedItem.id, activeTab === 'archived')}
+                      className="px-2.5 py-1.5 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1.5"
+                      title={activeTab === 'archived' ? 'Restore to Active Inbox' : 'Move to Archive'}
+                    >
+                      {activeTab === 'archived' ? (
+                        <>
+                          <ArchiveRestore className="h-3.5 w-3.5" />
+                          <span>Restore</span>
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="h-3.5 w-3.5" />
+                          <span>Archive</span>
+                        </>
+                      )}
+                    </button>
+                    <button 
+                      onClick={() => setDeleteTargetId(selectedItem.id)}
+                      className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"
+                      title="Permanently Delete Message"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-[12px] text-muted">
                   <span>From: <span className="font-medium text-primary/70">{selectedItem.name}</span></span>

@@ -17,10 +17,12 @@ class Feedback extends Model
         'subject',
         'message',
         'is_read',
+        'is_archived',
         'category',
     ];
     
     protected $casts = [
         'is_read' => 'boolean',
+        'is_archived' => 'boolean',
     ];
 }

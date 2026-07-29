@@ -111,6 +111,7 @@ Route::post('/public/feedbacks', [\App\Http\Controllers\Api\FeedbackController::
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware([\App\Http\Middleware\EnsureUserIsApproved::class])->group(function () {
         Route::post('/settings', [\App\Http\Controllers\Api\SettingController::class, 'store'])->middleware('role:Super Admin');
+        Route::get('/feedbacks/unread-count', [\App\Http\Controllers\Api\FeedbackController::class, 'unreadCount'])->middleware('role:Super Admin|Admin');
         Route::get('/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'index'])->middleware('role:Super Admin|Admin');
         Route::put('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'update'])->middleware('role:Super Admin|Admin');
         Route::delete('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'destroy'])->middleware('role:Super Admin');

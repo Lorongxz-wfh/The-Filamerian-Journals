@@ -24,7 +24,7 @@ interface AuthorFormFieldsProps {
 }
 
 const fieldStyle =
-  'w-full px-3 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary transition-colors';
+  'w-full px-2.5 py-2 border border-border text-[13px] bg-white focus:outline-none focus:border-primary transition-colors text-ellipsis overflow-hidden';
 
 const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
   values,
@@ -38,9 +38,9 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
       onChange({ ...values, [field]: e.target.value });
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-[3fr_2.5fr_2.5fr_1fr] gap-2 ${className}`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-12 gap-2 ${className}`}>
       {/* First Name */}
-      <div className="relative">
+      <div className="relative sm:col-span-4">
         <input
           type="text"
           value={values.first_name}
@@ -51,7 +51,7 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
           className={fieldStyle}
         />
         {!values.first_name && (
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
             <span className="text-[13px] text-gray-400">
               First Name <span className="text-red-500">*</span>
             </span>
@@ -60,18 +60,20 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
       </div>
 
       {/* Middle Name */}
-      <input
-        type="text"
-        value={values.middle_name}
-        onChange={handle('middle_name')}
-        onKeyDown={onKeyDown}
-        placeholder="Middle Name / Initial"
-        autoComplete="off"
-        className={fieldStyle}
-      />
+      <div className="sm:col-span-3">
+        <input
+          type="text"
+          value={values.middle_name}
+          onChange={handle('middle_name')}
+          onKeyDown={onKeyDown}
+          placeholder="Middle Name / Init"
+          autoComplete="off"
+          className={fieldStyle}
+        />
+      </div>
 
       {/* Last Name */}
-      <div className="relative">
+      <div className="relative sm:col-span-3">
         <input
           type="text"
           value={values.last_name}
@@ -81,7 +83,7 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
           className={fieldStyle}
         />
         {!values.last_name && (
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
             <span className="text-[13px] text-gray-400">
               Last Name <span className="text-red-500">*</span>
             </span>
@@ -90,15 +92,17 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
       </div>
 
       {/* Suffix */}
-      <input
-        type="text"
-        value={values.suffix}
-        onChange={handle('suffix')}
-        onKeyDown={onKeyDown}
-        placeholder="Suffix"
-        autoComplete="off"
-        className={fieldStyle}
-      />
+      <div className="sm:col-span-2">
+        <input
+          type="text"
+          value={values.suffix}
+          onChange={handle('suffix')}
+          onKeyDown={onKeyDown}
+          placeholder="Suffix"
+          autoComplete="off"
+          className={fieldStyle}
+        />
+      </div>
     </div>
   );
 };

@@ -9,7 +9,7 @@ interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
   ({ className, containerClassName, ...props }, ref) => {
     return (
-      <div className={cn("relative w-full sm:max-w-xs", containerClassName)}>
+      <div className={cn("relative w-full sm:w-72 sm:max-w-sm", containerClassName)}>
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted/40" />
         <input
           ref={ref}

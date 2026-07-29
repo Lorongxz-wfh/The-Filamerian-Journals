@@ -11,7 +11,23 @@ class FeedbackController extends Controller
     public function index(Request $request)
     {
         $query = Feedback::orderBy('created_at', 'desc');
-        return response()->json($query->paginate(50));
+
+        if ($request->has('archived') && $request->archived == 'true') {
+            $query->where('is_archived', true);
+        } else {
+            $query->where('is_archived', false);
+        }
+
+        $paginated = $query->paginate(50);
+        $paginated->appends(['unread_count' => Feedback::where('is_archived', false)->where('is_read', false)->count()]);
+
+        return response()->json($paginated);
+    }
+
+    public function unreadCount()
+    {
+        $count = Feedback::where('is_archived', false)->where('is_read', false)->count();
+        return response()->json(['unread_count' => $count]);
     }
 
     public function store(Request $request)
@@ -31,7 +47,8 @@ class FeedbackController extends Controller
     public function update(Request $request, Feedback $feedback)
     {
         $validated = $request->validate([
-            'is_read' => 'boolean'
+            'is_read' => 'nullable|boolean',
+            'is_archived' => 'nullable|boolean',
         ]);
 
         $feedback->update($validated);

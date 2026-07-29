@@ -115,8 +115,8 @@ const Announcements: React.FC = () => {
                 >
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5 text-secondary" />
-                        <span className="text-[11px] font-semibold text-secondary uppercase tracking-wider font-mono">
+                        <span className="bg-primary text-secondary px-2.5 py-1 text-[11px] font-bold font-mono uppercase tracking-wider inline-flex items-center gap-1.5 shadow-2xs">
+                          <Calendar className="h-3 w-3 text-secondary shrink-0" />
                           {new Date(item.created_at).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'long',

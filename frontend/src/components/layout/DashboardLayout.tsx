@@ -50,7 +50,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [readPages, setReadPages] = useState<Record<string, boolean>>({});
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const notifRef = useRef<HTMLDivElement>(null);
@@ -137,11 +136,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     navigate('/login');
   };
 
+  const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
+
   const fetchNotifications = async () => {
     try {
-      const res = await api.get('/notifications/unread');
-      setNotifications(res.data.data);
-      setUnreadCount(res.data.count);
+      const [notifRes, feedbackRes] = await Promise.all([
+        api.get('/notifications/unread').catch(() => ({ data: { data: [], count: 0 } })),
+        api.get('/feedbacks/unread-count').catch(() => ({ data: { unread_count: 0 } }))
+      ]);
+      setNotifications(notifRes.data.data || []);
+      setUnreadCount(notifRes.data.count || 0);
+      setUnreadFeedbackCount(feedbackRes.data.unread_count || 0);
     } catch (err) {
       console.error(err);
     }
@@ -252,13 +257,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           </span>
           {visibleMenuItems.map((item) => {
             const isCurrentPage = location.pathname === item.path;
-            const isRead = readPages[item.path] || isCurrentPage;
-            const hasUnread = !isRead && (item.path === '/dashboard/feedback' || item.path === '/dashboard/announcements');
+            const hasUnread = item.path === '/dashboard/feedback' && unreadFeedbackCount > 0 && !isCurrentPage;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={() => setReadPages(prev => ({ ...prev, [item.path]: true }))}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
                   location.pathname === item.path
