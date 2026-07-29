@@ -97,9 +97,8 @@ const Feedback: React.FC = () => {
 
   return (
     <div className="space-y-8 font-sans">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <DashboardHeader title="User Feedback" />
-        <div className="flex items-center gap-1 border border-border bg-surface p-1 self-start sm:self-auto">
+      <DashboardHeader title="User Feedback">
+        <div className="flex items-center gap-1 border border-border bg-surface p-1">
           <button
             onClick={() => { setActiveTab('active'); setPage(1); }}
             className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors ${
@@ -122,7 +121,7 @@ const Feedback: React.FC = () => {
             Archived Messages
           </button>
         </div>
-      </div>
+      </DashboardHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
         {/* Message List */}
