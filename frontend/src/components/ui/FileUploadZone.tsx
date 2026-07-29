@@ -81,7 +81,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
 
   const renderIcon = () => {
     if (isDragging) {
-      return <Upload className="h-5 w-5 text-primary animate-bounce shrink-0" />;
+      return <Upload className="h-5 w-5 text-primary scale-110 transition-transform duration-300 ease-out shrink-0" />;
     }
     if (selectedFile) {
       return <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />;
