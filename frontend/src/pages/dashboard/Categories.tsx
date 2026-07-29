@@ -359,8 +359,19 @@ const Categories: React.FC = () => {
                 <TableRowSkeleton columns={4} rows={5} />
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-0">
-                    <EmptyState title="No categories found" description="There are no categories matching your criteria." className="bg-transparent border-0 py-16" />
+                  <td colSpan={5} className="p-0">
+                    <EmptyState 
+                      title="No categories found" 
+                      description="There are no categories matching your search criteria." 
+                      action={
+                        filter ? (
+                          <Button variant="ghost" size="sm" onClick={() => setFilter('')}>
+                            Clear Search
+                          </Button>
+                        ) : undefined
+                      }
+                      className="bg-transparent border-0 py-16" 
+                    />
                   </td>
                 </tr>
               ) : (
@@ -390,11 +401,15 @@ const Categories: React.FC = () => {
         isDirty={formData.name !== (editingCategory?.name || '') || formData.slug !== (editingCategory?.slug || '') || formData.description !== (editingCategory?.description || '')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input 
-            label="Name" required 
-            value={formData.name} 
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-          />
+          <div>
+            <Input 
+              label="Name" required 
+              placeholder="e.g. Health & Nursing, Information Technology"
+              value={formData.name} 
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+            />
+            <p className="text-[11px] text-muted mt-1">Categories are used to group journals and filter research papers</p>
+          </div>
           <Input 
             label="Slug (optional)" hint="Auto-generated if left blank"
             value={formData.slug} 

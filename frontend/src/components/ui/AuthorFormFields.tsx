@@ -98,7 +98,7 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
           value={values.suffix}
           onChange={handle('suffix')}
           onKeyDown={onKeyDown}
-          placeholder="Suffix"
+          placeholder="Suffix (Jr, Sr)"
           autoComplete="off"
           className={fieldStyle}
         />

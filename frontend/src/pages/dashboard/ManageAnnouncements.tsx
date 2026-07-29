@@ -152,7 +152,18 @@ const ManageAnnouncements: React.FC = () => {
         {loading ? (
           <ListSkeleton colSpans={[4, 6, 2]} rows={PER_PAGE} />
         ) : announcements.length === 0 ? (
-          <EmptyState title="No announcements" description="No announcements found." className="border-0 bg-transparent py-16" />
+          <EmptyState 
+            title="No announcements" 
+            description={filter ? "No announcements match your search query." : "No announcements posted yet."} 
+            action={
+              filter ? (
+                <Button variant="ghost" size="sm" onClick={() => setFilter('')}>
+                  Clear Search
+                </Button>
+              ) : undefined
+            }
+            className="border-0 bg-transparent py-16" 
+          />
         ) : (
           announcements.map((item) => (
             <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-background transition-colors group cursor-default items-center">
@@ -181,9 +192,13 @@ const ManageAnnouncements: React.FC = () => {
       <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingItem ? 'Edit Announcement' : 'New Announcement'}>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="p-3 bg-red-50 text-red-700 text-[13px]">{error}</div>}
-          <Input 
-            label="Title" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
-          />
+          <div>
+            <Input 
+              label="Title" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
+              placeholder="e.g. Call for Papers - Volume 12 Issue 1"
+            />
+            <p className="text-[11px] text-muted mt-1">Announcements will be featured on the public homepage portal</p>
+          </div>
           <RichTextEditor 
             label="Content" 
             value={formData.body} 
