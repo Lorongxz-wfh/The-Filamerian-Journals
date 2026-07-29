@@ -8,6 +8,7 @@ import Select from '@/components/ui/Select';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
+import Button from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Journal {
@@ -446,7 +447,26 @@ const Journals: React.FC = () => {
                 </div>
               )
             ) : filtered.length === 0 ? (
-              <EmptyState title="No journals found" description="No journals matched your filter criteria." className="py-20 border border-border bg-surface" />
+              <EmptyState 
+                title="No journals found" 
+                description="No journals matched your filter criteria." 
+                action={
+                  (hasActiveFilters || search) ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        clearAllFilters();
+                        setSearch('');
+                      }}
+                      className="mt-2"
+                    >
+                      Reset Filters & Search
+                    </Button>
+                  ) : undefined
+                }
+                className="py-20 border border-border bg-surface" 
+              />
             ) : (
               <div className={viewMode === 'grid' 
                 ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8" 
