@@ -70,27 +70,40 @@ class ImportController extends Controller
                     'order' => $maxOrder,
                 ]);
 
-                // 3. Handle Authors with Smart Parsing
+                // 3. Handle Authors with Smart Parsing & Case-Insensitive Deduplication
                 if (!empty($row['authors'])) {
                     $rawAuthors = $row['authors'];
-                    // Use semicolon as primary delimiter, fallback to comma if no semicolon present
-                    $delimiter = (strpos($rawAuthors, ';') !== false) ? ';' : ',';
-                    $authorStrings = array_filter(array_map('trim', explode($delimiter, $rawAuthors)));
+                    // Split authors by semicolon, " and ", or comma (if semicolon/and not used)
+                    if (strpos($rawAuthors, ';') !== false) {
+                        $authorStrings = array_filter(array_map('trim', explode(';', $rawAuthors)));
+                    } else if (preg_match('/\s+and\s+/i', $rawAuthors)) {
+                        $authorStrings = array_filter(array_map('trim', preg_split('/\s+and\s+/i', $rawAuthors)));
+                    } else {
+                        $authorStrings = array_filter(array_map('trim', explode(',', $rawAuthors)));
+                    }
                     
                     $authorIds = [];
                     foreach ($authorStrings as $authorStr) {
                         if (empty($authorStr)) continue;
                         
                         $parsed = $this->parseAuthorName($authorStr);
+                        $cleanFullName = strtolower(trim($parsed['full_name']));
+                        $cleanFirst = strtolower(trim($parsed['first_name']));
+                        $cleanLast = strtolower(trim($parsed['last_name']));
                         
-                        // Search for existing author by formatted name or exact first/last combination
-                        $author = Author::where('name', $parsed['full_name'])
-                            ->orWhere(function($q) use ($parsed) {
-                                if ($parsed['last_name'] && $parsed['first_name']) {
-                                    $q->where('first_name', $parsed['first_name'])
-                                      ->where('last_name', $parsed['last_name']);
-                                }
-                            })->first();
+                        // Smart Case-Insensitive Deduplication Search
+                        $author = null;
+                        if (!empty($cleanFirst) && !empty($cleanLast)) {
+                            $author = Author::whereRaw('LOWER(first_name) = ? AND LOWER(last_name) = ?', [$cleanFirst, $cleanLast])->first();
+                        }
+
+                        if (!$author && !empty($cleanFullName)) {
+                            $author = Author::whereRaw('LOWER(name) = ?', [$cleanFullName])->first();
+                        }
+
+                        if (!$author && !empty($cleanLast)) {
+                            $author = Author::whereRaw('LOWER(last_name) = ?', [$cleanLast])->first();
+                        }
 
                         if (!$author) {
                             $author = Author::create([
@@ -106,7 +119,7 @@ class ImportController extends Controller
                         $authorIds[] = $author->id;
                     }
                     if (!empty($authorIds)) {
-                        $article->authors()->sync($authorIds);
+                        $article->authors()->sync(array_unique($authorIds));
                     }
                 }
 

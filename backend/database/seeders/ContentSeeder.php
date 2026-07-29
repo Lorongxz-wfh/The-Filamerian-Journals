@@ -178,7 +178,7 @@ class ContentSeeder extends Seeder
 
             // Announcement
             Announcement::firstOrCreate(
-                ['title' => "Call for Papers: {$data['title']}"],
+                ['title' => "Submission Guidelines & Announcement: {$data['title']}"],
                 [
                     'body' => "We are currently accepting new submissions for the upcoming issue of {$data['title']}. We invite scholars and researchers to submit their original work. The deadline for manuscript submission is fast approaching.",
                     'published_at' => now()->subDays(rand(2, 20))

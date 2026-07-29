@@ -118,7 +118,7 @@ const Home: React.FC = () => {
                 <span>Filamer Christian University</span>
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-serif font-bold text-primary leading-tight">
+              <h1 className="text-3xl lg:text-4xl font-display font-normal text-primary tracking-wider uppercase leading-tight">
                 {siteTitle}
               </h1>
 

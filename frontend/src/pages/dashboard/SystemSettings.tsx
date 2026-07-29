@@ -135,17 +135,56 @@ const SystemSettings: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Storage Usage Meter */}
-                  <div className="space-y-2 py-2 border-b border-border/60">
+                  {/* Storage Quota Cap */}
+                  <div className="flex items-center justify-between py-2 border-b border-border/60">
+                    <div>
+                      <span className="font-medium text-primary block">Storage Quota Cap Limit (GB)</span>
+                      <span className="text-[11px] text-muted">Configurable visual disk quota capacity target</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <input 
+                        type="number" 
+                        min="1"
+                        max="10000"
+                        value={settings.storage_quota_cap_gb || '50'}
+                        onChange={(e) => handleChange('storage_quota_cap_gb', e.target.value)}
+                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                      />
+                      <span className="text-xs font-mono text-muted">GB</span>
+                    </div>
+                  </div>
+
+                  {/* Storage Usage Meter with Progress Bar */}
+                  <div className="space-y-2 py-3 border-b border-border/60">
                     <div className="flex justify-between items-center text-[12px]">
-                      <span className="text-muted flex items-center gap-1.5">
-                        <HardDrive className="h-3.5 w-3.5 text-muted" />
-                        Media Storage Used
+                      <span className="text-muted flex items-center gap-1.5 font-medium">
+                        <HardDrive className="h-3.5 w-3.5 text-primary/70" />
+                        Media Storage Capacity Meter
                       </span>
                       <span className="font-mono text-xs text-primary font-semibold">
-                        {formatBytes(usedStorageBytes)}
+                        {formatBytes(usedStorageBytes)} / {settings.storage_quota_cap_gb || 50} GB
                       </span>
                     </div>
+                    {/* Visual Progress Bar */}
+                    {(() => {
+                      const capGb = parseFloat(settings.storage_quota_cap_gb || '50') || 50;
+                      const capBytes = capGb * 1024 * 1024 * 1024;
+                      const percentage = Math.min(100, Math.max(0.1, (usedStorageBytes / capBytes) * 100));
+                      return (
+                        <div className="space-y-1">
+                          <div className="w-full bg-background border border-border h-2.5 overflow-hidden p-0.5">
+                            <div 
+                              className="bg-primary h-full transition-all duration-500 ease-out" 
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between items-center text-[10px] font-mono text-muted">
+                            <span>{percentage.toFixed(3)}% Used</span>
+                            <span>{(capGb - (usedStorageBytes / (1024 * 1024 * 1024))).toFixed(2)} GB Available</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Supported Formats */}

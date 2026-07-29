@@ -107,8 +107,6 @@ const Announcements: React.FC = () => {
           ) : (
             paginatedAnnouncements.map((item) => {
               const isExpanded = expandedIds.has(item.id);
-              const isCallForPapers = item.title.toLowerCase().includes('call for papers');
-
               return (
                 <article 
                   key={item.id} 
@@ -126,14 +124,6 @@ const Announcements: React.FC = () => {
                           })}
                         </span>
                       </div>
-
-                      <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
-                        isCallForPapers 
-                          ? 'bg-secondary/10 text-secondary border-secondary/20' 
-                          : 'bg-primary/10 text-primary border-primary/20'
-                      }`}>
-                        {isCallForPapers ? 'Call For Papers' : 'General Announcement'}
-                      </span>
                     </div>
 
                     <h2 className="text-base sm:text-lg font-serif font-bold text-primary group-hover:text-secondary transition-colors leading-snug mb-3">

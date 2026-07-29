@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/services/api';
 import { MessageListSkeleton } from '@/components/ui/Skeleton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Pagination from '@/components/ui/Pagination';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface FeedbackItem {
   id: number;
@@ -23,6 +25,10 @@ const Feedback: React.FC = () => {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
+  // Delete modal state
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
@@ -31,6 +37,7 @@ const Feedback: React.FC = () => {
       setLastPage(res.data.last_page || 1);
     } catch (err) {
       console.error('Failed to fetch feedbacks', err);
+      toast.error('Failed to load feedback messages');
     } finally {
       setLoading(false);
     }
@@ -53,14 +60,20 @@ const Feedback: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this feedback?')) return;
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setIsDeleting(true);
     try {
-      await api.delete(`/feedbacks/${id}`);
-      setFeedbacks(feedbacks.filter(f => f.id !== id));
-      if (selected === id) setSelected(null);
+      await api.delete(`/feedbacks/${deleteTargetId}`);
+      setFeedbacks(feedbacks.filter(f => f.id !== deleteTargetId));
+      if (selected === deleteTargetId) setSelected(null);
+      toast.success('Feedback message deleted successfully');
+      setDeleteTargetId(null);
     } catch (err) {
       console.error('Failed to delete feedback', err);
+      toast.error('Failed to delete feedback message');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -132,7 +145,7 @@ const Feedback: React.FC = () => {
                     <h2 className="text-[15px] font-semibold text-primary leading-snug">{selectedItem.subject}</h2>
                   </div>
                   <button 
-                    onClick={() => handleDelete(selectedItem.id)}
+                    onClick={() => setDeleteTargetId(selectedItem.id)}
                     className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"
                     title="Delete message"
                   >
@@ -160,6 +173,17 @@ const Feedback: React.FC = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDelete}
+        title="Delete Feedback Message"
+        message="Are you sure you want to permanently delete this user feedback message?"
+        confirmText="Delete Message"
+        isDestructive={true}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

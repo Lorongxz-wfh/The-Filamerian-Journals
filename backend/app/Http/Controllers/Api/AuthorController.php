@@ -35,9 +35,24 @@ class AuthorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required_without:name|nullable|string|max:255',
+            'last_name' => 'required_without:name|nullable|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'suffix' => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:authors,email',
         ]);
+
+        if (empty($validated['name']) && (!empty($validated['first_name']) || !empty($validated['last_name']))) {
+            $parts = [];
+            if (!empty($validated['last_name'])) $parts[] = $validated['last_name'] . ',';
+            if (!empty($validated['first_name'])) $parts[] = $validated['first_name'];
+            if (!empty($validated['middle_name'])) {
+                $parts[] = mb_substr(trim($validated['middle_name']), 0, 1) . '.';
+            }
+            if (!empty($validated['suffix'])) $parts[] = $validated['suffix'];
+            $validated['name'] = implode(' ', $parts);
+        }
 
         $author = Author::create($validated);
 
@@ -52,9 +67,27 @@ class AuthorController extends Controller
     public function update(Request $request, Author $author)
     {
         $validated = $request->validate([
-            'name' => 'string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'suffix' => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:authors,email,' . $author->id,
         ]);
+
+        $firstName = $validated['first_name'] ?? $author->first_name;
+        $lastName = $validated['last_name'] ?? $author->last_name;
+        $middleName = $validated['middle_name'] ?? $author->middle_name;
+        $suffix = $validated['suffix'] ?? $author->suffix;
+
+        if (empty($validated['name']) && ($firstName || $lastName)) {
+            $parts = [];
+            if ($lastName) $parts[] = $lastName . ',';
+            if ($firstName) $parts[] = $firstName;
+            if ($middleName) $parts[] = mb_substr(trim($middleName), 0, 1) . '.';
+            if ($suffix) $parts[] = $suffix;
+            $validated['name'] = implode(' ', $parts);
+        }
 
         $author->update($validated);
 
