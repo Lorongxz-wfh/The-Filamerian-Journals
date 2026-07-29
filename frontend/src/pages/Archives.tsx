@@ -468,10 +468,10 @@ const Archives: React.FC = () => {
                         onClick={() => {
                            if (!isSelected) handleVolumeClick(vol);
                         }}
-                        className={`w-full text-left p-4 transition-all flex items-start justify-between gap-3 group relative border ${
+                        className={`w-full text-left p-4 transition-all flex items-start justify-between gap-3 group relative border border-border ${
                           isSelected
-                            ? 'bg-primary/10 border-primary text-primary font-medium shadow-2xs'
-                            : 'bg-surface border-border hover:bg-background hover:border-primary/40'
+                            ? 'bg-primary/5 border-l-2 border-l-secondary text-primary font-medium shadow-xs'
+                            : 'bg-surface hover:bg-background hover:border-primary/30 border-l-2 border-l-transparent'
                         }`}
                       >
                         <div className="min-w-0 flex-1">
