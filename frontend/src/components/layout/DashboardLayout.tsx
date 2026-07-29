@@ -91,14 +91,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((document.activeElement?.tagName || ''))) return;
-
+      const target = e.target as HTMLElement;
+      const isInput = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable;
+      
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         dashSearchInputRef.current?.focus();
-      } else if (e.key === '?') {
+        return;
+      }
+
+      if (isInput) return;
+
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
+      } else if (e.key === '/' && !e.shiftKey) {
+        e.preventDefault();
+        dashSearchInputRef.current?.focus();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
