@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, ImageIcon, CheckCircle2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface FileUploadZoneProps {
   id?: string;
@@ -27,10 +28,16 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   disabled = false,
   className = ''
 }) => {
+  const { settings } = useSettings();
+  const maxMb = settings.max_file_size_mb ? parseInt(String(settings.max_file_size_mb), 10) : 25;
   const [isDragging, setIsDragging] = useState(false);
   const inputId = id || `file-upload-${Math.random().toString(36).substring(2, 9)}`;
 
   const validateFile = (file: File): boolean => {
+    if (file.size > maxMb * 1024 * 1024) {
+      toast.error(`File size exceeds maximum allowed limit of ${maxMb}MB.`);
+      return false;
+    }
     if (!accept || accept === '*') return true;
 
     const acceptParts = accept.split(',').map(s => s.trim().toLowerCase());
@@ -207,7 +214,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                   Click or drag & drop file
                 </p>
                 <p className="text-[10px] text-muted truncate">
-                  {accept.includes('pdf') ? 'PDF files only' : accept.includes('image') ? 'JPG, PNG image files' : 'Select a file to upload'}
+                  {hint || (accept.includes('pdf') ? `PDF files only (Max ${maxMb}MB)` : accept.includes('image') ? `JPG, PNG image files (Max ${maxMb}MB)` : `Select a file up to ${maxMb}MB`)}
                 </p>
               </div>
             )}
