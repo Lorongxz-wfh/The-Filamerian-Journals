@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldAlert, RefreshCw, Filter, Calendar } from 'lucide-react';
 import api from '@/services/api';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/Table';
-import { ActivityLogsTableSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton, ActivityLogsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
@@ -148,8 +148,10 @@ const ActivityLogs: React.FC = () => {
           )}
         </div>
 
-        {!loading && (
-          <span className="text-[11px] text-muted">
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
+        ) : (
+          <span className="text-[11px] text-muted shrink-0">
             Showing {logs.length > 0 ? Math.min((page - 1) * 15 + 1, logs.length) : 0}–{logs.length} of {logs.length} activity logs
           </span>
         )}

@@ -8,7 +8,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import RichTextEditor from '@/components/ui/RichTextEditor';
-import { ListSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton, ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -144,8 +144,10 @@ const ManageAnnouncements: React.FC = () => {
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {!loading && (
-          <p className="text-[11px] text-muted">
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
+        ) : (
+          <p className="text-[11px] text-muted shrink-0">
             Showing {total > 0 ? 1 : 0}–{announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
           </p>
         )}

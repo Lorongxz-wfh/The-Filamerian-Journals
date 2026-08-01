@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { UsersTableSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton, UsersTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -251,8 +251,10 @@ const UserManager: React.FC = () => {
       </DashboardHeader>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {!loading && (
-          <p className="text-[11px] text-muted">
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
+        ) : (
+          <p className="text-[11px] text-muted shrink-0">
             Showing {users.length > 0 ? Math.min((page - 1) * 10 + 1, users.length) : 0}–{users.length} of {users.length} user{users.length !== 1 ? 's' : ''}
           </p>
         )}

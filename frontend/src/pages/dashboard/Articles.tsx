@@ -11,7 +11,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
-import { ArticlesTableSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton, ArticlesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
@@ -292,7 +292,9 @@ const Articles: React.FC = () => {
         </div>
 
         {/* Result count */}
-        {!loading && (
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded my-0.5" />
+        ) : (
           <p className="text-[11px] text-muted">
             Showing {Math.min((page - 1) * PER_PAGE + 1, totalCount)}–{Math.min(page * PER_PAGE, totalCount)} of {totalCount} article{totalCount !== 1 ? 's' : ''}
           </p>

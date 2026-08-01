@@ -15,7 +15,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { JournalsTableSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton, JournalsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import FileUploadZone from '@/components/ui/FileUploadZone';
@@ -406,7 +406,9 @@ const MyJournals: React.FC = () => {
         </div>
 
         {/* Pagination Result Count */}
-        {!loading && (
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded my-0.5" />
+        ) : (
           <p className="text-[11px] text-muted">
             Showing {filteredJournals.length > 0 ? Math.min((page - 1) * 10 + 1, filteredJournals.length) : 0}–{Math.min(page * 10, filteredJournals.length)} of {filteredJournals.length} journal{filteredJournals.length !== 1 ? 's' : ''}
           </p>

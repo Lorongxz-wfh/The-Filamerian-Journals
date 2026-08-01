@@ -6,7 +6,7 @@ import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
-import { CategoriesTableSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton, CategoriesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
@@ -313,8 +313,10 @@ const Categories: React.FC = () => {
       {/* Search Input & Count Text */}
       {!isReordering && (
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          {!loading && (
-            <p className="text-[11px] text-muted">
+          {loading ? (
+            <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
+          ) : (
+            <p className="text-[11px] text-muted shrink-0">
               Showing {filtered.length > 0 ? 1 : 0}–{filtered.length} of {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
             </p>
           )}
