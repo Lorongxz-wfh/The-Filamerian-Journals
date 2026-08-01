@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Shield, Server, CheckCircle2, HardDrive } from 'lucide-react';
 import api from '@/services/api';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { SystemSettingsSkeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
@@ -80,10 +80,7 @@ const SystemSettings: React.FC = () => {
       <DashboardHeader title="System Settings" />
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          <Skeleton className="h-[240px] w-full" />
-          <Skeleton className="h-[240px] w-full" />
-        </div>
+        <SystemSettingsSkeleton />
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

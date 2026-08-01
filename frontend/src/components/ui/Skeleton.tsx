@@ -315,3 +315,125 @@ export const FormSkeleton: React.FC<{ rows?: number }> = ({ rows = 4 }) => {
     </div>
   );
 };
+
+// ─── Chart / Graph Skeleton (Dashboard & Analytics) ─────────────────────────
+export const ChartSkeleton: React.FC<{ title?: string; height?: string }> = ({
+  height = 'h-64',
+}) => {
+  return (
+    <div className="border border-border bg-surface p-6 shadow-sm">
+      <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-4 w-44 rounded" />
+        </div>
+      </div>
+      <div className={cn("w-full flex items-end justify-between gap-3 pt-4 px-2", height)}>
+        {Array.from({ length: 12 }).map((_, i) => {
+          const heights = [
+            'h-[35%]', 'h-[65%]', 'h-[45%]', 'h-[85%]',
+            'h-[55%]', 'h-[75%]', 'h-[40%]', 'h-[90%]',
+            'h-[60%]', 'h-[80%]', 'h-[50%]', 'h-[70%]',
+          ];
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+              <Skeleton className={cn("w-full rounded-t opacity-80", heights[i % heights.length])} />
+              <Skeleton className="h-2.5 w-full max-w-[24px] rounded" />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ─── System Settings Skeleton ────────────────────────────────────────────────
+export const SystemSettingsSkeleton: React.FC = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+    {/* Card 1 Skeleton: Storage & File Limits */}
+    <div className="border border-border bg-surface p-6 space-y-5 flex flex-col justify-between">
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 border-b border-border pb-3">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-4 w-40 rounded" />
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between py-2 border-b border-border/60">
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-44 rounded" />
+                <Skeleton className="h-3 w-64 rounded" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-20 rounded" />
+                <Skeleton className="h-3 w-6 rounded" />
+              </div>
+            </div>
+          ))}
+
+          {/* Usage meter */}
+          <div className="space-y-2 py-3 border-b border-border/60">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-3.5 w-40 rounded" />
+              <Skeleton className="h-3.5 w-24 rounded" />
+            </div>
+            <Skeleton className="h-2 w-full rounded-full" />
+            <div className="flex justify-between">
+              <Skeleton className="h-3 w-16 rounded" />
+              <Skeleton className="h-3 w-24 rounded" />
+            </div>
+          </div>
+
+          {/* Badges */}
+          <div className="flex items-center justify-between pt-2">
+            <Skeleton className="h-3.5 w-28 rounded" />
+            <div className="flex gap-1.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-6 w-9 rounded" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Card 2 Skeleton: Security & Governance */}
+    <div className="border border-border bg-surface p-6 space-y-5">
+      <div className="flex items-center gap-3 border-b border-border pb-3">
+        <Skeleton className="h-4 w-4 rounded" />
+        <Skeleton className="h-4 w-44 rounded" />
+      </div>
+      <div className="space-y-4">
+        {/* Toggle row */}
+        <div className="flex items-center justify-between py-3 border-b border-border/60">
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-36 rounded" />
+            <Skeleton className="h-3 w-56 rounded" />
+          </div>
+          <Skeleton className="h-6 w-11 rounded-full" />
+        </div>
+        {/* Session timeout */}
+        <div className="flex items-center justify-between py-3 border-b border-border/60">
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-32 rounded" />
+            <Skeleton className="h-3 w-48 rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-20 rounded" />
+            <Skeleton className="h-3 w-6 rounded" />
+          </div>
+        </div>
+        {/* Auth engine */}
+        <div className="flex items-center justify-between py-3 border-b border-border/60">
+          <Skeleton className="h-4 w-40 rounded" />
+          <Skeleton className="h-6 w-32 rounded" />
+        </div>
+        {/* Access control */}
+        <div className="flex items-center justify-between py-3">
+          <Skeleton className="h-4 w-36 rounded" />
+          <Skeleton className="h-6 w-36 rounded" />
+        </div>
+      </div>
+    </div>
+  </div>
+);

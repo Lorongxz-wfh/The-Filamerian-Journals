@@ -4,6 +4,7 @@ import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import { Skeleton, ChartSkeleton } from '@/components/ui/Skeleton';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 const Overview: React.FC = () => {
@@ -36,11 +37,13 @@ const Overview: React.FC = () => {
   }>({ journals: 0, articles: 0, drafts: 0, authors: 0, users: 0, announcements: 0, recentActivity: [] });
 
   const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const statsRes = await api.get('/dashboard/stats');
         setData(statsRes.data);
         
@@ -50,6 +53,8 @@ const Overview: React.FC = () => {
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -88,30 +93,45 @@ const Overview: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="border border-border bg-surface p-5 relative overflow-hidden group hover:border-primary/30 transition-colors">
-            <div className="flex items-start justify-between mb-6">
-              <div className="p-2 bg-background border border-border">
-                <stat.icon className="h-4 w-4 text-primary/70" />
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="border border-border bg-surface p-5 space-y-6">
+              <div className="flex items-start justify-between">
+                <Skeleton className="h-8 w-8 rounded" />
+                <Skeleton className="h-5 w-14 rounded" />
               </div>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${stat.color ? `${stat.color} ${stat.bg}` : (stat.isPositive ? 'text-emerald-600 bg-emerald-500/10' : 'text-amber-600 bg-amber-500/10')}`}>
-                {stat.trend}
-              </span>
+              <div className="space-y-1.5">
+                <Skeleton className="h-8 w-16 rounded" />
+                <Skeleton className="h-3 w-24 rounded" />
+              </div>
             </div>
-            <div>
-              <p className="text-3xl font-light text-primary tracking-tight">
-                {stat.value}
-              </p>
-              <p className="text-[11px] font-medium text-muted uppercase tracking-wider mt-1">
-                {stat.label}
-              </p>
+          ))
+        ) : (
+          stats.map((stat) => (
+            <div key={stat.label} className="border border-border bg-surface p-5 relative overflow-hidden group hover:border-primary/30 transition-colors">
+              <div className="flex items-start justify-between mb-6">
+                <div className="p-2 bg-background border border-border">
+                  <stat.icon className="h-4 w-4 text-primary/70" />
+                </div>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${stat.color ? `${stat.color} ${stat.bg}` : (stat.isPositive ? 'text-emerald-600 bg-emerald-500/10' : 'text-amber-600 bg-amber-500/10')}`}>
+                  {stat.trend}
+                </span>
+              </div>
+              <div>
+                <p className="text-3xl font-light text-primary tracking-tight">
+                  {stat.value}
+                </p>
+                <p className="text-[11px] font-medium text-muted uppercase tracking-wider mt-1">
+                  {stat.label}
+                </p>
+              </div>
+              {/* Decorative faint icon */}
+              <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-500">
+                <stat.icon className="h-28 w-28" />
+              </div>
             </div>
-            {/* Decorative faint icon */}
-            <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-500">
-              <stat.icon className="h-28 w-28" />
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Main Content Grid */}
@@ -121,67 +141,75 @@ const Overview: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Website Chart Section */}
-          <div className="border border-border bg-surface p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-primary/50" />
-                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
-                  Website Activity (30 Days)
-                </h2>
+          {loading ? (
+            <ChartSkeleton />
+          ) : (
+            <div className="border border-border bg-surface p-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary/50" />
+                  <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
+                    Website Activity (30 Days)
+                  </h2>
+                </div>
+              </div>
+              <div className="h-64 pt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={websiteChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorDownloads" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+                      itemStyle={{ color: '#111827' }}
+                    />
+                    <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Views" />
+                    <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="PDF Reads" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
-            <div className="h-64 pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={websiteChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorDownloads" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
-                    itemStyle={{ color: '#111827' }}
-                  />
-                  <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Views" />
-                  <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="PDF Reads" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          )}
 
           {/* Portal Chart Section */}
-          <div className="border border-border bg-surface p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-              <div className="flex items-center gap-2">
-                <BarChart2 className="h-4 w-4 text-primary/50" />
-                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
-                  Portal Activity (30 Days)
-                </h2>
+          {loading ? (
+            <ChartSkeleton />
+          ) : (
+            <div className="border border-border bg-surface p-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <BarChart2 className="h-4 w-4 text-primary/50" />
+                  <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">
+                    Portal Activity (30 Days)
+                  </h2>
+                </div>
+              </div>
+              <div className="h-64 pt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={portalChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+                      cursor={{ fill: '#f3f4f6' }}
+                    />
+                    <Bar dataKey="actions" fill="#002d72" radius={[2, 2, 0, 0]} name="Actions" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
-            <div className="h-64 pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={portalChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '12px' }}
-                    cursor={{ fill: '#f3f4f6' }}
-                  />
-                  <Bar dataKey="actions" fill="#002d72" radius={[2, 2, 0, 0]} name="Actions" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          )}
 
           {/* Activity Feed */}
           <div className="border border-border bg-surface shadow-sm">
