@@ -97,6 +97,22 @@ const ManageAuthors: React.FC = () => {
 
   useEffect(() => { fetchAuthors(); }, [fetchAuthors]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
+      if ((e.key === 'n' || e.key === 'N') && !isModalOpen) {
+        e.preventDefault();
+        setFormError(null);
+        setEditingAuthor(null);
+        setForm({ first_name: '', middle_name: '', last_name: '', suffix: '', email: '' });
+        setIsModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   // Client-side sort (since API may not support sort param)
   const sortedAuthors = React.useMemo(() => {
     const items = [...authors];

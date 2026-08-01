@@ -173,6 +173,24 @@ const MyJournals: React.FC = () => {
     fetchJournals();
   }, [page, debouncedFilter, categoryFilter]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
+      if ((e.key === 'n' || e.key === 'N') && !isModalOpen) {
+        e.preventDefault();
+        setServerError(null);
+        setEditingJournal(null);
+        setPdfFile(null);
+        setCoverImage(null);
+        reset({ title: '', slug: '', description: '', category_id: '', status: 'Published', publisher: '' });
+        setIsModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   // URL Sync
   useEffect(() => {
     const action = searchParams.get('action');

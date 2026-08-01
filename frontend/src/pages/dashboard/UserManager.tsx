@@ -112,6 +112,22 @@ const UserManager: React.FC = () => {
     fetchUsers();
   }, [page, debouncedFilter]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
+      if ((e.key === 'n' || e.key === 'N') && !isModalOpen) {
+        e.preventDefault();
+        setServerError(null);
+        setEditingUser(null);
+        reset({ name: '', email: '', password: '', role: 'Editor' });
+        setIsModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   // URL modal sync
   useEffect(() => {
     const action = searchParams.get('action');

@@ -20,6 +20,8 @@ interface FeedbackItem {
 }
 
 const Feedback: React.FC = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperAdmin = user?.role === 'Super Admin';
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -202,13 +204,15 @@ const Feedback: React.FC = () => {
                         </>
                       )}
                     </button>
-                    <button 
-                      onClick={() => setDeleteTargetId(selectedItem.id)}
-                      className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"
-                      title="Permanently Delete Message"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {isSuperAdmin && (
+                      <button 
+                        onClick={() => setDeleteTargetId(selectedItem.id)}
+                        className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"
+                        title="Permanently Delete Message (Super Admin only)"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-[12px] text-muted">

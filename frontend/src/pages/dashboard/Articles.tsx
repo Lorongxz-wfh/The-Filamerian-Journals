@@ -173,6 +173,21 @@ const Articles: React.FC = () => {
 
   const handleDelete = (id: number) => setDeleteTarget(id);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
+      if ((e.key === 'n' || e.key === 'N') && !isModalOpen) {
+        e.preventDefault();
+        setEditingArticle(null);
+        setInitialVolumeId('');
+        setIsModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
   const [isDeleting, setIsDeleting] = useState(false);
 
   const confirmDelete = async () => {

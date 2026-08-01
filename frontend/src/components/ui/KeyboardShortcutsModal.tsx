@@ -1,6 +1,6 @@
 import React from 'react';
 import Modal from '@/components/ui/Modal';
-import { Command, Search, Plus, CornerDownLeft, X, HelpCircle } from 'lucide-react';
+import { Search, Plus, CornerDownLeft, X, HelpCircle } from 'lucide-react';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -11,10 +11,9 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
   const shortcuts = [
     { key: 'Ctrl + K', description: 'Open Global Search from anywhere', icon: Search },
     { key: 'N', description: 'Create New Item (on Dashboard management pages)', icon: Plus },
-    { key: '/', description: 'Focus global search bar', icon: Command },
     { key: 'Enter', description: 'Submit modal forms', icon: CornerDownLeft },
     { key: 'Esc', description: 'Close active modal or dropdown', icon: X },
-    { key: 'Shift + / (or ?)', description: 'Open this Keyboard Shortcuts guide', icon: HelpCircle },
+    { key: 'Shift + /', description: 'Open this Keyboard Shortcuts guide', icon: HelpCircle },
   ];
 
   return (
