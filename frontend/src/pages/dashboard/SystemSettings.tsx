@@ -67,6 +67,9 @@ const SystemSettings: React.FC = () => {
       setSaving(true);
       await api.post('/settings', { settings });
       toast.success('System settings saved successfully!');
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
     } catch (err) {
       console.error('Failed to save settings', err);
       toast.error('Failed to save system settings.');
