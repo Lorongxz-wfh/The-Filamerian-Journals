@@ -8,7 +8,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
-import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import { AuthorsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Pagination from '@/components/ui/Pagination';
@@ -246,7 +246,7 @@ const ManageAuthors: React.FC = () => {
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRowSkeleton columns={6} rows={PER_PAGE} />
+            <AuthorsTableSkeleton rows={PER_PAGE} />
           ) : sortedAuthors.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="h-32 text-center">

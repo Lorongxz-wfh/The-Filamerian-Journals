@@ -11,7 +11,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
-import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import { ArticlesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
@@ -319,7 +319,7 @@ const Articles: React.FC = () => {
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRowSkeleton columns={6} rows={PER_PAGE} />
+            <ArticlesTableSkeleton rows={PER_PAGE} />
           ) : sortedArticles.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="h-32 text-center">

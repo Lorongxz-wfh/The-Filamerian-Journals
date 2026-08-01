@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldAlert, RefreshCw, Filter, Calendar } from 'lucide-react';
 import api from '@/services/api';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/Table';
-import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import { ActivityLogsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
@@ -168,7 +168,7 @@ const ActivityLogs: React.FC = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRowSkeleton columns={4} rows={6} />
+              <ActivityLogsTableSkeleton rows={6} />
             ) : logs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-40 text-center">

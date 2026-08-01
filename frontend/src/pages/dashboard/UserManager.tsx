@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import { UsersTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -276,7 +276,7 @@ const UserManager: React.FC = () => {
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRowSkeleton columns={4} rows={5} />
+            <UsersTableSkeleton rows={5} />
           ) : users.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="h-32 text-center">

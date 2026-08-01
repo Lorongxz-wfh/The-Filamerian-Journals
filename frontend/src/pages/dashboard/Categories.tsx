@@ -6,7 +6,7 @@ import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
-import { TableRowSkeleton } from '@/components/ui/Skeleton';
+import { CategoriesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
@@ -369,7 +369,7 @@ const Categories: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
-                <TableRowSkeleton columns={4} rows={5} />
+                <CategoriesTableSkeleton rows={5} />
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-0">
