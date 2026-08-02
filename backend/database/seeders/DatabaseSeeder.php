@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ResourceSeeder::class,
             ContentSeeder::class,
-            FaqSeeder::class,
         ]);
     }
 }

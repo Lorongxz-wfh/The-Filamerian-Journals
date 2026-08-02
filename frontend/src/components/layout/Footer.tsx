@@ -12,13 +12,13 @@ const Footer: React.FC = () => {
   const phone = settings.footer_phone || '(036) 621-2317';
 
   const quickLinksTitle = settings.footer_quick_links_title || 'Quick Links';
-  const quickLinks = (settings.footer_quick_links || 'About, FAQ & Guide, Academics, Admission, Organizations, Data Privacy Act, Sitemap')
+  const quickLinks = (settings.footer_quick_links || 'About, Academics, Admission, Organizations, Data Privacy Act, Sitemap')
     .split(',')
     .map((s: string) => s.trim())
     .filter(Boolean);
 
   const journalLinksTitle = settings.footer_journal_links_title || settings.site_title || 'The Filamerian Journals';
-  const journalLinks = (settings.footer_journal_links || 'User Guide & FAQ, Submission Guidelines, Editorial Board, Publication Ethics, Open Access Policy, Contact Editorial Office')
+  const journalLinks = (settings.footer_journal_links || 'Submission Guidelines, Editorial Board, Publication Ethics, Open Access Policy, Contact Editorial Office')
     .split(',')
     .map((s: string) => s.trim())
     .filter(Boolean);
@@ -30,10 +30,8 @@ const Footer: React.FC = () => {
   const getLinkHref = (item: string) => {
     const lower = item.toLowerCase();
     if (lower === 'about') return '/about';
-    if (lower.includes('faq') || lower.includes('guide') || lower.includes('help')) return '/faq';
     if (lower === 'contact' || lower === 'contact editorial office') return '/contact';
     if (lower === 'archives' || lower === 'journals') return '/archives';
-    if (lower.includes('submission')) return '/faq';
     return '/about';
   };
 

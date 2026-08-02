@@ -127,7 +127,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     { label: 'Bulk Import', icon: Upload, path: '/dashboard/import', roles: ['Admin', 'Super Admin'] },
     { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Admin'] },
     { label: 'User Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
-    { label: 'Help & Guide', icon: HelpCircle, path: '/dashboard/help', roles: ['Super Admin', 'Admin'] },
   ];
 
   const adminItems = [

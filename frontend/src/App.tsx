@@ -22,8 +22,6 @@ import SystemSettings from '@/pages/dashboard/SystemSettings';
 import SystemHealth from '@/pages/dashboard/SystemHealth';
 import BulkImport from '@/pages/dashboard/BulkImport';
 import ManageAuthors from '@/pages/dashboard/ManageAuthors';
-import DashboardHelp from '@/pages/dashboard/DashboardHelp';
-import Faq from '@/pages/Faq';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -64,8 +62,6 @@ function App() {
               <Route path="/announcements" element={<PublicLayout><Announcements /></PublicLayout>} />
               <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
               <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-              <Route path="/faq" element={<PublicLayout><Faq /></PublicLayout>} />
-              <Route path="/guide" element={<PublicLayout><Faq /></PublicLayout>} />
               <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
               <Route path="/pending-verification" element={<PublicLayout><PendingVerification /></PublicLayout>} />
 
@@ -94,7 +90,6 @@ function App() {
                 <Route path="logs" element={<ActivityLogs />} />
                 <Route path="website" element={<WebsiteSettings />} />
                 <Route path="settings" element={<SystemSettings />} />
-                <Route path="help" element={<DashboardHelp />} />
                 <Route path="search" element={<Overview />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Route>
