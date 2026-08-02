@@ -190,6 +190,9 @@ const Navbar = () => {
           <Link to="/archives" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/archives') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             Archives
           </Link>
+          <Link to="/faq" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/faq') || path.startsWith('/guide') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
+            FAQ & Guide
+          </Link>
           <Link to="/about" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/about') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
             About
           </Link>
