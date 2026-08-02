@@ -38,29 +38,130 @@ const CATEGORY_ICONS: Record<string, any> = {
   Admin: ShieldCheck,
 };
 
+const DEFAULT_FAQS: FaqItem[] = [
+  {
+    id: 1,
+    question: 'What is The Filamerian Journals platform?',
+    answer: 'The Filamerian Journals is the official academic publishing and journal repository platform for Filamer Christian University. It hosts peer-reviewed undergraduate, graduate, institutional, and multidisciplinary research journals with free open-access reading and PDF downloading.',
+    category: 'General',
+    audience: 'public',
+    sort_order: 1,
+  },
+  {
+    id: 2,
+    question: 'Are articles on this platform open access?',
+    answer: 'Yes! All published journals and research articles are freely accessible to the public for reading and downloading. No paid subscription or registration is required to read abstracts or download PDF documents.',
+    category: 'General',
+    audience: 'public',
+    sort_order: 2,
+  },
+  {
+    id: 3,
+    question: 'How can I search for specific research articles?',
+    answer: 'Use the global search bar at the top of the website or press Shift + / to open keyboard shortcuts. You can search by article title, author name, category, or relevant keywords.',
+    category: 'Readers',
+    audience: 'public',
+    sort_order: 3,
+  },
+  {
+    id: 4,
+    question: 'How do I cite an article from Filamerian Journals?',
+    answer: 'On any article preview or detail page, click the "Cite" button. You can automatically copy citations formatted in APA 7th, MLA 9th, Chicago, or Harvard reference styles.',
+    category: 'Readers',
+    audience: 'public',
+    sort_order: 4,
+  },
+  {
+    id: 5,
+    question: 'Can I download PDF copies of research papers?',
+    answer: 'Yes. Every published article includes an in-browser PDF viewer with full-screen reading modes and an instant "Download PDF" button.',
+    category: 'Readers',
+    audience: 'public',
+    sort_order: 5,
+  },
+  {
+    id: 6,
+    question: 'Who can submit research papers to Filamerian Journals?',
+    answer: 'Filamer Christian University faculty, graduate students, undergraduate researchers, and invited external academic contributors are eligible to submit manuscripts for editorial review.',
+    category: 'Authors',
+    audience: 'all',
+    sort_order: 6,
+  },
+  {
+    id: 7,
+    question: 'What file formats are accepted for article PDF uploads?',
+    answer: 'Full-text manuscripts must be uploaded as PDF files. Cover graphics and supplementary images accept JPG, PNG, and WebP formats.',
+    category: 'Authors',
+    audience: 'all',
+    sort_order: 7,
+  },
+  {
+    id: 8,
+    question: 'What is the maximum PDF file upload size limit?',
+    answer: 'The default PDF upload limit is configured under System Settings (typically up to 25 MB per document). Large graphic files are automatically optimized.',
+    category: 'Authors',
+    audience: 'all',
+    sort_order: 8,
+  },
+  {
+    id: 9,
+    question: 'How does the Journal > Volume > Issue > Article hierarchy work?',
+    answer: 'The platform follows standard academic structure: Each Journal contains numbered Volumes (typically one volume per publication year). Volumes contain Issues (e.g., Issue No. 1 - Vol 12), and Articles are assigned to specific Issues and Volumes.',
+    category: 'Publishing',
+    audience: 'admin',
+    sort_order: 9,
+  },
+  {
+    id: 10,
+    question: 'How do I add a new article or author in the Dashboard?',
+    answer: 'Logged-in staff can navigate to Dashboard > Articles or Dashboard > Authors and press "N" on their keyboard to instantly open the Creation Form modal.',
+    category: 'Publishing',
+    audience: 'admin',
+    sort_order: 10,
+  },
+  {
+    id: 11,
+    question: 'What keyboard shortcuts are available in the Dashboard?',
+    answer: 'Press Shift + / (or Shift + ?) anywhere in the dashboard to toggle the Keyboard Shortcuts guide. Shortcuts include N (Create New Item), Esc (Close Modal), and Tab navigation.',
+    category: 'Admin',
+    audience: 'admin',
+    sort_order: 11,
+  },
+  {
+    id: 12,
+    question: 'How does Role-Based Access Control (RBAC) work?',
+    answer: 'Super Admins have full access to User Management, Activity Logs, and System Health. Admins can create and edit Journals, Volumes, and Articles. Non-admin users are restricted from administrative controls.',
+    category: 'Admin',
+    audience: 'admin',
+    sort_order: 12,
+  },
+  {
+    id: 13,
+    question: 'What happens when Maintenance Mode is toggled on?',
+    answer: 'When Maintenance Mode is active in System Settings, public visitors are shown a scheduled maintenance notice while logged-in Admins retain uninterrupted access to manage the system.',
+    category: 'Admin',
+    audience: 'admin',
+    sort_order: 13,
+  },
+];
+
 const FaqPage: React.FC = () => {
-  const [faqs, setFaqs] = useState<FaqItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [faqs, setFaqs] = useState<FaqItem[]>(DEFAULT_FAQS);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [viewMode, setViewMode] = useState<ViewMode>('accordion');
-  const [openAccordionId, setOpenAccordionId] = useState<number | null>(null);
+  const [openAccordionId, setOpenAccordionId] = useState<number | null>(DEFAULT_FAQS[0].id);
 
   useEffect(() => {
     const fetchFaqs = async () => {
       try {
-        setLoading(true);
         const res = await api.get('/public/faqs');
-        if (res.data?.data) {
+        if (res.data?.data && res.data.data.length > 0) {
           setFaqs(res.data.data);
-          if (res.data.data.length > 0) {
-            setOpenAccordionId(res.data.data[0].id);
-          }
+          setOpenAccordionId(res.data.data[0].id);
         }
       } catch (err) {
         console.error('Failed to load FAQs:', err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchFaqs();
@@ -180,13 +281,7 @@ const FaqPage: React.FC = () => {
 
       {/* Main Content Body */}
       <main className="max-w-5xl mx-auto px-6 py-12">
-        {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-20 bg-surface border border-border animate-pulse rounded" />
-            ))}
-          </div>
-        ) : filteredFaqs.length === 0 ? (
+        {filteredFaqs.length === 0 ? (
           <div className="text-center py-16 border border-dashed border-border p-8 bg-surface space-y-3">
             <HelpCircle className="h-10 w-10 text-muted mx-auto" />
             <h3 className="text-lg font-serif">No matching questions found</h3>
