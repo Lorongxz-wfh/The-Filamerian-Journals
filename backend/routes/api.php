@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('resources', \App\Http\Controllers\Api\ResourceController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('faqs', \App\Http\Controllers\Api\FaqController::class);
     });
 
     // Super Admin Only
@@ -103,6 +104,7 @@ Route::get('/public/articles/{article}/pdf', [\App\Http\Controllers\Api\ArticleC
 Route::post('/public/articles/{article}/view', [\App\Http\Controllers\Api\ArticleController::class, 'trackView']);
 Route::get('/public/articles/{article}/related', [\App\Http\Controllers\Api\ArticleController::class, 'getRelated']);
 Route::get('/public/categories', [\App\Http\Controllers\Api\CategoryController::class, 'index']);
+Route::get('/public/faqs', [\App\Http\Controllers\Api\FaqController::class, 'publicIndex']);
 
 // Settings & Feedbacks
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);

@@ -30,9 +30,10 @@ const Footer: React.FC = () => {
   const getLinkHref = (item: string) => {
     const lower = item.toLowerCase();
     if (lower === 'about') return '/about';
+    if (lower.includes('faq') || lower.includes('guide') || lower.includes('help')) return '/faq';
     if (lower === 'contact' || lower === 'contact editorial office') return '/contact';
     if (lower === 'archives' || lower === 'journals') return '/archives';
-    if (lower.includes('submission')) return '/about';
+    if (lower.includes('submission')) return '/faq';
     return '/about';
   };
 
