@@ -102,7 +102,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
       if (isInput) return;
 
-      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+      if (e.key === '/') {
+        e.preventDefault();
+        dashSearchInputRef.current?.focus();
+        return;
+      }
+
+      if (e.key === '?') {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
       }
