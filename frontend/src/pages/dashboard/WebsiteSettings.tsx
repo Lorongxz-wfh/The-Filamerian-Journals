@@ -343,137 +343,6 @@ const WebsiteSettings: React.FC = () => {
     </div>
   );
 
-  const footerTabContent = (
-    <div className="space-y-8 w-full">
-      {loadingSettings ? (
-        <FormSkeleton rows={6} />
-      ) : (
-        <>
-          {/* Column 1: School & Contact Info */}
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Footer Column 1 (School Info & Address)</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input 
-                label="University / Institution Name" 
-                value={settings.footer_school_name || ''} 
-                onChange={(e) => handleSettingsChange('footer_school_name', e.target.value)}
-                placeholder="Filamer Christian University"
-              />
-              <Input 
-                label="Subtagline" 
-                value={settings.footer_school_subtitle || ''} 
-                onChange={(e) => handleSettingsChange('footer_school_subtitle', e.target.value)}
-                placeholder="A globally linked Christian university"
-              />
-              <Input 
-                label="Address" 
-                value={settings.footer_address || ''} 
-                onChange={(e) => handleSettingsChange('footer_address', e.target.value)}
-                placeholder="Roxas Avenue, Roxas City, Capiz, Philippines"
-              />
-              <Input 
-                label="Footer Email" 
-                value={settings.footer_email || ''} 
-                onChange={(e) => handleSettingsChange('footer_email', e.target.value)}
-                placeholder="info@filamer.edu.ph"
-              />
-              <Input 
-                label="Footer Phone" 
-                value={settings.footer_phone || ''} 
-                onChange={(e) => handleSettingsChange('footer_phone', e.target.value)}
-                placeholder="(036) 621-2317"
-              />
-            </div>
-          </div>
-
-          {/* Column 2 & Column 3: Navigation Links */}
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Footer Column 2 & 3 (Navigation Links)</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <Input 
-                  label="Quick Links Title" 
-                  value={settings.footer_quick_links_title || ''} 
-                  onChange={(e) => handleSettingsChange('footer_quick_links_title', e.target.value)}
-                  placeholder="Quick Links"
-                />
-                <Input 
-                  label="Quick Links (Separated by Comma)" 
-                  value={settings.footer_quick_links || ''} 
-                  onChange={(e) => handleSettingsChange('footer_quick_links', e.target.value)}
-                  placeholder="About, Academics, Admission, Organizations, Data Privacy Act, Sitemap"
-                />
-              </div>
-              <div className="space-y-4">
-                <Input 
-                  label="Journal Links Title" 
-                  value={settings.footer_journal_links_title || ''} 
-                  onChange={(e) => handleSettingsChange('footer_journal_links_title', e.target.value)}
-                  placeholder="The Filamerian Journals"
-                />
-                <Input 
-                  label="Journal Links (Separated by Comma)" 
-                  value={settings.footer_journal_links || ''} 
-                  onChange={(e) => handleSettingsChange('footer_journal_links', e.target.value)}
-                  placeholder="Submission Guidelines, Editorial Board, Publication Ethics, Open Access Policy, Contact Editorial Office"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Bar: Copyright & Facebook */}
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Footer Bottom Bar (Copyright & Social)</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <Input 
-                  label="Copyright Line" 
-                  value={settings.footer_copyright || ''} 
-                  onChange={(e) => handleSettingsChange('footer_copyright', e.target.value)}
-                  placeholder="© Filamer Christian University, Inc. All rights reserved."
-                />
-              </div>
-              <div>
-                <Input 
-                  label="Facebook Label" 
-                  value={settings.footer_facebook_text || ''} 
-                  onChange={(e) => handleSettingsChange('footer_facebook_text', e.target.value)}
-                  placeholder="Official Facebook Page"
-                />
-              </div>
-              <div className="md:col-span-3">
-                <Input 
-                  label="Facebook URL" 
-                  value={settings.footer_facebook_url || ''} 
-                  onChange={(e) => handleSettingsChange('footer_facebook_url', e.target.value)}
-                  placeholder="https://facebook.com"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button 
-              onClick={handleSaveSettings}
-              isLoading={savingSettings}
-            >
-              {savingSettings ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-
   return (
     <div className="space-y-2">
       <DashboardHeader title="Website Settings" className="mb-2" />
@@ -483,8 +352,7 @@ const WebsiteSettings: React.FC = () => {
           { id: 'home', label: 'Home', content: homeTabContent },
           { id: 'archives', label: 'Archives', content: archivesTabContent },
           { id: 'about', label: 'About', content: resourcesContent },
-          { id: 'contact', label: 'Contact', content: contactTabContent },
-          { id: 'footer', label: 'Footer', content: footerTabContent }
+          { id: 'contact', label: 'Contact', content: contactTabContent }
         ]}
       />
       <ConfirmDialog 

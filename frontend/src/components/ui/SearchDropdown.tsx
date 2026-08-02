@@ -18,7 +18,6 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard');
-  const searchBasePath = isDashboard ? '/dashboard/search' : '/search';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -142,7 +141,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
                   {articles.map(a => (
                     <Link 
                       key={a.id} 
-                      to={`${searchBasePath}?q=${encodeURIComponent(query)}`} 
+                      to={`/articles/${a.id}`} 
                       onClick={onClose}
                       className="block p-3 hover:bg-background transition-colors group"
                     >
@@ -164,7 +163,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
       {/* View All Button */}
       {hasResults && (
         <Link 
-          to={`${searchBasePath}?q=${encodeURIComponent(query)}`}
+          to={isDashboard ? `/dashboard/articles` : `/search?q=${encodeURIComponent(query)}`}
           onClick={onClose}
           className="block w-full p-4 text-center text-[12px] font-bold text-primary uppercase tracking-wider bg-background border-t border-border hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-2"
         >

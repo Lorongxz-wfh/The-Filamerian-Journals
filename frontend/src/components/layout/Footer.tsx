@@ -5,110 +5,38 @@ import { useSettings } from '@/contexts/SettingsContext';
 const Footer: React.FC = () => {
   const { settings } = useSettings();
 
+  const siteTitle = settings.site_title || 'The Filamerian Journals';
   const schoolName = settings.footer_school_name || 'Filamer Christian University';
-  const schoolSubtitle = settings.footer_school_subtitle || 'A globally linked Christian university';
-  const address = settings.footer_address || 'Roxas Avenue, Roxas City, Capiz, Philippines';
-  const email = settings.footer_email || 'info@filamer.edu.ph';
-  const phone = settings.footer_phone || '(036) 621-2317';
-
-  const quickLinksTitle = settings.footer_quick_links_title || 'Quick Links';
-  const quickLinks = (settings.footer_quick_links || 'About, Academics, Admission, Organizations, Data Privacy Act, Sitemap')
-    .split(',')
-    .map((s: string) => s.trim())
-    .filter(Boolean);
-
-  const journalLinksTitle = settings.footer_journal_links_title || settings.site_title || 'The Filamerian Journals';
-  const journalLinks = (settings.footer_journal_links || 'Submission Guidelines, Editorial Board, Publication Ethics, Open Access Policy, Contact Editorial Office')
-    .split(',')
-    .map((s: string) => s.trim())
-    .filter(Boolean);
-
-  const copyrightText = settings.footer_copyright || `© ${new Date().getFullYear()} Filamer Christian University, Inc. All rights reserved.`;
-  const facebookUrl = settings.footer_facebook_url || '#';
-  const facebookText = settings.footer_facebook_text || 'Official Facebook Page';
-
-  const getLinkHref = (item: string) => {
-    const lower = item.toLowerCase();
-    if (lower === 'about') return '/about';
-    if (lower === 'contact' || lower === 'contact editorial office') return '/contact';
-    if (lower === 'archives' || lower === 'journals') return '/archives';
-    return '/about';
-  };
+  const copyrightText = settings.footer_copyright || `© ${new Date().getFullYear()} ${schoolName}, Inc. All rights reserved.`;
 
   return (
-    <footer className="bg-primary text-white">
-      {/* Main footer content */}
-      <div className="container-custom py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* School Info */}
-          <div className="space-y-4">
-            <h3 className="font-display font-normal text-secondary text-lg tracking-wider uppercase">
-              {schoolName}
+    <footer className="bg-primary text-white border-t border-white/10">
+      <div className="container-custom py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
+          {/* Brand & Identity */}
+          <div className="text-center md:text-left space-y-1">
+            <h3 className="font-display font-semibold text-secondary text-base tracking-wider uppercase">
+              {siteTitle}
             </h3>
-            {schoolSubtitle && (
-              <p className="text-[11px] text-white/40 uppercase tracking-wider">
-                {schoolSubtitle}
-              </p>
-            )}
-            <div className="space-y-2 text-[13px] text-white/60 pt-2">
-              {address && <p>{address}</p>}
-              {email && <p>{email}</p>}
-              {phone && <p>{phone}</p>}
-            </div>
+            <p className="text-xs text-white/50 tracking-wide font-sans">
+              Official Academic Repository of {schoolName}
+            </p>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-[12px] font-semibold text-white/80 uppercase tracking-wider">
-              {quickLinksTitle}
-            </h4>
-            <ul className="space-y-2">
-              {quickLinks.map((item: string) => (
-                <li key={item}>
-                  <Link to={getLinkHref(item)} className="text-[13px] text-white/50 hover:text-white transition-colors">
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Journal Info */}
-          <div className="space-y-4">
-            <h4 className="text-[12px] font-semibold text-white/80 uppercase tracking-wider">
-              {journalLinksTitle}
-            </h4>
-            <ul className="space-y-2">
-              {journalLinks.map((item: string) => (
-                <li key={item}>
-                  <Link to={getLinkHref(item)} className="text-[13px] text-white/50 hover:text-white transition-colors">
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Clean Navigation Links */}
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-medium uppercase tracking-wider text-white/70">
+            <Link to="/" className="hover:text-secondary transition-colors">Home</Link>
+            <Link to="/journals" className="hover:text-secondary transition-colors">Journals</Link>
+            <Link to="/archives" className="hover:text-secondary transition-colors">Archives</Link>
+            <Link to="/about" className="hover:text-secondary transition-colors">About</Link>
+            <Link to="/contact" className="hover:text-secondary transition-colors">Contact</Link>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white/10">
-        <div className="container-custom py-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-[12px] text-white/40">
-            {copyrightText.includes('{year}')
-              ? copyrightText.replace('{year}', new Date().getFullYear().toString())
-              : copyrightText}
-          </p>
-          {facebookText && (
-            <a 
-              href={facebookUrl} 
-              target={facebookUrl !== '#' ? '_blank' : '_self'} 
-              rel="noreferrer" 
-              className="text-[12px] text-white/40 hover:text-white transition-colors"
-            >
-              {facebookText}
-            </a>
-          )}
+        {/* Bottom Bar */}
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-white/40">
+          <p>{copyrightText}</p>
+          <p className="font-mono">Roxas City, Capiz, Philippines</p>
         </div>
       </div>
     </footer>
