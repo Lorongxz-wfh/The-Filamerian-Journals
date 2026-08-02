@@ -22,6 +22,7 @@ import SystemSettings from '@/pages/dashboard/SystemSettings';
 import SystemHealth from '@/pages/dashboard/SystemHealth';
 import BulkImport from '@/pages/dashboard/BulkImport';
 import ManageAuthors from '@/pages/dashboard/ManageAuthors';
+import DashboardHelp from '@/pages/dashboard/DashboardHelp';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -90,6 +91,7 @@ function App() {
                 <Route path="logs" element={<ActivityLogs />} />
                 <Route path="website" element={<WebsiteSettings />} />
                 <Route path="settings" element={<SystemSettings />} />
+                <Route path="help" element={<DashboardHelp />} />
                 <Route path="search" element={<Overview />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Route>
