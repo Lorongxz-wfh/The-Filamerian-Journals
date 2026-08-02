@@ -6,9 +6,6 @@ import {
   Users, 
   ShieldCheck, 
   FileText, 
-  Layers, 
-  Grid, 
-  List, 
   Sparkles,
   ArrowRight,
   MessageSquare,
@@ -25,8 +22,6 @@ interface FaqItem {
   audience: string;
   sort_order: number;
 }
-
-type ViewMode = 'accordion' | 'tabs' | 'grid';
 
 const CATEGORIES = ['All', 'General', 'Readers', 'Authors', 'Publishing', 'Admin'];
 
@@ -149,8 +144,7 @@ const FaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<FaqItem[]>(DEFAULT_FAQS);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState<ViewMode>('accordion');
-  const [openAccordionId, setOpenAccordionId] = useState<number | null>(DEFAULT_FAQS[0].id);
+  const [expandedId, setExpandedId] = useState<number | null>(DEFAULT_FAQS[0].id);
 
   useEffect(() => {
     const fetchFaqs = async () => {
@@ -158,7 +152,7 @@ const FaqPage: React.FC = () => {
         const res = await api.get('/public/faqs');
         if (res.data?.data && res.data.data.length > 0) {
           setFaqs(res.data.data);
-          setOpenAccordionId(res.data.data[0].id);
+          setExpandedId(res.data.data[0].id);
         }
       } catch (err) {
         console.error('Failed to load FAQs:', err);
@@ -176,260 +170,151 @@ const FaqPage: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const toggleAccordion = (id: number) => {
-    setOpenAccordionId(prev => (prev === id ? null : id));
+  const toggleExpand = (id: number) => {
+    setExpandedId(prev => (prev === id ? null : id));
   };
 
   return (
     <div className="min-h-screen bg-background font-sans text-primary">
-      {/* Hero Header */}
-      <section className="bg-surface border-b border-border py-14 px-6 md:px-12 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto space-y-6 text-center md:text-left relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-mono font-medium">
-            <HelpCircle className="h-3.5 w-3.5" /> Knowledge Base & User Guide
+      {/* Header Banner */}
+      <section className="bg-surface border-b border-border py-12 px-6 md:px-12 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 text-xs font-mono font-medium">
+            <HelpCircle className="h-3.5 w-3.5" /> User Guide & Support Center
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-serif text-primary tracking-tight">
-            How can we help you today?
+          <h1 className="text-3xl md:text-4xl font-serif text-primary tracking-tight">
+            User Guide & Frequently Asked Questions
           </h1>
           <p className="text-muted text-sm md:text-base max-w-2xl">
-            Explore guides, publishing steps, keyboard shortcuts, and answers to frequently asked questions about The Filamerian Journals repository.
+            Find instructions, research guidelines, citation rules, and system answers organized by topic.
           </p>
 
-          {/* Search & Layout Control Bar */}
-          <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 max-w-3xl">
-            <div className="flex-1">
-              <SearchInput
-                placeholder="Search questions, citations, submission rules..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-background"
-              />
-            </div>
-
-            {/* Layout Mode Switcher */}
-            <div className="flex items-center gap-1 bg-background border border-border p-1 rounded-md shrink-0 shadow-sm">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-muted px-2 hidden sm:inline">
-                Layout:
-              </span>
-              <button
-                onClick={() => setViewMode('accordion')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                  viewMode === 'accordion'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted hover:text-primary hover:bg-surface'
-                }`}
-                title="Accordion List View"
-              >
-                <List className="h-3.5 w-3.5" />
-                <span>Accordion</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('tabs')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                  viewMode === 'tabs'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted hover:text-primary hover:bg-surface'
-                }`}
-                title="Tabbed Categories View"
-              >
-                <Layers className="h-3.5 w-3.5" />
-                <span>Tabs</span>
-              </button>
-
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted hover:text-primary hover:bg-surface'
-                }`}
-                title="Grid Cards View"
-              >
-                <Grid className="h-3.5 w-3.5" />
-                <span>Cards</span>
-              </button>
-            </div>
+          {/* Search Bar */}
+          <div className="pt-2 max-w-xl">
+            <SearchInput
+              placeholder="Search guide by keyword, title, citations..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-background"
+            />
           </div>
         </div>
       </section>
 
-      {/* Category Pills Filter */}
-      <div className="border-b border-border bg-surface/50 px-6 py-4 sticky top-14 z-20 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {CATEGORIES.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat] || Bookmark;
-            const isSelected = selectedCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all shrink-0 rounded-full border ${
-                  isSelected
-                    ? 'bg-primary text-white border-primary shadow-sm'
-                    : 'bg-background border-border text-muted hover:text-primary hover:border-primary/40'
-                }`}
-              >
-                {cat !== 'All' && <Icon className="h-3.5 w-3.5" />}
-                <span>{cat}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Main Tabbed Layout Container */}
+      <main className="max-w-5xl mx-auto px-6 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+          
+          {/* Left Category Tabs Sidebar */}
+          <div className="border border-border bg-surface p-2 shadow-xs space-y-1 sticky top-20">
+            <div className="px-3 py-2 text-[11px] font-mono uppercase tracking-wider text-muted font-bold border-b border-border/60 mb-1">
+              Categories
+            </div>
+            {CATEGORIES.map((cat) => {
+              const Icon = CATEGORY_ICONS[cat] || Bookmark;
+              const isSelected = selectedCategory === cat;
+              const count = cat === 'All' 
+                ? faqs.length 
+                : faqs.filter(f => f.category === cat).length;
 
-      {/* Main Content Body */}
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        {filteredFaqs.length === 0 ? (
-          <div className="text-center py-16 border border-dashed border-border p-8 bg-surface space-y-3">
-            <HelpCircle className="h-10 w-10 text-muted mx-auto" />
-            <h3 className="text-lg font-serif">No matching questions found</h3>
-            <p className="text-sm text-muted max-w-md mx-auto">
-              Try adjusting your search terms or select a different category above.
-            </p>
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`w-full text-left px-3.5 py-2.5 text-xs font-medium transition-all flex items-center justify-between border-l-2 ${
+                    isSelected
+                      ? 'border-primary bg-primary/5 text-primary font-semibold'
+                      : 'border-transparent text-muted hover:text-primary hover:bg-background/80'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {cat !== 'All' && <Icon className={`h-3.5 w-3.5 ${isSelected ? 'text-secondary' : 'text-muted'}`} />}
+                    <span>{cat}</span>
+                  </div>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 border ${
+                    isSelected 
+                      ? 'bg-primary text-white border-primary' 
+                      : 'bg-background border-border text-muted'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        ) : (
-          <>
-            {/* VIEW MODE 1: ACCORDION LIST */}
-            {viewMode === 'accordion' && (
-              <div className="space-y-4">
-                {filteredFaqs.map((faq) => {
-                  const isOpen = openAccordionId === faq.id;
-                  const CategoryIcon = CATEGORY_ICONS[faq.category] || Bookmark;
-                  return (
-                    <div
-                      key={faq.id}
-                      className="border border-border bg-surface transition-all duration-200 shadow-sm"
+
+          {/* Right Cards Panel */}
+          <div className="md:col-span-3 space-y-4">
+            {filteredFaqs.length === 0 ? (
+              <div className="text-center py-16 border border-dashed border-border p-8 bg-surface space-y-3">
+                <HelpCircle className="h-10 w-10 text-muted mx-auto" />
+                <h3 className="text-lg font-serif">No matching questions found</h3>
+                <p className="text-sm text-muted max-w-md mx-auto">
+                  Try adjusting your search query or select another category from the sidebar.
+                </p>
+              </div>
+            ) : (
+              filteredFaqs.map((faq) => {
+                const isExpanded = expandedId === faq.id;
+                const CategoryIcon = CATEGORY_ICONS[faq.category] || Bookmark;
+
+                return (
+                  <div
+                    key={faq.id}
+                    className="border border-border bg-surface transition-all duration-200 shadow-xs hover:border-primary/40"
+                  >
+                    <button
+                      onClick={() => toggleExpand(faq.id)}
+                      className="w-full p-5 flex items-start justify-between gap-4 text-left hover:bg-background/40 transition-colors"
                     >
-                      <button
-                        onClick={() => toggleAccordion(faq.id)}
-                        className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left hover:bg-background/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="p-1.5 bg-background border border-border text-secondary shrink-0">
-                            <CategoryIcon className="h-4 w-4" />
-                          </span>
-                          <h3 className="text-sm md:text-base font-medium text-primary">
+                      <div className="flex items-start gap-3">
+                        <span className="p-1.5 bg-background border border-border text-secondary shrink-0 mt-0.5">
+                          <CategoryIcon className="h-3.5 w-3.5" />
+                        </span>
+                        <div>
+                          <h3 className="text-sm md:text-base font-medium text-primary leading-snug">
                             {faq.question}
                           </h3>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 bg-background border border-border text-muted hidden sm:inline">
+                          <span className="inline-block mt-1 text-[10px] font-mono uppercase tracking-wider text-muted/80">
                             {faq.category}
                           </span>
-                          <ChevronDown
-                            className={`h-4 w-4 text-muted transition-transform duration-200 ${
-                              isOpen ? 'rotate-180 text-primary' : ''
-                            }`}
-                          />
                         </div>
-                      </button>
+                      </div>
 
-                      {isOpen && (
-                        <div className="px-6 pb-6 pt-2 text-sm text-muted leading-relaxed border-t border-border/60 bg-background/30">
-                          {faq.answer}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* VIEW MODE 2: TABBED CATEGORIES */}
-            {viewMode === 'tabs' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                {/* Sidebar Navigation */}
-                <div className="space-y-1">
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`w-full text-left px-4 py-3 text-xs font-medium transition-all flex items-center justify-between border-l-2 ${
-                        selectedCategory === cat
-                          ? 'border-primary bg-primary/5 text-primary font-semibold'
-                          : 'border-transparent text-muted hover:text-primary hover:bg-surface'
-                      }`}
-                    >
-                      <span>{cat}</span>
-                      <span className="text-[10px] font-mono text-muted/70">
-                        {cat === 'All' 
-                          ? faqs.length 
-                          : faqs.filter(f => f.category === cat).length}
-                      </span>
+                      <ChevronDown
+                        className={`h-4 w-4 text-muted shrink-0 transition-transform duration-200 mt-1 ${
+                          isExpanded ? 'rotate-180 text-primary' : ''
+                        }`}
+                      />
                     </button>
-                  ))}
-                </div>
 
-                {/* Content Panel */}
-                <div className="md:col-span-3 space-y-6">
-                  {filteredFaqs.map((faq) => (
-                    <div key={faq.id} className="border border-border bg-surface p-6 space-y-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-base font-serif font-medium text-primary">
-                          {faq.question}
-                        </h3>
-                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20">
-                          {faq.category}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted leading-relaxed">
+                    {isExpanded && (
+                      <div className="px-5 pb-5 pt-3 text-xs md:text-sm text-muted leading-relaxed border-t border-border/60 bg-background/30">
                         {faq.answer}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* VIEW MODE 3: GRID CARDS */}
-            {viewMode === 'grid' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredFaqs.map((faq) => {
-                  const CategoryIcon = CATEGORY_ICONS[faq.category] || Bookmark;
-                  return (
-                    <div
-                      key={faq.id}
-                      className="border border-border bg-surface p-6 space-y-4 flex flex-col justify-between hover:border-primary/40 transition-colors shadow-sm"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="p-2 bg-background border border-border text-primary/70">
-                            <CategoryIcon className="h-4 w-4" />
-                          </span>
-                          <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 bg-background border border-border text-muted">
-                            {faq.category}
-                          </span>
-                        </div>
-                        <h3 className="text-base font-medium text-primary leading-snug">
-                          {faq.question}
-                        </h3>
-                        <p className="text-xs md:text-sm text-muted leading-relaxed">
-                          {faq.answer}
-                        </p>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    )}
+                  </div>
+                );
+              })
             )}
-          </>
-        )}
+          </div>
 
-        {/* Bottom Support Banner */}
-        <div className="mt-16 border border-border bg-surface p-8 text-center space-y-4 shadow-sm">
-          <MessageSquare className="h-8 w-8 text-secondary mx-auto" />
-          <h2 className="text-xl font-serif text-primary">Still have questions?</h2>
-          <p className="text-sm text-muted max-w-lg mx-auto">
-            Can’t find the answer you’re looking for? Reach out directly to the editorial team or send system feedback.
+        </div>
+
+        {/* Footer Help Banner */}
+        <div className="mt-14 border border-border bg-surface p-8 text-center space-y-3 shadow-xs">
+          <MessageSquare className="h-7 w-7 text-secondary mx-auto" />
+          <h2 className="text-lg font-serif text-primary">Need additional editorial or technical support?</h2>
+          <p className="text-xs text-muted max-w-lg mx-auto">
+            Contact the Filamerian Journals office directly for manuscript inquiries or technical assistance.
           </p>
           <div className="pt-2">
             <a
               href="mailto:support@filamer.edu.ph"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-xs font-semibold uppercase tracking-wider hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-semibold uppercase tracking-wider hover:bg-primary/90 transition-colors"
             >
-              Contact Support Team <ArrowRight className="h-3.5 w-3.5" />
+              Contact Support Office <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
         </div>
