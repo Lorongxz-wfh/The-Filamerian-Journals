@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, FileText, Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { Globe, FileText, Plus, Search, Edit2, Trash2, ShieldAlert } from 'lucide-react';
 import api from '@/services/api';
 import Input from '@/components/ui/Input';
 import { FormSkeleton, ListSkeleton } from '@/components/ui/Skeleton';
@@ -21,6 +21,10 @@ interface Resource {
 }
 
 const WebsiteSettings: React.FC = () => {
+  const storedUser = localStorage.getItem('user');
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
+  const isSuperAdmin = currentUser?.roles?.some((r: any) => r.name === 'Super Admin') || currentUser?.role === 'Super Admin';
+
   // --- General Settings State ---
   const [settings, setSettings] = useState<Record<string, string>>({
     site_title: 'The Filamerian Journals',
@@ -31,6 +35,24 @@ const WebsiteSettings: React.FC = () => {
     home_about_us: '<p class="text-sm text-muted leading-relaxed">\n  <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n</p>',
     show_tagline: 'false',
     show_about_us: 'true',
+    footer_col1_title: 'NAVIGATION',
+    footer_col1_l1_text: 'Home Portal', footer_col1_l1_url: '/',
+    footer_col1_l2_text: 'Browse Journals', footer_col1_l2_url: '/journals',
+    footer_col1_l3_text: 'Volume Archives', footer_col1_l3_url: '/archives',
+    footer_col1_l4_text: 'About Repository', footer_col1_l4_url: '/about',
+    footer_col1_l5_text: 'Contact Editorial Office', footer_col1_l5_url: '/contact',
+    footer_col2_title: 'PUBLISHING POLICIES',
+    footer_col2_l1_text: 'Open Access Policy', footer_col2_l1_url: '/about',
+    footer_col2_l2_text: 'Peer Review Process', footer_col2_l2_url: '/about',
+    footer_col2_l3_text: 'Publication Ethics', footer_col2_l3_url: '/about',
+    footer_col2_l4_text: 'Author Guidelines', footer_col2_l4_url: '/about',
+    footer_col2_l5_text: 'Staff & Admin Login', footer_col2_l5_url: '/login',
+    footer_col3_title: 'RESOURCES & LINKS',
+    footer_col3_l1_text: '', footer_col3_l1_url: '',
+    footer_col3_l2_text: '', footer_col3_l2_url: '',
+    footer_col3_l3_text: '', footer_col3_l3_url: '',
+    footer_col3_l4_text: '', footer_col3_l4_url: '',
+    footer_col3_l5_text: '', footer_col3_l5_url: '',
   });
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -198,16 +220,85 @@ const WebsiteSettings: React.FC = () => {
     </div>
   );
 
-
-  const archivesTabContent = (
+  const footerTabContent = (
     <div className="space-y-8 w-full">
-      <div className="border border-border bg-surface p-6 space-y-5">
-        <div className="flex items-center gap-3 border-b border-border pb-3">
-          <Globe className="h-4 w-4 text-primary/40" />
-          <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Archives Page Settings</h2>
-        </div>
-        <EmptyState title="Coming Soon" description="Settings for the archives page are empty for now." className="border-0 bg-transparent py-8" />
-      </div>
+      {loadingSettings ? (
+        <FormSkeleton rows={6} />
+      ) : (
+        <>
+          {!isSuperAdmin && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 text-[13px] font-medium flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
+              Footer link settings can only be edited by Super Admins.
+            </div>
+          )}
+
+          <div className="border border-border bg-surface p-6 space-y-6">
+            <div className="flex items-center gap-3 border-b border-border pb-3">
+              <Globe className="h-4 w-4 text-primary/40" />
+              <div>
+                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Footer Navigation Columns</h2>
+                <p className="text-[12px] text-muted">Configure the 3 customizable link columns displayed in the website footer. Leave rows empty to hide them.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((colNum) => (
+                <div key={colNum} className="border border-border bg-background p-4 space-y-4">
+                  <div className="border-b border-border pb-2">
+                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-1">Column {colNum} Header</span>
+                    <Input 
+                      label={`Main Title`} 
+                      disabled={!isSuperAdmin}
+                      value={settings[`footer_col${colNum}_title`] || (colNum === 1 ? 'NAVIGATION' : colNum === 2 ? 'PUBLISHING POLICIES' : '')} 
+                      onChange={(e) => handleSettingsChange(`footer_col${colNum}_title`, e.target.value)}
+                      placeholder="e.g. NAVIGATION"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <span className="text-[11px] font-semibold text-primary uppercase tracking-wider block">Links (Up to 5)</span>
+                    {[1, 2, 3, 4, 5].map((linkNum) => (
+                      <div key={linkNum} className="p-2 border border-border bg-surface space-y-2">
+                        <span className="text-[10px] font-mono text-muted uppercase">Link #{linkNum}</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            disabled={!isSuperAdmin}
+                            placeholder="Text Title (e.g. Home)"
+                            value={settings[`footer_col${colNum}_l${linkNum}_text`] || ''}
+                            onChange={(e) => handleSettingsChange(`footer_col${colNum}_l${linkNum}_text`, e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-background border border-border text-[12px] focus:outline-none focus:border-primary disabled:opacity-50"
+                          />
+                          <input
+                            type="text"
+                            disabled={!isSuperAdmin}
+                            placeholder="URL / Path (e.g. /about)"
+                            value={settings[`footer_col${colNum}_l${linkNum}_url`] || ''}
+                            onChange={(e) => handleSettingsChange(`footer_col${colNum}_l${linkNum}_url`, e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-background border border-border text-[12px] focus:outline-none focus:border-primary font-mono disabled:opacity-50"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {isSuperAdmin && (
+            <div className="flex justify-end pt-2">
+              <Button 
+                onClick={handleSaveSettings}
+                isLoading={savingSettings}
+              >
+                {savingSettings ? 'Saving...' : 'Save Footer Settings'}
+              </Button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 
@@ -350,7 +441,7 @@ const WebsiteSettings: React.FC = () => {
       <Tabs 
         tabs={[
           { id: 'home', label: 'Home', content: homeTabContent },
-          { id: 'archives', label: 'Archives', content: archivesTabContent },
+          { id: 'footer', label: 'Footer Links', content: footerTabContent },
           { id: 'about', label: 'About', content: resourcesContent },
           { id: 'contact', label: 'Contact', content: contactTabContent }
         ]}
