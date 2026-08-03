@@ -97,6 +97,34 @@ const Contact: React.FC = () => {
             <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Support Hours</h3>
             <p className="text-[12px] text-muted">Monday - Friday<br />8:00 AM - 5:00 PM (PST)</p>
           </div>
+
+          {/* Campus Map Embed Card */}
+          <div className="bg-surface border border-border p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Campus Map</h3>
+              <a
+                href="https://maps.google.com/?q=Filamer+Christian+University,+Roxas+City,+Capiz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-medium text-secondary hover:underline flex items-center gap-1"
+              >
+                Get Directions ↗
+              </a>
+            </div>
+            <div className="w-full h-52 border border-border overflow-hidden relative">
+              <iframe
+                title="Filamer Christian University Map"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3908.2868297621147!2d122.7516113!3d11.5794444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a5f2526e0e0a51%3A0xb3671239bfb1b369!2sFilamer%20Christian%20University!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full grayscale-[0.15] contrast-[1.05]"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Contact Form */}
