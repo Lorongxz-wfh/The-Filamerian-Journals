@@ -17,7 +17,8 @@ import {
   Loader2,
   Globe,
   Upload,
-  HelpCircle
+  HelpCircle,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/services/api';
@@ -138,6 +139,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
   const adminItems = [
     { path: '/dashboard/categories', label: 'Categories', icon: BookOpen, roles: ['Super Admin', 'Admin'] },
+    { path: '/dashboard/trash', label: 'Trash Bin', icon: Trash2, roles: ['Super Admin', 'Admin'] },
     { path: '/dashboard/users', label: 'User Accounts', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },

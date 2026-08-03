@@ -23,6 +23,7 @@ import SystemHealth from '@/pages/dashboard/SystemHealth';
 import BulkImport from '@/pages/dashboard/BulkImport';
 import ManageAuthors from '@/pages/dashboard/ManageAuthors';
 import DashboardHelp from '@/pages/dashboard/DashboardHelp';
+import TrashBin from '@/pages/dashboard/TrashBin';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
@@ -89,6 +90,7 @@ function App() {
                 <Route path="feedback" element={<Feedback />} />
                 <Route path="users" element={<UserManager />} />
                 <Route path="logs" element={<ActivityLogs />} />
+                <Route path="trash" element={<TrashBin />} />
                 <Route path="website" element={<WebsiteSettings />} />
                 <Route path="settings" element={<SystemSettings />} />
                 <Route path="help" element={<DashboardHelp />} />

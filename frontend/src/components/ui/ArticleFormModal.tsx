@@ -9,6 +9,7 @@ import Textarea from '@/components/ui/Textarea';
 import AuthorInput from '@/components/ui/AuthorInput';
 import Button from '@/components/ui/Button';
 import FileUploadZone from '@/components/ui/FileUploadZone';
+import EditDiffModal, { type DiffItem } from '@/components/ui/EditDiffModal';
 import { formatVolumeName } from '@/lib/utils';
 
 interface AuthorData {
@@ -117,17 +118,61 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
   };
 
 
+  const [diffModalOpen, setDiffModalOpen] = useState(false);
+  const [pendingDiffs, setPendingDiffs] = useState<DiffItem[]>([]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
 
     if (editingArticle && !isDirtyForm && !pdfFile) {
       toast.info('No changes were made.');
       onClose();
-      setIsSubmitting(false);
       return;
     }
+
+    if (editingArticle) {
+      // Calculate diffs
+      const diffs: DiffItem[] = [];
+
+      if (editingArticle.title !== formData.title) {
+        diffs.push({ label: 'Title', oldValue: editingArticle.title || '', newValue: formData.title });
+      }
+
+      const oldVolId = String(editingArticle.volume?.id || editingArticle.volume_id || '');
+      if (oldVolId !== formData.volume_id) {
+        const oldVol = journalsData.flatMap(j => j.volumes || []).find((v: any) => String(v.id) === oldVolId);
+        const newVol = journalsData.flatMap(j => j.volumes || []).find((v: any) => String(v.id) === formData.volume_id);
+        const oldLabel = oldVol ? `Vol. ${oldVol.volume_number} (${oldVol.year})` : `Volume #${oldVolId}`;
+        const newLabel = newVol ? `Vol. ${newVol.volume_number} (${newVol.year})` : `Volume #${formData.volume_id}`;
+        diffs.push({ label: 'Volume Assignment', oldValue: oldLabel, newValue: newLabel, isReassigned: true });
+      }
+
+      if (editingArticle.status !== formData.status) {
+        diffs.push({ label: 'Publishing Status', oldValue: editingArticle.status || 'Draft', newValue: formData.status });
+      }
+
+      if ((editingArticle.abstract || '') !== formData.abstract) {
+        diffs.push({ label: 'Abstract', oldValue: editingArticle.abstract || '', newValue: formData.abstract });
+      }
+
+      if (pdfFile) {
+        diffs.push({ label: 'Manuscript File', oldValue: editingArticle.pdf_path ? 'Existing PDF' : 'None', newValue: pdfFile.name });
+      }
+
+      if (diffs.length > 0) {
+        setPendingDiffs(diffs);
+        setDiffModalOpen(true);
+        return;
+      }
+    }
+
+    await executeSave();
+  };
+
+  const executeSave = async () => {
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       const payload = new FormData();
@@ -172,6 +217,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
         });
         toast.success('Article created successfully');
       }
+      setDiffModalOpen(false);
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -312,6 +358,15 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           </Button>
         </div>
       </form>
+
+      <EditDiffModal
+        isOpen={diffModalOpen}
+        onClose={() => setDiffModalOpen(false)}
+        onConfirm={executeSave}
+        entityName="Article"
+        diffs={pendingDiffs}
+        loading={isSubmitting}
+      />
     </Modal>
   );
 };

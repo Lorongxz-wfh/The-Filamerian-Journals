@@ -191,28 +191,27 @@ class JournalController extends Controller
      */
     public function destroy(Journal $journal)
     {
-        // Count total articles associated with volumes of this journal
+        $volumeCount = $journal->volumes()->count();
+        if ($volumeCount > 0) {
+            return response()->json([
+                'message' => "Cannot move '{$journal->title}' to Trash because it contains {$volumeCount} active volume(s). Please move or remove the volumes first."
+            ], 422);
+        }
+
         $articleCount = \App\Models\Article::whereHas('volume', function($q) use ($journal) {
             $q->where('journal_id', $journal->id);
         })->count();
 
         if ($articleCount > 0) {
             return response()->json([
-                'message' => "Cannot delete '{$journal->title}' because it contains {$articleCount} published/associated article(s). Please unpublish or remove the articles first."
+                'message' => "Cannot move '{$journal->title}' to Trash because it contains {$articleCount} active article(s). Please move or remove the articles first."
             ], 422);
         }
 
-        // Delete cover image if exists
-        if ($journal->cover_image) {
-            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($journal->cover_image);
-        }
-
-        // Delete PDF if exists
-        if ($journal->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($journal->pdf_path);
-        }
-
+        // Soft delete journal (preserve files for potential restore)
         $journal->delete();
+
+        \App\Services\ActivityLogger::log('Soft Deleted Journal', "Moved journal to trash: {$journal->title}", get_class($journal), $journal->id);
 
         return response()->noContent();
     }

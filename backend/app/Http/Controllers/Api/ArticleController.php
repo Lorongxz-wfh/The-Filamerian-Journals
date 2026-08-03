@@ -291,14 +291,10 @@ class ArticleController extends Controller
         $title = $article->title;
         $class = get_class($article);
 
-        // Delete PDF if exists
-        if ($article->pdf_path) {
-            \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($article->pdf_path);
-        }
-
+        // Soft delete article (preserve files for potential restore)
         $article->delete();
 
-        \App\Services\ActivityLogger::log('Deleted Article', "Deleted article: {$title}", $class, null);
+        \App\Services\ActivityLogger::log('Soft Deleted Article', "Moved article to trash: {$title}", $class, $article->id);
         \Illuminate\Support\Facades\Cache::forget('public_settings');
 
         return response()->noContent();
