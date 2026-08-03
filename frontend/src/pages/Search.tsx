@@ -6,6 +6,7 @@ import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
+import HighlightText from '@/components/ui/HighlightText';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
@@ -311,6 +312,7 @@ const Search: React.FC = () => {
                     date={new Date(j.created_at).getFullYear().toString()}
                     image={getFileUrl(j.cover_image)}
                     category={j.category?.name}
+                    searchQuery={query}
                   />
                 ))}
               </div>
@@ -330,17 +332,17 @@ const Search: React.FC = () => {
                     <div className="space-y-3 flex-grow">
                       <div className="flex items-center gap-3">
                         <span className="text-[11px] font-medium text-secondary bg-secondary/10 px-2 py-0.5 uppercase tracking-wider">
-                          {article.volume?.journal?.title || 'Unknown Journal'}
+                          <HighlightText text={article.volume?.journal?.title || 'Unknown Journal'} query={query} />
                         </span>
                         <span className="text-[12px] text-muted">
                           Vol. {article.volume?.volume_number || '-'}
                         </span>
                       </div>
                       <h4 className="text-[14px] font-semibold text-primary uppercase tracking-wider">
-                        {article.title}
+                        <HighlightText text={article.title} query={query} />
                       </h4>
                       <p className="text-[13px] text-muted leading-relaxed line-clamp-3">
-                        {article.abstract || 'No abstract available.'}
+                        <HighlightText text={article.abstract || 'No abstract available.'} query={query} />
                       </p>
                       
                       <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
@@ -348,7 +350,7 @@ const Search: React.FC = () => {
                           <div key={author.id} className="flex items-center gap-1.5">
                             <div className="w-1 h-1 bg-muted rounded-full" />
                             <span className="text-[12px] font-medium text-primary">
-                              {author.name}
+                              <HighlightText text={author.name} query={query} />
                             </span>
                           </div>
                         ))}

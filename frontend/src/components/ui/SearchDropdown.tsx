@@ -4,6 +4,8 @@ import { BookOpen, FileText, ArrowRight, Loader2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getFileUrl } from '@/services/api';
 
+import HighlightText from '@/components/ui/HighlightText';
+
 interface SearchDropdownProps {
   query: string;
   results: { journals: any[]; articles: any[] } | null;
@@ -81,7 +83,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
                           <Icon className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
                         </div>
                         <h4 className="text-[13px] font-semibold text-primary uppercase tracking-wider group-hover:text-secondary transition-colors">
-                          {p.label}
+                          <HighlightText text={p.label} query={query} />
                         </h4>
                       </Link>
                     );
@@ -121,9 +123,11 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-[13px] font-semibold text-primary uppercase tracking-wider truncate group-hover:text-secondary transition-colors">
-                          {j.title}
+                          <HighlightText text={j.title} query={query} />
                         </h4>
-                        <p className="text-[12px] text-muted line-clamp-1 mt-0.5">{j.description}</p>
+                        <p className="text-[12px] text-muted line-clamp-1 mt-0.5">
+                          <HighlightText text={j.description || ''} query={query} />
+                        </p>
                       </div>
                     </Link>
                   ))}
@@ -146,10 +150,13 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
                       className="block p-3 hover:bg-background transition-colors group"
                     >
                       <h4 className="text-[13px] font-semibold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
-                        {a.title}
+                        <HighlightText text={a.title} query={query} />
                       </h4>
                       <p className="text-[12px] text-muted mt-1 truncate">
-                        {a.authors?.map((author: any) => author.name).join(', ') || 'No authors listed'}
+                        <HighlightText 
+                          text={a.authors?.map((author: any) => author.name).join(', ') || 'No authors listed'} 
+                          query={query} 
+                        />
                       </p>
                     </Link>
                   ))}

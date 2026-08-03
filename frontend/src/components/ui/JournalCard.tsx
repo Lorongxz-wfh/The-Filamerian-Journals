@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 import { BookOpen, ArrowRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
+import HighlightText from './HighlightText';
+
 interface JournalCardProps {
   slug: string;
   title: string;
@@ -15,6 +17,7 @@ interface JournalCardProps {
   date?: string;
   className?: string;
   viewMode?: 'list' | 'grid';
+  searchQuery?: string;
 }
 
 const JournalCard: React.FC<JournalCardProps> = ({
@@ -28,6 +31,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
   publisher,
   className,
   viewMode = 'list',
+  searchQuery = '',
 }) => {
   const categoryName = typeof category === 'object' && category !== null ? category.name : category;
   const [showFloating, setShowFloating] = useState(false);
@@ -108,7 +112,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
               </span>
             )}
             <h3 className="text-[12px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
-              {title}
+              <HighlightText text={title} query={searchQuery} />
             </h3>
           </div>
 
@@ -168,7 +172,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
         </div>
 
         <h3 className="text-[22px] font-bold text-[#005a9c] mb-3 leading-snug uppercase tracking-wider transition-colors duration-200">
-          {title}
+          <HighlightText text={title} query={searchQuery} />
         </h3>
 
         <div 
