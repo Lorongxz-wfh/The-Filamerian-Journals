@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, FileText, ShieldCheck, Award, Printer, CheckCircle, ChevronRight } from 'lucide-react';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -13,7 +16,16 @@ interface Resource {
   order: number;
 }
 
+const getResourceIcon = (slug: string) => {
+  if (slug.includes('submission')) return FileText;
+  if (slug.includes('editorial')) return BookOpen;
+  if (slug.includes('ethics')) return ShieldCheck;
+  if (slug.includes('indexing')) return Award;
+  return FileText;
+};
+
 const About: React.FC = () => {
+  const location = useLocation();
   const [resources, setResources] = useState<Resource[]>([]);
   
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -30,7 +42,6 @@ const About: React.FC = () => {
         const data = res.data.data;
         setResources(data);
         
-        // If we didn't have an active tab set from cache, set it now
         if (!activeTab || !data.find((r: Resource) => r.slug === activeTab)) {
           const hash = location.hash.replace('#', '');
           if (hash && data.find((r: Resource) => r.slug === hash)) {
@@ -49,54 +60,159 @@ const About: React.FC = () => {
   }, [location.hash, activeTab]);
 
   const activeResource = resources.find(r => r.slug === activeTab);
+  const IconComponent = activeResource ? getResourceIcon(activeResource.slug) : FileText;
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <PageWrapper className="flex flex-col">
-      <PageHeader title="About Us" />
+      {/* Page Header */}
+      <PageHeader 
+        title="About & Policies" 
+        className="mb-8"
+      >
+        <p className="text-[14px] text-muted max-w-2xl">
+          Institutional guidelines, editorial board standards, publication ethics, and indexing directory information for <strong className="text-primary font-medium">The Filamerian Journals</strong>.
+        </p>
+      </PageHeader>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-12">
-        <div className="lg:w-1/4 shrink-0">
-          <div className="flex flex-col gap-1 border border-border bg-surface p-2 sticky top-24">
-            {loading ? (
-              <Spinner text="Loading..." size="sm" className="py-4" />
-            ) : resources.length === 0 ? (
-              <EmptyState title="No resources" description="No resources available." className="p-4" />
-            ) : (
-              resources.map((res) => (
-                <button
-                  key={res.id}
-                  onClick={() => setActiveTab(res.slug)}
-                  className={`text-left px-4 py-2.5 text-[13px] font-bold transition-colors ${
-                    activeTab === res.slug
-                      ? 'bg-primary text-white'
-                      : 'text-muted hover:text-primary hover:bg-background'
-                  }`}
-                >
-                  {res.title}
-                </button>
-              ))
-            )}
+      {/* Main Content Layout */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-8 items-start">
+        {/* Sidebar Navigation */}
+        <aside className="w-full lg:w-72 shrink-0 space-y-4 lg:sticky lg:top-24">
+          <div className="border border-border bg-surface shadow-xs">
+            <div className="px-4 py-3 border-b border-border bg-background/50">
+              <h3 className="text-[11px] font-bold text-primary uppercase tracking-wider">
+                Documentation & Guidelines
+              </h3>
+            </div>
+            
+            <div className="p-1.5 space-y-1">
+              {loading ? (
+                <Spinner text="Loading..." size="sm" className="py-6" />
+              ) : resources.length === 0 ? (
+                <EmptyState title="No resources" description="No documentation published." className="p-4 border-0" />
+              ) : (
+                resources.map((res) => {
+                  const ItemIcon = getResourceIcon(res.slug);
+                  const isActive = activeTab === res.slug;
+                  return (
+                    <button
+                      key={res.id}
+                      onClick={() => {
+                        setActiveTab(res.slug);
+                        window.history.replaceState(null, '', `#${res.slug}`);
+                      }}
+                      className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-medium transition-all group ${
+                        isActive
+                          ? 'bg-primary text-white shadow-xs font-semibold'
+                          : 'text-muted hover:text-primary hover:bg-background'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <ItemIcon className={`h-4 w-4 shrink-0 transition-colors ${
+                          isActive ? 'text-secondary' : 'text-muted/60 group-hover:text-primary'
+                        }`} />
+                        <span className="truncate">{res.title}</span>
+                      </div>
+                      <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform ${
+                        isActive ? 'text-white translate-x-0.5' : 'text-muted/40 opacity-0 group-hover:opacity-100'
+                      }`} />
+                    </button>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="lg:w-3/4 flex flex-col">
-          <div className="flex-1 bg-surface border border-border p-8 lg:p-10 flex flex-col">
-            {loading ? (
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <Spinner text="Loading content..." />
-              </div>
-            ) : activeResource ? (
-              <div 
-                className="space-y-6 prose prose-sm max-w-none prose-headings:font-display prose-headings:font-normal prose-headings:text-primary prose-headings:uppercase prose-headings:tracking-wider prose-p:text-muted prose-p:leading-relaxed prose-li:text-muted prose-a:text-secondary prose-blockquote:border prose-blockquote:border-border prose-blockquote:bg-primary/5 prose-blockquote:p-4 prose-blockquote:italic prose-blockquote:text-primary/80"
-                dangerouslySetInnerHTML={{ __html: activeResource.content || '' }}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted text-[13px]">
-                Select a topic from the sidebar.
+          {/* Institutional Integrity Info Card */}
+          <div className="border border-border bg-surface p-4 space-y-3 hidden lg:block">
+            <div className="flex items-center gap-2 text-primary">
+              <ShieldCheck className="h-4 w-4 text-secondary shrink-0" />
+              <h4 className="text-[11px] font-bold uppercase tracking-wider">Peer-Reviewed Quality</h4>
+            </div>
+            <p className="text-[12px] text-muted leading-relaxed">
+              All manuscripts adhere to double-blind peer review and COPE Ethical Guidelines published by Filamer Christian University.
+            </p>
+          </div>
+        </aside>
+
+        {/* Content Body */}
+        <main className="flex-1 w-full min-w-0">
+          <div className="bg-surface border border-border shadow-xs overflow-hidden min-h-[500px] flex flex-col">
+            {/* Content Top Bar */}
+            {activeResource && (
+              <div className="px-6 py-4 border-b border-border bg-background/50 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <IconComponent className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-[14px] font-bold text-primary uppercase tracking-wider">
+                      {activeResource.title}
+                    </h2>
+                    <p className="text-[11px] text-muted">Official Filamerian Academic Policy</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrint}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-primary border border-border hover:bg-background transition-colors rounded-xs cursor-pointer"
+                    title="Print Document"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    Print
+                  </button>
+                </div>
               </div>
             )}
+
+            {/* Main Article Body with Animation */}
+            <div className="p-6 sm:p-8 lg:p-10 flex-1">
+              {loading ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-20">
+                  <Spinner text="Loading documentation..." />
+                </div>
+              ) : activeResource ? (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeResource.slug}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="prose prose-sm max-w-none 
+                      prose-headings:font-display prose-headings:font-bold prose-headings:text-primary prose-headings:uppercase prose-headings:tracking-wider 
+                      prose-h2:text-[16px] prose-h2:border-b prose-h2:border-border prose-h2:pb-2 prose-h2:mt-6 prose-h2:mb-4
+                      prose-h3:text-[14px] prose-h3:mt-4 prose-h3:mb-2
+                      prose-p:text-muted prose-p:leading-relaxed prose-p:text-[13.5px]
+                      prose-li:text-muted prose-li:text-[13.5px] prose-li:marker:text-primary
+                      prose-strong:text-primary prose-strong:font-semibold
+                      prose-a:text-secondary prose-a:underline hover:prose-a:text-primary
+                      prose-blockquote:border-l-2 prose-blockquote:border-secondary prose-blockquote:bg-primary/5 prose-blockquote:p-4 prose-blockquote:not-italic prose-blockquote:text-primary/90"
+                    dangerouslySetInnerHTML={{ __html: activeResource.content || '' }}
+                  />
+                </AnimatePresence>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted text-[13px] py-20">
+                  Select a policy or guideline from the documentation menu.
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Footer Notice inside Card */}
+            <div className="px-6 py-4 border-t border-border bg-background/30 flex flex-wrap items-center justify-between text-[11.5px] text-muted gap-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span>Filamer Christian University Academic Standard</span>
+              </div>
+              <span className="font-mono text-[11px]">Updated Annually</span>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </PageWrapper>
   );
