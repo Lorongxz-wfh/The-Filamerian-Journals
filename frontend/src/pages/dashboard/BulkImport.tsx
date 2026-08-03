@@ -124,7 +124,7 @@ const BulkImport: React.FC = () => {
       const templateData = [
         {
           title: 'Filamer Journal of Information Technology',
-          description: 'A peer-reviewed journal focused on IT and Software Engineering.',
+          description: 'An academic research journal focused on IT and Software Engineering.',
           category: 'Technology',
           issn: '1234-5678',
           frequency: 'Bi-annual',

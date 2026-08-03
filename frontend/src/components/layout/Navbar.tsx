@@ -89,7 +89,7 @@ const Navbar = () => {
     <>
       {settings.maintenance_mode === '1' && (
         <div className="bg-amber-600 text-white text-[11px] font-bold uppercase tracking-wider py-1.5 px-4 text-center flex items-center justify-center gap-2">
-          <span>⚠️ Scheduled System Maintenance Active — Public Submissions Temporarily Paused</span>
+          <span>⚠️ Scheduled System Maintenance Active — Public Access Temporarily Paused</span>
         </div>
       )}
       <nav className="bg-primary sticky top-0 z-50 shadow-md border-b border-white/10">

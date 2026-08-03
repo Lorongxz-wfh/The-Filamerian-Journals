@@ -204,7 +204,7 @@ const Contact: React.FC = () => {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
-                  placeholder="Inquiry about manuscript submission"
+                  placeholder="Inquiry about journal or article publications"
                 />
               </div>
             </div>
