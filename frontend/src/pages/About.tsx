@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, FileText, ShieldCheck, Award, Printer, CheckCircle, ChevronRight } from 'lucide-react';
+import { BookOpen, FileText, ShieldCheck, Award, CheckCircle, ChevronRight } from 'lucide-react';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Spinner from '@/components/ui/Spinner';
@@ -62,21 +62,10 @@ const About: React.FC = () => {
   const activeResource = resources.find(r => r.slug === activeTab);
   const IconComponent = activeResource ? getResourceIcon(activeResource.slug) : FileText;
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <PageWrapper className="flex flex-col">
       {/* Page Header */}
-      <PageHeader 
-        title="About & Policies" 
-        className="mb-8"
-      >
-        <p className="text-[14px] text-muted max-w-2xl">
-          Institutional guidelines, editorial board standards, publication ethics, and indexing directory information for <strong className="text-primary font-medium">The Filamerian Journals</strong>.
-        </p>
-      </PageHeader>
+      <PageHeader title="About Us" className="mb-8" />
 
       {/* Main Content Layout */}
       <div className="flex-1 flex flex-col lg:flex-row gap-8 items-start">
@@ -126,17 +115,6 @@ const About: React.FC = () => {
               )}
             </div>
           </div>
-
-          {/* Institutional Integrity Info Card */}
-          <div className="border border-border bg-surface p-4 space-y-3 hidden lg:block">
-            <div className="flex items-center gap-2 text-primary">
-              <ShieldCheck className="h-4 w-4 text-secondary shrink-0" />
-              <h4 className="text-[11px] font-bold uppercase tracking-wider">Peer-Reviewed Quality</h4>
-            </div>
-            <p className="text-[12px] text-muted leading-relaxed">
-              All manuscripts adhere to double-blind peer review and COPE Ethical Guidelines published by Filamer Christian University.
-            </p>
-          </div>
         </aside>
 
         {/* Content Body */}
@@ -144,29 +122,13 @@ const About: React.FC = () => {
           <div className="bg-surface border border-border shadow-xs overflow-hidden min-h-[500px] flex flex-col">
             {/* Content Top Bar */}
             {activeResource && (
-              <div className="px-6 py-4 border-b border-border bg-background/50 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                    <IconComponent className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-[14px] font-bold text-primary uppercase tracking-wider">
-                      {activeResource.title}
-                    </h2>
-                    <p className="text-[11px] text-muted">Official Filamerian Academic Policy</p>
-                  </div>
+              <div className="px-6 py-4 border-b border-border bg-background/50 flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <IconComponent className="h-4 w-4 text-primary" />
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePrint}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted hover:text-primary border border-border hover:bg-background transition-colors rounded-xs cursor-pointer"
-                    title="Print Document"
-                  >
-                    <Printer className="h-3.5 w-3.5" />
-                    Print
-                  </button>
-                </div>
+                <h2 className="text-[14px] font-bold text-primary uppercase tracking-wider">
+                  {activeResource.title}
+                </h2>
               </div>
             )}
 
