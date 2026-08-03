@@ -258,8 +258,8 @@ const UserManager: React.FC = () => {
         />
       </div>
 
-      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
-        <Table containerClassName="border-0 rounded-none max-h-[520px]">
+      <div className="border border-border bg-surface flex flex-col">
+        <Table containerClassName="max-h-[520px]">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>

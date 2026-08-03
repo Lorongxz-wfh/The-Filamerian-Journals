@@ -14,6 +14,7 @@ import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Pagination from '@/components/ui/Pagination';
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
 
 const PER_PAGE = 10;
 
@@ -161,57 +162,70 @@ const ManageAnnouncements: React.FC = () => {
         </div>
       </div>
 
-      <div className="border border-border bg-surface overflow-x-auto relative">
-        <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
-          <div className="col-span-8">Title</div>
-          <div className="col-span-3">Date</div>
-          <div className="col-span-1"></div>
-        </div>
-        
-        {loading ? (
-          <ListSkeleton colSpans={[4, 6, 2]} rows={PER_PAGE} />
-        ) : announcements.length === 0 ? (
-          <EmptyState 
-            title="No announcements" 
-            description={filter ? "No announcements match your search query." : "No announcements posted yet."} 
-            action={
-              filter ? (
-                <Button variant="ghost" size="sm" onClick={() => setFilter('')}>
-                  Clear Search
-                </Button>
-              ) : undefined
-            }
-            className="border-0 bg-transparent py-16" 
-          />
-        ) : (
-          announcements.map((item) => (
-            <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-background transition-colors group cursor-default items-center">
-              <div className="col-span-8 flex items-center gap-3">
-                <Megaphone className="h-4 w-4 text-primary/30 shrink-0" />
-                <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
-              </div>
-              <div className="col-span-3 text-[12px] text-muted">{new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
-              <div className="col-span-1 flex justify-end">
-                <DropdownMenu
-                  trigger={
-                    <IconButton icon={MoreVertical} title="Actions" />
-                  }
-                >
-                  <DropdownMenuItem onClick={() => handleOpenModal(item)}>
-                    <div className="flex items-center gap-2 text-foreground">
-                      <Edit2 className="h-4 w-4 text-muted" /> Edit Announcement
+      <div className="border border-border bg-surface flex flex-col">
+        <Table containerClassName="max-h-[520px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead className="w-44">Date</TableHead>
+              <TableHead className="w-12 text-right"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <ListSkeleton colSpans={[4, 6, 2]} rows={PER_PAGE} />
+            ) : announcements.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} className="h-32 text-center">
+                  <EmptyState 
+                    title="No announcements" 
+                    description={filter ? "No announcements match your search query." : "No announcements posted yet."} 
+                    action={
+                      filter ? (
+                        <Button variant="ghost" size="sm" onClick={() => setFilter('')}>
+                          Clear Search
+                        </Button>
+                      ) : undefined
+                    }
+                    className="border-0 bg-transparent py-16" 
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              announcements.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Megaphone className="h-4 w-4 text-primary/30 shrink-0" />
+                      <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
                     </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDelete(item.id)}>
-                    <div className="flex items-center gap-2 text-red-600">
-                      <Trash2 className="h-4 w-4 text-red-600" /> Delete Announcement
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenu>
-              </div>
-            </div>
-          ))
-        )}
+                  </TableCell>
+                  <TableCell className="text-[12px] text-muted">
+                    {new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </TableCell>
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenu
+                      trigger={
+                        <IconButton icon={MoreVertical} title="Actions" />
+                      }
+                    >
+                      <DropdownMenuItem onClick={() => handleOpenModal(item)}>
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Edit2 className="h-4 w-4 text-muted" /> Edit Announcement
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDelete(item.id)}>
+                        <div className="flex items-center gap-2 text-red-600">
+                          <Trash2 className="h-4 w-4 text-red-600" /> Delete Announcement
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {!loading && total > 0 && (

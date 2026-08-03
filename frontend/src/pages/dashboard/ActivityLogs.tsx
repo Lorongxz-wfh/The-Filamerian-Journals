@@ -150,7 +150,7 @@ const ActivityLogs: React.FC = () => {
       </div>
 
       {/* Card Container */}
-      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+      <div className="border border-border bg-surface flex flex-col">
         <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
           <Table className="w-full border-collapse">
             <TableHeader>

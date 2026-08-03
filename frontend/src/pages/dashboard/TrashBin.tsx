@@ -23,6 +23,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import IconButton from '@/components/ui/IconButton';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
 
 interface TrashedItem {
   id: number;
@@ -330,29 +331,29 @@ const TrashBin: React.FC = () => {
           description={searchQuery ? "No deleted items match your search criteria." : "Soft-deleted articles, volumes, and journals will appear here for 30 days."}
         />
       ) : (
-        <div className="border border-border/80 bg-surface rounded-lg overflow-hidden shadow-xs">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border/80 text-[11px] font-bold text-muted uppercase tracking-wider bg-muted/40">
+        <div className="border border-border bg-surface flex flex-col">
+          <Table containerClassName="max-h-[520px]">
+            <TableHeader>
+              <TableRow>
                 {isSelectMode && (
-                  <th className="py-3.5 px-4 w-10 text-center">
+                  <TableHead className="w-10 text-center">
                     <input 
                       type="checkbox"
                       checked={filteredItems.length > 0 && filteredItems.every(i => selectedKeys.includes(`${i.type}-${i.id}`))}
                       onChange={toggleSelectAll}
                       className="rounded border-border accent-primary cursor-pointer h-4 w-4"
                     />
-                  </th>
+                  </TableHead>
                 )}
-                <th className="py-3.5 px-4">Item Name / Title</th>
-                <th className="py-3.5 px-4">Type</th>
-                <th className="py-3.5 px-4">Original Context</th>
-                <th className="py-3.5 px-4">Deleted On</th>
-                <th className="py-3.5 px-4">Retention</th>
-                <th className="py-3.5 px-4 text-right w-12"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40 text-xs">
+                <TableHead>Item Name / Title</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Original Context</TableHead>
+                <TableHead>Deleted On</TableHead>
+                <TableHead>Retention</TableHead>
+                <TableHead className="w-12 text-right"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredItems.map((item) => {
                 const itemKey = `${item.type}-${item.id}`;
                 const isSelected = selectedKeys.includes(itemKey);
@@ -364,28 +365,28 @@ const TrashBin: React.FC = () => {
                   : item.category?.name || 'Journal Collection';
 
                 return (
-                  <tr key={itemKey} className={`transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
+                  <TableRow key={itemKey} className={isSelected ? 'bg-primary/5' : ''}>
                     {isSelectMode && (
-                      <td className="py-3.5 px-4 text-center">
+                      <TableCell className="text-center">
                         <input 
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleSelectItem(itemKey)}
                           className="rounded border-border accent-primary cursor-pointer h-4 w-4"
                         />
-                      </td>
+                      </TableCell>
                     )}
 
-                    <td className="py-3.5 px-4 font-medium text-foreground">
+                    <TableCell className="font-medium text-foreground">
                       <div className="flex items-center gap-2.5">
                         {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0" />}
                         {item.type === 'volume' && <Layers className="h-4 w-4 text-secondary shrink-0" />}
                         {item.type === 'journal' && <BookOpen className="h-4 w-4 text-emerald-600 shrink-0" />}
                         <span className="line-clamp-1 font-semibold">{title}</span>
                       </div>
-                    </td>
+                    </TableCell>
 
-                    <td className="py-3.5 px-4">
+                    <TableCell>
                       <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
                         item.type === 'article'
                           ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
@@ -395,28 +396,28 @@ const TrashBin: React.FC = () => {
                       }`}>
                         {item.type}
                       </span>
-                    </td>
+                    </TableCell>
 
-                    <td className="py-3.5 px-4 text-muted-foreground text-[12px]">
+                    <TableCell className="text-muted text-[12px]">
                       {context}
-                    </td>
+                    </TableCell>
 
-                    <td className="py-3.5 px-4 text-muted-foreground text-[12px]">
+                    <TableCell className="text-muted text-[12px]">
                       {new Date(item.deleted_at).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric'
                       })}
-                    </td>
+                    </TableCell>
 
-                    <td className="py-3.5 px-4">
+                    <TableCell>
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                         <Clock className="h-3.5 w-3.5" />
                         <span>{item.days_remaining} days left</span>
                       </span>
-                    </td>
+                    </TableCell>
 
-                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu
                         trigger={
                           <IconButton icon={MoreVertical} title="Actions" />
@@ -445,12 +446,12 @@ const TrashBin: React.FC = () => {
                           </DropdownMenuItem>
                         )}
                       </DropdownMenu>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
