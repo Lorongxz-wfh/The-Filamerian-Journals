@@ -256,7 +256,7 @@ const BulkImport: React.FC = () => {
     <div className="space-y-8">
       <DashboardHeader title="Bulk Import">
         <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2">
-          <Download className="h-4 w-4" /> Download {activeTab === 'articles' ? 'Articles' : 'Journals'} Template
+          <Download className="h-4 w-4" /> {activeTab === 'articles' ? 'Articles' : 'Journals'} Template
         </Button>
       </DashboardHeader>
 

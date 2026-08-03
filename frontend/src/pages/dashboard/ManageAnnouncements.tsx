@@ -145,15 +145,16 @@ const ManageAnnouncements: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex justify-end items-center">
-        <SearchInput 
-          placeholder="Search announcements..." 
-          value={filter} 
-          onChange={(e) => setFilter(e.target.value)} 
-        />
-      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-end items-center">
+          <SearchInput 
+            placeholder="Search announcements..." 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)} 
+          />
+        </div>
 
-      <div className="border border-border bg-surface flex flex-col">
+        <div className="border border-border bg-surface flex flex-col">
         <Table containerClassName="max-h-[520px]">
           <TableHeader>
             <TableRow>
@@ -224,6 +225,7 @@ const ManageAnnouncements: React.FC = () => {
           showingText={`Showing ${total > 0 ? Math.min((page - 1) * PER_PAGE + 1, total) : 0}–${Math.min(page * PER_PAGE, total)} of ${total} announcement${total !== 1 ? 's' : ''}`}
           loading={loading}
         />
+        </div>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingItem ? 'Edit Announcement' : 'New Announcement'}>

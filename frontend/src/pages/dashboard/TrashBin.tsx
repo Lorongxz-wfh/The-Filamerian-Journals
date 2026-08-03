@@ -403,9 +403,9 @@ const TrashBin: React.FC = () => {
                     </TableCell>
 
                     <TableCell>
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>{item.days_remaining} days left</span>
+                      <span className="inline-flex items-center gap-1.5 text-[12px] text-muted">
+                        <Clock className="h-3.5 w-3.5 shrink-0" />
+                        {item.days_remaining} days left
                       </span>
                     </TableCell>
 

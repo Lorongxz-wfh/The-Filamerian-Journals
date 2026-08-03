@@ -252,15 +252,16 @@ const UserManager: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex justify-end items-center">
-        <SearchInput 
-          placeholder="Search users by name or email..." 
-          value={filter} 
-          onChange={(e) => setFilter(e.target.value)} 
-        />
-      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-end items-center">
+          <SearchInput 
+            placeholder="Search users by name or email..." 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)} 
+          />
+        </div>
 
-      <div className="border border-border bg-surface flex flex-col">
+        <div className="border border-border bg-surface flex flex-col">
         <Table containerClassName="max-h-[520px]">
           <TableHeader>
             <TableRow>
@@ -356,6 +357,7 @@ const UserManager: React.FC = () => {
           showingText={`Showing ${total > 0 ? Math.min((page - 1) * 10 + 1, total) : 0}–${Math.min(page * 10, total)} of ${total} user${total !== 1 ? 's' : ''}`}
           loading={loading}
         />
+        </div>
       </div>
 
       {/* Modal with Zod & React Hook Form */}

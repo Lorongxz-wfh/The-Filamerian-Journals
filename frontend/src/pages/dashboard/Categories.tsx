@@ -320,29 +320,30 @@ const Categories: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Search Input */}
-      {!isReordering && (
-        <div className="flex justify-end items-center">
-          <SearchInput
-            placeholder="Search categories..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-        </div>
-      )}
-
-      {/* Reorder Info Banner */}
-      {isReordering && (
-        <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between rounded-lg">
-          <div className="flex items-center gap-2">
-            <GripVertical className="h-4 w-4 text-primary" />
-            <span>Drag items using the handle or use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order.</span>
+      <div className="flex flex-col gap-4">
+        {/* Search Input */}
+        {!isReordering && (
+          <div className="flex justify-end items-center">
+            <SearchInput
+              placeholder="Search categories..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Content Area */}
-      <div className="border border-border bg-surface flex flex-col">
+        {/* Reorder Info Banner */}
+        {isReordering && (
+          <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between rounded-lg">
+            <div className="flex items-center gap-2">
+              <GripVertical className="h-4 w-4 text-primary" />
+              <span>Drag items using the handle or use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order.</span>
+            </div>
+          </div>
+        )}
+
+        {/* Content Area */}
+        <div className="border border-border bg-surface flex flex-col">
         <div className="overflow-x-auto max-h-[520px] overflow-y-auto relative">
           {isReordering ? (
             <Reorder.Group axis="y" values={categories} onReorder={handleReorderList} className="divide-y divide-border">
@@ -416,6 +417,7 @@ const Categories: React.FC = () => {
             loading={loading}
           />
         )}
+        </div>
       </div>
 
       <Modal 

@@ -212,15 +212,16 @@ const ManageAuthors: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex justify-end items-center">
-        <SearchInput
-          placeholder="Search by name or email..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-end items-center">
+          <SearchInput
+            placeholder="Search by name or email..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
 
-      <div className="border border-border bg-surface flex flex-col">
+        <div className="border border-border bg-surface flex flex-col">
         <Table containerClassName="max-h-[520px]">
           <TableHeader>
             <TableRow>
@@ -289,6 +290,7 @@ const ManageAuthors: React.FC = () => {
           showingText={`Showing ${total > 0 ? Math.min((page - 1) * PER_PAGE + 1, total) : 0}–${Math.min(page * PER_PAGE, total)} of ${total} author${total !== 1 ? 's' : ''}`}
           loading={loading}
         />
+        </div>
       </div>
 
       {/* Create/Edit Modal */}
