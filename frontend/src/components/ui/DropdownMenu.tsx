@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,54 +12,95 @@ interface DropdownMenuProps {
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({ trigger, children, align = 'right', className }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [openUpward, setOpenUpward] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number; openUpward: boolean }>({ top: 0, left: 0, openUpward: false });
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  const updateCoords = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const menuHeight = 180;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const openUpward = spaceBelow < menuHeight && rect.top > menuHeight;
+      const menuWidth = 224; // w-56 = 14rem = 224px
+
+      let left = align === 'right' ? rect.right - menuWidth : rect.left;
+      left = Math.max(10, Math.min(left, window.innerWidth - menuWidth - 10));
+
+      setCoords({
+        top: openUpward ? rect.top : rect.bottom,
+        left,
+        openUpward,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updateCoords();
+      const handleScrollOrResize = () => setIsOpen(false);
+      window.addEventListener('scroll', handleScrollOrResize, true);
+      window.addEventListener('resize', handleScrollOrResize);
+      return () => {
+        window.removeEventListener('scroll', handleScrollOrResize, true);
+        window.removeEventListener('resize', handleScrollOrResize);
+      };
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+      if (triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
+        // Check if click is inside portal menu
+        const target = event.target as HTMLElement;
+        if (!target.closest?.('.dropdown-portal-menu')) {
+          setIsOpen(false);
+        }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const toggleDropdown = () => {
-    if (!isOpen && dropdownRef.current) {
-      const rect = dropdownRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      setOpenUpward(spaceBelow < 220);
+  const toggleDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isOpen) {
+      updateCoords();
     }
     setIsOpen(!isOpen);
   };
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className="inline-block text-left" ref={triggerRef}>
       <div onClick={toggleDropdown} className="cursor-pointer">
         {trigger}
       </div>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: openUpward ? 5 : -5 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: openUpward ? 5 : -5 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            className={cn(
-              'absolute z-50 w-56 rounded-md border border-border bg-surface shadow-lg focus:outline-none overflow-hidden',
-              openUpward ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-2 origin-top',
-              align === 'right' ? 'right-0' : 'left-0',
-              className
-            )}
-          >
-            <div className="py-1" role="menu" aria-orientation="vertical" onClick={() => setIsOpen(false)}>
-              {children}
-            </div>
-          </motion.div>
+      {isOpen &&
+        createPortal(
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: coords.openUpward ? 5 : -5 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: coords.openUpward ? 5 : -5 }}
+              transition={{ duration: 0.12, ease: 'easeOut' }}
+              style={{
+                position: 'fixed',
+                top: coords.openUpward ? 'auto' : `${coords.top + 6}px`,
+                bottom: coords.openUpward ? `${window.innerHeight - coords.top + 6}px` : 'auto',
+                left: `${coords.left}px`,
+              }}
+              className={cn(
+                'dropdown-portal-menu z-[9999] w-56 rounded-md border border-border bg-surface shadow-xl focus:outline-none overflow-hidden',
+                className
+              )}
+            >
+              <div className="py-1" role="menu" aria-orientation="vertical" onClick={() => setIsOpen(false)}>
+                {children}
+              </div>
+            </motion.div>
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 };

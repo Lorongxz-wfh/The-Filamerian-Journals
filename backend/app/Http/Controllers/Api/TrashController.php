@@ -71,6 +71,10 @@ class TrashController extends Controller
 
         $item->restore();
 
+        if ($type === 'volume') {
+            Article::onlyTrashed()->where('volume_id', $item->id)->restore();
+        }
+
         $title = $item->title ?? ($item->volume_number ? "Volume {$item->volume_number}" : "Item #{$id}");
         \App\Services\ActivityLogger::log('Restored Item', "Restored {$type}: {$title}", get_class($item), $item->id);
 

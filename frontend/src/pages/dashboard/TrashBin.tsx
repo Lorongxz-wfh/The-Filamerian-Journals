@@ -200,7 +200,7 @@ const TrashBin: React.FC = () => {
             Trash Bin
             <span className="group relative inline-flex items-center">
               <HelpCircle className="h-4 w-4 text-muted/60 hover:text-primary cursor-pointer transition-colors" />
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 p-2.5 bg-primary text-white text-[11px] font-normal normal-case tracking-normal rounded shadow-md z-50 pointer-events-none leading-relaxed">
+              <span className="absolute left-0 top-full mt-2 hidden group-hover:block w-64 p-2.5 bg-primary text-white text-[11px] font-normal normal-case tracking-normal rounded shadow-md z-50 pointer-events-none leading-relaxed">
                 Soft-deleted articles, volumes, and journals are retained for 30 days before permanent deletion from storage.
               </span>
             </span>

@@ -38,70 +38,70 @@ const AuthorFormFields: React.FC<AuthorFormFieldsProps> = ({
       onChange({ ...values, [field]: e.target.value });
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-12 gap-2 ${className}`}>
-      {/* First Name */}
-      <div className="relative sm:col-span-4">
-        <input
-          type="text"
-          value={values.first_name}
-          onChange={handle('first_name')}
-          onKeyDown={onKeyDown}
-          autoFocus={autoFocus}
-          autoComplete="off"
-          className={fieldStyle}
-        />
-        {!values.first_name && (
-          <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
-            <span className="text-[13px] text-gray-400">
-              First Name <span className="text-red-500">*</span>
-            </span>
-          </div>
-        )}
+    <div className={`space-y-4 ${className}`}>
+      {/* Row 1: First Name & Last Name */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-[12px] font-medium text-primary uppercase tracking-wider block mb-1.5">
+            First Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={values.first_name}
+            onChange={handle('first_name')}
+            onKeyDown={onKeyDown}
+            autoFocus={autoFocus}
+            placeholder="e.g. John"
+            autoComplete="off"
+            className={fieldStyle}
+          />
+        </div>
+        <div>
+          <label className="text-[12px] font-medium text-primary uppercase tracking-wider block mb-1.5">
+            Last Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={values.last_name}
+            onChange={handle('last_name')}
+            onKeyDown={onKeyDown}
+            placeholder="e.g. Doe"
+            autoComplete="off"
+            className={fieldStyle}
+          />
+        </div>
       </div>
 
-      {/* Middle Name */}
-      <div className="sm:col-span-3">
-        <input
-          type="text"
-          value={values.middle_name}
-          onChange={handle('middle_name')}
-          onKeyDown={onKeyDown}
-          placeholder="Middle Name / Init"
-          autoComplete="off"
-          className={fieldStyle}
-        />
-      </div>
-
-      {/* Last Name */}
-      <div className="relative sm:col-span-3">
-        <input
-          type="text"
-          value={values.last_name}
-          onChange={handle('last_name')}
-          onKeyDown={onKeyDown}
-          autoComplete="off"
-          className={fieldStyle}
-        />
-        {!values.last_name && (
-          <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
-            <span className="text-[13px] text-gray-400">
-              Last Name <span className="text-red-500">*</span>
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Suffix */}
-      <div className="sm:col-span-2">
-        <input
-          type="text"
-          value={values.suffix}
-          onChange={handle('suffix')}
-          onKeyDown={onKeyDown}
-          placeholder="Suffix (Jr, Sr)"
-          autoComplete="off"
-          className={fieldStyle}
-        />
+      {/* Row 2: Middle Name & Suffix */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-[12px] font-medium text-muted uppercase tracking-wider block mb-1.5">
+            Middle Name / Initial <span className="text-[10px] normal-case text-muted/70">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            value={values.middle_name}
+            onChange={handle('middle_name')}
+            onKeyDown={onKeyDown}
+            placeholder="e.g. Alexander"
+            autoComplete="off"
+            className={fieldStyle}
+          />
+        </div>
+        <div>
+          <label className="text-[12px] font-medium text-muted uppercase tracking-wider block mb-1.5">
+            Suffix <span className="text-[10px] normal-case text-muted/70">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            value={values.suffix}
+            onChange={handle('suffix')}
+            onKeyDown={onKeyDown}
+            placeholder="e.g. Jr., III"
+            autoComplete="off"
+            className={fieldStyle}
+          />
+        </div>
       </div>
     </div>
   );

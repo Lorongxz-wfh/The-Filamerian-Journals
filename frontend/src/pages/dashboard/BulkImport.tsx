@@ -108,7 +108,6 @@ const BulkImport: React.FC = () => {
           title: 'Example Article Title',
           abstract: 'This is an optional abstract...',
           authors: 'Doe, John Alexander Jr.; Jane M. Smith',
-          category: 'Computer Science',
           keywords: 'AI, Machine Learning',
           page_start: '10',
           page_end: '25',
@@ -393,21 +392,17 @@ const BulkImport: React.FC = () => {
                       <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Authors</TableHead>
-                        <TableHead>Category</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {parsedArticles.map((row, idx) => (
                         <TableRow key={idx}>
-                          <TableCell className="font-medium text-primary truncate max-w-[200px]">
+                          <TableCell className="font-medium text-primary truncate max-w-[240px]">
                             {row.title}
                           </TableCell>
-                          <TableCell className="text-muted truncate max-w-[150px]">
+                          <TableCell className="text-muted truncate max-w-[200px]">
                             {row.authors || '-'}
-                          </TableCell>
-                          <TableCell className="text-muted truncate max-w-[150px]">
-                            {row.category || '-'}
                           </TableCell>
                           <TableCell>
                             <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${

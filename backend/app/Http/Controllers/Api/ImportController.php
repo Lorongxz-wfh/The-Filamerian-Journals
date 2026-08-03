@@ -42,19 +42,22 @@ class ImportController extends Controller
         DB::beginTransaction();
 
         try {
+            // Pre-fetch journal's category
+            $journal = Journal::find($validated['journal_id']);
+            $defaultCategoryId = $journal ? $journal->category_id : null;
+
             // Pre-fetch the max order for this volume to append new articles to the end
             $maxOrder = Article::where('volume_id', $volumeId)->max('order') ?? 0;
 
             foreach ($articles as $index => $row) {
-                // 1. Handle Category (Global, optional)
-                $categoryId = null;
+                // 1. Handle Category (Inherit from journal unless explicitly mapped to existing category)
+                $categoryId = $defaultCategoryId;
                 if (!empty($row['category'])) {
                     $categoryName = trim($row['category']);
-                    $category = Category::firstOrCreate(
-                        ['name' => $categoryName],
-                        ['slug' => \Illuminate\Support\Str::slug($categoryName), 'description' => '']
-                    );
-                    $categoryId = $category->id;
+                    $category = Category::whereRaw('LOWER(name) = ?', [strtolower($categoryName)])->first();
+                    if ($category) {
+                        $categoryId = $category->id;
+                    }
                 }
 
                 // 2. Create Article

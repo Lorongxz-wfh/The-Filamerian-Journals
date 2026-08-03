@@ -76,17 +76,15 @@ class VolumeController extends Controller
 
     public function destroy(Volume $volume)
     {
-        $articleCount = $volume->articles()->count();
-        if ($articleCount > 0) {
-            return response()->json([
-                'message' => "Cannot move Volume {$volume->volume_number} to Trash because it contains {$articleCount} active article(s). Please move or remove the articles first."
-            ], 422);
-        }
+        \Illuminate\Support\Facades\DB::transaction(function () use ($volume) {
+            // Soft delete all active articles in this volume
+            $volume->articles()->delete();
+            // Soft delete the volume itself
+            $volume->delete();
+        });
 
-        $desc = "Moved volume number {$volume->volume_number} to trash";
+        $desc = "Moved volume number {$volume->volume_number} and its articles to trash";
         $class = get_class($volume);
-
-        $volume->delete();
 
         \App\Services\ActivityLogger::log('Soft Deleted Volume', $desc, $class, $volume->id);
 

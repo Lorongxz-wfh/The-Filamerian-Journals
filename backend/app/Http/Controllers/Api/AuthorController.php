@@ -43,6 +43,26 @@ class AuthorController extends Controller
             'email' => 'nullable|email|unique:authors,email',
         ]);
 
+        // Duplicate author check (case-insensitive)
+        if (!$request->boolean('force') && !empty($validated['first_name']) && !empty($validated['last_name'])) {
+            $existing = Author::whereRaw('LOWER(first_name) = ? AND LOWER(last_name) = ?', [
+                strtolower(trim($validated['first_name'])),
+                strtolower(trim($validated['last_name']))
+            ])->first();
+
+            if ($existing) {
+                return response()->json([
+                    'message' => "An author named '{$existing->first_name} {$existing->last_name}' already exists in the system.",
+                    'duplicate' => true,
+                    'existing_author' => [
+                        'id' => $existing->id,
+                        'name' => $existing->name,
+                        'email' => $existing->email,
+                    ]
+                ], 409);
+            }
+        }
+
         if (empty($validated['name']) && (!empty($validated['first_name']) || !empty($validated['last_name']))) {
             $parts = [];
             if (!empty($validated['last_name'])) $parts[] = $validated['last_name'] . ',';

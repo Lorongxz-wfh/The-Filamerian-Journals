@@ -47,11 +47,6 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <p className="text-[13px] leading-relaxed font-medium">
               {cleanMessage}
             </p>
-            {isDestructive && (
-              <p className="text-[11px] opacity-80 font-normal">
-                Item will be moved to retention storage or archived safely.
-              </p>
-            )}
           </div>
         </div>
       </div>

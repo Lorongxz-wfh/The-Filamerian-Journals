@@ -142,6 +142,7 @@ const ManageAuthors: React.FC = () => {
 
   const openModal = (author: Author | null = null) => {
     setFormError(null);
+    setDuplicateWarning(null);
     setEditingAuthor(author);
     if (author) {
       setForm({
@@ -162,28 +163,36 @@ const ManageAuthors: React.FC = () => {
     setEditingAuthor(null);
     setForm(emptyForm);
     setFormError(null);
+    setDuplicateWarning(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent, force = false) => {
+    if (e) e.preventDefault();
     if (!form.first_name.trim() || !form.last_name.trim()) {
       setFormError('First Name and Last Name are required.');
       return;
     }
     setIsSubmitting(true);
     setFormError(null);
+    setDuplicateWarning(null);
     try {
       if (editingAuthor) {
         await api.put(`/authors/${editingAuthor.id}`, form);
         toast.success('Author updated successfully');
       } else {
-        await api.post('/authors', form);
+        await api.post('/authors', { ...form, force });
         toast.success('Author created successfully');
       }
       await fetchAuthors();
       closeModal();
     } catch (err: any) {
-      setFormError(err.response?.data?.message || 'Failed to save author.');
+      if (err.response?.status === 409 && err.response?.data?.duplicate) {
+        setDuplicateWarning(err.response.data.message);
+      } else {
+        setFormError(err.response?.data?.message || 'Failed to save author.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -298,16 +307,43 @@ const ManageAuthors: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => !isSubmitting && closeModal()}
         title={editingAuthor ? 'Edit Author' : 'New Author'}
-        className="max-w-lg"
+        className="max-w-xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-5">
           {formError && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px]">
               {formError}
             </div>
           )}
 
-          {/* Shared 4-field name grid component */}
+          {duplicateWarning && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 text-[13px] rounded space-y-3">
+              <p className="font-medium">{duplicateWarning}</p>
+              <p className="text-[12px] opacity-90">Would you like to force create a duplicate author anyway?</p>
+              <div className="flex items-center gap-2 pt-1">
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  onClick={(e) => handleSubmit(e, true)} 
+                  isLoading={isSubmitting}
+                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3"
+                >
+                  Create Duplicate Anyway
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setDuplicateWarning(null)}
+                  className="text-xs px-3"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Shared name grid component */}
           <AuthorFormFields
             values={{
               first_name: form.first_name,
@@ -327,7 +363,7 @@ const ManageAuthors: React.FC = () => {
             placeholder="author@email.com"
           />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
             <Button type="button" variant="ghost" onClick={closeModal}>Cancel</Button>
             <Button type="submit" isLoading={isSubmitting}>
               {editingAuthor ? 'Save Changes' : 'Create Author'}

@@ -238,7 +238,7 @@ const ManageJournal: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDeleteVolume}
         title="Delete Volume"
-        message="Are you sure you want to delete this volume and all associated issues? Published items will be safely archived."
+        message="Are you sure you want to delete this volume? All articles inside it will be moved to the Trash Bin."
       />
     </div>
   );
