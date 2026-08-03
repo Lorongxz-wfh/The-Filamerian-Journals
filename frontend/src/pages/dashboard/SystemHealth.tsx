@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { FileText, BookOpen, Users } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
-import { Skeleton } from '@/components/ui/Skeleton';
 
 interface RecordCounts {
   articles: number;
@@ -127,7 +126,7 @@ const SystemHealth: React.FC = () => {
             <div className="flex justify-between items-start">
               <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Application</span>
               {loading && !health ? (
-                <Skeleton className="h-5 w-20 rounded" />
+                <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {health?.status || 'Operational'}
@@ -135,17 +134,14 @@ const SystemHealth: React.FC = () => {
               )}
             </div>
             <div className="space-y-1">
-              {loading && !health ? (
-                <>
-                  <Skeleton className="h-7 w-36 rounded my-1" />
-                  <Skeleton className="h-4 w-20 rounded" />
-                </>
-              ) : (
-                <>
-                  <p className="text-2xl font-bold text-primary font-mono">{health?.laravel_version ? `Laravel ${health.laravel_version}` : 'Laravel 12'}</p>
-                  <p className="text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
-                </>
-              )}
+              <p className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+                {loading && !health ? (
+                  <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                ) : (
+                  health?.laravel_version ? `Laravel ${health.laravel_version}` : 'Laravel 12'
+                )}
+              </p>
+              <p className="text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
             </div>
           </div>
 
@@ -155,7 +151,7 @@ const SystemHealth: React.FC = () => {
                 Database ({loading && !health ? '...' : dbDriverText.toUpperCase()})
               </span>
               {loading && !health ? (
-                <Skeleton className="h-5 w-20 rounded" />
+                <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {dbStatusText}
@@ -163,17 +159,14 @@ const SystemHealth: React.FC = () => {
               )}
             </div>
             <div className="space-y-1">
-              {loading && !health ? (
-                <>
-                  <Skeleton className="h-7 w-28 rounded my-1" />
-                  <Skeleton className="h-4 w-28 rounded" />
-                </>
-              ) : (
-                <>
-                  <p className="text-2xl font-bold text-primary font-mono">{formatBytes(dbSizeBytes)}</p>
-                  <p className="text-xs text-muted font-mono">Active Connection</p>
-                </>
-              )}
+              <p className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+                {loading && !health ? (
+                  <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                ) : (
+                  formatBytes(dbSizeBytes)
+                )}
+              </p>
+              <p className="text-xs text-muted font-mono">Active Connection</p>
             </div>
           </div>
 
@@ -181,7 +174,7 @@ const SystemHealth: React.FC = () => {
             <div className="flex justify-between items-start">
               <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Storage Provider</span>
               {loading && !health ? (
-                <Skeleton className="h-5 w-16 rounded" />
+                <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {storageDiskText.toUpperCase()}
@@ -189,17 +182,14 @@ const SystemHealth: React.FC = () => {
               )}
             </div>
             <div className="space-y-1">
-              {loading && !health ? (
-                <>
-                  <Skeleton className="h-7 w-28 rounded my-1" />
-                  <Skeleton className="h-4 w-28 rounded" />
-                </>
-              ) : (
-                <>
-                  <p className="text-2xl font-bold text-primary font-mono">{formatBytes(storageSizeBytes)}</p>
-                  <p className="text-xs text-muted font-mono">{storageTypeText}</p>
-                </>
-              )}
+              <p className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+                {loading && !health ? (
+                  <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                ) : (
+                  formatBytes(storageSizeBytes)
+                )}
+              </p>
+              <p className="text-xs text-muted font-mono">{storageTypeText}</p>
             </div>
           </div>
         </div>
@@ -214,11 +204,13 @@ const SystemHealth: React.FC = () => {
               </div>
               <div>
                 <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
-                {loading && !health ? (
-                  <Skeleton className="h-6 w-12 rounded mt-1" />
-                ) : (
-                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.articles ?? 0}</div>
-                )}
+                <div className="text-xl font-extrabold text-primary font-mono min-h-[28px] flex items-center">
+                  {loading && !health ? (
+                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                  ) : (
+                    health?.counts.articles ?? 0
+                  )}
+                </div>
               </div>
             </div>
 
@@ -228,11 +220,13 @@ const SystemHealth: React.FC = () => {
               </div>
               <div>
                 <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
-                {loading && !health ? (
-                  <Skeleton className="h-6 w-12 rounded mt-1" />
-                ) : (
-                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.journals ?? 0}</div>
-                )}
+                <div className="text-xl font-extrabold text-primary font-mono min-h-[28px] flex items-center">
+                  {loading && !health ? (
+                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                  ) : (
+                    health?.counts.journals ?? 0
+                  )}
+                </div>
               </div>
             </div>
 
@@ -242,11 +236,13 @@ const SystemHealth: React.FC = () => {
               </div>
               <div>
                 <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
-                {loading && !health ? (
-                  <Skeleton className="h-6 w-12 rounded mt-1" />
-                ) : (
-                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.users ?? 0}</div>
-                )}
+                <div className="text-xl font-extrabold text-primary font-mono min-h-[28px] flex items-center">
+                  {loading && !health ? (
+                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                  ) : (
+                    health?.counts.users ?? 0
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -278,9 +274,9 @@ const SystemHealth: React.FC = () => {
             </div>
 
             {loadingErrors ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
+              <div className="py-8 flex items-center justify-center gap-2 text-muted text-[13px]">
+                <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                Fetching exception logs...
               </div>
             ) : errors.length === 0 ? (
               <div className="py-8 text-center space-y-1">

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Shield, Server, CheckCircle2, HardDrive } from 'lucide-react';
 import api from '@/services/api';
-import { Skeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
@@ -100,21 +99,17 @@ const SystemSettings: React.FC = () => {
                     <span className="font-medium text-primary block">Max PDF Upload Size (MB)</span>
                     <span className="text-[11px] text-muted">Applies to all article and journal PDF documents</span>
                   </div>
-                  {loading ? (
-                    <Skeleton className="h-8 w-24 rounded" />
-                  ) : (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <input 
-                        type="number" 
-                        min="1"
-                        max="500"
-                        value={settings.max_pdf_upload_size || '10'}
-                        onChange={(e) => handleChange('max_pdf_upload_size', e.target.value)}
-                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
-                      />
-                      <span className="text-xs font-mono text-muted">MB</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <input 
+                      type="number" 
+                      min="1"
+                      max="500"
+                      value={settings.max_pdf_upload_size || '10'}
+                      onChange={(e) => handleChange('max_pdf_upload_size', e.target.value)}
+                      className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                    />
+                    <span className="text-xs font-mono text-muted">MB</span>
+                  </div>
                 </div>
 
                 {/* Max Image Upload Size */}
@@ -123,21 +118,17 @@ const SystemSettings: React.FC = () => {
                     <span className="font-medium text-primary block">Max Image Upload Size (MB)</span>
                     <span className="text-[11px] text-muted">Applies to cover images and resource graphics</span>
                   </div>
-                  {loading ? (
-                    <Skeleton className="h-8 w-24 rounded" />
-                  ) : (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <input 
-                        type="number" 
-                        min="1"
-                        max="100"
-                        value={settings.max_image_upload_size || '5'}
-                        onChange={(e) => handleChange('max_image_upload_size', e.target.value)}
-                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
-                      />
-                      <span className="text-xs font-mono text-muted">MB</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <input 
+                      type="number" 
+                      min="1"
+                      max="100"
+                      value={settings.max_image_upload_size || '5'}
+                      onChange={(e) => handleChange('max_image_upload_size', e.target.value)}
+                      className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                    />
+                    <span className="text-xs font-mono text-muted">MB</span>
+                  </div>
                 </div>
 
                 {/* Storage Quota Cap */}
@@ -146,21 +137,17 @@ const SystemSettings: React.FC = () => {
                     <span className="font-medium text-primary block">Storage Quota Cap Limit (GB)</span>
                     <span className="text-[11px] text-muted">Configurable visual disk quota capacity target</span>
                   </div>
-                  {loading ? (
-                    <Skeleton className="h-8 w-24 rounded" />
-                  ) : (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <input 
-                        type="number" 
-                        min="1"
-                        max="10000"
-                        value={settings.storage_quota_cap_gb || '50'}
-                        onChange={(e) => handleChange('storage_quota_cap_gb', e.target.value)}
-                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
-                      />
-                      <span className="text-xs font-mono text-muted">GB</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <input 
+                      type="number" 
+                      min="1"
+                      max="10000"
+                      value={settings.storage_quota_cap_gb || '50'}
+                      onChange={(e) => handleChange('storage_quota_cap_gb', e.target.value)}
+                      className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                    />
+                    <span className="text-xs font-mono text-muted">GB</span>
+                  </div>
                 </div>
 
                 {/* Storage Usage Meter with Progress Bar */}
@@ -170,18 +157,12 @@ const SystemSettings: React.FC = () => {
                       <HardDrive className="h-3.5 w-3.5 text-primary/70" />
                       Media Storage Capacity Meter
                     </span>
-                    {loading ? (
-                      <Skeleton className="h-4 w-32 rounded" />
-                    ) : (
-                      <span className="font-mono text-xs text-primary font-semibold">
-                        {formatBytes(usedStorageBytes)} / {settings.storage_quota_cap_gb || 50} GB
-                      </span>
-                    )}
+                    <span className="font-mono text-xs text-primary font-semibold">
+                      {loading ? 'Calculating...' : `${formatBytes(usedStorageBytes)} / ${settings.storage_quota_cap_gb || 50} GB`}
+                    </span>
                   </div>
                   {/* Visual Progress Bar */}
-                  {loading ? (
-                    <Skeleton className="h-3 w-full rounded mt-2" />
-                  ) : (() => {
+                  {(() => {
                     const capGb = parseFloat(settings.storage_quota_cap_gb || '50') || 50;
                     const capBytes = capGb * 1024 * 1024 * 1024;
                     const percentage = Math.min(100, Math.max(0.1, (usedStorageBytes / capBytes) * 100));
@@ -239,23 +220,19 @@ const SystemSettings: React.FC = () => {
                     </span>
                     <span className="text-[11px] text-muted">Restrict non-admin public access during maintenance</span>
                   </div>
-                  {loading ? (
-                    <Skeleton className="h-6 w-11 rounded-full" />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleToggleChange('maintenance_mode')}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        settings.maintenance_mode === '1' ? 'bg-primary' : 'bg-muted/30'
+                  <button
+                    type="button"
+                    onClick={() => handleToggleChange('maintenance_mode')}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      settings.maintenance_mode === '1' ? 'bg-primary' : 'bg-muted/30'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        settings.maintenance_mode === '1' ? 'translate-x-5' : 'translate-x-0'
                       }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          settings.maintenance_mode === '1' ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  )}
+                    />
+                  </button>
                 </div>
 
                 {/* Session Timeout */}
@@ -264,21 +241,17 @@ const SystemSettings: React.FC = () => {
                     <span className="font-medium text-primary block">Session Timeout</span>
                     <span className="text-[11px] text-muted">Inactivity duration before requiring re-login</span>
                   </div>
-                  {loading ? (
-                    <Skeleton className="h-8 w-24 rounded" />
-                  ) : (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <input 
-                        type="number" 
-                        min="15"
-                        max="1440"
-                        value={settings.session_timeout || '120'}
-                        onChange={(e) => handleChange('session_timeout', e.target.value)}
-                        className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
-                      />
-                      <span className="text-xs font-mono text-muted">min</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <input 
+                      type="number" 
+                      min="15"
+                      max="1440"
+                      value={settings.session_timeout || '120'}
+                      onChange={(e) => handleChange('session_timeout', e.target.value)}
+                      className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors" 
+                    />
+                    <span className="text-xs font-mono text-muted">min</span>
+                  </div>
                 </div>
 
                 {/* Auth Framework Badges */}
