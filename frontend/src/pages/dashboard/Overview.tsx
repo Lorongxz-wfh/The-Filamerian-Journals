@@ -4,7 +4,7 @@ import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router';
 import DashboardHeader from '@/components/ui/DashboardHeader';
-import { Skeleton, ChartSkeleton } from '@/components/ui/Skeleton';
+import { ChartSkeleton } from '@/components/ui/Skeleton';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 const Overview: React.FC = () => {
@@ -93,45 +93,34 @@ const Overview: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {loading ? (
-          Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="border border-border bg-surface p-5 space-y-6">
-              <div className="flex items-start justify-between">
-                <Skeleton className="h-8 w-8 rounded" />
-                <Skeleton className="h-5 w-14 rounded" />
+        {stats.map((stat) => (
+          <div key={stat.label} className="border border-border bg-surface p-5 relative overflow-hidden group hover:border-primary/30 transition-colors">
+            <div className="flex items-start justify-between mb-6">
+              <div className="p-2 bg-background border border-border">
+                <stat.icon className="h-4 w-4 text-primary/70" />
               </div>
-              <div className="space-y-1.5">
-                <Skeleton className="h-8 w-16 rounded" />
-                <Skeleton className="h-3 w-24 rounded" />
-              </div>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${stat.color ? `${stat.color} ${stat.bg}` : (stat.isPositive ? 'text-emerald-600 bg-emerald-500/10' : 'text-amber-600 bg-amber-500/10')}`}>
+                {stat.trend}
+              </span>
             </div>
-          ))
-        ) : (
-          stats.map((stat) => (
-            <div key={stat.label} className="border border-border bg-surface p-5 relative overflow-hidden group hover:border-primary/30 transition-colors">
-              <div className="flex items-start justify-between mb-6">
-                <div className="p-2 bg-background border border-border">
-                  <stat.icon className="h-4 w-4 text-primary/70" />
-                </div>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wider ${stat.color ? `${stat.color} ${stat.bg}` : (stat.isPositive ? 'text-emerald-600 bg-emerald-500/10' : 'text-amber-600 bg-amber-500/10')}`}>
-                  {stat.trend}
-                </span>
-              </div>
-              <div>
-                <p className="text-3xl font-light text-primary tracking-tight">
-                  {stat.value}
-                </p>
-                <p className="text-[11px] font-medium text-muted uppercase tracking-wider mt-1">
-                  {stat.label}
-                </p>
-              </div>
-              {/* Decorative faint icon */}
-              <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-500">
-                <stat.icon className="h-28 w-28" />
-              </div>
+            <div>
+              <p className="text-3xl font-light text-primary tracking-tight min-h-[36px] flex items-center">
+                {loading ? (
+                  <span className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                ) : (
+                  stat.value
+                )}
+              </p>
+              <p className="text-[11px] font-medium text-muted uppercase tracking-wider mt-1">
+                {stat.label}
+              </p>
             </div>
-          ))
-        )}
+            {/* Decorative faint icon */}
+            <div className="absolute -bottom-4 -right-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-500">
+              <stat.icon className="h-28 w-28" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Main Content Grid */}

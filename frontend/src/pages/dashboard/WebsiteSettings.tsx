@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Globe, FileText, Plus, Search, Edit2, Trash2, ShieldAlert } from 'lucide-react';
 import api from '@/services/api';
 import Input from '@/components/ui/Input';
-import { FormSkeleton, ListSkeleton } from '@/components/ui/Skeleton';
+import { ListSkeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
 import Tabs from '@/components/ui/Tabs';
 import Modal from '@/components/ui/Modal';
@@ -180,163 +180,169 @@ const WebsiteSettings: React.FC = () => {
   // --- Tab Contents ---
   const homeTabContent = (
     <div className="space-y-8 w-full">
-      {loadingSettings ? (
-        <FormSkeleton rows={6} />
-      ) : (
-        <>
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Home Page Settings</h2>
-            </div>
-            <div className="space-y-4">
-              <Input 
-                label="Site Title" 
-                value={settings.site_title} 
-                onChange={(e) => handleSettingsChange('site_title', e.target.value)}
-              />
-              <div className="pt-2">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Hero Text</label>
-                </div>
-                <RichTextEditor 
-                  value={settings.home_about_us || 'The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.'}
-                  onChange={(val) => handleSettingsChange('home_about_us', val)}
-                />
-              </div>
-            </div>
+      <div className="border border-border bg-surface p-6 space-y-5">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="flex items-center gap-3">
+            <Globe className="h-4 w-4 text-primary/40" />
+            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Home Page Settings</h2>
           </div>
+          {loadingSettings && (
+            <span className="text-[11px] text-muted flex items-center gap-1.5 font-medium">
+              <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+              Syncing settings...
+            </span>
+          )}
+        </div>
+        <div className="space-y-4">
+          <Input 
+            label="Site Title" 
+            value={settings.site_title} 
+            onChange={(e) => handleSettingsChange('site_title', e.target.value)}
+          />
+          <div className="pt-2">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Hero Text</label>
+            </div>
+            <RichTextEditor 
+              value={settings.home_about_us || 'The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.'}
+              onChange={(val) => handleSettingsChange('home_about_us', val)}
+            />
+          </div>
+        </div>
+      </div>
 
-          <div className="flex justify-end pt-2">
-            <Button 
-              onClick={handleSaveSettings}
-              isLoading={savingSettings}
-            >
-              {savingSettings ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </>
-      )}
+      <div className="flex justify-end pt-2">
+        <Button 
+          onClick={handleSaveSettings}
+          isLoading={savingSettings}
+        >
+          {savingSettings ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
     </div>
   );
 
   const footerTabContent = (
     <div className="space-y-8 w-full">
-      {loadingSettings ? (
-        <FormSkeleton rows={6} />
-      ) : (
-        <>
-          {!isSuperAdmin && (
-            <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 text-[13px] font-medium flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
-              Footer link settings can only be edited by Super Admins.
-            </div>
-          )}
+      {!isSuperAdmin && (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 text-[13px] font-medium flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
+          Footer link settings can only be edited by Super Admins.
+        </div>
+      )}
 
-          <div className="border border-border bg-surface p-6 space-y-6">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <div>
-                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Footer Navigation Columns</h2>
-                <p className="text-[12px] text-muted">Configure the 3 customizable link columns displayed in the website footer. Leave rows empty to hide them.</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((colNum) => (
-                <div key={colNum} className="border border-border bg-background p-4 space-y-4">
-                  <div className="border-b border-border pb-2">
-                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-1">Column {colNum} Header</span>
-                    <Input 
-                      label={`Main Title`} 
-                      disabled={!isSuperAdmin}
-                      value={settings[`footer_col${colNum}_title`] || (colNum === 1 ? 'NAVIGATION' : colNum === 2 ? 'PUBLISHING POLICIES' : '')} 
-                      onChange={(e) => handleSettingsChange(`footer_col${colNum}_title`, e.target.value)}
-                      placeholder="e.g. NAVIGATION"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <span className="text-[11px] font-semibold text-primary uppercase tracking-wider block">Links (Up to 5)</span>
-                    {[1, 2, 3, 4, 5].map((linkNum) => (
-                      <div key={linkNum} className="p-2 border border-border bg-surface space-y-2">
-                        <span className="text-[10px] font-mono text-muted uppercase">Link #{linkNum}</span>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="text"
-                            disabled={!isSuperAdmin}
-                            placeholder="Text Title (e.g. Home)"
-                            value={settings[`footer_col${colNum}_l${linkNum}_text`] || ''}
-                            onChange={(e) => handleSettingsChange(`footer_col${colNum}_l${linkNum}_text`, e.target.value)}
-                            className="w-full px-2.5 py-1.5 bg-background border border-border text-[12px] focus:outline-none focus:border-primary disabled:opacity-50"
-                          />
-                          <input
-                            type="text"
-                            disabled={!isSuperAdmin}
-                            placeholder="URL / Path (e.g. /about)"
-                            value={settings[`footer_col${colNum}_l${linkNum}_url`] || ''}
-                            onChange={(e) => handleSettingsChange(`footer_col${colNum}_l${linkNum}_url`, e.target.value)}
-                            className="w-full px-2.5 py-1.5 bg-background border border-border text-[12px] focus:outline-none focus:border-primary font-mono disabled:opacity-50"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+      <div className="border border-border bg-surface p-6 space-y-6">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="flex items-center gap-3">
+            <Globe className="h-4 w-4 text-primary/40" />
+            <div>
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Footer Navigation Columns</h2>
+              <p className="text-[12px] text-muted">Configure the 3 customizable link columns displayed in the website footer. Leave rows empty to hide them.</p>
             </div>
           </div>
-
-          {isSuperAdmin && (
-            <div className="flex justify-end pt-2">
-              <Button 
-                onClick={handleSaveSettings}
-                isLoading={savingSettings}
-              >
-                {savingSettings ? 'Saving...' : 'Save Footer Settings'}
-              </Button>
-            </div>
+          {loadingSettings && (
+            <span className="text-[11px] text-muted flex items-center gap-1.5 font-medium shrink-0">
+              <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+              Syncing settings...
+            </span>
           )}
-        </>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((colNum) => (
+            <div key={colNum} className="border border-border bg-background p-4 space-y-4">
+              <div className="border-b border-border pb-2">
+                <span className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-1">Column {colNum} Header</span>
+                <Input 
+                  label={`Main Title`} 
+                  disabled={!isSuperAdmin}
+                  value={settings[`footer_col${colNum}_title`] || (colNum === 1 ? 'NAVIGATION' : colNum === 2 ? 'PUBLISHING POLICIES' : '')} 
+                  onChange={(e) => handleSettingsChange(`footer_col${colNum}_title`, e.target.value)}
+                  placeholder="e.g. NAVIGATION"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-[11px] font-semibold text-primary uppercase tracking-wider block">Links (Up to 5)</span>
+                {[1, 2, 3, 4, 5].map((linkNum) => (
+                  <div key={linkNum} className="p-2 border border-border bg-surface space-y-2">
+                    <span className="text-[10px] font-mono text-muted uppercase">Link #{linkNum}</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        disabled={!isSuperAdmin}
+                        placeholder="Text Title (e.g. Home)"
+                        value={settings[`footer_col${colNum}_l${linkNum}_text`] || ''}
+                        onChange={(e) => handleSettingsChange(`footer_col${colNum}_l${linkNum}_text`, e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-background border border-border text-[12px] focus:outline-none focus:border-primary disabled:opacity-50"
+                      />
+                      <input
+                        type="text"
+                        disabled={!isSuperAdmin}
+                        placeholder="URL / Path (e.g. /about)"
+                        value={settings[`footer_col${colNum}_l${linkNum}_url`] || ''}
+                        onChange={(e) => handleSettingsChange(`footer_col${colNum}_l${linkNum}_url`, e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-background border border-border text-[12px] focus:outline-none focus:border-primary font-mono disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {isSuperAdmin && (
+        <div className="flex justify-end pt-2">
+          <Button 
+            onClick={handleSaveSettings}
+            isLoading={savingSettings}
+          >
+            {savingSettings ? 'Saving...' : 'Save Footer Settings'}
+          </Button>
+        </div>
       )}
     </div>
   );
 
   const contactTabContent = (
     <div className="space-y-8 w-full">
-      {loadingSettings ? (
-        <FormSkeleton rows={2} />
-      ) : (
-        <>
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <Globe className="h-4 w-4 text-primary/40" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Contact Page Settings</h2>
-            </div>
-            <div className="space-y-4">
-              <Input 
-                label="Contact Email" type="email"
-                value={settings.contact_email} 
-                onChange={(e) => handleSettingsChange('contact_email', e.target.value)}
-              />
-              <Input 
-                label="Contact Phone" type="text"
-                value={settings.contact_phone} 
-                onChange={(e) => handleSettingsChange('contact_phone', e.target.value)}
-              />
-            </div>
+      <div className="border border-border bg-surface p-6 space-y-5">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="flex items-center gap-3">
+            <Globe className="h-4 w-4 text-primary/40" />
+            <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Contact Page Settings</h2>
           </div>
+          {loadingSettings && (
+            <span className="text-[11px] text-muted flex items-center gap-1.5 font-medium">
+              <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+              Syncing settings...
+            </span>
+          )}
+        </div>
+        <div className="space-y-4">
+          <Input 
+            label="Contact Email" type="email"
+            value={settings.contact_email} 
+            onChange={(e) => handleSettingsChange('contact_email', e.target.value)}
+          />
+          <Input 
+            label="Contact Phone" type="text"
+            value={settings.contact_phone} 
+            onChange={(e) => handleSettingsChange('contact_phone', e.target.value)}
+          />
+        </div>
+      </div>
 
-          <div className="flex justify-end pt-2">
-            <Button 
-              onClick={handleSaveSettings}
-              isLoading={savingSettings}
-            >
-              {savingSettings ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </>
-      )}
+      <div className="flex justify-end pt-2">
+        <Button 
+          onClick={handleSaveSettings}
+          isLoading={savingSettings}
+        >
+          {savingSettings ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
     </div>
   );
 

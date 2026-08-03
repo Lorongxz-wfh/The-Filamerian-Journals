@@ -23,7 +23,6 @@ import SearchInput from '@/components/ui/SearchInput';
 import EmptyState from '@/components/ui/EmptyState';
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import IconButton from '@/components/ui/IconButton';
-import { Skeleton } from '@/components/ui/Skeleton';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 
 interface TrashedItem {
@@ -321,43 +320,51 @@ const TrashBin: React.FC = () => {
       )}
 
 
-      {loading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-          <Skeleton className="h-12 w-full rounded-lg" />
-        </div>
-      ) : filteredItems.length === 0 ? (
-        <EmptyState
-          icon={Trash2}
-          title="Trash Bin is Empty"
-          description={searchQuery ? "No deleted items match your search criteria." : "Soft-deleted articles, volumes, and journals will appear here for 30 days."}
-        />
-      ) : (
-        <div className="border border-border bg-surface flex flex-col">
-          <Table containerClassName="max-h-[520px]">
-            <TableHeader>
+      <div className="border border-border bg-surface flex flex-col">
+        <Table containerClassName="max-h-[520px]">
+          <TableHeader>
+            <TableRow>
+              {isSelectMode && (
+                <TableHead className="w-10 text-center">
+                  <input 
+                    type="checkbox"
+                    checked={filteredItems.length > 0 && filteredItems.every(i => selectedKeys.includes(`${i.type}-${i.id}`))}
+                    onChange={toggleSelectAll}
+                    className="rounded border-border accent-primary cursor-pointer h-4 w-4"
+                  />
+                </TableHead>
+              )}
+              <TableHead>Item Name / Title</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Original Context</TableHead>
+              <TableHead>Deleted On</TableHead>
+              <TableHead>Retention</TableHead>
+              <TableHead className="w-12 text-right"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                {isSelectMode && (
-                  <TableHead className="w-10 text-center">
-                    <input 
-                      type="checkbox"
-                      checked={filteredItems.length > 0 && filteredItems.every(i => selectedKeys.includes(`${i.type}-${i.id}`))}
-                      onChange={toggleSelectAll}
-                      className="rounded border-border accent-primary cursor-pointer h-4 w-4"
-                    />
-                  </TableHead>
-                )}
-                <TableHead>Item Name / Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Original Context</TableHead>
-                <TableHead>Deleted On</TableHead>
-                <TableHead>Retention</TableHead>
-                <TableHead className="w-12 text-right"></TableHead>
+                <TableCell colSpan={isSelectMode ? 7 : 6} className="text-center py-16">
+                  <div className="flex items-center justify-center gap-2 text-muted text-[13px]">
+                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                    Loading trash bin items...
+                  </div>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredItems.map((item) => {
+            ) : filteredItems.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={isSelectMode ? 7 : 6} className="p-0">
+                  <EmptyState
+                    icon={Trash2}
+                    title="Trash Bin is Empty"
+                    description={searchQuery ? "No deleted items match your search criteria." : "Soft-deleted articles, volumes, and journals will appear here for 30 days."}
+                    className="border-0 bg-transparent py-12"
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredItems.map((item) => {
                 const itemKey = `${item.type}-${item.id}`;
                 const isSelected = selectedKeys.includes(itemKey);
                 const title = item.title || `Volume ${item.volume_number} (${item.year})`;
@@ -452,7 +459,8 @@ const TrashBin: React.FC = () => {
                     </TableCell>
                   </TableRow>
                 );
-              })}
+              })
+            )}
             </TableBody>
           </Table>
           <DataTableFooter
@@ -460,7 +468,6 @@ const TrashBin: React.FC = () => {
             loading={loading}
           />
         </div>
-      )}
 
       {/* Individual Restore Confirmation Modal */}
       <Modal
