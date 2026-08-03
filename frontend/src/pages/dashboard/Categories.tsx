@@ -10,7 +10,7 @@ import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { CategoriesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
-import { DataTableFooter } from '@/components/ui/Table';
+import { DataTableFooter, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import { toast } from 'sonner';
@@ -342,8 +342,8 @@ const Categories: React.FC = () => {
       )}
 
       {/* Content Area */}
-      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto relative">
+      <div className="border border-border bg-surface flex flex-col">
+        <div className="overflow-x-auto max-h-[520px] overflow-y-auto relative">
           {isReordering ? (
             <Reorder.Group axis="y" values={categories} onReorder={handleReorderList} className="divide-y divide-border">
               {categories.map((cat, idx) => (
@@ -361,22 +361,22 @@ const Categories: React.FC = () => {
               ))}
             </Reorder.Group>
           ) : (
-            <table className="w-full min-w-[600px]">
-              <thead className="sticky top-0 bg-surface z-10 shadow-xs">
-                <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
-                  <th className="px-5 py-3">Category Name</th>
-                  <th className="px-5 py-3">Slug</th>
-                  <th className="px-5 py-3 hidden md:table-cell">Description</th>
-                  <th className="px-5 py-3 text-center">Journals</th>
-                  <th className="px-5 py-3 w-12 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Category Name</TableHead>
+                  <TableHead>Slug</TableHead>
+                  <TableHead className="hidden md:table-cell">Description</TableHead>
+                  <TableHead className="text-center">Journals</TableHead>
+                  <TableHead className="w-12 text-right"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {loading ? (
                   <CategoriesTableSkeleton rows={5} />
                 ) : filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-0">
+                  <TableRow>
+                    <TableCell colSpan={5} className="p-0">
                       <EmptyState 
                         title="No categories found" 
                         description="There are no categories matching your search criteria." 
@@ -389,8 +389,8 @@ const Categories: React.FC = () => {
                         }
                         className="bg-transparent border-0 py-16" 
                       />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filtered.map((cat, idx) => (
                     <CategoryRow
@@ -406,8 +406,8 @@ const Categories: React.FC = () => {
                     />
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
         </div>
         {!isReordering && (

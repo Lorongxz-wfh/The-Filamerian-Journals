@@ -54,6 +54,7 @@ const UserManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [filter, setFilter] = useState('');
   const [debouncedFilter, setDebouncedFilter] = useState('');
   
@@ -100,6 +101,7 @@ const UserManager: React.FC = () => {
       const res = await api.get(`/users?${params.toString()}`);
       setUsers(res.data.data);
       setLastPage(res.data.last_page || 1);
+      setTotal(res.data.total || 0);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load users');
@@ -351,7 +353,7 @@ const UserManager: React.FC = () => {
           currentPage={page}
           lastPage={lastPage}
           onPageChange={setPage}
-          showingText={`Showing ${users.length > 0 ? Math.min((page - 1) * 10 + 1, users.length) : 0}–${users.length} of ${users.length} user${users.length !== 1 ? 's' : ''}`}
+          showingText={`Showing ${total > 0 ? Math.min((page - 1) * 10 + 1, total) : 0}–${Math.min(page * 10, total)} of ${total} user${total !== 1 ? 's' : ''}`}
           loading={loading}
         />
       </div>

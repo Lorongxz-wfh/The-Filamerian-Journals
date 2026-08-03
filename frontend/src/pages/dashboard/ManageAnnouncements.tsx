@@ -8,13 +8,13 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import RichTextEditor from '@/components/ui/RichTextEditor';
-import { Skeleton, ListSkeleton } from '@/components/ui/Skeleton';
+import { ListSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import Pagination from '@/components/ui/Pagination';
+
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 
 const PER_PAGE = 10;
 
@@ -145,21 +145,12 @@ const ManageAnnouncements: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
-        ) : (
-          <p className="text-[11px] text-muted shrink-0">
-            Showing {total > 0 ? 1 : 0}–{announcements.length} of {total} announcement{total !== 1 ? 's' : ''}
-          </p>
-        )}
-        <div className="w-full sm:w-auto flex justify-end">
-          <SearchInput 
-            placeholder="Search announcements..." 
-            value={filter} 
-            onChange={(e) => setFilter(e.target.value)} 
-          />
-        </div>
+      <div className="flex justify-end items-center">
+        <SearchInput 
+          placeholder="Search announcements..." 
+          value={filter} 
+          onChange={(e) => setFilter(e.target.value)} 
+        />
       </div>
 
       <div className="border border-border bg-surface flex flex-col">
@@ -226,15 +217,14 @@ const ManageAnnouncements: React.FC = () => {
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {!loading && total > 0 && (
-        <Pagination
+        <DataTableFooter
           currentPage={page}
           lastPage={lastPage}
           onPageChange={setPage}
+          showingText={`Showing ${total > 0 ? Math.min((page - 1) * PER_PAGE + 1, total) : 0}–${Math.min(page * PER_PAGE, total)} of ${total} announcement${total !== 1 ? 's' : ''}`}
+          loading={loading}
         />
-      )}
+      </div>
 
       <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && setIsModalOpen(false)} title={editingItem ? 'Edit Announcement' : 'New Announcement'}>
         <form onSubmit={handleSubmit} className="space-y-4">

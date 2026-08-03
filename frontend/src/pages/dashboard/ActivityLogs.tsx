@@ -7,7 +7,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
 import DashboardHeader from '@/components/ui/DashboardHeader';
-import Pagination from '@/components/ui/Pagination';
+
 import Select from '@/components/ui/Select';
 
 interface ActivityLog {
@@ -29,6 +29,7 @@ const ActivityLogs: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [actionFilter, setActionFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
 
@@ -43,6 +44,7 @@ const ActivityLogs: React.FC = () => {
       const res = await api.get(`/dashboard/logs?${params.toString()}`);
       setLogs(res.data.data);
       setLastPage(res.data.last_page || 1);
+      setTotal(res.data.total || 0);
     } catch (err: any) {
       console.error(err);
       toast.error(err.response?.data?.message || 'Failed to fetch activity logs');
@@ -151,7 +153,7 @@ const ActivityLogs: React.FC = () => {
 
       {/* Card Container */}
       <div className="border border-border bg-surface flex flex-col">
-        <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
+        <div className="max-h-[520px] overflow-y-auto overflow-x-auto relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
           <Table className="w-full border-collapse">
             <TableHeader>
               <TableRow>
@@ -206,17 +208,11 @@ const ActivityLogs: React.FC = () => {
         </div>
 
         <DataTableFooter
-          showingText={`Showing ${logs.length > 0 ? Math.min((page - 1) * 15 + 1, logs.length) : 0}–${logs.length} of ${logs.length} activity logs`}
+          currentPage={page}
+          lastPage={lastPage}
+          onPageChange={setPage}
+          showingText={`Showing ${total > 0 ? Math.min((page - 1) * 15 + 1, total) : 0}–${Math.min(page * 15, total)} of ${total} log${total !== 1 ? 's' : ''}`}
           loading={loading}
-          pagination={
-            !loading && lastPage > 1 ? (
-              <Pagination
-                currentPage={page}
-                lastPage={lastPage}
-                onPageChange={setPage}
-              />
-            ) : undefined
-          }
         />
       </div>
     </div>

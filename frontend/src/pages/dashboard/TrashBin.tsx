@@ -23,7 +23,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import IconButton from '@/components/ui/IconButton';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 
 interface TrashedItem {
   id: number;
@@ -309,14 +309,6 @@ const TrashBin: React.FC = () => {
         </div>
       )}
 
-      {/* Table & Results Header */}
-      <div className="flex justify-between items-center text-[12px] font-mono text-muted px-1">
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
-        ) : (
-          <span>Showing {filteredItems.length} of {allItems.length} deleted items</span>
-        )}
-      </div>
 
       {loading ? (
         <div className="space-y-3">
@@ -452,6 +444,10 @@ const TrashBin: React.FC = () => {
               })}
             </TableBody>
           </Table>
+          <DataTableFooter
+            showingText={`Showing ${filteredItems.length} of ${allItems.length} deleted item${allItems.length !== 1 ? 's' : ''}`}
+            loading={loading}
+          />
         </div>
       )}
 
