@@ -237,7 +237,7 @@ const ManageAnnouncements: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Announcement"
-        message="Are you sure you want to delete this announcement? This action cannot be undone."
+        message="Are you sure you want to remove this announcement from active publication?"
       />
     </div>
   );

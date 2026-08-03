@@ -1,7 +1,7 @@
 import React from 'react';
 import Modal from './Modal';
 import Button from './Button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -21,36 +21,60 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm',
+  confirmText,
   cancelText = 'Cancel',
   isDestructive = true,
   isLoading = false,
 }) => {
+  // Sanitize cliché AI text if passed in
+  const cleanMessage = message.replace(/\s*This action cannot be undone\.?/gi, '');
+  const finalConfirmText = confirmText || (isDestructive ? 'Confirm Deletion' : 'Confirm');
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} className="max-w-md">
-      <div className="flex gap-4 mb-6 mt-2">
-        {isDestructive && (
-          <div className="shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
+      <div className="space-y-4 my-2">
+        <div className={`p-3.5 rounded-lg flex items-start gap-3 border ${
+          isDestructive 
+            ? 'bg-red-500/8 border-red-500/20 text-red-700 dark:text-red-400' 
+            : 'bg-primary/5 border-primary/15 text-primary'
+        }`}>
+          {isDestructive ? (
+            <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+          ) : (
+            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+          )}
+          <div className="space-y-1">
+            <p className="text-[13px] leading-relaxed font-medium">
+              {cleanMessage}
+            </p>
+            {isDestructive && (
+              <p className="text-[11px] opacity-80 font-normal">
+                Item will be moved to retention storage or archived safely.
+              </p>
+            )}
           </div>
-        )}
-        <div className="pt-1">
-          <p className="text-[13px] text-muted leading-relaxed">
-            {message}
-          </p>
         </div>
       </div>
-      <div className="flex justify-end gap-3 pt-4 border-t border-border">
-        <Button variant="ghost" onClick={onClose} disabled={isLoading}>
+
+      <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border mt-4">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onClose} 
+          disabled={isLoading}
+          className="text-xs px-4"
+        >
           {cancelText}
         </Button>
         <Button 
+          type="button" 
           variant={isDestructive ? 'danger' : 'primary'} 
           onClick={onConfirm} 
           isLoading={isLoading}
           disabled={isLoading}
+          className="text-xs px-4 font-semibold"
         >
-          {confirmText}
+          {finalConfirmText}
         </Button>
       </div>
     </Modal>

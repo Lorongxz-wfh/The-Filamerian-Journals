@@ -501,7 +501,7 @@ const UserManager: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete User"
-        message="Are you sure you want to delete this user? This action cannot be undone."
+        message="Are you sure you want to remove this user account? Their contributions and activity logs will remain preserved."
       />
       
       <ConfirmDialog 

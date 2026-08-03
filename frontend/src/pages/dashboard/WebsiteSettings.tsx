@@ -360,7 +360,7 @@ const WebsiteSettings: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDeleteResource}
         title="Delete Resource Page"
-        message="Are you sure you want to delete this resource page? This action cannot be undone."
+        message="Are you sure you want to delete this resource page from the public index?"
       />
     </div>
   );

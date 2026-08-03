@@ -409,7 +409,7 @@ const Articles: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Article"
-        message="Are you sure you want to delete this article? This action cannot be undone."
+        message="Are you sure you want to delete this article? It will be moved to the Trash Bin where it can be restored within 30 days."
         isLoading={isDeleting}
       />
     </div>

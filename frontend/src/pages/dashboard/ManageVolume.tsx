@@ -450,7 +450,7 @@ const ManageVolume: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Article"
-        message="Are you sure you want to delete this article? This action cannot be undone."
+        message="Are you sure you want to remove this article from the volume? It will be safely stored in the Trash Bin."
       />
     </div>
   );

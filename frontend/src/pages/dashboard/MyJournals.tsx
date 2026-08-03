@@ -665,7 +665,7 @@ const MyJournals: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Journal"
-        message="Are you sure you want to delete this journal? This action cannot be undone."
+        message="Are you sure you want to delete this journal collection? Volumes and articles inside will be safely retained in retention."
         isLoading={isDeleting}
       />
     </div>

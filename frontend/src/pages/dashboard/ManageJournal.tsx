@@ -223,7 +223,7 @@ const ManageJournal: React.FC = () => {
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDeleteVolume}
         title="Delete Volume"
-        message="Are you sure you want to delete this volume and all its issues? This action cannot be undone."
+        message="Are you sure you want to delete this volume and all associated issues? Published items will be safely archived."
       />
     </div>
   );
