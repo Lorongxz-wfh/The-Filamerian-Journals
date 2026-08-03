@@ -3,12 +3,13 @@ import { useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit2, Trash2, CheckCircle, Users, Power } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle, Users, Power, MoreVertical } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { UsersTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -264,7 +265,7 @@ const UserManager: React.FC = () => {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role & Status</TableHead>
-              <TableHead className="w-24 text-right">Actions</TableHead>
+              <TableHead className="w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -320,14 +321,25 @@ const UserManager: React.FC = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-1">
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                      <DropdownMenu
+                        trigger={
+                          <IconButton icon={MoreVertical} title="Actions" />
+                        }
+                      >
                         {!user.is_approved && (
-                          <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
+                          <DropdownMenuItem onClick={() => handleApprove(user.id)}>
+                            <div className="flex items-center gap-2 text-emerald-600">
+                              <CheckCircle className="h-4 w-4 text-emerald-600" /> Approve User
+                            </div>
+                          </DropdownMenuItem>
                         )}
-                        
-                        <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit User & Manage Status" />
-                      </div>
+                        <DropdownMenuItem onClick={() => handleOpenModal(user)}>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Edit2 className="h-4 w-4 text-muted" /> Edit & Status
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );

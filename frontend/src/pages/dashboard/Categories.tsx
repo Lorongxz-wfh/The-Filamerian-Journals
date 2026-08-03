@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/services/api';
-import { Plus, Edit2, Trash2, Tag, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, Tag, ArrowUp, ArrowDown, GripVertical, MoreVertical } from 'lucide-react';
 import { Reorder, useDragControls } from 'framer-motion';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { CategoriesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
@@ -136,17 +137,25 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
           {cat.journals_count || 0} journal{(cat.journals_count || 0) !== 1 ? 's' : ''}
         </span>
       </td>
-      <td className="px-5 py-4 text-right">
-        <div className="flex items-center justify-end gap-1">
-          <IconButton icon={Edit2} title="Edit" onClick={() => openModal(cat)} />
-          <IconButton 
-            icon={Trash2} 
-            title={hasJournals ? "Cannot delete category while assigned to journals" : "Delete"} 
-            variant="danger" 
-            disabled={hasJournals}
-            onClick={() => !hasJournals && setDeleteId(cat.id)} 
-          />
-        </div>
+      <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu
+          trigger={
+            <IconButton icon={MoreVertical} title="Actions" />
+          }
+        >
+          <DropdownMenuItem onClick={() => openModal(cat)}>
+            <div className="flex items-center gap-2 text-foreground">
+              <Edit2 className="h-4 w-4 text-muted" /> Edit Category
+            </div>
+          </DropdownMenuItem>
+          {!hasJournals && (
+            <DropdownMenuItem onClick={() => setDeleteId(cat.id)}>
+              <div className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-4 w-4 text-red-600" /> Delete Category
+              </div>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenu>
       </td>
     </tr>
   );
@@ -359,7 +368,7 @@ const Categories: React.FC = () => {
                   <th className="px-5 py-3">Slug</th>
                   <th className="px-5 py-3 hidden md:table-cell">Description</th>
                   <th className="px-5 py-3 text-center">Journals</th>
-                  <th className="px-5 py-3 w-20 text-right">Actions</th>
+                  <th className="px-5 py-3 w-12 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

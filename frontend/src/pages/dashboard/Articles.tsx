@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
-import { FileText, Plus, Edit2, Trash2, Eye, Upload, ArrowUp, ArrowDown } from 'lucide-react';
+import { FileText, Plus, Edit2, Trash2, Eye, Upload, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
@@ -11,6 +11,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { ArticlesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -307,7 +308,7 @@ const Articles: React.FC = () => {
                 <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
                   <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
                 </TableHead>
-                <TableHead className="w-28 text-right">Actions</TableHead>
+                <TableHead className="w-12 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -355,14 +356,30 @@ const Articles: React.FC = () => {
                         ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                         : '-'}
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                      <DropdownMenu
+                        trigger={
+                          <IconButton icon={MoreVertical} title="Actions" />
+                        }
+                      >
                         {article.pdf_url && (
-                          <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
+                          <DropdownMenuItem onClick={() => viewPdf(article)}>
+                            <div className="flex items-center gap-2 text-foreground">
+                              <Eye className="h-4 w-4 text-muted" /> View PDF
+                            </div>
+                          </DropdownMenuItem>
                         )}
-                        <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
-                        <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(article.id)} title="Delete Article" />
-                      </div>
+                        <DropdownMenuItem onClick={() => handleOpenModal(article)}>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Edit2 className="h-4 w-4 text-muted" /> Edit Article
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(article.id)}>
+                          <div className="flex items-center gap-2 text-red-600">
+                            <Trash2 className="h-4 w-4 text-red-600" /> Delete Article
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))

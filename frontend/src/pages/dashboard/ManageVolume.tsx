@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Reorder, useDragControls } from 'framer-motion';
-import { ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical } from 'lucide-react';
+import { ArrowUp, ArrowDown, Plus, Trash2, Edit2, GripVertical, Eye, MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import {
   Breadcrumbs,
   BreadcrumbList,
@@ -19,7 +20,6 @@ import {
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Eye } from 'lucide-react';
 
 interface Author {
   id: number;
@@ -154,13 +154,29 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
         <span className={`px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
           {article.status}
         </span>
-        <div className="flex items-center gap-2">
+        <DropdownMenu
+          trigger={
+            <IconButton icon={MoreVertical} title="Actions" />
+          }
+        >
           {article.pdf_url && (
-            <IconButton icon={Eye} onClick={() => onViewPdf(article)} title="View PDF" />
+            <DropdownMenuItem onClick={() => onViewPdf(article)}>
+              <div className="flex items-center gap-2 text-foreground">
+                <Eye className="h-4 w-4 text-muted" /> View PDF
+              </div>
+            </DropdownMenuItem>
           )}
-          <IconButton icon={Edit2} onClick={() => onEdit(article)} title="Edit" />
-          <IconButton icon={Trash2} variant="danger" onClick={() => onDelete(article.id)} title="Delete" />
-        </div>
+          <DropdownMenuItem onClick={() => onEdit(article)}>
+            <div className="flex items-center gap-2 text-foreground">
+              <Edit2 className="h-4 w-4 text-muted" /> Edit Article
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onDelete(article.id)}>
+            <div className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-4 w-4 text-red-600" /> Delete Article
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenu>
       </div>
     </Reorder.Item>
   );

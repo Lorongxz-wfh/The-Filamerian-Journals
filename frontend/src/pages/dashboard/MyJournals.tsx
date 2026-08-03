@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
@@ -15,6 +15,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { JournalsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -420,7 +421,7 @@ const MyJournals: React.FC = () => {
                 <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
                   <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
                 </TableHead>
-                <TableHead className="w-28 text-right">Actions</TableHead>
+                <TableHead className="w-12 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -468,25 +469,28 @@ const MyJournals: React.FC = () => {
                     <TableCell className="text-muted truncate">
                       {journal.editor || '-'}
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1">
-                        <IconButton 
-                          icon={Settings2} 
-                          onClick={() => navigate(`/dashboard/journals/${journal.slug}`)} 
-                          title="Manage Volumes" 
-                        />
-                        <IconButton 
-                          icon={Edit2} 
-                          onClick={() => handleOpenModal(journal)} 
-                          title="Edit Journal" 
-                        />
-                        <IconButton 
-                          icon={Trash2} 
-                          variant="danger" 
-                          onClick={() => handleDelete(journal.slug)} 
-                          title="Delete Journal" 
-                        />
-                      </div>
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                      <DropdownMenu
+                        trigger={
+                          <IconButton icon={MoreVertical} title="Actions" />
+                        }
+                      >
+                        <DropdownMenuItem onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Settings2 className="h-4 w-4 text-muted" /> Manage Volumes
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenModal(journal)}>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Edit2 className="h-4 w-4 text-muted" /> Edit Journal
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(journal.slug)}>
+                          <div className="flex items-center gap-2 text-red-600">
+                            <Trash2 className="h-4 w-4 text-red-600" /> Delete Journal
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))

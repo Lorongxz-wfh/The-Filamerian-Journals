@@ -153,12 +153,12 @@ const ActivityLogs: React.FC = () => {
       <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
         <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
           <Table className="w-full border-collapse">
-            <TableHeader className="sticky top-0 z-10 bg-surface shadow-xs">
-              <TableRow className="border-b border-border bg-surface/95 backdrop-blur-xs">
-                <TableHead className="w-[180px] bg-surface font-semibold">Date & Time</TableHead>
-                <TableHead className="w-[160px] bg-surface font-semibold">User</TableHead>
-                <TableHead className="w-[150px] bg-surface font-semibold">Action</TableHead>
-                <TableHead className="bg-surface font-semibold">Description</TableHead>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[180px] font-semibold">Date & Time</TableHead>
+                <TableHead className="w-[160px] font-semibold">User</TableHead>
+                <TableHead className="w-[150px] font-semibold">Action</TableHead>
+                <TableHead className="font-semibold">Description</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

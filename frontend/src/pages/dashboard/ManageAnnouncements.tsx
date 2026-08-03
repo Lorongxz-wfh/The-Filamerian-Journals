@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Megaphone, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Megaphone, Plus, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -13,6 +13,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import Pagination from '@/components/ui/Pagination';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 
 const PER_PAGE = 10;
 
@@ -190,9 +191,23 @@ const ManageAnnouncements: React.FC = () => {
                 <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
               </div>
               <div className="col-span-3 text-[12px] text-muted">{new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
-              <div className="col-span-1 flex justify-end gap-2">
-                <IconButton icon={Edit2} onClick={() => handleOpenModal(item)} title="Edit" />
-                <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(item.id)} title="Delete" />
+              <div className="col-span-1 flex justify-end">
+                <DropdownMenu
+                  trigger={
+                    <IconButton icon={MoreVertical} title="Actions" />
+                  }
+                >
+                  <DropdownMenuItem onClick={() => handleOpenModal(item)}>
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Edit2 className="h-4 w-4 text-muted" /> Edit Announcement
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDelete(item.id)}>
+                    <div className="flex items-center gap-2 text-red-600">
+                      <Trash2 className="h-4 w-4 text-red-600" /> Delete Announcement
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenu>
               </div>
             </div>
           ))

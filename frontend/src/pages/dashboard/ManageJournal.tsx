@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { Plus, BookOpen, Edit2, Trash2 } from 'lucide-react';
+import { Plus, BookOpen, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { Skeleton } from '@/components/ui/Skeleton';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -178,8 +179,22 @@ const ManageJournal: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                    <IconButton icon={Edit2} onClick={() => handleOpenVolModal(vol)} title="Edit" />
-                    <IconButton icon={Trash2} variant="danger" onClick={() => deleteVolume(vol.id)} title="Delete" />
+                    <DropdownMenu
+                      trigger={
+                        <IconButton icon={MoreVertical} title="Actions" />
+                      }
+                    >
+                      <DropdownMenuItem onClick={() => handleOpenVolModal(vol)}>
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Edit2 className="h-4 w-4 text-muted" /> Edit Volume
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => deleteVolume(vol.id)}>
+                        <div className="flex items-center gap-2 text-red-600">
+                          <Trash2 className="h-4 w-4 text-red-600" /> Delete Volume
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenu>
                   </div>
                 </div>
               </div>

@@ -10,7 +10,8 @@ import {
   CheckCircle2, 
   RefreshCw,
   CheckSquare,
-  X
+  X,
+  MoreVertical
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -19,6 +20,8 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import SearchInput from '@/components/ui/SearchInput';
 import EmptyState from '@/components/ui/EmptyState';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
+import IconButton from '@/components/ui/IconButton';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 interface TrashedItem {
@@ -346,7 +349,7 @@ const TrashBin: React.FC = () => {
                 <th className="py-3.5 px-4">Original Context</th>
                 <th className="py-3.5 px-4">Deleted On</th>
                 <th className="py-3.5 px-4">Retention</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3.5 px-4 text-right w-12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40 text-xs">
@@ -413,34 +416,35 @@ const TrashBin: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
+                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu
+                        trigger={
+                          <IconButton icon={MoreVertical} title="Actions" />
+                        }
+                      >
+                        <DropdownMenuItem
                           onClick={() => {
                             setSelectedItem(item);
                             setActionType('restore');
                           }}
-                          title="Restore Item"
-                          className="p-1.5 rounded-md text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-all"
                         >
-                          <RotateCcw className="h-4 w-4" />
-                        </button>
-
+                          <div className="flex items-center gap-2 text-emerald-600">
+                            <RotateCcw className="h-4 w-4 text-emerald-600" /> Restore Item
+                          </div>
+                        </DropdownMenuItem>
                         {isSuperAdmin && (
-                          <button
-                            type="button"
+                          <DropdownMenuItem
                             onClick={() => {
                               setSelectedItem(item);
                               setActionType('forceDelete');
                             }}
-                            title="Permanently Purge Item"
-                            className="p-1.5 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                            <div className="flex items-center gap-2 text-red-600">
+                              <Trash2 className="h-4 w-4 text-red-600" /> Purge Permanently
+                            </div>
+                          </DropdownMenuItem>
                         )}
-                      </div>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 );

@@ -71,11 +71,9 @@ export const ArticlesTableSkeleton: React.FC<{ rows?: number }> = ({ rows = 10 }
         <td className="p-5 align-middle">
           <Skeleton className="h-[13px] w-24" />
         </td>
-        {/* Actions: 3 icon buttons */}
+        {/* Actions: 1 icon button */}
         <td className="p-5 align-middle">
-          <div className="flex items-center justify-end gap-1">
-            <Skeleton className="h-7 w-7" />
-            <Skeleton className="h-7 w-7" />
+          <div className="flex items-center justify-end">
             <Skeleton className="h-7 w-7" />
           </div>
         </td>
@@ -112,11 +110,9 @@ export const JournalsTableSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 })
         <td className="p-5 align-middle">
           <Skeleton className="h-[13px] w-32" />
         </td>
-        {/* Actions: 3 icon buttons */}
+        {/* Actions: 1 icon button */}
         <td className="p-5 align-middle">
-          <div className="flex items-center justify-end gap-1">
-            <Skeleton className="h-7 w-7" />
-            <Skeleton className="h-7 w-7" />
+          <div className="flex items-center justify-end">
             <Skeleton className="h-7 w-7" />
           </div>
         </td>
@@ -146,10 +142,9 @@ export const AuthorsTableSkeleton: React.FC<{ rows?: number }> = ({ rows = 10 })
         <td className="p-5 align-middle">
           <Skeleton className="h-[12px] w-40" />
         </td>
-        {/* Actions: 2 icon buttons */}
+        {/* Actions: 1 icon button */}
         <td className="p-5 align-middle">
-          <div className="flex items-center justify-end gap-1">
-            <Skeleton className="h-7 w-7" />
+          <div className="flex items-center justify-end">
             <Skeleton className="h-7 w-7" />
           </div>
         </td>
@@ -182,10 +177,9 @@ export const UsersTableSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) =>
             <Skeleton className="h-5 w-14" />
           </div>
         </td>
-        {/* Actions: 1–2 icon buttons */}
+        {/* Actions: 1 icon button */}
         <td className="p-5 align-middle">
-          <div className="flex items-center justify-end gap-1">
-            <Skeleton className="h-7 w-7" />
+          <div className="flex items-center justify-end">
             <Skeleton className="h-7 w-7" />
           </div>
         </td>
@@ -219,8 +213,7 @@ export const CategoriesTableSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 
         </td>
         {/* Actions */}
         <td className="px-5 py-[14px] align-middle">
-          <div className="flex items-center justify-end gap-1">
-            <Skeleton className="h-7 w-7" />
+          <div className="flex items-center justify-end">
             <Skeleton className="h-7 w-7" />
           </div>
         </td>

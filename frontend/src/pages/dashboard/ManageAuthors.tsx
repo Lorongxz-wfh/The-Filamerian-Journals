@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
 import api from '@/services/api';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
@@ -8,6 +8,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { AuthorsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -234,7 +235,7 @@ const ManageAuthors: React.FC = () => {
               <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('email')}>
                 <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
               </TableHead>
-              <TableHead className="w-24 text-right">Actions</TableHead>
+              <TableHead className="w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -258,11 +259,23 @@ const ManageAuthors: React.FC = () => {
                   <TableCell className="text-muted">{author.middle_name || '-'}</TableCell>
                   <TableCell className="text-muted">{author.suffix || '-'}</TableCell>
                   <TableCell className="text-muted text-[12px]">{author.email || '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      <IconButton icon={Edit2} onClick={() => openModal(author)} title="Edit Author" />
-                      <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(author.id)} title="Delete Author" />
-                    </div>
+                  <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                    <DropdownMenu
+                      trigger={
+                        <IconButton icon={MoreVertical} title="Actions" />
+                      }
+                    >
+                      <DropdownMenuItem onClick={() => openModal(author)}>
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Edit2 className="h-4 w-4 text-muted" /> Edit Author
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setDeleteTarget(author.id)}>
+                        <div className="flex items-center gap-2 text-red-600">
+                          <Trash2 className="h-4 w-4 text-red-600" /> Delete Author
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))

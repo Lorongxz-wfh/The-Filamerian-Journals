@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['index', 'show']);
     Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['index', 'show']);
     Route::apiResource('resources', \App\Http\Controllers\Api\ResourceController::class)->only(['index', 'show']);
+    Route::apiResource('faqs', \App\Http\Controllers\Api\FaqController::class)->only(['index', 'show']);
 
     Route::get('/articles/{article}/download-url', [\App\Http\Controllers\Api\ArticleController::class, 'getDownloadUrl']);
 
@@ -65,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('keywords', \App\Http\Controllers\Api\KeywordController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('announcements', \App\Http\Controllers\Api\AnnouncementController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('resources', \App\Http\Controllers\Api\ResourceController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('faqs', \App\Http\Controllers\Api\FaqController::class)->only(['store', 'update', 'destroy']);
 
         // Trash Bin (Read & Restore for Admin & Super Admin)
         Route::get('trash', [\App\Http\Controllers\Api\TrashController::class, 'index']);
@@ -111,13 +113,15 @@ Route::post('/public/articles/{article}/view', [\App\Http\Controllers\Api\Articl
 Route::get('/public/articles/{article}/related', [\App\Http\Controllers\Api\ArticleController::class, 'getRelated']);
 Route::get('/public/categories', [\App\Http\Controllers\Api\CategoryController::class, 'index']);
 
-// Settings & Feedbacks
+// Settings & Feedbacks & FAQs
 Route::get('/public/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);
+Route::get('/public/faqs', [\App\Http\Controllers\Api\FaqController::class, 'publicIndex']);
 Route::post('/public/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'store'])->middleware('throttle:1,3');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::middleware([\App\Http\Middleware\EnsureUserIsApproved::class])->group(function () {
         Route::post('/settings', [\App\Http\Controllers\Api\SettingController::class, 'store'])->middleware('role:Super Admin');
+        Route::apiResource('faqs', \App\Http\Controllers\Api\FaqController::class)->middleware('role:Super Admin|Admin');
         Route::get('/feedbacks/unread-count', [\App\Http\Controllers\Api\FeedbackController::class, 'unreadCount'])->middleware('role:Super Admin|Admin');
         Route::get('/feedbacks', [\App\Http\Controllers\Api\FeedbackController::class, 'index'])->middleware('role:Super Admin|Admin');
         Route::put('/feedbacks/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'update'])->middleware('role:Super Admin|Admin');
