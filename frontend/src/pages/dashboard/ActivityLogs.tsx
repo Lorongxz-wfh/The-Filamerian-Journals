@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, RefreshCw, Filter, Calendar } from 'lucide-react';
 import api from '@/services/api';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/Table';
-import { Skeleton, ActivityLogsTableSkeleton } from '@/components/ui/Skeleton';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell, DataTableFooter } from '@/components/ui/Table';
+import { ActivityLogsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { toast } from 'sonner';
 import Button from '@/components/ui/Button';
@@ -90,7 +90,7 @@ const ActivityLogs: React.FC = () => {
       </DashboardHeader>
 
       {/* Sleek, Compact Inline Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Action Filter */}
           <div className="flex items-center gap-2 w-48">
@@ -147,80 +147,78 @@ const ActivityLogs: React.FC = () => {
             </button>
           )}
         </div>
-
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
-        ) : (
-          <span className="text-[11px] text-muted shrink-0">
-            Showing {logs.length > 0 ? Math.min((page - 1) * 15 + 1, logs.length) : 0}–{logs.length} of {logs.length} activity logs
-          </span>
-        )}
       </div>
 
-      {/* Scrollable Container with Sticky Header */}
-      <div className="border border-border bg-surface max-h-[600px] overflow-y-auto overflow-x-auto shadow-sm relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
-        <Table className="w-full border-collapse">
-          <TableHeader className="sticky top-0 z-10 bg-surface shadow-sm">
-            <TableRow className="border-b border-border bg-surface/95 backdrop-blur-sm">
-              <TableHead className="w-[180px] bg-surface font-semibold">Date & Time</TableHead>
-              <TableHead className="w-[160px] bg-surface font-semibold">User</TableHead>
-              <TableHead className="w-[150px] bg-surface font-semibold">Action</TableHead>
-              <TableHead className="bg-surface font-semibold">Description</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <ActivityLogsTableSkeleton rows={6} />
-            ) : logs.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-40 text-center">
-                  <EmptyState
-                    icon={ShieldAlert}
-                    title="No activity logs found"
-                    description="There are no system logs matching your selected filters."
-                    className="bg-transparent border-0 py-8"
-                  />
-                </TableCell>
+      {/* Card Container */}
+      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+        <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-border">
+          <Table className="w-full border-collapse">
+            <TableHeader className="sticky top-0 z-10 bg-surface shadow-xs">
+              <TableRow className="border-b border-border bg-surface/95 backdrop-blur-xs">
+                <TableHead className="w-[180px] bg-surface font-semibold">Date & Time</TableHead>
+                <TableHead className="w-[160px] bg-surface font-semibold">User</TableHead>
+                <TableHead className="w-[150px] bg-surface font-semibold">Action</TableHead>
+                <TableHead className="bg-surface font-semibold">Description</TableHead>
               </TableRow>
-            ) : (
-              logs.map((log) => (
-                <TableRow key={log.id} className="hover:bg-background/80 transition-colors">
-                  <TableCell className="text-xs font-mono text-muted whitespace-nowrap">
-                    {new Date(log.created_at).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
-                  </TableCell>
-                  <TableCell className="text-xs font-semibold text-primary whitespace-nowrap">
-                    {log.user ? log.user.name : 'System'}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {renderActionBadge(log.action)}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted/90 leading-relaxed font-sans">
-                    {log.description}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <ActivityLogsTableSkeleton rows={6} />
+              ) : logs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-40 text-center">
+                    <EmptyState
+                      icon={ShieldAlert}
+                      title="No activity logs found"
+                      description="There are no system logs matching your selected filters."
+                      className="bg-transparent border-0 py-8"
+                    />
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      
-      {!loading && lastPage > 1 && (
-        <div className="pt-2">
-          <Pagination
-            currentPage={page}
-            lastPage={lastPage}
-            onPageChange={setPage}
-          />
+              ) : (
+                logs.map((log) => (
+                  <TableRow key={log.id} className="hover:bg-background/80 transition-colors">
+                    <TableCell className="text-xs font-mono text-muted whitespace-nowrap">
+                      {new Date(log.created_at).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
+                    </TableCell>
+                    <TableCell className="text-xs font-semibold text-primary whitespace-nowrap">
+                      {log.user ? log.user.name : 'System'}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {renderActionBadge(log.action)}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted/90 leading-relaxed font-sans">
+                      {log.description}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
-      )}
+
+        <DataTableFooter
+          showingText={`Showing ${logs.length > 0 ? Math.min((page - 1) * 15 + 1, logs.length) : 0}–${logs.length} of ${logs.length} activity logs`}
+          loading={loading}
+          pagination={
+            !loading && lastPage > 1 ? (
+              <Pagination
+                currentPage={page}
+                lastPage={lastPage}
+                onPageChange={setPage}
+              />
+            ) : undefined
+          }
+        />
+      </div>
     </div>
   );
 };

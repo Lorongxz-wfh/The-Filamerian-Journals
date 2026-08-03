@@ -6,9 +6,10 @@ import DashboardHeader from '@/components/ui/DashboardHeader';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
-import { Skeleton, CategoriesTableSkeleton } from '@/components/ui/Skeleton';
+import { CategoriesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
+import { DataTableFooter } from '@/components/ui/Table';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import { toast } from 'sonner';
@@ -310,29 +311,20 @@ const Categories: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Search Input & Count Text */}
+      {/* Search Input */}
       {!isReordering && (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          {loading ? (
-            <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
-          ) : (
-            <p className="text-[11px] text-muted shrink-0">
-              Showing {filtered.length > 0 ? 1 : 0}–{filtered.length} of {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'}
-            </p>
-          )}
-          <div className="w-full sm:w-auto flex justify-end">
-            <SearchInput
-              placeholder="Search categories..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-          </div>
+        <div className="flex justify-end items-center">
+          <SearchInput
+            placeholder="Search categories..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
         </div>
       )}
 
       {/* Reorder Info Banner */}
       {isReordering && (
-        <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between">
+        <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between rounded-lg">
           <div className="flex items-center gap-2">
             <GripVertical className="h-4 w-4 text-primary" />
             <span>Drag items using the handle or use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order.</span>
@@ -341,71 +333,79 @@ const Categories: React.FC = () => {
       )}
 
       {/* Content Area */}
-      <div className="border border-border bg-surface overflow-x-auto max-h-[500px] overflow-y-auto relative">
-        {isReordering ? (
-          <Reorder.Group axis="y" values={categories} onReorder={handleReorderList} className="divide-y divide-border">
-            {categories.map((cat, idx) => (
-              <CategoryRow
-                key={cat.id}
-                cat={cat}
-                idx={idx}
-                isLast={idx === categories.length - 1}
-                isReordering={true}
-                moveCategory={moveCategory}
-                openModal={openModal}
-                setDeleteId={setDeleteId}
-                setIsReordering={setIsReordering}
-              />
-            ))}
-          </Reorder.Group>
-        ) : (
-          <table className="w-full min-w-[600px]">
-            <thead className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5">
-              <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
-                <th className="px-5 py-3">Category Name</th>
-                <th className="px-5 py-3">Slug</th>
-                <th className="px-5 py-3 hidden md:table-cell">Description</th>
-                <th className="px-5 py-3 text-center">Journals</th>
-                <th className="px-5 py-3 w-20 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading ? (
-                <CategoriesTableSkeleton rows={5} />
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-0">
-                    <EmptyState 
-                      title="No categories found" 
-                      description="There are no categories matching your search criteria." 
-                      action={
-                        filter ? (
-                          <Button variant="ghost" size="sm" onClick={() => setFilter('')}>
-                            Clear Search
-                          </Button>
-                        ) : undefined
-                      }
-                      className="bg-transparent border-0 py-16" 
-                    />
-                  </td>
+      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+        <div className="overflow-x-auto max-h-[500px] overflow-y-auto relative">
+          {isReordering ? (
+            <Reorder.Group axis="y" values={categories} onReorder={handleReorderList} className="divide-y divide-border">
+              {categories.map((cat, idx) => (
+                <CategoryRow
+                  key={cat.id}
+                  cat={cat}
+                  idx={idx}
+                  isLast={idx === categories.length - 1}
+                  isReordering={true}
+                  moveCategory={moveCategory}
+                  openModal={openModal}
+                  setDeleteId={setDeleteId}
+                  setIsReordering={setIsReordering}
+                />
+              ))}
+            </Reorder.Group>
+          ) : (
+            <table className="w-full min-w-[600px]">
+              <thead className="sticky top-0 bg-surface z-10 shadow-xs">
+                <tr className="border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider text-left">
+                  <th className="px-5 py-3">Category Name</th>
+                  <th className="px-5 py-3">Slug</th>
+                  <th className="px-5 py-3 hidden md:table-cell">Description</th>
+                  <th className="px-5 py-3 text-center">Journals</th>
+                  <th className="px-5 py-3 w-20 text-right">Actions</th>
                 </tr>
-              ) : (
-                filtered.map((cat, idx) => (
-                  <CategoryRow
-                    key={cat.id}
-                    cat={cat}
-                    idx={idx}
-                    isLast={idx === filtered.length - 1}
-                    isReordering={false}
-                    moveCategory={moveCategory}
-                    openModal={openModal}
-                    setDeleteId={setDeleteId}
-                    setIsReordering={setIsReordering}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {loading ? (
+                  <CategoriesTableSkeleton rows={5} />
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-0">
+                      <EmptyState 
+                        title="No categories found" 
+                        description="There are no categories matching your search criteria." 
+                        action={
+                          filter ? (
+                            <Button variant="ghost" size="sm" onClick={() => setFilter('')}>
+                              Clear Search
+                            </Button>
+                          ) : undefined
+                        }
+                        className="bg-transparent border-0 py-16" 
+                      />
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((cat, idx) => (
+                    <CategoryRow
+                      key={cat.id}
+                      cat={cat}
+                      idx={idx}
+                      isLast={idx === filtered.length - 1}
+                      isReordering={false}
+                      moveCategory={moveCategory}
+                      openModal={openModal}
+                      setDeleteId={setDeleteId}
+                      setIsReordering={setIsReordering}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+        {!isReordering && (
+          <DataTableFooter
+            showingText={`Showing ${filtered.length > 0 ? 1 : 0}–${filtered.length} of ${categories.length} categor${categories.length !== 1 ? 'ies' : 'y'}`}
+            loading={loading}
+          />
         )}
       </div>
 

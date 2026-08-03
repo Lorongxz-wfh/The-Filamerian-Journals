@@ -11,12 +11,11 @@ import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
 import IconButton from '@/components/ui/IconButton';
 import Button from '@/components/ui/Button';
-import { Skeleton, ArticlesTableSkeleton } from '@/components/ui/Skeleton';
+import { ArticlesTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
-import Pagination from '@/components/ui/Pagination';
 
 const PER_PAGE = 10;
 
@@ -291,101 +290,93 @@ const Articles: React.FC = () => {
           />
         </div>
 
-        {/* Result count */}
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded my-0.5" />
-        ) : (
-          <p className="text-[11px] text-muted">
-            Showing {Math.min((page - 1) * PER_PAGE + 1, totalCount)}–{Math.min(page * PER_PAGE, totalCount)} of {totalCount} article{totalCount !== 1 ? 's' : ''}
-          </p>
-        )}
-
-        <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
-              <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
-            </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('journal')}>
-              <div className="flex items-center gap-1">Journal {getSortIcon('journal')}</div>
-            </TableHead>
-            <TableHead>Authors</TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('created_at')}>
-              <div className="flex items-center gap-1">Submitted {getSortIcon('created_at')}</div>
-            </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
-              <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
-            </TableHead>
-            <TableHead className="w-28 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <ArticlesTableSkeleton rows={PER_PAGE} />
-          ) : sortedArticles.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="h-32 text-center">
-                <EmptyState title="No articles" description="No articles match your criteria." className="bg-transparent border-0 py-16" />
-              </TableCell>
-            </TableRow>
-          ) : (
-            pagedArticles.map((article) => (
-              <TableRow 
-                key={article.id} 
-                className={`group ${articleHasPdf(article) ? 'cursor-pointer' : ''}`}
-                onClick={() => articleHasPdf(article) && viewPdf(article)}
-              >
-                <TableCell>
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary/20 shrink-0" />
-                      <span className="text-[13px] font-medium text-primary truncate max-w-[280px]" title={article.title}>
-                        {truncateMiddle(article.title, 42)}
-                      </span>
-                    </div>
-                    <div className="mt-1 pl-6">
-                      <Badge variant={getStatusVariant(article.status)}>
-                        {article.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted truncate max-w-[180px]">
-                  {article.volume?.journal?.title || '-'}
-                </TableCell>
-                <TableCell className="text-muted">
-                  {article.authors?.map(a => a.name).join(', ') || '-'}
-                </TableCell>
-                <TableCell className="text-muted">
-                  {new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                </TableCell>
-                <TableCell className="text-muted">
-                  {article.updated_at
-                    ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                    : '-'}
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1">
-                    {article.pdf_url && (
-                      <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
-                    )}
-                    <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
-                    <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(article.id)} title="Delete Article" />
-                  </div>
-                </TableCell>
+        <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+          <Table containerClassName="border-0 rounded-none max-h-[520px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
+                  <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
+                </TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('journal')}>
+                  <div className="flex items-center gap-1">Journal {getSortIcon('journal')}</div>
+                </TableHead>
+                <TableHead>Authors</TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('created_at')}>
+                  <div className="flex items-center gap-1">Submitted {getSortIcon('created_at')}</div>
+                </TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
+                  <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
+                </TableHead>
+                <TableHead className="w-28 text-right">Actions</TableHead>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-
-      {!loading && totalCount > 0 && (
-        <Pagination
-          currentPage={page}
-          lastPage={lastPage}
-          onPageChange={setPage}
-        />
-      )}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <ArticlesTableSkeleton rows={PER_PAGE} />
+              ) : sortedArticles.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center">
+                    <EmptyState title="No articles" description="No articles match your criteria." className="bg-transparent border-0 py-16" />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                pagedArticles.map((article) => (
+                  <TableRow 
+                    key={article.id} 
+                    className={`group ${articleHasPdf(article) ? 'cursor-pointer' : ''}`}
+                    onClick={() => articleHasPdf(article) && viewPdf(article)}
+                  >
+                    <TableCell>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary/20 shrink-0" />
+                          <span className="text-[13px] font-medium text-primary truncate max-w-[280px]" title={article.title}>
+                            {truncateMiddle(article.title, 42)}
+                          </span>
+                        </div>
+                        <div className="mt-1 pl-6">
+                          <Badge variant={getStatusVariant(article.status)}>
+                            {article.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted truncate max-w-[180px]">
+                      {article.volume?.journal?.title || '-'}
+                    </TableCell>
+                    <TableCell className="text-muted">
+                      {article.authors?.map(a => a.name).join(', ') || '-'}
+                    </TableCell>
+                    <TableCell className="text-muted">
+                      {new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </TableCell>
+                    <TableCell className="text-muted">
+                      {article.updated_at
+                        ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                        : '-'}
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
+                        {article.pdf_url && (
+                          <IconButton icon={Eye} onClick={() => viewPdf(article)} title="View PDF" />
+                        )}
+                        <IconButton icon={Edit2} onClick={() => handleOpenModal(article)} title="Edit Article" />
+                        <IconButton icon={Trash2} variant="danger" onClick={() => handleDelete(article.id)} title="Delete Article" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          <DataTableFooter
+            currentPage={page}
+            lastPage={lastPage}
+            onPageChange={setPage}
+            showingText={`Showing ${totalCount > 0 ? Math.min((page - 1) * PER_PAGE + 1, totalCount) : 0}–${Math.min(page * PER_PAGE, totalCount)} of ${totalCount} article${totalCount !== 1 ? 's' : ''}`}
+            loading={loading}
+          />
+        </div>
       </div>
 
       <ArticleFormModal

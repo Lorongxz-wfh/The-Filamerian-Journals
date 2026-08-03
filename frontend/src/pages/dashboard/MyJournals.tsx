@@ -15,13 +15,12 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { Skeleton, JournalsTableSkeleton } from '@/components/ui/Skeleton';
+import { JournalsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import FileUploadZone from '@/components/ui/FileUploadZone';
 import { toast } from 'sonner';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
-import Pagination from '@/components/ui/Pagination';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
 
 interface Journal {
@@ -405,111 +404,103 @@ const MyJournals: React.FC = () => {
           />
         </div>
 
-        {/* Pagination Result Count */}
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded my-0.5" />
-        ) : (
-          <p className="text-[11px] text-muted">
-            Showing {filteredJournals.length > 0 ? Math.min((page - 1) * 10 + 1, filteredJournals.length) : 0}–{Math.min(page * 10, filteredJournals.length)} of {filteredJournals.length} journal{filteredJournals.length !== 1 ? 's' : ''}
-          </p>
-        )}
-
-        <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
-              <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
-            </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('category')}>
-              <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
-            </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
-              <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
-            </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
-              <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
-            </TableHead>
-            <TableHead className="w-28 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <JournalsTableSkeleton rows={5} />
-          ) : filteredJournals.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="h-32 text-center">
-                <EmptyState title="No journals" description="No journals match your criteria." className="bg-transparent border-0 py-16" />
-              </TableCell>
-            </TableRow>
-          ) : (
-            filteredJournals.map((journal) => (
-              <TableRow
-                key={journal.id}
-                onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
-                className="group cursor-pointer"
-              >
-                <TableCell>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate" title={journal.title}>
-                        {truncateMiddle(journal.title, 42)}
-                      </span>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <Badge 
-                          variant={journal.status === 'Draft' ? 'outline' : 'secondary'} 
-                          className={journal.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0' : 'text-[9px] px-1.5 py-0'}
-                        >
-                          {journal.status || 'Published'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted truncate">
-                  {journal.category?.name || '-'}
-                </TableCell>
-                <TableCell className="text-muted text-[12px]">
-                  {journal.updated_at
-                    ? new Date(journal.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                    : '-'}
-                </TableCell>
-                <TableCell className="text-muted truncate">
-                  {journal.editor || '-'}
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1">
-                    <IconButton 
-                      icon={Settings2} 
-                      onClick={() => navigate(`/dashboard/journals/${journal.slug}`)} 
-                      title="Manage Volumes" 
-                    />
-                    <IconButton 
-                      icon={Edit2} 
-                      onClick={() => handleOpenModal(journal)} 
-                      title="Edit Journal" 
-                    />
-                    <IconButton 
-                      icon={Trash2} 
-                      variant="danger" 
-                      onClick={() => handleDelete(journal.slug)} 
-                      title="Delete Journal" 
-                    />
-                  </div>
-                </TableCell>
+        <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+          <Table containerClassName="border-0 rounded-none max-h-[520px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
+                  <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
+                </TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('category')}>
+                  <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
+                </TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
+                  <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
+                </TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
+                  <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
+                </TableHead>
+                <TableHead className="w-28 text-right">Actions</TableHead>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-
-      {!loading && lastPage > 1 && (
-        <Pagination
-          currentPage={page}
-          lastPage={lastPage}
-          onPageChange={setPage}
-        />
-      )}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <JournalsTableSkeleton rows={5} />
+              ) : filteredJournals.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center">
+                    <EmptyState title="No journals" description="No journals match your criteria." className="bg-transparent border-0 py-16" />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredJournals.map((journal) => (
+                  <TableRow
+                    key={journal.id}
+                    onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
+                    className="group cursor-pointer"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate" title={journal.title}>
+                            {truncateMiddle(journal.title, 42)}
+                          </span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <Badge 
+                              variant={journal.status === 'Draft' ? 'outline' : 'secondary'} 
+                              className={journal.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0' : 'text-[9px] px-1.5 py-0'}
+                            >
+                              {journal.status || 'Published'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted truncate">
+                      {journal.category?.name || '-'}
+                    </TableCell>
+                    <TableCell className="text-muted text-[12px]">
+                      {journal.updated_at
+                        ? new Date(journal.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                        : '-'}
+                    </TableCell>
+                    <TableCell className="text-muted truncate">
+                      {journal.editor || '-'}
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
+                        <IconButton 
+                          icon={Settings2} 
+                          onClick={() => navigate(`/dashboard/journals/${journal.slug}`)} 
+                          title="Manage Volumes" 
+                        />
+                        <IconButton 
+                          icon={Edit2} 
+                          onClick={() => handleOpenModal(journal)} 
+                          title="Edit Journal" 
+                        />
+                        <IconButton 
+                          icon={Trash2} 
+                          variant="danger" 
+                          onClick={() => handleDelete(journal.slug)} 
+                          title="Delete Journal" 
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          <DataTableFooter
+            currentPage={page}
+            lastPage={lastPage}
+            onPageChange={setPage}
+            showingText={`Showing ${filteredJournals.length > 0 ? Math.min((page - 1) * 10 + 1, filteredJournals.length) : 0}–${Math.min(page * 10, filteredJournals.length)} of ${filteredJournals.length} journal${filteredJournals.length !== 1 ? 's' : ''}`}
+            loading={loading}
+          />
+        </div>
       </div>
 
       {/* Modal Form */}

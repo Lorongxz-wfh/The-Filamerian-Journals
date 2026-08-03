@@ -8,11 +8,10 @@ import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
-import { Skeleton, AuthorsTableSkeleton } from '@/components/ui/Skeleton';
+import { AuthorsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import Pagination from '@/components/ui/Pagination';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 import AuthorFormFields from '@/components/ui/AuthorFormFields';
 
 const PER_PAGE = 15;
@@ -212,76 +211,72 @@ const ManageAuthors: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
-        ) : (
-          <p className="text-[11px] text-muted shrink-0">
-            Showing {total > 0 ? Math.min((page - 1) * PER_PAGE + 1, total) : 0}–{Math.min(page * PER_PAGE, total)} of {total} author{total !== 1 ? 's' : ''}
-          </p>
-        )}
-        <div className="w-full sm:w-auto flex justify-end">
-          <SearchInput
-            placeholder="Search by name or email..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-        </div>
+      <div className="flex justify-end items-center">
+        <SearchInput
+          placeholder="Search by name or email..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('last_name')}>
-              <div className="flex items-center gap-1">Last Name {getSortIcon('last_name')}</div>
-            </TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('first_name')}>
-              <div className="flex items-center gap-1">First Name {getSortIcon('first_name')}</div>
-            </TableHead>
-            <TableHead>Middle</TableHead>
-            <TableHead>Suffix</TableHead>
-            <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('email')}>
-              <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
-            </TableHead>
-            <TableHead className="w-24 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <AuthorsTableSkeleton rows={PER_PAGE} />
-          ) : sortedAuthors.length === 0 ? (
+      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+        <Table containerClassName="border-0 rounded-none max-h-[520px]">
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={6} className="h-32 text-center">
-                <EmptyState
-                  title="No authors"
-                  description="No authors match your search. Create one to get started."
-                  className="bg-transparent border-0 py-16"
-                />
-              </TableCell>
+              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('last_name')}>
+                <div className="flex items-center gap-1">Last Name {getSortIcon('last_name')}</div>
+              </TableHead>
+              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('first_name')}>
+                <div className="flex items-center gap-1">First Name {getSortIcon('first_name')}</div>
+              </TableHead>
+              <TableHead>Middle</TableHead>
+              <TableHead>Suffix</TableHead>
+              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('email')}>
+                <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
+              </TableHead>
+              <TableHead className="w-24 text-right">Actions</TableHead>
             </TableRow>
-          ) : (
-            sortedAuthors.map((author) => (
-              <TableRow key={author.id} className="group">
-                <TableCell className="font-medium text-primary">{author.last_name}</TableCell>
-                <TableCell className="text-muted">{author.first_name}</TableCell>
-                <TableCell className="text-muted">{author.middle_name || '-'}</TableCell>
-                <TableCell className="text-muted">{author.suffix || '-'}</TableCell>
-                <TableCell className="text-muted text-[12px]">{author.email || '-'}</TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <IconButton icon={Edit2} onClick={() => openModal(author)} title="Edit Author" />
-                    <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(author.id)} title="Delete Author" />
-                  </div>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <AuthorsTableSkeleton rows={PER_PAGE} />
+            ) : sortedAuthors.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-32 text-center">
+                  <EmptyState
+                    title="No authors"
+                    description="No authors match your search. Create one to get started."
+                    className="bg-transparent border-0 py-16"
+                  />
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-
-      {!loading && total > 0 && (
-        <Pagination currentPage={page} lastPage={lastPage} onPageChange={setPage} />
-      )}
+            ) : (
+              sortedAuthors.map((author) => (
+                <TableRow key={author.id} className="group">
+                  <TableCell className="font-medium text-primary">{author.last_name}</TableCell>
+                  <TableCell className="text-muted">{author.first_name}</TableCell>
+                  <TableCell className="text-muted">{author.middle_name || '-'}</TableCell>
+                  <TableCell className="text-muted">{author.suffix || '-'}</TableCell>
+                  <TableCell className="text-muted text-[12px]">{author.email || '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      <IconButton icon={Edit2} onClick={() => openModal(author)} title="Edit Author" />
+                      <IconButton icon={Trash2} variant="danger" onClick={() => setDeleteTarget(author.id)} title="Delete Author" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <DataTableFooter
+          currentPage={page}
+          lastPage={lastPage}
+          onPageChange={setPage}
+          showingText={`Showing ${total > 0 ? Math.min((page - 1) * PER_PAGE + 1, total) : 0}–${Math.min(page * PER_PAGE, total)} of ${total} author${total !== 1 ? 's' : ''}`}
+          loading={loading}
+        />
+      </div>
 
       {/* Create/Edit Modal */}
       <Modal

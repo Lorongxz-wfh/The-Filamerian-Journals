@@ -1,12 +1,18 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import Pagination from './Pagination';
+import { Skeleton } from './Skeleton';
 
-const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto border border-border bg-surface">
+interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
+  containerClassName?: string;
+}
+
+const Table = React.forwardRef<HTMLTableElement, TableProps>(
+  ({ className, containerClassName, ...props }, ref) => (
+    <div className={cn('relative w-full overflow-auto max-h-[520px] border border-border bg-surface shadow-2xs rounded-lg', containerClassName)}>
       <table
         ref={ref}
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn('w-full caption-bottom text-sm border-collapse', className)}
         {...props}
       />
     </div>
@@ -16,7 +22,11 @@ Table.displayName = 'Table';
 
 const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('[&_tr]:border-b border-border bg-background', className)} {...props} />
+    <thead 
+      ref={ref} 
+      className={cn('sticky top-0 z-10 bg-surface/95 backdrop-blur-xs border-b border-border shadow-2xs [&_tr]:border-b-0', className)} 
+      {...props} 
+    />
   )
 );
 TableHeader.displayName = 'TableHeader';
@@ -93,6 +103,60 @@ const TableCaption = React.forwardRef<HTMLTableCaptionElement, React.HTMLAttribu
 );
 TableCaption.displayName = 'TableCaption';
 
+export interface DataTableFooterProps {
+  currentPage?: number;
+  lastPage?: number;
+  onPageChange?: (page: number) => void;
+  showingText?: React.ReactNode;
+  loading?: boolean;
+  pagination?: React.ReactNode;
+  className?: string;
+}
+
+const DataTableFooter: React.FC<DataTableFooterProps> = ({
+  currentPage = 1,
+  lastPage = 1,
+  onPageChange,
+  showingText,
+  loading = false,
+  pagination,
+  className,
+}) => {
+  return (
+    <div className={cn('border-t border-border bg-surface px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 min-h-[52px]', className)}>
+      {/* Left spacer / placeholder */}
+      <div className="hidden sm:block text-[11px] text-muted w-1/4" />
+
+      {/* Center Pagination */}
+      <div className="flex-1 flex justify-center">
+        {loading ? (
+          <Skeleton className="h-8 w-44 rounded" />
+        ) : pagination ? (
+          pagination
+        ) : lastPage > 1 && onPageChange ? (
+          <Pagination
+            currentPage={currentPage}
+            lastPage={lastPage}
+            onPageChange={onPageChange}
+            className="space-x-1"
+          />
+        ) : null}
+      </div>
+
+      {/* Right Result Count */}
+      <div className="w-full sm:w-1/4 flex justify-center sm:justify-end text-right">
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded my-1" />
+        ) : showingText ? (
+          <div className="text-[11px] font-medium text-muted">
+            {showingText}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
 export {
   Table,
   TableHeader,
@@ -102,4 +166,6 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  DataTableFooter,
 };
+

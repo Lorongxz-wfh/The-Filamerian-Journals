@@ -9,16 +9,15 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import { Skeleton, UsersTableSkeleton } from '@/components/ui/Skeleton';
+import { UsersTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { toast } from 'sonner';
 import SearchInput from '@/components/ui/SearchInput';
 import IconButton from '@/components/ui/IconButton';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/Table';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
-import Pagination from '@/components/ui/Pagination';
 
 interface User {
   id: number;
@@ -250,108 +249,100 @@ const UserManager: React.FC = () => {
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
-        ) : (
-          <p className="text-[11px] text-muted shrink-0">
-            Showing {users.length > 0 ? Math.min((page - 1) * 10 + 1, users.length) : 0}–{users.length} of {users.length} user{users.length !== 1 ? 's' : ''}
-          </p>
-        )}
-        <div className="w-full sm:w-auto flex justify-end">
-          <SearchInput 
-            placeholder="Search users by name or email..." 
-            value={filter} 
-            onChange={(e) => setFilter(e.target.value)} 
-          />
-        </div>
+      <div className="flex justify-end items-center">
+        <SearchInput 
+          placeholder="Search users by name or email..." 
+          value={filter} 
+          onChange={(e) => setFilter(e.target.value)} 
+        />
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role & Status</TableHead>
-            <TableHead className="w-24 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <UsersTableSkeleton rows={5} />
-          ) : users.length === 0 ? (
+      <div className="border border-border bg-surface rounded-lg overflow-hidden shadow-2xs flex flex-col">
+        <Table containerClassName="border-0 rounded-none max-h-[520px]">
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={4} className="h-32 text-center">
-                <EmptyState icon={Users} title="No users found" description="No users match your criteria." className="bg-transparent border-0" />
-              </TableCell>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role & Status</TableHead>
+              <TableHead className="w-24 text-right">Actions</TableHead>
             </TableRow>
-          ) : (
-            users.map((user) => {
-              const isSelf = user.id === currentUser.id;
-              return (
-                <TableRow key={user.id} className={`group ${user.is_disabled ? 'bg-red-50/20 opacity-75' : ''}`}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
-                        {user.name.charAt(0).toUpperCase()}
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <UsersTableSkeleton rows={5} />
+            ) : users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="h-32 text-center">
+                  <EmptyState icon={Users} title="No users found" description="No users match your criteria." className="bg-transparent border-0" />
+                </TableCell>
+              </TableRow>
+            ) : (
+              users.map((user) => {
+                const isSelf = user.id === currentUser.id;
+                return (
+                  <TableRow key={user.id} className={`group ${user.is_disabled ? 'bg-red-50/20 opacity-75' : ''}`}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] font-medium text-primary flex items-center gap-1.5">
+                            {user.name}
+                            {isSelf && (
+                              <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary px-1.5 py-0.2 rounded">You</span>
+                            )}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-[13px] font-medium text-primary flex items-center gap-1.5">
-                          {user.name}
-                          {isSelf && (
-                            <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary px-1.5 py-0.2 rounded">You</span>
-                          )}
-                        </span>
+                    </TableCell>
+                    <TableCell className="text-muted">{user.email}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')}>
+                          {user.roles?.[0]?.name || 'No Role'}
+                        </Badge>
+
+                        {user.is_disabled ? (
+                          <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+                            Disabled
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">
+                            Active
+                          </Badge>
+                        )}
+
+                        {!user.is_approved && (
+                          <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
+                            Pending Approval
+                          </Badge>
+                        )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted">{user.email}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')}>
-                        {user.roles?.[0]?.name || 'No Role'}
-                      </Badge>
-
-                      {user.is_disabled ? (
-                        <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
-                          Disabled
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">
-                          Active
-                        </Badge>
-                      )}
-
-                      {!user.is_approved && (
-                        <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
-                          Pending Approval
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      {!user.is_approved && (
-                        <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
-                      )}
-                      
-                      <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit User & Manage Status" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
-
-      {!loading && lastPage > 1 && (
-        <Pagination
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        {!user.is_approved && (
+                          <IconButton icon={CheckCircle} variant="success" onClick={() => handleApprove(user.id)} title="Approve User" />
+                        )}
+                        
+                        <IconButton icon={Edit2} onClick={() => handleOpenModal(user)} title="Edit User & Manage Status" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+        <DataTableFooter
           currentPage={page}
           lastPage={lastPage}
           onPageChange={setPage}
+          showingText={`Showing ${users.length > 0 ? Math.min((page - 1) * 10 + 1, users.length) : 0}–${users.length} of ${users.length} user${users.length !== 1 ? 's' : ''}`}
+          loading={loading}
         />
-      )}
+      </div>
 
       {/* Modal with Zod & React Hook Form */}
       <Modal isOpen={isModalOpen} onClose={() => !isSubmitting && handleCloseModal()} title={editingUser ? 'Edit User & Management' : 'New User'}>
