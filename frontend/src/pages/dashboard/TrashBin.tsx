@@ -7,9 +7,9 @@ import {
   FileText, 
   BookOpen, 
   Layers, 
-  ShieldAlert, 
   CheckCircle2, 
-  RefreshCw
+  RefreshCw,
+  CheckSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -55,9 +55,12 @@ const TrashBin: React.FC = () => {
   const [volumes, setVolumes] = useState<TrashedItem[]>([]);
   const [journals, setJournals] = useState<TrashedItem[]>([]);
 
+  // Bulk Selection State
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+
   // Action Modals State
   const [selectedItem, setSelectedItem] = useState<TrashedItem | null>(null);
-  const [actionType, setActionType] = useState<'restore' | 'forceDelete' | 'purgeAll' | null>(null);
+  const [actionType, setActionType] = useState<'restore' | 'forceDelete' | 'batchRestore' | 'batchForceDelete' | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchTrashItems = async () => {
@@ -87,6 +90,22 @@ const TrashBin: React.FC = () => {
     const matchesSearch = !searchQuery || titleText.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+
+  const toggleSelectAll = () => {
+    const allFilteredKeys = filteredItems.map(item => `${item.type}-${item.id}`);
+    const isAllSelected = allFilteredKeys.length > 0 && allFilteredKeys.every(k => selectedKeys.includes(k));
+    if (isAllSelected) {
+      setSelectedKeys([]);
+    } else {
+      setSelectedKeys(allFilteredKeys);
+    }
+  };
+
+  const toggleSelectItem = (key: string) => {
+    setSelectedKeys(prev => 
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  };
 
   const handleRestore = async () => {
     if (!selectedItem) return;
@@ -120,15 +139,45 @@ const TrashBin: React.FC = () => {
     }
   };
 
-  const handlePurgeOld = async () => {
+  const handleBatchRestore = async () => {
+    if (selectedKeys.length === 0) return;
     setActionLoading(true);
     try {
-      const res = await api.delete('/trash/purge');
-      toast.success(res.data.message || 'Expired trash items purged successfully.');
+      const items = selectedKeys.map(k => {
+        const parts = k.split('-');
+        const type = parts[0];
+        const id = parseInt(parts[1], 10);
+        return { type, id };
+      });
+      const res = await api.post('/trash/batch-restore', { items });
+      toast.success(res.data.message || `Successfully restored ${items.length} item(s).`);
+      setSelectedKeys([]);
       setActionType(null);
       fetchTrashItems();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to purge trash.');
+      toast.error(err.response?.data?.message || 'Failed to restore selected items.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleBatchForceDelete = async () => {
+    if (selectedKeys.length === 0) return;
+    setActionLoading(true);
+    try {
+      const items = selectedKeys.map(k => {
+        const parts = k.split('-');
+        const type = parts[0];
+        const id = parseInt(parts[1], 10);
+        return { type, id };
+      });
+      const res = await api.delete('/trash/batch-force', { data: { items } });
+      toast.success(res.data.message || `Permanently deleted ${items.length} item(s) and wiped storage.`);
+      setSelectedKeys([]);
+      setActionType(null);
+      fetchTrashItems();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to purge selected items.');
     } finally {
       setActionLoading(false);
     }
@@ -140,32 +189,6 @@ const TrashBin: React.FC = () => {
         title="30-Day Trash Bin & Storage Cleanup" 
         className="mb-4"
       />
-
-      {/* Overview Banner */}
-      <div className="border border-border bg-surface p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-            <Trash2 className="h-5 w-5 text-red-500" />
-          </div>
-          <div>
-            <h4 className="text-[13px] font-bold text-primary uppercase tracking-wider">Safety Cushion & Auto-Purge</h4>
-            <p className="text-[12px] text-muted mt-1 leading-relaxed">
-              Deleted items remain in the Trash Bin for <strong>30 days</strong>. Both Admins and Super Admins can restore them. Only Super Admins can permanently purge items and wipe files from Cloudflare R2 storage.
-            </p>
-          </div>
-        </div>
-
-        {isSuperAdmin && (
-          <Button
-            variant="outline"
-            onClick={() => setActionType('purgeAll')}
-            className="text-red-500 border-red-500/30 hover:bg-red-500/10 shrink-0 text-[12px]"
-          >
-            <ShieldAlert className="h-4 w-4 mr-1.5 inline" />
-            Purge Expired (&gt; 30 Days)
-          </Button>
-        )}
-      </div>
 
       {/* Filter Tabs & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-3">
@@ -216,20 +239,63 @@ const TrashBin: React.FC = () => {
           <SearchInput
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Filter trash items..."
+            placeholder="Search deleted items..."
+            className="w-full sm:w-64"
           />
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={fetchTrashItems}
+            disabled={loading}
+            className="p-2 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0"
+            title="Refresh Trash Bin"
           >
-            <RefreshCw className="h-3.5 w-3.5 mr-1 inline" />
-            Refresh
-          </Button>
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* Main Table Content */}
+      {/* Bulk Action Toolbar when items selected */}
+      {selectedKeys.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-primary/10 border border-primary/20 p-3.5 gap-4 transition-all">
+          <div className="flex items-center gap-2.5">
+            <CheckSquare className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-[13px] font-semibold text-primary">
+              {selectedKeys.length} item{selectedKeys.length > 1 ? 's' : ''} selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setActionType('batchRestore')}
+              className="bg-surface text-primary border-border hover:bg-background text-[12px]"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5 inline" />
+              Restore Selected ({selectedKeys.length})
+            </Button>
+            {isSuperAdmin && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setActionType('batchForceDelete')}
+                className="bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20 text-[12px]"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5 inline" />
+                Purge Selected ({selectedKeys.length})
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Table & Results Header */}
+      <div className="flex justify-between items-center text-[12px] font-mono text-muted px-1">
+        {loading ? (
+          <Skeleton className="h-4 w-36 rounded shrink-0 my-0.5" />
+        ) : (
+          <span>Showing {filteredItems.length} of {allItems.length} deleted items</span>
+        )}
+      </div>
+
       {loading ? (
         <div className="space-y-3">
           <Skeleton className="h-12 w-full rounded" />
@@ -240,13 +306,21 @@ const TrashBin: React.FC = () => {
         <EmptyState
           icon={Trash2}
           title="Trash Bin is Empty"
-          description={searchQuery ? `No trashed items match "${searchQuery}".` : "There are no soft-deleted articles, volumes, or journals in the trash bin."}
+          description={searchQuery ? "No deleted items match your search criteria." : "Soft-deleted articles, volumes, and journals will appear here for 30 days."}
         />
       ) : (
         <div className="border border-border bg-surface overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
-            <thead className="bg-background border-b border-border uppercase tracking-wider text-[11px] font-bold text-muted">
-              <tr>
+          <table className="w-full text-left text-[13px] border-collapse">
+            <thead>
+              <tr className="border-b border-border text-[11px] font-bold text-muted uppercase tracking-wider bg-background/50">
+                <th className="py-3 px-4 w-10 text-center">
+                  <input 
+                    type="checkbox"
+                    checked={filteredItems.length > 0 && filteredItems.every(i => selectedKeys.includes(`${i.type}-${i.id}`))}
+                    onChange={toggleSelectAll}
+                    className="rounded border-border accent-primary cursor-pointer h-4 w-4"
+                  />
+                </th>
                 <th className="py-3 px-4">Item Name / Title</th>
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Original Context</th>
@@ -257,6 +331,8 @@ const TrashBin: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-border">
               {filteredItems.map((item) => {
+                const itemKey = `${item.type}-${item.id}`;
+                const isSelected = selectedKeys.includes(itemKey);
                 const title = item.title || `Volume ${item.volume_number} (${item.year})`;
                 const context = item.type === 'article'
                   ? `${item.volume?.journal?.title || 'Journal'} → Vol. ${item.volume?.volume_number || ''}`
@@ -265,7 +341,16 @@ const TrashBin: React.FC = () => {
                   : item.category?.name || 'Journal Collection';
 
                 return (
-                  <tr key={`${item.type}-${item.id}`} className="hover:bg-surface/50 transition-colors">
+                  <tr key={itemKey} className={`transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-surface/50'}`}>
+                    <td className="py-3.5 px-4 text-center">
+                      <input 
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectItem(itemKey)}
+                        className="rounded border-border accent-primary cursor-pointer h-4 w-4"
+                      />
+                    </td>
+
                     <td className="py-3.5 px-4 font-semibold text-primary">
                       <div className="flex items-center gap-2.5">
                         {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0" />}
@@ -342,7 +427,7 @@ const TrashBin: React.FC = () => {
         </div>
       )}
 
-      {/* Restore Confirmation Modal */}
+      {/* Individual Restore Confirmation Modal */}
       <Modal
         isOpen={actionType === 'restore'}
         onClose={() => setActionType(null)}
@@ -364,7 +449,7 @@ const TrashBin: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Super Admin Force Purge Modal */}
+      {/* Individual Force Delete Modal */}
       <Modal
         isOpen={actionType === 'forceDelete'}
         onClose={() => setActionType(null)}
@@ -397,22 +482,53 @@ const TrashBin: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Purge Expired Modal */}
+      {/* Batch Restore Confirmation Modal */}
       <Modal
-        isOpen={actionType === 'purgeAll'}
+        isOpen={actionType === 'batchRestore'}
         onClose={() => setActionType(null)}
-        title="Purge Expired Trash Items (> 30 Days)"
+        title="Confirm Batch Item Restoration"
       >
         <div className="space-y-4">
           <p className="text-[13px] text-muted leading-relaxed">
-            This will permanently delete all soft-deleted items that have exceeded the 30-day retention window and clean up their associated files on Cloudflare R2 storage.
+            Are you sure you want to restore the <strong>{selectedKeys.length} selected item(s)</strong> back to active publishing status?
           </p>
           <div className="flex justify-end gap-3 pt-3 border-t border-border">
             <Button variant="outline" onClick={() => setActionType(null)} disabled={actionLoading}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handlePurgeOld} isLoading={actionLoading} className="bg-red-600 hover:bg-red-700 text-white">
-              Execute Purge
+            <Button variant="primary" onClick={handleBatchRestore} isLoading={actionLoading}>
+              <CheckCircle2 className="h-4 w-4 mr-1.5 inline" />
+              Restore {selectedKeys.length} Items
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Batch Force Delete Modal */}
+      <Modal
+        isOpen={actionType === 'batchForceDelete'}
+        onClose={() => setActionType(null)}
+        title="Permanent Batch Purge & Storage Wipe"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-3 rounded text-[12px] text-red-600 dark:text-red-300">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <p>
+              <strong>WARNING:</strong> This action cannot be undone! All <strong>{selectedKeys.length} selected items</strong> and their attached PDF/image files will be permanently wiped from database and Cloudflare R2 storage.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3 pt-3 border-t border-border">
+            <Button variant="outline" onClick={() => setActionType(null)} disabled={actionLoading}>
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={handleBatchForceDelete} 
+              isLoading={actionLoading} 
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5 inline" />
+              Permanently Purge {selectedKeys.length} Items
             </Button>
           </div>
         </div>

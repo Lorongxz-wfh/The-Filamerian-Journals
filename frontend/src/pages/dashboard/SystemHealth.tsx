@@ -118,96 +118,139 @@ const SystemHealth: React.FC = () => {
 
   return (
     <div className="space-y-8 font-sans w-full">
-      <DashboardHeader title="System Status" />
+      <DashboardHeader title="System Health" />
 
-      {loading && !health ? (
-        <div className="space-y-8 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-[150px] w-full" />
-            <Skeleton className="h-[150px] w-full" />
-            <Skeleton className="h-[150px] w-full" />
-          </div>
-          <Skeleton className="h-[220px] w-full" />
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {/* Health Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border border-border bg-surface p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Application</span>
+      <div className="space-y-8">
+        {/* Health Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="border border-border bg-surface p-6 space-y-4">
+            <div className="flex justify-between items-start">
+              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Application</span>
+              {loading && !health ? (
+                <Skeleton className="h-5 w-20 rounded" />
+              ) : (
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {health?.status || 'Operational'}
                 </span>
-              </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-primary font-mono">{health?.laravel_version ? `Laravel ${health.laravel_version}` : 'Laravel 11'}</p>
-                <p className="text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
-              </div>
+              )}
             </div>
+            <div className="space-y-1">
+              {loading && !health ? (
+                <>
+                  <Skeleton className="h-7 w-36 rounded my-1" />
+                  <Skeleton className="h-4 w-20 rounded" />
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-primary font-mono">{health?.laravel_version ? `Laravel ${health.laravel_version}` : 'Laravel 12'}</p>
+                  <p className="text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
+                </>
+              )}
+            </div>
+          </div>
 
-            <div className="border border-border bg-surface p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Database ({dbDriverText.toUpperCase()})</span>
+          <div className="border border-border bg-surface p-6 space-y-4">
+            <div className="flex justify-between items-start">
+              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
+                Database ({loading && !health ? '...' : dbDriverText.toUpperCase()})
+              </span>
+              {loading && !health ? (
+                <Skeleton className="h-5 w-20 rounded" />
+              ) : (
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {dbStatusText}
                 </span>
-              </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-primary font-mono">{formatBytes(dbSizeBytes)}</p>
-                <p className="text-xs text-muted font-mono">Active Connection</p>
-              </div>
+              )}
             </div>
+            <div className="space-y-1">
+              {loading && !health ? (
+                <>
+                  <Skeleton className="h-7 w-28 rounded my-1" />
+                  <Skeleton className="h-4 w-28 rounded" />
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-primary font-mono">{formatBytes(dbSizeBytes)}</p>
+                  <p className="text-xs text-muted font-mono">Active Connection</p>
+                </>
+              )}
+            </div>
+          </div>
 
-            <div className="border border-border bg-surface p-6 space-y-4">
-              <div className="flex justify-between items-start">
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Storage Provider</span>
+          <div className="border border-border bg-surface p-6 space-y-4">
+            <div className="flex justify-between items-start">
+              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Storage Provider</span>
+              {loading && !health ? (
+                <Skeleton className="h-5 w-16 rounded" />
+              ) : (
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {storageDiskText.toUpperCase()}
                 </span>
+              )}
+            </div>
+            <div className="space-y-1">
+              {loading && !health ? (
+                <>
+                  <Skeleton className="h-7 w-28 rounded my-1" />
+                  <Skeleton className="h-4 w-28 rounded" />
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-primary font-mono">{formatBytes(storageSizeBytes)}</p>
+                  <p className="text-xs text-muted font-mono">{storageTypeText}</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Database Entity Metrics */}
+        <div className="bg-surface border border-border p-6 space-y-6">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Database Entity Metrics</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
+              <div className="p-3 bg-emerald-500/10 text-emerald-500">
+                <FileText className="h-5 w-5" />
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-primary font-mono">{formatBytes(storageSizeBytes)}</p>
-                <p className="text-xs text-muted font-mono">{storageTypeText}</p>
+              <div>
+                <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
+                {loading && !health ? (
+                  <Skeleton className="h-6 w-12 rounded mt-1" />
+                ) : (
+                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.articles ?? 0}</div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
+              <div className="p-3 bg-blue-500/10 text-blue-500">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
+                {loading && !health ? (
+                  <Skeleton className="h-6 w-12 rounded mt-1" />
+                ) : (
+                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.journals ?? 0}</div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
+              <div className="p-3 bg-purple-500/10 text-purple-500">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
+                {loading && !health ? (
+                  <Skeleton className="h-6 w-12 rounded mt-1" />
+                ) : (
+                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.users ?? 0}</div>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Database Entity Metrics */}
-          <div className="bg-surface border border-border p-6 space-y-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Database Entity Metrics</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
-                <div className="p-3 bg-emerald-500/10 text-emerald-500">
-                  <FileText className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
-                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.articles}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
-                <div className="p-3 bg-blue-500/10 text-blue-500">
-                  <BookOpen className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
-                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.journals}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
-                <div className="p-3 bg-purple-500/10 text-purple-500">
-                  <Users className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
-                  <div className="text-xl font-extrabold text-primary font-mono">{health?.counts.users}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        </div>
 
           {/* System Error Tracker & QA Logs */}
           <div className="border border-border bg-surface p-6 space-y-5">
@@ -297,7 +340,6 @@ const SystemHealth: React.FC = () => {
             )}
           </div>
         </div>
-      )}
     </div>
   );
 };

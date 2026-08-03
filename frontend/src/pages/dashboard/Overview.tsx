@@ -287,7 +287,7 @@ const Overview: React.FC = () => {
             return (
               <div className="border border-border bg-surface p-5 shadow-sm">
                 <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider mb-5">
-                  System Status
+                  System Health
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">

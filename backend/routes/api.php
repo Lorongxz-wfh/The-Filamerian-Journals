@@ -68,16 +68,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Trash Bin (Read & Restore for Admin & Super Admin)
         Route::get('trash', [\App\Http\Controllers\Api\TrashController::class, 'index']);
+        Route::post('trash/batch-restore', [\App\Http\Controllers\Api\TrashController::class, 'batchRestore']);
         Route::post('trash/{type}/{id}/restore', [\App\Http\Controllers\Api\TrashController::class, 'restore']);
-    });
-
-    // Super Admin Only
-    Route::middleware('role:Super Admin')->group(function () {
-        // Trash Bin Purge (Super Admin Only)
-        Route::delete('trash/{type}/{id}/force', [\App\Http\Controllers\Api\TrashController::class, 'forceDelete']);
-        Route::delete('trash/purge', [\App\Http\Controllers\Api\TrashController::class, 'purgeOld']);
-
-        // User management
+        
+        // Super Admin trash routes
+        Route::middleware(['role:Super Admin'])->group(function () {
+            Route::delete('trash/batch-force', [\App\Http\Controllers\Api\TrashController::class, 'batchForceDelete']);
+            Route::delete('trash/{type}/{id}/force', [\App\Http\Controllers\Api\TrashController::class, 'forceDelete']);
+            Route::delete('trash/purge', [\App\Http\Controllers\Api\TrashController::class, 'purgeOld']);
+        }); // User management
         Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
         Route::post('/users/{user}/approve', [\App\Http\Controllers\Api\UserController::class, 'approve']);
         Route::post('/users/{user}/toggle-status', [\App\Http\Controllers\Api\UserController::class, 'toggleStatus']);

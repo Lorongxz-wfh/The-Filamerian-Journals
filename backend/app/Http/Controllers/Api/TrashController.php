@@ -117,6 +117,68 @@ class TrashController extends Controller
     }
 
     /**
+     * Batch restore multiple soft-deleted items.
+     */
+    public function batchRestore(Request $request)
+    {
+        $items = $request->input('items', []);
+        $restoredCount = 0;
+
+        foreach ($items as $target) {
+            $type = $target['type'] ?? '';
+            $id = (int) ($target['id'] ?? 0);
+            $item = $this->findTrashedItem($type, $id);
+            if ($item) {
+                $item->restore();
+                $title = $item->title ?? ($item->volume_number ? "Volume {$item->volume_number}" : "Item #{$id}");
+                \App\Services\ActivityLogger::log('Restored Item', "Batch restored {$type}: {$title}", get_class($item), $item->id);
+                $restoredCount++;
+            }
+        }
+
+        return response()->json(['message' => "Successfully restored {$restoredCount} item(s).", 'count' => $restoredCount]);
+    }
+
+    /**
+     * Batch force delete multiple soft-deleted items. Restricted to Super Admin.
+     */
+    public function batchForceDelete(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !$user->hasRole('Super Admin')) {
+            return response()->json(['message' => 'Unauthorized. Only Super Admins can permanently delete items.'], 403);
+        }
+
+        $items = $request->input('items', []);
+        $disk = Storage::disk(config('filesystems.default'));
+        $purgedCount = 0;
+
+        foreach ($items as $target) {
+            $type = $target['type'] ?? '';
+            $id = (int) ($target['id'] ?? 0);
+            $item = $this->findTrashedItem($type, $id);
+            if ($item) {
+                if ($type === 'article' && !empty($item->pdf_path)) {
+                    try { $disk->delete($item->pdf_path); } catch (\Throwable $t) {}
+                } elseif ($type === 'journal') {
+                    if (!empty($item->cover_image)) {
+                        try { $disk->delete($item->cover_image); } catch (\Throwable $t) {}
+                    }
+                    if (!empty($item->pdf_path)) {
+                        try { $disk->delete($item->pdf_path); } catch (\Throwable $t) {}
+                    }
+                }
+                $item->forceDelete();
+                $purgedCount++;
+            }
+        }
+
+        \App\Services\ActivityLogger::log('Permanently Purged Items', "Batch purged {$purgedCount} item(s) from storage", 'Batch', null);
+
+        return response()->json(['message' => "Successfully permanently deleted {$purgedCount} item(s).", 'count' => $purgedCount]);
+    }
+
+    /**
      * Purge all items in trash that have passed the 30-day limit.
      * Restricted to Super Admin.
      */
