@@ -35,15 +35,7 @@ interface Article {
   updated_at?: string;
 }
 
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'Published': return 'success';
-    case 'Pending': return 'secondary';
-    case 'Revision': return 'destructive';
-    case 'Draft': return 'default';
-    default: return 'outline';
-  }
-};
+
 
 const articleHasPdf = (article: Article) => !!article.pdf_url;
 
@@ -256,12 +248,12 @@ const Articles: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {/* Status tabs */}
-            <div className="flex gap-1 border border-border bg-surface">
+            <div className="flex gap-1 border border-border bg-surface h-9 items-center shrink-0">
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className={`px-4 py-2 text-[12px] font-medium transition-colors ${
+                  className={`px-4 h-full text-[12px] font-medium transition-colors flex items-center justify-center ${
                     tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
                   }`}
                 >
@@ -271,9 +263,10 @@ const Articles: React.FC = () => {
             </div>
             {/* Category filter */}
             <div className="flex items-center gap-2">
-              <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Category:</label>
+              <label className="text-[12px] font-medium text-muted uppercase tracking-wider shrink-0">Category:</label>
               <div className="w-[200px]">
                 <Select
+                  className="py-1.5 h-9 text-[12px]"
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val as string)}
                   options={[
@@ -336,8 +329,11 @@ const Articles: React.FC = () => {
                           </span>
                         </div>
                         <div className="mt-1 pl-6">
-                          <Badge variant={getStatusVariant(article.status)}>
-                            {article.status}
+                          <Badge 
+                            variant={article.status === 'Draft' ? 'outline' : 'secondary'}
+                            className={article.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0 font-semibold' : 'text-[9px] px-1.5 py-0 font-semibold'}
+                          >
+                            {article.status || 'Published'}
                           </Badge>
                         </div>
                       </div>

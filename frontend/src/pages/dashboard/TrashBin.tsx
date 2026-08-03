@@ -11,7 +11,8 @@ import {
   RefreshCw,
   CheckSquare,
   X,
-  MoreVertical
+  MoreVertical,
+  HelpCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -194,12 +195,53 @@ const TrashBin: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <DashboardHeader 
-        title="30-Day Trash Bin & Storage Cleanup" 
-        className="mb-4"
-      />
+        title={
+          <span className="inline-flex items-center gap-2">
+            Trash Bin
+            <span className="group relative inline-flex items-center">
+              <HelpCircle className="h-4 w-4 text-muted/60 hover:text-primary cursor-pointer transition-colors" />
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 p-2.5 bg-primary text-white text-[11px] font-normal normal-case tracking-normal rounded shadow-md z-50 pointer-events-none leading-relaxed">
+                Soft-deleted articles, volumes, and journals are retained for 30 days before permanent deletion from storage.
+              </span>
+            </span>
+          </span>
+        }
+      >
+        <div className="flex items-center gap-2">
+          <SearchInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search deleted items..."
+            containerClassName="w-full sm:w-72"
+            className="h-9"
+          />
+          <Button
+            type="button"
+            variant={isSelectMode ? "primary" : "outline"}
+            onClick={() => {
+              if (isSelectMode) {
+                setSelectedKeys([]);
+              }
+              setIsSelectMode(!isSelectMode);
+            }}
+            className="h-9 text-[12px] flex items-center gap-1.5 px-3 shrink-0 font-medium"
+          >
+            {isSelectMode ? <X className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}
+            {isSelectMode ? 'Cancel Selection' : 'Select'}
+          </Button>
+          <button
+            onClick={fetchTrashItems}
+            disabled={loading}
+            className="h-9 w-9 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0 rounded flex items-center justify-center"
+            title="Refresh Trash Bin"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </DashboardHeader>
 
-      {/* Filter Tabs & Search / Select Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-3">
+      {/* Filter Tabs */}
+      <div className="flex items-center justify-between border-b border-border pb-3">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
             onClick={() => setActiveTab('all')}
@@ -240,37 +282,6 @@ const TrashBin: React.FC = () => {
             }`}
           >
             Journals ({journals.length})
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <SearchInput
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search deleted items..."
-            className="w-full sm:w-60"
-          />
-          <Button
-            type="button"
-            variant={isSelectMode ? "primary" : "outline"}
-            onClick={() => {
-              if (isSelectMode) {
-                setSelectedKeys([]);
-              }
-              setIsSelectMode(!isSelectMode);
-            }}
-            className="h-9 text-[12px] flex items-center gap-1.5 px-3 shrink-0 font-medium"
-          >
-            {isSelectMode ? <X className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}
-            {isSelectMode ? 'Cancel Selection' : 'Select'}
-          </Button>
-          <button
-            onClick={fetchTrashItems}
-            disabled={loading}
-            className="p-2 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0 rounded"
-            title="Refresh Trash Bin"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>

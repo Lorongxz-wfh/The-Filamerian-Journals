@@ -369,12 +369,12 @@ const MyJournals: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {/* Status tabs */}
-            <div className="flex gap-1 border border-border bg-surface">
+            <div className="flex gap-1 border border-border bg-surface h-9 items-center shrink-0">
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setStatusTab(t.key)}
-                  className={`px-4 py-2 text-[12px] font-medium transition-colors ${
+                  className={`px-4 h-full text-[12px] font-medium transition-colors flex items-center justify-center ${
                     statusTab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
                   }`}
                 >
@@ -385,9 +385,10 @@ const MyJournals: React.FC = () => {
 
             {/* Category filter */}
             <div className="flex items-center gap-2">
-              <label className="text-[12px] font-medium text-muted uppercase tracking-wider">Category:</label>
+              <label className="text-[12px] font-medium text-muted uppercase tracking-wider shrink-0">Category:</label>
               <div className="w-[200px]">
                 <Select
+                  className="py-1.5 h-9 text-[12px]"
                   value={categoryFilter}
                   onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
                   options={[

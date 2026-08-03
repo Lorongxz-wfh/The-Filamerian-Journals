@@ -11,6 +11,7 @@ interface DropdownMenuProps {
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({ trigger, children, align = 'right', className }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,21 +24,31 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ trigger, children, align = 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const toggleDropdown = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpenUpward(spaceBelow < 220);
+    }
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
+      <div onClick={toggleDropdown} className="cursor-pointer">
         {trigger}
       </div>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -5 }}
+            initial={{ opacity: 0, scale: 0.95, y: openUpward ? 5 : -5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -5 }}
+            exit={{ opacity: 0, scale: 0.95, y: openUpward ? 5 : -5 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className={cn(
-              'absolute z-50 mt-2 w-56 rounded-md border border-border bg-surface shadow-lg focus:outline-none overflow-hidden origin-top',
+              'absolute z-50 w-56 rounded-md border border-border bg-surface shadow-lg focus:outline-none overflow-hidden',
+              openUpward ? 'bottom-full mb-2 origin-bottom' : 'top-full mt-2 origin-top',
               align === 'right' ? 'right-0' : 'left-0',
               className
             )}
