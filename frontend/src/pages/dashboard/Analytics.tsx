@@ -110,7 +110,7 @@ const Analytics: React.FC = () => {
     window.print();
   };
 
-  const totalViews = data?.websiteChartData?.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0) || 3840;
+  const totalViews = data?.websiteChartData?.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0) || 0;
 
   return (
     <div className="space-y-8 font-sans w-full print:p-0">
@@ -145,7 +145,7 @@ const Analytics: React.FC = () => {
             </div>
             <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
               <TrendingUp className="h-3 w-3" />
-              <span>{data?.trends?.articles?.trend || '+12%'} vs previous month</span>
+              <span>{data?.trends?.articles?.trend || 'Stable'} vs previous month</span>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ const Analytics: React.FC = () => {
             </div>
             <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
               <TrendingUp className="h-3 w-3" />
-              <span>{data?.trends?.authors?.trend || '+8%'} active contributors</span>
+              <span>{data?.trends?.authors?.trend || 'Stable'} active contributors</span>
             </div>
           </div>
         </div>
@@ -241,8 +241,8 @@ const Analytics: React.FC = () => {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data?.websiteChartData && data.websiteChartData.length > 0 ? data.websiteChartData : [
-                  { date: 'Jul 05', views: 45, downloads: 0 }, { date: 'Jul 10', views: 82, downloads: 0 }, { date: 'Jul 15', views: 120, downloads: 0 },
-                  { date: 'Jul 20', views: 195, downloads: 0 }, { date: 'Jul 25', views: 310, downloads: 0 }, { date: 'Aug 01', views: 450, downloads: 0 }
+                  { date: 'Jul 05', views: 0, downloads: 0 }, { date: 'Jul 10', views: 0, downloads: 0 }, { date: 'Jul 15', views: 0, downloads: 0 },
+                  { date: 'Jul 20', views: 0, downloads: 0 }, { date: 'Jul 25', views: 0, downloads: 0 }, { date: 'Aug 01', views: 0, downloads: 0 }
                 ]}>
                   <defs>
                     <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
@@ -262,29 +262,33 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Content Category Distribution (1 col) */}
-        <div className="border border-border bg-surface p-6 space-y-5">
+        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary/50" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Discipline Distribution</h2>
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Category Distribution</h2>
             </div>
           </div>
 
-          <div className="space-y-4 pt-1">
-            {categoryBreakdown.map((cat: any) => (
-              <div key={cat.name} className="space-y-1.5">
-                <div className="flex justify-between items-center text-[12px]">
-                  <span className="font-medium text-primary truncate max-w-[190px]">{cat.name}</span>
-                  <span className="font-mono text-muted text-[11px]">{cat.count} papers ({cat.percentage}%)</span>
+          <div className="space-y-4 pt-1 max-h-64 overflow-y-auto pr-1">
+            {categoryBreakdown.length === 0 ? (
+              <p className="text-xs text-muted py-8 text-center">No categories recorded yet.</p>
+            ) : (
+              categoryBreakdown.map((cat: any) => (
+                <div key={cat.name} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-[12px]">
+                    <span className="font-medium text-primary truncate max-w-[190px]">{cat.name}</span>
+                    <span className="font-mono text-muted text-[11px]">{cat.count} journal{cat.count !== 1 ? 's' : ''} ({cat.percentage}%)</span>
+                  </div>
+                  <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
+                    <div 
+                      className="bg-primary h-full transition-all duration-500 ease-out" 
+                      style={{ width: `${cat.percentage}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
-                  <div 
-                    className="bg-primary h-full transition-all duration-500 ease-out" 
-                    style={{ width: `${cat.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -301,26 +305,30 @@ const Analytics: React.FC = () => {
             <span className="text-[10px] font-mono text-muted uppercase">By Views</span>
           </div>
 
-          <div className="divide-y divide-border overflow-hidden border border-border">
-            {topArticles.map((art: TopArticle, index: number) => (
-              <div key={art.id} className="p-3 text-[12px] flex items-center justify-between gap-4 hover:bg-background/50 transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold font-mono ${
-                    index === 0 ? 'bg-amber-500 text-white' : index === 1 ? 'bg-slate-400 text-white' : index === 2 ? 'bg-amber-700 text-white' : 'bg-muted/20 text-muted'
-                  }`}>
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-medium text-primary truncate" title={art.title}>{art.title}</p>
-                    <p className="text-[10px] text-muted truncate">{art.journal} • {art.published_date}</p>
+          <div className="divide-y divide-border overflow-hidden border border-border max-h-64 overflow-y-auto">
+            {topArticles.length === 0 ? (
+              <p className="text-xs text-muted py-8 text-center">No articles available.</p>
+            ) : (
+              topArticles.map((art: TopArticle, index: number) => (
+                <div key={art.id} className="p-3 text-[12px] flex items-center justify-between gap-4 hover:bg-background/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold font-mono ${
+                      index === 0 ? 'bg-amber-500 text-white' : index === 1 ? 'bg-slate-400 text-white' : index === 2 ? 'bg-amber-700 text-white' : 'bg-muted/20 text-muted'
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-medium text-primary truncate" title={art.title}>{art.title}</p>
+                      <p className="text-[10px] text-muted truncate">{art.journal} • {art.published_date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 text-xs font-mono font-bold text-primary bg-background border border-border px-2 py-0.5">
+                    <Eye className="h-3 w-3 text-muted" />
+                    <span>{art.views.toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 text-xs font-mono font-bold text-primary bg-background border border-border px-2 py-0.5">
-                  <Eye className="h-3 w-3 text-muted" />
-                  <span>{art.views.toLocaleString()}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -334,23 +342,27 @@ const Analytics: React.FC = () => {
             <span className="text-[10px] font-mono text-muted uppercase">By Papers</span>
           </div>
 
-          <div className="divide-y divide-border overflow-hidden border border-border">
-            {topAuthors.map((author: TopAuthor, index: number) => (
-              <div key={author.name} className="p-3 text-[12px] flex items-center justify-between gap-4 hover:bg-background/50 transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-5 h-5 shrink-0 bg-primary/10 text-primary rounded-full flex items-center justify-center text-[10px] font-bold font-mono">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-medium text-primary truncate">{author.name}</p>
-                    <p className="text-[10px] text-muted truncate">{author.department}</p>
+          <div className="divide-y divide-border overflow-hidden border border-border max-h-64 overflow-y-auto">
+            {topAuthors.length === 0 ? (
+              <p className="text-xs text-muted py-8 text-center">No author contributions recorded.</p>
+            ) : (
+              topAuthors.map((author: TopAuthor, index: number) => (
+                <div key={author.name} className="p-3 text-[12px] flex items-center justify-between gap-4 hover:bg-background/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-5 h-5 shrink-0 bg-primary/10 text-primary rounded-full flex items-center justify-center text-[10px] font-bold font-mono">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-medium text-primary truncate">{author.name}</p>
+                      <p className="text-[10px] text-muted truncate">{author.department}</p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-xs font-mono font-bold text-primary bg-background border border-border px-2 py-0.5">
+                    {author.papers} publication{author.papers !== 1 ? 's' : ''}
                   </div>
                 </div>
-                <div className="shrink-0 text-xs font-mono font-bold text-primary bg-background border border-border px-2 py-0.5">
-                  {author.papers} publication{author.papers !== 1 ? 's' : ''}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
