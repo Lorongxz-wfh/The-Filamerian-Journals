@@ -15,6 +15,7 @@ import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
+import { useSmartPolling } from '@/hooks/useSmartPolling';
 
 interface AnalyticsData {
   journals: number;
@@ -55,13 +56,9 @@ const Analytics: React.FC = () => {
   const [topAuthors, setTopAuthors] = useState<TopAuthor[]>([]);
   const [categoryBreakdown, setCategoryBreakdown] = useState<{ name: string; count: number; percentage: number }[]>([]);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await api.get('/dashboard/stats');
       const stats = res.data;
       setData(stats);
@@ -80,9 +77,16 @@ const Analytics: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch analytics', err);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
+
+  // 120-Second (2 Minute) Smart Background Polling for Analytics
+  useSmartPolling(() => fetchAnalytics(true), 120000);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
   const userObj = JSON.parse(localStorage.getItem('user') || '{}');
   const userName = userObj.name ? `${userObj.name} (${userObj.role || 'Super Admin'})` : 'IT Super Admin';

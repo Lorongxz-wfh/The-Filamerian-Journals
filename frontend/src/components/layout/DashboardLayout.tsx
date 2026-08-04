@@ -23,6 +23,7 @@ import {
 import { cn } from '@/lib/utils';
 import api from '@/services/api';
 import { Outlet } from 'react-router';
+import { useSmartPolling } from '@/hooks/useSmartPolling';
 import SplashLoader from '@/components/ui/SplashLoader';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -174,6 +175,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       console.error(err);
     }
   };
+
+  // 60-Second Smart Background Polling for Notifications & Feedback Badge
+  useSmartPolling(fetchNotifications, 60000);
 
   useEffect(() => {
     fetchNotifications();

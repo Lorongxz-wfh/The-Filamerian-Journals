@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import { ChartSkeleton } from '@/components/ui/Skeleton';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useSmartPolling } from '@/hooks/useSmartPolling';
 
 const Overview: React.FC = () => {
   const [data, setData] = useState<{
@@ -38,25 +39,30 @@ const Overview: React.FC = () => {
 
   const [systemHealth, setSystemHealth] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const statsRes = await api.get('/dashboard/stats');
-        setData(statsRes.data);
-        
-        if (user.role === 'Super Admin') {
-          const healthRes = await api.get('/system/health');
-          setSystemHealth(healthRes.data);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchData = async (isBackground = false) => {
+    try {
+      if (!isBackground) setLoading(true);
+      const statsRes = await api.get('/dashboard/stats');
+      setData(statsRes.data);
+      
+      if (user.role === 'Super Admin') {
+        const healthRes = await api.get('/system/health');
+        setSystemHealth(healthRes.data);
       }
-    };
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (!isBackground) setLoading(false);
+    }
+  };
+
+  // 120-Second (2 Minute) Smart Background Polling for Overview stats
+  useSmartPolling(() => fetchData(true), 120000);
+
+  useEffect(() => {
     fetchData();
   }, []);
 

@@ -17,6 +17,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 import Badge from '@/components/ui/Badge';
+import { useSmartPolling } from '@/hooks/useSmartPolling';
 
 const PER_PAGE = 10;
 
@@ -114,9 +115,9 @@ const Articles: React.FC = () => {
   // Reset page when filters/sort change
   useEffect(() => { setPage(1); }, [tab, categoryFilter, debouncedFilter, sortConfig]);
 
-  const fetchData = async () => {
+  const fetchData = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const params = new URLSearchParams();
       if (debouncedFilter) params.append('search', debouncedFilter);
       if (tab !== 'all') params.append('status', tab);
@@ -133,11 +134,14 @@ const Articles: React.FC = () => {
       setCategoriesData(catRes.data.data || []);
     } catch (err) {
       console.error('Failed to fetch data:', err);
-      toast.error('Failed to load articles');
+      if (!isBackground) toast.error('Failed to load articles');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
+
+  // 180-Second (3 Minute) Smart Background Polling for Articles (paused when modal open)
+  useSmartPolling(() => fetchData(true), 180000, isModalOpen);
 
   useEffect(() => {
     fetchData();
