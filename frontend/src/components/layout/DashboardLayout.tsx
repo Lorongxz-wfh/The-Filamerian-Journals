@@ -126,25 +126,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     }
   };
 
-  const menuItems = [
+  const overviewItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Admin'] },
     { label: 'Reports & Analytics', icon: BarChart3, path: '/dashboard/analytics', roles: ['Super Admin', 'Admin'] },
+    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
+  ];
+
+  const repositoryItems = [
     { label: 'Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Admin', 'Super Admin'] },
     { label: 'Articles', icon: FileText, path: '/dashboard/articles', roles: ['Admin', 'Super Admin'] },
+    { path: '/dashboard/categories', label: 'Categories', icon: BookOpen, roles: ['Super Admin', 'Admin'] },
     { label: 'Authors', icon: UserCheck, path: '/dashboard/authors', roles: ['Admin', 'Super Admin'] },
     { label: 'Bulk Import', icon: Upload, path: '/dashboard/import', roles: ['Admin', 'Super Admin'] },
-    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Admin'] },
-    { label: 'User Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
-    { label: 'Help & Manual', icon: HelpCircle, path: '/dashboard/help', roles: ['Super Admin', 'Admin'] },
   ];
 
   const adminItems = [
-    { path: '/dashboard/categories', label: 'Categories', icon: BookOpen, roles: ['Super Admin', 'Admin'] },
+    { label: 'Announcements', icon: Bell, path: '/dashboard/announcements', roles: ['Super Admin', 'Admin'] },
+    { label: 'User Feedback', icon: MessageSquare, path: '/dashboard/feedback', roles: ['Super Admin', 'Admin'] },
     { path: '/dashboard/trash', label: 'Trash Bin', icon: Trash2, roles: ['Super Admin', 'Admin'] },
     { path: '/dashboard/users', label: 'User Accounts', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
     { label: 'Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin', 'Admin'] },
-    { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
+    { label: 'Help & Manual', icon: HelpCircle, path: '/dashboard/help', roles: ['Super Admin', 'Admin'] },
   ];
 
   const handleLogout = async () => {
@@ -243,10 +246,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     return allowedRoles.some(role => userRoles.includes(role) || userRoles.includes('Super Admin')); // Super admin sees all their allowed stuff anyway
   };
 
-  const visibleMenuItems = menuItems.filter(item => hasAccess(item.roles));
+  const visibleOverviewItems = overviewItems.filter(item => hasAccess(item.roles));
+  const visibleRepositoryItems = repositoryItems.filter(item => hasAccess(item.roles));
   const visibleAdminItems = adminItems.filter(item => hasAccess(item.roles));
 
-  const allPortalItems = [...menuItems, ...adminItems].filter(item => 
+  const allPortalItems = [...overviewItems, ...repositoryItems, ...adminItems].filter(item => 
     item.roles.includes(user.role || 'Member')
   );
 
@@ -271,62 +275,78 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-6 dark-scrollbar">
+        {/* Section 1: Overview & Analytics */}
         <div className="space-y-1">
-          <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
-            Navigation
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider px-3 mb-2 block">
+            Overview & Analytics
           </span>
-          {visibleMenuItems.map((item) => {
-            const isCurrentPage = location.pathname === item.path;
-            const hasUnread = item.path === '/dashboard/feedback' && unreadFeedbackCount > 0 && !isCurrentPage;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
-                  location.pathname === item.path
-                    ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
-                    : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
-                {hasUnread && (
-                  <span className="ml-auto w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/50" title="Active Updates" />
-                )}
-              </Link>
-            );
-          })}
+          {visibleOverviewItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
+                location.pathname === item.path
+                  ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
+                  : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.label}</span>
+            </Link>
+          ))}
         </div>
 
+        {/* Section 2: Repository Management */}
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider px-3 mb-2 block">
+            Repository Management
+          </span>
+          {visibleRepositoryItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
+                location.pathname === item.path
+                  ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
+                  : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Section 3: Portal Admin & System */}
         {visibleAdminItems.length > 0 && (
           <div className="space-y-1">
-            <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider px-3 mb-2 block">
-              Administration
+            <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider px-3 mb-2 block">
+              Portal Admin & System
             </span>
-            {visibleAdminItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                // onClick removed to keep sidebar open after navigation
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
-                  location.pathname === item.path
-                    ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
-                    : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
-                )}
-              >
-                <div className="flex items-center gap-3 flex-grow">
+            {visibleAdminItems.map((item) => {
+              const isCurrentPage = location.pathname === item.path;
+              const hasUnread = item.path === '/dashboard/feedback' && unreadFeedbackCount > 0 && !isCurrentPage;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 transition-colors duration-200 text-[13px]',
+                    location.pathname === item.path
+                      ? 'bg-secondary/10 text-secondary font-semibold border-l-2 border-secondary'
+                      : 'text-white/50 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+                  )}
+                >
                   <item.icon className="h-4 w-4" />
                   <span>{item.label}</span>
-                </div>
-                {(item as any).inDev && (
-                  <span className="text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 uppercase tracking-widest shrink-0">
-                    Dev
-                  </span>
-                )}
-              </Link>
-            ))}
+                  {hasUnread && (
+                    <span className="ml-auto w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/50" title="Active Updates" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
         )}
       </nav>

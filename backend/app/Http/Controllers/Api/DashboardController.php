@@ -121,6 +121,54 @@ class DashboardController extends Controller
             }
         }
 
+        // Category breakdown calculation
+        $categories = \App\Models\Category::withCount(['articles' => function($q) {
+            $q->where('status', 'Published');
+        }])->get();
+        
+        $totalCatArticles = Article::where('status', 'Published')->count();
+        $categoryBreakdown = $categories->map(function($cat) use ($totalCatArticles) {
+            $count = $cat->articles_count;
+            $percentage = $totalCatArticles > 0 ? round(($count / $totalCatArticles) * 100) : 0;
+            return [
+                'name' => $cat->name,
+                'count' => $count,
+                'percentage' => $percentage,
+            ];
+        })->sortByDesc('count')->values();
+
+        // Top Read Articles
+        $topArticlesData = Article::where('status', 'Published')
+            ->with(['volume.journal'])
+            ->leftJoin('article_metrics', 'articles.id', '=', 'article_metrics.article_id')
+            ->select('articles.*', \Illuminate\Support\Facades\DB::raw('COALESCE(SUM(article_metrics.count), 0) as total_views'))
+            ->groupBy('articles.id')
+            ->orderBy('total_views', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function($art) {
+                return [
+                    'id' => $art->id,
+                    'title' => $art->title,
+                    'journal' => $art->volume && $art->volume->journal ? $art->volume->journal->title : 'Academic Repository',
+                    'views' => (int) $art->total_views,
+                    'published_date' => $art->created_at ? $art->created_at->format('M Y') : '2025',
+                ];
+            });
+
+        // Top Contributing Authors
+        $topAuthorsData = Author::withCount('articles')
+            ->orderBy('articles_count', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function($aut) {
+                return [
+                    'name' => trim($aut->first_name . ' ' . $aut->last_name),
+                    'papers' => $aut->articles_count,
+                    'department' => $aut->email ? explode('@', $aut->email)[1] ?? 'Academic Staff' : 'Faculty Research',
+                ];
+            });
+
         return response()->json([
             'journals' => Journal::count(),
             'articles' => Article::where('status', 'Published')->count(),
@@ -137,6 +185,9 @@ class DashboardController extends Controller
             ],
             'chartData' => $chartData,
             'websiteChartData' => $websiteChartData,
+            'categoryBreakdown' => $categoryBreakdown,
+            'topArticles' => $topArticlesData,
+            'topAuthors' => $topAuthorsData,
             'vercel' => $vercelData
         ]);
     }

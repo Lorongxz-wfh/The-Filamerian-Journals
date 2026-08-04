@@ -62,64 +62,21 @@ const Analytics: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const [statsRes, articlesRes, authorsRes] = await Promise.allSettled([
-        api.get('/dashboard/stats'),
-        api.get('/public/search?type=article&limit=10'),
-        api.get('/authors?per_page=10'),
-      ]);
+      const res = await api.get('/dashboard/stats');
+      const stats = res.data;
+      setData(stats);
 
-      if (statsRes.status === 'fulfilled') {
-        setData(statsRes.value.data);
+      if (stats.categoryBreakdown) {
+        setCategoryBreakdown(stats.categoryBreakdown);
       }
 
-      // Process Top Articles
-      if (articlesRes.status === 'fulfilled' && articlesRes.value.data?.articles?.data) {
-        const articlesList = articlesRes.value.data.articles.data.map((item: any, idx: number) => ({
-          id: item.id,
-          title: item.title,
-          journal: item.volume?.journal?.title || 'Academic Journal',
-          views: Math.max(12, 1400 - idx * 115 + (item.id * 17) % 300),
-          published_date: item.created_at ? new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '2025',
-        }));
-        setTopArticles(articlesList.slice(0, 5));
-      } else {
-        // Fallback sample data if empty
-        setTopArticles([
-          { id: 1, title: 'AI Integration in Higher Education Curricula', journal: 'Filamer Journal of Information Technology', views: 1420, published_date: 'Jan 2026' },
-          { id: 2, title: 'Sustainable Agricultural Practices in Capiz', journal: 'Journal of Agriculture & Ecology', views: 1180, published_date: 'Dec 2025' },
-          { id: 3, title: 'Pedagogical Strategies in Post-Pandemic Learning', journal: 'Filamer Educational Review', views: 950, published_date: 'Nov 2025' },
-          { id: 4, title: 'Cybersecurity Awareness Among Nursing Students', journal: 'Journal of Health Sciences', views: 820, published_date: 'Oct 2025' },
-          { id: 5, title: 'Economic Impact of Local Micro-Enterprises', journal: 'Journal of Business & Governance', views: 640, published_date: 'Sep 2025' },
-        ]);
+      if (stats.topArticles) {
+        setTopArticles(stats.topArticles);
       }
 
-      // Process Top Authors
-      if (authorsRes.status === 'fulfilled' && authorsRes.value.data?.data) {
-        const authorList = authorsRes.value.data.data.map((a: any, idx: number) => ({
-          name: `${a.first_name} ${a.last_name}`,
-          papers: Math.max(1, 8 - idx + (a.id % 3)),
-          department: idx % 2 === 0 ? 'Information Technology' : idx % 3 === 0 ? 'Education' : 'Arts & Sciences',
-        }));
-        setTopAuthors(authorList.slice(0, 5));
-      } else {
-        setTopAuthors([
-          { name: 'Dr. Maria Santos', papers: 12, department: 'Information Technology' },
-          { name: 'Prof. Juan Dela Cruz', papers: 9, department: 'Education' },
-          { name: 'Dr. Elena Roxas', papers: 7, department: 'Health Sciences' },
-          { name: 'Prof. Mark Tan', papers: 6, department: 'Business Administration' },
-          { name: 'Dr. Grace Villanueva', papers: 5, department: 'Arts & Humanities' },
-        ]);
+      if (stats.topAuthors) {
+        setTopAuthors(stats.topAuthors);
       }
-
-      // Category breakdown
-      setCategoryBreakdown([
-        { name: 'Information Technology', count: 48, percentage: 35 },
-        { name: 'Education & Pedagogy', count: 34, percentage: 25 },
-        { name: 'Health Sciences & Nursing', count: 26, percentage: 19 },
-        { name: 'Business & Governance', count: 18, percentage: 13 },
-        { name: 'Arts & Humanities', count: 12, percentage: 8 },
-      ]);
-
     } catch (err) {
       console.error('Failed to fetch analytics', err);
     } finally {
