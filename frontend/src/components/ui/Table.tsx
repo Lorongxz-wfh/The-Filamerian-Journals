@@ -1,7 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import Pagination from './Pagination';
-import { Skeleton } from './Skeleton';
 
 interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
   containerClassName?: string;
@@ -124,14 +123,19 @@ const DataTableFooter: React.FC<DataTableFooterProps> = ({
 }) => {
   return (
     <div className={cn('border-t border-border bg-surface px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 min-h-[52px]', className)}>
-      {/* Left spacer / placeholder */}
-      <div className="hidden sm:block text-[11px] text-muted w-1/4" />
+      {/* Left spacer / status indicator */}
+      <div className="hidden sm:flex items-center gap-2 text-[11px] text-muted w-1/4">
+        {loading && (
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+            Updating...
+          </span>
+        )}
+      </div>
 
       {/* Center Pagination */}
       <div className="flex-1 flex justify-center">
-        {loading ? (
-          <Skeleton className="h-8 w-44 rounded" />
-        ) : pagination ? (
+        {pagination ? (
           pagination
         ) : lastPage > 1 && onPageChange ? (
           <Pagination
@@ -145,11 +149,12 @@ const DataTableFooter: React.FC<DataTableFooterProps> = ({
 
       {/* Right Result Count */}
       <div className="w-full sm:w-1/4 flex justify-center sm:justify-end text-right">
-        {loading ? (
-          <Skeleton className="h-4 w-36 rounded my-1" />
-        ) : showingText ? (
-          <div className="text-[11px] font-medium text-muted">
+        {showingText ? (
+          <div className="text-[11px] font-medium text-muted flex items-center gap-2">
             {showingText}
+            {loading && (
+              <span className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block sm:hidden" />
+            )}
           </div>
         ) : null}
       </div>
