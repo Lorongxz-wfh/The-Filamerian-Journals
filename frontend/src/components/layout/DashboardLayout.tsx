@@ -15,7 +15,6 @@ import {
   FileText,
   Check,
   Loader2,
-  Globe,
   Upload,
   HelpCircle,
   Trash2
@@ -142,8 +141,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     { path: '/dashboard/trash', label: 'Trash Bin', icon: Trash2, roles: ['Super Admin', 'Admin'] },
     { path: '/dashboard/users', label: 'User Accounts', icon: Users, roles: ['Super Admin'] },
     { path: '/dashboard/logs', label: 'Activity Logs', icon: FileText, roles: ['Super Admin'] },
-    { label: 'Website Settings', icon: Globe, path: '/dashboard/website', roles: ['Super Admin'] },
-    { label: 'System Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin'] },
+    { label: 'Settings', icon: Settings, path: '/dashboard/settings', roles: ['Super Admin', 'Admin'] },
     { label: 'System Health', icon: LayoutDashboard, path: '/dashboard/health', roles: ['Super Admin'] },
   ];
 

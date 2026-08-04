@@ -18,7 +18,7 @@ import Notifications from '@/pages/dashboard/Notifications';
 import Feedback from '@/pages/dashboard/Feedback';
 import UserManager from '@/pages/dashboard/UserManager';
 import ActivityLogs from '@/pages/dashboard/ActivityLogs';
-import SystemSettings from '@/pages/dashboard/SystemSettings';
+import Settings from '@/pages/dashboard/Settings';
 import SystemHealth from '@/pages/dashboard/SystemHealth';
 import BulkImport from '@/pages/dashboard/BulkImport';
 import ManageAuthors from '@/pages/dashboard/ManageAuthors';
@@ -26,10 +26,8 @@ import DashboardHelp from '@/pages/dashboard/DashboardHelp';
 import TrashBin from '@/pages/dashboard/TrashBin';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-
 import Contact from '@/pages/Contact';
 import About from '@/pages/About';
-import WebsiteSettings from '@/pages/dashboard/WebsiteSettings';
 import Toaster from '@/components/ui/Toaster';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
@@ -91,8 +89,7 @@ function App() {
                 <Route path="users" element={<UserManager />} />
                 <Route path="logs" element={<ActivityLogs />} />
                 <Route path="trash" element={<TrashBin />} />
-                <Route path="website" element={<WebsiteSettings />} />
-                <Route path="settings" element={<SystemSettings />} />
+                <Route path="settings" element={<Settings />} />
                 <Route path="help" element={<DashboardHelp />} />
                 <Route path="search" element={<Overview />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
