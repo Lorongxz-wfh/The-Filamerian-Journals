@@ -206,18 +206,18 @@ const Navbar = () => {
             {localStorage.getItem('token') ? (
               <Link
                 to="/dashboard"
-                className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all text-[12px] font-bold uppercase tracking-wider shadow-sm"
+                title="Dashboard"
+                className="flex items-center justify-center p-2 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all shadow-sm"
               >
-                <BookOpen className="h-3.5 w-3.5" />
-                <span>Dashboard</span>
+                <BookOpen className="h-4 w-4" />
               </Link>
             ) : (
               <Link
                 to="/login"
-                className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all text-[12px] font-bold uppercase tracking-wider shadow-sm"
+                title="Portal Login"
+                className="flex items-center justify-center p-2 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all shadow-sm"
               >
-                <BookOpen className="h-3.5 w-3.5" />
-                <span>Portal Login</span>
+                <BookOpen className="h-4 w-4" />
               </Link>
             )}
           </div>
