@@ -399,7 +399,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   }
 
   return (
-    <div className="h-screen bg-surface flex text-primary font-sans overflow-hidden">
+    <div className="h-screen bg-background flex text-primary font-sans overflow-hidden">
       <SplashLoader />
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
