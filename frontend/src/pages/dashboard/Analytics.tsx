@@ -270,7 +270,7 @@ const Analytics: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-4 pt-1 max-h-64 overflow-y-auto pr-1">
+          <div className="space-y-4 pt-1 max-h-[250px] overflow-y-auto custom-scrollbar pr-1">
             {categoryBreakdown.length === 0 ? (
               <p className="text-xs text-muted py-8 text-center">No categories recorded yet.</p>
             ) : (
@@ -305,7 +305,7 @@ const Analytics: React.FC = () => {
             <span className="text-[10px] font-mono text-muted uppercase">By Views</span>
           </div>
 
-          <div className="divide-y divide-border overflow-hidden border border-border max-h-64 overflow-y-auto">
+          <div className="divide-y divide-border overflow-hidden border border-border">
             {topArticles.length === 0 ? (
               <p className="text-xs text-muted py-8 text-center">No articles available.</p>
             ) : (
@@ -342,7 +342,7 @@ const Analytics: React.FC = () => {
             <span className="text-[10px] font-mono text-muted uppercase">By Papers</span>
           </div>
 
-          <div className="divide-y divide-border overflow-hidden border border-border max-h-64 overflow-y-auto">
+          <div className="divide-y divide-border overflow-hidden border border-border">
             {topAuthors.length === 0 ? (
               <p className="text-xs text-muted py-8 text-center">No author contributions recorded.</p>
             ) : (
