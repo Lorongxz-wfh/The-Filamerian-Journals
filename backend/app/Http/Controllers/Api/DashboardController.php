@@ -121,56 +121,61 @@ class DashboardController extends Controller
             }
         }
 
-        // Category breakdown calculation
-        $categories = \App\Models\Category::withCount(['articles' => function($q) {
-            $q->where('status', 'Published');
-        }])->get();
-        
-        $totalCatArticles = Article::where('status', 'Published')->count();
-        $categoryBreakdown = $categories->map(function($cat) use ($totalCatArticles) {
-            $count = $cat->articles_count;
-            $percentage = $totalCatArticles > 0 ? round(($count / $totalCatArticles) * 100) : 0;
-            return [
-                'name' => $cat->name,
-                'count' => $count,
-                'percentage' => $percentage,
-            ];
-        })->sortByDesc('count')->values();
+        // Category breakdown calculation (by active journals)
+        $categoryBreakdown = collect();
+        $topArticlesData = collect();
+        $topAuthorsData = collect();
 
-        // Top Read Articles (MySQL Strict ONLY_FULL_GROUP_BY Safe)
-        $topArticlesData = Article::where('status', 'Published')
-            ->with(['volume.journal'])
-            ->select('articles.*')
-            ->selectSub(function($query) {
-                $query->from('article_metrics')
-                      ->selectRaw('COALESCE(SUM(count), 0)')
-                      ->whereColumn('article_metrics.article_id', 'articles.id');
-            }, 'total_views')
-            ->orderBy('total_views', 'desc')
-            ->take(5)
-            ->get()
-            ->map(function($art) {
+        try {
+            $categories = \App\Models\Category::withCount('journals')->get();
+            $totalJournalsCount = Journal::count();
+            $categoryBreakdown = $categories->map(function($cat) use ($totalJournalsCount) {
+                $count = $cat->journals_count;
+                $percentage = $totalJournalsCount > 0 ? round(($count / $totalJournalsCount) * 100) : 0;
                 return [
-                    'id' => $art->id,
-                    'title' => $art->title,
-                    'journal' => $art->volume && $art->volume->journal ? $art->volume->journal->title : 'Academic Repository',
-                    'views' => (int) ($art->total_views ?? 0),
-                    'published_date' => $art->created_at ? $art->created_at->format('M Y') : '2025',
+                    'name' => $cat->name,
+                    'count' => $count,
+                    'percentage' => $percentage,
                 ];
-            });
+            })->sortByDesc('count')->values();
 
-        // Top Contributing Authors
-        $topAuthorsData = Author::withCount('articles')
-            ->orderBy('articles_count', 'desc')
-            ->take(5)
-            ->get()
-            ->map(function($aut) {
-                return [
-                    'name' => trim($aut->first_name . ' ' . $aut->last_name),
-                    'papers' => $aut->articles_count,
-                    'department' => $aut->email ? explode('@', $aut->email)[1] ?? 'Academic Staff' : 'Faculty Research',
-                ];
-            });
+            // Top Read Articles (MySQL Strict ONLY_FULL_GROUP_BY Safe)
+            $topArticlesData = Article::where('status', 'Published')
+                ->with(['volume.journal'])
+                ->select('articles.*')
+                ->selectSub(function($query) {
+                    $query->from('article_metrics')
+                          ->selectRaw('COALESCE(SUM(count), 0)')
+                          ->whereColumn('article_metrics.article_id', 'articles.id');
+                }, 'total_views')
+                ->orderBy('total_views', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function($art) {
+                    return [
+                        'id' => $art->id,
+                        'title' => $art->title,
+                        'journal' => $art->volume && $art->volume->journal ? $art->volume->journal->title : 'Academic Repository',
+                        'views' => (int) ($art->total_views ?? 0),
+                        'published_date' => $art->created_at ? $art->created_at->format('M Y') : '2025',
+                    ];
+                });
+
+            // Top Contributing Authors
+            $topAuthorsData = Author::withCount('articles')
+                ->orderBy('articles_count', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function($aut) {
+                    return [
+                        'name' => trim($aut->first_name . ' ' . $aut->last_name),
+                        'papers' => $aut->articles_count,
+                        'department' => $aut->email && str_contains($aut->email, '@') ? explode('@', $aut->email)[1] : 'Faculty Research',
+                    ];
+                });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Analytics stats calculation error: ' . $e->getMessage());
+        }
 
         return response()->json([
             'journals' => Journal::count(),
