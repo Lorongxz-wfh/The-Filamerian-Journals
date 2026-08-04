@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router';
-import { Menu, Search, X, ChevronRight } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, BookOpen } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -113,7 +113,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => {
-                  if (searchQuery.trim()) setIsDropdownOpen(true);
+                  setIsDropdownOpen(true);
                 }}
                 onKeyDown={handleSearch}
                 className="w-full pl-10 pr-16 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
@@ -139,6 +139,10 @@ const Navbar = () => {
                 loading={isSearchLoading}
                 isOpen={isDropdownOpen}
                 onClose={() => setIsDropdownOpen(false)}
+                onSelectQuery={(q) => {
+                  setSearchQuery(q);
+                  setIsDropdownOpen(true);
+                }}
               />
             </div>
           </div>
@@ -179,10 +183,9 @@ const Navbar = () => {
               </div>
               <Link
                 to="/journals"
-                className="flex items-center justify-between px-6 py-3 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-secondary hover:text-white border-t border-white/10 transition-colors uppercase tracking-widest"
+                className="block p-4 text-center text-[12px] font-bold text-secondary uppercase tracking-widest bg-primary/95 hover:bg-secondary hover:text-primary transition-colors border-t border-white/10"
               >
-                <span>All Categories</span>
-                <span>→</span>
+                View All Categories →
               </Link>
             </div>
           </div>
@@ -203,16 +206,18 @@ const Navbar = () => {
             {localStorage.getItem('token') ? (
               <Link
                 to="/dashboard"
-                className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
+                className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all text-[12px] font-bold uppercase tracking-wider shadow-sm"
               >
-                Dashboard
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Dashboard</span>
               </Link>
             ) : (
               <Link
                 to="/login"
-                className="text-[13px] font-semibold text-secondary hover:text-secondary/80 transition-colors tracking-wide"
+                className="flex items-center gap-2 px-3 py-1.5 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all text-[12px] font-bold uppercase tracking-wider shadow-sm"
               >
-                Portal Login
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Portal Login</span>
               </Link>
             )}
           </div>

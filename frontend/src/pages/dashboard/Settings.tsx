@@ -726,7 +726,7 @@ const Settings: React.FC = () => {
 
   return (
     <div className="space-y-2">
-      <DashboardHeader title="Portal Settings" className="mb-2" />
+      <DashboardHeader title="Settings" className="mb-2" />
 
       <Tabs 
         tabs={[

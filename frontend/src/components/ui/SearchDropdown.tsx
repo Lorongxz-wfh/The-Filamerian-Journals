@@ -13,10 +13,11 @@ interface SearchDropdownProps {
   loading: boolean;
   isOpen: boolean;
   onClose: () => void;
+  onSelectQuery?: (query: string) => void;
   className?: string;
 }
 
-const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, loading, isOpen, onClose, className }) => {
+const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, loading, isOpen, onClose, onSelectQuery, className }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard');
@@ -36,7 +37,48 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen || !query.trim()) return null;
+  if (!isOpen) return null;
+
+  const popularTopics = [
+    'Information Technology',
+    'Education & Pedagogy',
+    'Health Sciences & Nursing',
+    'Capiz Agriculture & Ecology',
+    'Business Administration'
+  ];
+
+  // Render recent / popular topics when query is empty
+  if (!query.trim()) {
+    return (
+      <div 
+        ref={dropdownRef}
+        className={cn(
+          "absolute top-[calc(100%+8px)] left-0 w-full bg-surface border border-border shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden p-4 space-y-4",
+          className
+        )}
+      >
+        <div>
+          <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2.5">
+            🔥 Popular Research Topics
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {popularTopics.map((topic) => (
+              <button
+                key={topic}
+                type="button"
+                onClick={() => {
+                  if (onSelectQuery) onSelectQuery(topic);
+                }}
+                className="px-2.5 py-1 bg-background border border-border text-[11px] font-medium text-primary hover:border-primary/50 transition-colors"
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const journals = results?.journals.slice(0, 3) || [];
   const articles = results?.articles.slice(0, 3) || [];
