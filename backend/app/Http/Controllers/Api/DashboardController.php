@@ -137,12 +137,15 @@ class DashboardController extends Controller
             ];
         })->sortByDesc('count')->values();
 
-        // Top Read Articles
+        // Top Read Articles (MySQL Strict ONLY_FULL_GROUP_BY Safe)
         $topArticlesData = Article::where('status', 'Published')
             ->with(['volume.journal'])
-            ->leftJoin('article_metrics', 'articles.id', '=', 'article_metrics.article_id')
-            ->select('articles.*', \Illuminate\Support\Facades\DB::raw('COALESCE(SUM(article_metrics.count), 0) as total_views'))
-            ->groupBy('articles.id')
+            ->select('articles.*')
+            ->selectSub(function($query) {
+                $query->from('article_metrics')
+                      ->selectRaw('COALESCE(SUM(count), 0)')
+                      ->whereColumn('article_metrics.article_id', 'articles.id');
+            }, 'total_views')
             ->orderBy('total_views', 'desc')
             ->take(5)
             ->get()
@@ -151,7 +154,7 @@ class DashboardController extends Controller
                     'id' => $art->id,
                     'title' => $art->title,
                     'journal' => $art->volume && $art->volume->journal ? $art->volume->journal->title : 'Academic Repository',
-                    'views' => (int) $art->total_views,
+                    'views' => (int) ($art->total_views ?? 0),
                     'published_date' => $art->created_at ? $art->created_at->format('M Y') : '2025',
                 ];
             });
