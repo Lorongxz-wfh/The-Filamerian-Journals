@@ -23,6 +23,6 @@ class Volume extends Model
 
     public function articles()
     {
-        return $this->hasMany(Article::class);
+        return $this->hasMany(Article::class)->orderBy('order', 'asc')->orderBy('id', 'asc');
     }
 }

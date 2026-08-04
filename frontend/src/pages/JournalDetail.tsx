@@ -396,7 +396,9 @@ const JournalDetail: React.FC = () => {
                         </div>
                       </div>
                       <div className="divide-y divide-border flex-1">
-                        {activeVol.articles?.map((article) => (
+                        {[...(activeVol.articles || [])]
+                          .sort((a: any, b: any) => ((a.order ?? a.id) - (b.order ?? b.id)))
+                          .map((article) => (
                           <Link 
                             key={article.id} 
                             to={`/articles/${article.id}`}
