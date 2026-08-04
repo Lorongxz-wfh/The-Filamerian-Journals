@@ -17,7 +17,8 @@ import {
   Loader2,
   Upload,
   HelpCircle,
-  Trash2
+  Trash2,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api from '@/services/api';
@@ -127,6 +128,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
   const menuItems = [
     { label: 'Overview', icon: LayoutDashboard, path: '/dashboard', roles: ['Super Admin', 'Admin'] },
+    { label: 'Reports & Analytics', icon: BarChart3, path: '/dashboard/analytics', roles: ['Super Admin', 'Admin'] },
     { label: 'Journals', icon: BookOpen, path: '/dashboard/journals', roles: ['Admin', 'Super Admin'] },
     { label: 'Articles', icon: FileText, path: '/dashboard/articles', roles: ['Admin', 'Super Admin'] },
     { label: 'Authors', icon: UserCheck, path: '/dashboard/authors', roles: ['Admin', 'Super Admin'] },

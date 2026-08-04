@@ -20,6 +20,7 @@ import UserManager from '@/pages/dashboard/UserManager';
 import ActivityLogs from '@/pages/dashboard/ActivityLogs';
 import Settings from '@/pages/dashboard/Settings';
 import SystemHealth from '@/pages/dashboard/SystemHealth';
+import AnalyticsDashboard from '@/pages/dashboard/Analytics';
 import BulkImport from '@/pages/dashboard/BulkImport';
 import ManageAuthors from '@/pages/dashboard/ManageAuthors';
 import DashboardHelp from '@/pages/dashboard/DashboardHelp';
@@ -75,6 +76,7 @@ function App() {
                 }
               >
                 <Route index element={<Overview />} />
+                <Route path="analytics" element={<AnalyticsDashboard />} />
                 <Route path="health" element={<SystemHealth />} />
                 <Route path="journals" element={<MyJournals />} />
                 <Route path="categories" element={<Categories />} />
