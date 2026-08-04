@@ -139,7 +139,7 @@ class DashboardController extends Controller
                 ];
             })->sortByDesc('count')->values();
 
-            // Top Read Articles (MySQL Strict ONLY_FULL_GROUP_BY Safe)
+            // Top Read Articles (Full Ranked List)
             $topArticlesData = Article::where('status', 'Published')
                 ->with(['volume.journal'])
                 ->select('articles.*')
@@ -149,7 +149,6 @@ class DashboardController extends Controller
                           ->whereColumn('article_metrics.article_id', 'articles.id');
                 }, 'total_views')
                 ->orderBy('total_views', 'desc')
-                ->take(5)
                 ->get()
                 ->map(function($art) {
                     return [
@@ -161,10 +160,9 @@ class DashboardController extends Controller
                     ];
                 });
 
-            // Top Contributing Authors
+            // Top Contributing Authors (Full Ranked List)
             $topAuthorsData = Author::withCount('articles')
                 ->orderBy('articles_count', 'desc')
-                ->take(5)
                 ->get()
                 ->map(function($aut) {
                     return [

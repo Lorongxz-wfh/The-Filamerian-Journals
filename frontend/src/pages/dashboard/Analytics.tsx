@@ -293,19 +293,19 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 2: Leaderboards */}
+      {/* Row 2: Leaderboards & Full Rankings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Most Viewed Research Articles */}
-        <div className="border border-border bg-surface p-6 space-y-5">
+        {/* Research Paper Readership Ranking */}
+        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Award className="h-4 w-4 text-amber-600" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Most Read Research Papers</h2>
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Research Paper Readership Ranking</h2>
             </div>
             <span className="text-[10px] font-mono text-muted uppercase">By Views</span>
           </div>
 
-          <div className="divide-y divide-border overflow-hidden border border-border">
+          <div className="divide-y divide-border border border-border max-h-[340px] overflow-y-auto custom-scrollbar pr-1">
             {topArticles.length === 0 ? (
               <p className="text-xs text-muted py-8 text-center">No articles available.</p>
             ) : (
@@ -332,17 +332,17 @@ const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* Top Contributing FCU Authors */}
-        <div className="border border-border bg-surface p-6 space-y-5">
+        {/* Author Contribution Ranking */}
+        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary/50" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Top Faculty & Student Authors</h2>
+              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Author Contribution Ranking</h2>
             </div>
             <span className="text-[10px] font-mono text-muted uppercase">By Papers</span>
           </div>
 
-          <div className="divide-y divide-border overflow-hidden border border-border">
+          <div className="divide-y divide-border border border-border max-h-[340px] overflow-y-auto custom-scrollbar pr-1">
             {topAuthors.length === 0 ? (
               <p className="text-xs text-muted py-8 text-center">No author contributions recorded.</p>
             ) : (
