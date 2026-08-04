@@ -494,7 +494,7 @@ const Journals: React.FC = () => {
               </div>
             )}
 
-            {!loading && lastPage > 1 && (
+            {lastPage > 1 && (
               <Pagination 
                 currentPage={currentPage} 
                 lastPage={lastPage} 

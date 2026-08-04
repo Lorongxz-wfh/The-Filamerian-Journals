@@ -162,14 +162,22 @@ const Feedback: React.FC = () => {
             )}
           </div>
           
-          {!loading && lastPage > 1 && (
-            <div className="border-t border-border p-4 bg-background/50">
-              <Pagination
-                currentPage={page}
-                lastPage={lastPage}
-                onPageChange={setPage}
-                className="mt-0"
-              />
+          {lastPage > 1 && (
+            <div className="border-t border-border p-4 bg-background/50 flex items-center justify-between">
+              {loading && (
+                <span className="text-[11px] text-muted flex items-center gap-1.5 font-medium">
+                  <span className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                  Updating...
+                </span>
+              )}
+              <div className="flex-1">
+                <Pagination
+                  currentPage={page}
+                  lastPage={lastPage}
+                  onPageChange={setPage}
+                  className="mt-0"
+                />
+              </div>
             </div>
           )}
         </div>

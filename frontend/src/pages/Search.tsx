@@ -416,7 +416,7 @@ const Search: React.FC = () => {
                 />
               )}
               
-              {!loading && type !== 'all' && lastPage > 1 && (
+              {type !== 'all' && lastPage > 1 && (
                 <Pagination 
                   currentPage={currentPage} 
                   lastPage={lastPage} 

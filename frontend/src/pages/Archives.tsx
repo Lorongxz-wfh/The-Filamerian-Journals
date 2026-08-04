@@ -755,7 +755,7 @@ const Archives: React.FC = () => {
         ) : null}
 
         {/* Pagination Bar */}
-        {!loading && lastPage > 1 && (
+        {lastPage > 1 && (
           <Pagination
             currentPage={currentPage}
             lastPage={lastPage}
