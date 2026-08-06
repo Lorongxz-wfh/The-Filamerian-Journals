@@ -204,9 +204,10 @@ const UserManager: React.FC = () => {
       } else {
         await api.post('/users', data);
       }
-      await fetchUsers();
       handleCloseModal();
+      reset();
       toast.success(editingUser ? 'User updated successfully' : 'User created successfully');
+      fetchUsers();
     } catch (err: any) {
       setServerError(err.response?.data?.message || 'Failed to save user.');
     }

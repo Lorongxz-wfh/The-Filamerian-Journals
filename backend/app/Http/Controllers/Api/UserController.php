@@ -69,14 +69,16 @@ class UserController extends Controller
         $roleObj = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $validated['role']]);
         $user->assignRole($roleObj);
 
-        // Send email with credentials
-        try {
-            Mail::to($user->email)->send(new UserCreatedMail($user, $tempPassword));
-        } catch (\Throwable $e) {
-            $msg = $e->getMessage();
-            \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $msg);
-            \App\Services\ActivityLogger::log('Email Dispatch Failed', "Failed sending credentials email to {$user->email}: {$msg}", get_class($user), $user->id);
-        }
+        // Non-blocking background email dispatch via defer()
+        defer(function () use ($user, $tempPassword) {
+            try {
+                Mail::to($user->email)->send(new UserCreatedMail($user, $tempPassword));
+            } catch (\Throwable $e) {
+                $msg = $e->getMessage();
+                \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $msg);
+                \App\Services\ActivityLogger::log('Email Dispatch Failed', "Failed sending credentials email to {$user->email}: {$msg}", get_class($user), $user->id);
+            }
+        });
 
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
 

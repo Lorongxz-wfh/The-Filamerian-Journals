@@ -170,12 +170,15 @@ class AuthController extends Controller
             ]
         );
 
-        try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\ResetPasswordMail($user, $token));
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send password reset email to {$user->email}: " . $e->getMessage());
-            return response()->json(['message' => 'Unable to send password reset email. Please try again later.'], 500);
-        }
+        defer(function () use ($user, $token) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\ResetPasswordMail($user, $token));
+            } catch (\Throwable $e) {
+                $msg = $e->getMessage();
+                \Illuminate\Support\Facades\Log::error("Failed to send password reset email to {$user->email}: " . $msg);
+                ActivityLogger::log('Email Dispatch Failed', "Failed sending password reset email to {$user->email}: {$msg}", User::class, $user->id);
+            }
+        });
 
         ActivityLogger::log('Requested Password Reset', "Requested password reset for {$user->email}", User::class, $user->id, $user->id);
 
