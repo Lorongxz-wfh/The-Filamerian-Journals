@@ -73,7 +73,9 @@ class UserController extends Controller
         try {
             Mail::to($user->email)->send(new UserCreatedMail($user, $tempPassword));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $e->getMessage());
+            $msg = $e->getMessage();
+            \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $msg);
+            \App\Services\ActivityLogger::log('Email Dispatch Failed', "Failed sending credentials email to {$user->email}: {$msg}", get_class($user), $user->id);
         }
 
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
