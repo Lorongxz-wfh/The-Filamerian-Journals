@@ -146,9 +146,9 @@ const UserManager: React.FC = () => {
   useEffect(() => {
     const action = searchParams.get('action');
     const userId = searchParams.get('user_id');
-    if (action === 'new') {
+    if (action === 'new' && !isModalOpen && !editingUser) {
       handleOpenModal(null, false);
-    } else if (action === 'edit' && userId && users.length > 0) {
+    } else if (action === 'edit' && userId && users.length > 0 && !isModalOpen) {
       const target = users.find(u => u.id === Number(userId));
       if (target) {
         handleOpenModal(target, false);
@@ -188,10 +188,11 @@ const UserManager: React.FC = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingUser(null);
     const newParams = new URLSearchParams(searchParams);
     newParams.delete('action');
     newParams.delete('user_id');
-    setSearchParams(newParams);
+    setSearchParams(newParams, { replace: true });
   };
 
   const onSubmit = async (data: UserFormData) => {
@@ -420,13 +421,28 @@ const UserManager: React.FC = () => {
               <span>A secure random temporary password will be automatically generated and sent to this email address.</span>
             </div>
           ) : (
-            <Input 
-              label="Password" 
-              hint="Leave blank to keep current password" 
-              type="password" 
-              error={errors.password?.message}
-              {...register('password')}
-            />
+            <div className="p-3 bg-background border border-border text-xs text-muted space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-primary">Password Security</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await api.post('/forgot-password', { email: editingUser.email });
+                      toast.success(`Password reset link sent to ${editingUser.email}`);
+                    } catch (err: any) {
+                      toast.error('Failed to send password reset email.');
+                    }
+                  }}
+                  className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                >
+                  Send Password Reset Link
+                </button>
+              </div>
+              <p className="text-[11px] leading-relaxed text-muted/80">
+                Passwords are not shown or modified directly. Click above to send a secure password reset link to this user's email address.
+              </p>
+            </div>
           )}
 
           <Select 
