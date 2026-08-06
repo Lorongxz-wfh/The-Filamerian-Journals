@@ -205,18 +205,17 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <Input
-                  label="Last Name"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label="Last Name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
               <Input
                 label="Suffix"
-                hint="Optional (Jr., Ph.D.)"
+                hint="Optional"
+                placeholder="e.g. Jr., Ph.D."
                 value={suffix}
                 onChange={(e) => setSuffix(e.target.value)}
               />

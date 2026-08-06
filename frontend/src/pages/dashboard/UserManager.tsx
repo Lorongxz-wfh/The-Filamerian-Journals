@@ -390,18 +390,17 @@ const UserManager: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
-              <Input 
-                label="Last Name" 
-                required 
-                error={errors.last_name?.message}
-                {...register('last_name')}
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input 
+              label="Last Name" 
+              required 
+              error={errors.last_name?.message}
+              {...register('last_name')}
+            />
             <Input 
               label="Suffix" 
-              hint="Optional (Jr., Ph.D.)"
+              hint="Optional"
+              placeholder="e.g. Jr., Ph.D."
               error={errors.suffix?.message}
               {...register('suffix')}
             />
