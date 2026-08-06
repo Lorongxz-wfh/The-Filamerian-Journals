@@ -35,8 +35,8 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
-            'role' => 'required|string|exists:roles,name',
+            'password' => 'required|string|min:6',
+            'role' => 'required|string|max:100',
         ]);
 
         $user = User::create([
@@ -47,7 +47,8 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        $user->assignRole($validated['role']);
+        $roleObj = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $validated['role']]);
+        $user->assignRole($roleObj);
 
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
 
@@ -64,8 +65,8 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'string|max:255',
             'email' => 'email|unique:users,email,' . $user->id,
-            'password' => ['nullable', 'string', Password::min(8)->mixedCase()->numbers()->symbols()],
-            'role' => 'nullable|string|exists:roles,name',
+            'password' => 'nullable|string|min:6',
+            'role' => 'nullable|string|max:100',
         ]);
 
         // If changing role away from Super Admin, ensure at least one active Super Admin remains
@@ -76,14 +77,14 @@ class UserController extends Controller
             }
         }
 
-        $user->update([
-            'name' => $validated['name'] ?? $user->name,
-            'email' => $validated['email'] ?? $user->email,
-            'password' => !empty($validated['password']) ? Hash::make($validated['password']) : $user->password,
-        ]);
+        if (!empty($validated['name'])) $user->name = $validated['name'];
+        if (!empty($validated['email'])) $user->email = $validated['email'];
+        if (!empty($validated['password'])) $user->password = Hash::make($validated['password']);
+        $user->save();
 
         if (!empty($validated['role'])) {
-            $user->syncRoles([$validated['role']]);
+            $roleObj = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $validated['role']]);
+            $user->syncRoles([$roleObj]);
         }
 
         \App\Services\ActivityLogger::log('Updated User', "Updated user account for {$user->name}", get_class($user), $user->id);
