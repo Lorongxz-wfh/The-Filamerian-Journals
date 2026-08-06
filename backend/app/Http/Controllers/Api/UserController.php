@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rules\Password;
 
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use App\Mail\UserCreatedMail;
+
 class UserController extends Controller
 {
     public function index(Request $request)
@@ -35,20 +39,28 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
             'role' => 'required|string|max:100',
         ]);
+
+        $tempPassword = Str::random(8) . '!1a';
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make($tempPassword),
             'is_approved' => true,
             'email_verified_at' => now(),
         ]);
 
         $roleObj = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $validated['role']]);
         $user->assignRole($roleObj);
+
+        // Send email with credentials
+        try {
+            Mail::to($user->email)->send(new UserCreatedMail($user, $tempPassword));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $e->getMessage());
+        }
 
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
 

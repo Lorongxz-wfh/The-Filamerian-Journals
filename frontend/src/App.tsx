@@ -29,6 +29,8 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Contact from '@/pages/Contact';
 import About from '@/pages/About';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import Toaster from '@/components/ui/Toaster';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Search from '@/pages/Search';
@@ -64,6 +66,8 @@ function App() {
               <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
               <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
               <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+              <Route path="/forgot-password" element={<PublicLayout><ForgotPassword /></PublicLayout>} />
+              <Route path="/reset-password" element={<PublicLayout><ResetPassword /></PublicLayout>} />
               <Route path="/pending-verification" element={<PublicLayout><PendingVerification /></PublicLayout>} />
 
               {/* Dashboard System Routes */}

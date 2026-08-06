@@ -28,6 +28,7 @@ import SplashLoader from '@/components/ui/SplashLoader';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchDropdown from '@/components/ui/SearchDropdown';
+import UserProfileModal from '@/components/ui/UserProfileModal';
 import KeyboardShortcutsModal from '@/components/ui/KeyboardShortcutsModal';
 import { toast } from 'sonner';
 
@@ -55,10 +56,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -356,16 +358,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       </nav>
 
       <div className="px-4 py-4 border-t border-white/10 shrink-0 mt-auto">
-        <div className="flex items-center gap-3 px-3 py-3 mb-2">
-          <div className="h-8 w-8 bg-secondary flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+        <div 
+          onClick={() => setIsProfileModalOpen(true)}
+          className="flex items-center gap-3 px-3 py-3 mb-2 hover:bg-white/10 transition-colors cursor-pointer rounded group"
+          title="Click to manage your Profile & Account Settings"
+        >
+          <div className="h-8 w-8 bg-secondary flex items-center justify-center text-primary font-semibold text-sm shrink-0 border border-secondary/30">
             {user.name?.charAt(0) || 'U'}
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-[13px] font-medium text-white truncate leading-none">
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-[13px] font-medium text-white group-hover:text-secondary transition-colors truncate leading-none">
               {user.name || 'User'}
             </span>
-            <span className="text-[11px] text-white/30 truncate mt-0.5">
-              {user.role || 'Member'}
+            <span className="text-[11px] text-white/40 truncate mt-1">
+              {user.role || 'Member'} • Settings
             </span>
           </div>
         </div>
@@ -569,6 +575,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
         <KeyboardShortcutsModal
           isOpen={isShortcutsOpen}
           onClose={() => setIsShortcutsOpen(false)}
+        />
+
+        <UserProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          onProfileUpdated={(updatedUser) => setUser(updatedUser)}
         />
       </div>
     </div>

@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 
 use App\Models\User;
 
@@ -25,6 +27,8 @@ Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) 
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Notifications

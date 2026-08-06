@@ -178,12 +178,6 @@ const UserManager: React.FC = () => {
 
   const onSubmit = async (data: UserFormData) => {
     setServerError(null);
-    
-    // Validate password for new users
-    if (!editingUser && (!data.password || data.password.length < 6)) {
-      setServerError('Password must be at least 6 characters for new users.');
-      return;
-    }
 
     try {
       if (editingUser) {
@@ -380,14 +374,20 @@ const UserManager: React.FC = () => {
             {...register('email')}
           />
 
-          <Input 
-            label="Password" 
-            hint={editingUser ? 'Leave blank to keep current' : undefined} 
-            type="password" 
-            required={!editingUser} 
-            error={errors.password?.message}
-            {...register('password')}
-          />
+          {!editingUser ? (
+            <div className="p-3 bg-primary/5 border border-primary/20 text-xs text-muted space-y-1">
+              <span className="font-semibold text-primary block">Automatic Password Generation</span>
+              <span>A secure random temporary password will be automatically generated and sent to this email address.</span>
+            </div>
+          ) : (
+            <Input 
+              label="Password" 
+              hint="Leave blank to keep current password" 
+              type="password" 
+              error={errors.password?.message}
+              {...register('password')}
+            />
+          )}
 
           <Select 
             label="Role" 

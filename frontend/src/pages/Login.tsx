@@ -109,6 +109,15 @@ const Login: React.FC = () => {
             </div>
           </div>
 
+          <div className="flex items-center justify-end">
+            <a
+              href="/forgot-password"
+              className="text-[12px] font-medium text-primary/70 hover:text-primary transition-colors underline-offset-4 hover:underline"
+            >
+              Forgot password?
+            </a>
+          </div>
+
           <Button
             type="submit"
             className="w-full py-3 text-[13px] font-medium"
