@@ -24,12 +24,26 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'suffix',
         'email',
         'password',
         'is_approved',
         'is_disabled',
         'disabled_at',
     ];
+
+    public static function formatFullName(?string $firstName, ?string $middleName, ?string $lastName, ?string $suffix): string
+    {
+        $parts = array_filter([$firstName, $middleName, $lastName]);
+        $fullName = implode(' ', $parts);
+        if ($suffix) {
+            $fullName .= ' ' . $suffix;
+        }
+        return trim($fullName);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

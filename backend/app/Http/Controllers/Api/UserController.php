@@ -37,15 +37,29 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:100',
+            'middle_name' => 'nullable|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'suffix' => 'nullable|string|max:20',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string|max:100',
         ]);
 
-        $tempPassword = Str::random(8) . '!1a';
+        $firstName = trim($validated['first_name']);
+        $middleName = !empty($validated['middle_name']) ? trim($validated['middle_name']) : null;
+        $lastName = trim($validated['last_name']);
+        $suffix = !empty($validated['suffix']) ? trim($validated['suffix']) : null;
+        $fullName = User::formatFullName($firstName, $middleName, $lastName, $suffix);
+
+        // Strong temporary password generator (Uppercase, Lowercase, Number, Symbol)
+        $tempPassword = Str::random(4) . 'A' . Str::random(3) . '1!' . Str::random(2);
 
         $user = User::create([
-            'name' => $validated['name'],
+            'name' => $fullName,
+            'first_name' => $firstName,
+            'middle_name' => $middleName,
+            'last_name' => $lastName,
+            'suffix' => $suffix,
             'email' => $validated['email'],
             'password' => Hash::make($tempPassword),
             'is_approved' => true,
@@ -75,9 +89,12 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name' => 'string|max:255',
+            'first_name' => 'nullable|string|max:100',
+            'middle_name' => 'nullable|string|max:100',
+            'last_name' => 'nullable|string|max:100',
+            'suffix' => 'nullable|string|max:20',
             'email' => 'email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6',
+            'password' => ['nullable', 'string', Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'role' => 'nullable|string|max:100',
         ]);
 
@@ -89,7 +106,13 @@ class UserController extends Controller
             }
         }
 
-        if (!empty($validated['name'])) $user->name = $validated['name'];
+        if (array_key_exists('first_name', $validated)) $user->first_name = $validated['first_name'];
+        if (array_key_exists('middle_name', $validated)) $user->middle_name = $validated['middle_name'];
+        if (array_key_exists('last_name', $validated)) $user->last_name = $validated['last_name'];
+        if (array_key_exists('suffix', $validated)) $user->suffix = $validated['suffix'];
+
+        $user->name = User::formatFullName($user->first_name ?: $user->name, $user->middle_name, $user->last_name, $user->suffix);
+
         if (!empty($validated['email'])) $user->email = $validated['email'];
         if (!empty($validated['password'])) $user->password = Hash::make($validated['password']);
         $user->save();

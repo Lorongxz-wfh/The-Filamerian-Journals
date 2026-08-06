@@ -17,6 +17,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
   const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
   
   // Profile Form State
+  const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [suffix, setSuffix] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('Member');
@@ -33,6 +37,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
   useEffect(() => {
     if (isOpen) {
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      setFirstName(storedUser.first_name || storedUser.name?.split(' ')[0] || '');
+      setMiddleName(storedUser.middle_name || '');
+      setLastName(storedUser.last_name || storedUser.name?.split(' ').slice(1).join(' ') || '');
+      setSuffix(storedUser.suffix || '');
       setName(storedUser.name || '');
       setEmail(storedUser.email || '');
       setRole(storedUser.role || storedUser.roles?.[0] || 'Member');
@@ -44,20 +52,45 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
     }
   }, [isOpen]);
 
+  const passwordChecks = {
+    length: newPassword.length >= 8,
+    uppercase: /[A-Z]/.test(newPassword),
+    lowercase: /[a-z]/.test(newPassword),
+    number: /[0-9]/.test(newPassword),
+    symbol: /[^A-Za-z0-9]/.test(newPassword),
+  };
+
+  const isPasswordValid = Object.values(passwordChecks).every(Boolean);
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingProfile(true);
     setProfileError(null);
 
     try {
-      const res = await api.put('/profile', { name, email });
+      const res = await api.put('/profile', {
+        first_name: firstName,
+        middle_name: middleName,
+        last_name: lastName,
+        suffix: suffix,
+        email: email,
+      });
       const updatedUser = res.data.user;
 
       // Update local storage user object
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const newUserData = { ...storedUser, name: updatedUser.name, email: updatedUser.email };
+      const newUserData = {
+        ...storedUser,
+        name: updatedUser.name,
+        first_name: updatedUser.first_name,
+        middle_name: updatedUser.middle_name,
+        last_name: updatedUser.last_name,
+        suffix: updatedUser.suffix,
+        email: updatedUser.email
+      };
       localStorage.setItem('user', JSON.stringify(newUserData));
 
+      setName(updatedUser.name);
       toast.success('Profile information updated successfully.');
       if (onProfileUpdated) onProfileUpdated(newUserData);
     } catch (err: any) {
@@ -75,8 +108,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters.');
+    if (!isPasswordValid) {
+      setPasswordError('Password must meet all 5 complexity requirements below (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol).');
       return;
     }
 
@@ -157,12 +190,37 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
               </div>
             )}
 
-            <Input
-              label="Full Name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label="First Name"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <Input
+                label="Middle Name"
+                hint="Optional"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <Input
+                  label="Last Name"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
+              <Input
+                label="Suffix"
+                hint="Optional (Jr., Ph.D.)"
+                value={suffix}
+                onChange={(e) => setSuffix(e.target.value)}
+              />
+            </div>
 
             <Input
               label="Email Address"
@@ -205,10 +263,33 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
               label="New Password"
               type="password"
               required
-              hint="Must be at least 6 characters"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
+
+            {/* Password Strength Checklist */}
+            {newPassword && (
+              <div className="p-3 bg-background border border-border text-xs space-y-1.5 font-mono">
+                <div className="font-sans font-bold text-[11px] uppercase tracking-wider text-muted mb-1">
+                  Password Requirements:
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.length ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.length ? '✓' : '○'}</span> At least 8 characters long
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.uppercase ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.uppercase ? '✓' : '○'}</span> At least 1 uppercase letter (A-Z)
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.lowercase ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.lowercase ? '✓' : '○'}</span> At least 1 lowercase letter (a-z)
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.number ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.number ? '✓' : '○'}</span> At least 1 number (0-9)
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.symbol ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.symbol ? '✓' : '○'}</span> At least 1 special symbol (!@#$%^&*)
+                </div>
+              </div>
+            )}
 
             <Input
               label="Confirm New Password"
@@ -222,7 +303,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" isLoading={loadingPassword}>
+              <Button type="submit" isLoading={loadingPassword} disabled={!isPasswordValid}>
                 Update Password
               </Button>
             </div>

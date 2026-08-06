@@ -23,8 +23,12 @@ import Badge from '@/components/ui/Badge';
 interface User {
   id: number;
   name: string;
+  first_name?: string | null;
+  middle_name?: string | null;
+  last_name?: string | null;
+  suffix?: string | null;
   email: string;
-  roles?: { name: string }[];
+  roles?: Array<{ name: string }>;
   is_approved: boolean;
   is_disabled: boolean;
   disabled_at?: string | null;
@@ -32,7 +36,10 @@ interface User {
 }
 
 const userFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  first_name: z.string().min(1, 'First name is required'),
+  middle_name: z.string().optional(),
+  last_name: z.string().min(1, 'Last name is required'),
+  suffix: z.string().optional(),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().optional(),
   role: z.string().min(1, 'Role is required')
@@ -74,14 +81,19 @@ const UserManager: React.FC = () => {
   } = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: '',
+      first_name: '',
+      middle_name: '',
+      last_name: '',
+      suffix: '',
       email: '',
       password: '',
-      role: 'Editor'
+      role: 'Admin'
     }
   });
 
   const selectedRole = watch('role');
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -122,7 +134,7 @@ const UserManager: React.FC = () => {
         e.preventDefault();
         setServerError(null);
         setEditingUser(null);
-        reset({ name: '', email: '', password: '', role: 'Editor' });
+        reset({ first_name: '', middle_name: '', last_name: '', suffix: '', email: '', password: '', role: 'Admin' });
         setIsModalOpen(true);
       }
     };
@@ -151,18 +163,24 @@ const UserManager: React.FC = () => {
     if (user) {
       if (updateUrl) setSearchParams({ action: 'edit', user_id: String(user.id) });
       reset({
-        name: user.name,
+        first_name: user.first_name || user.name?.split(' ')[0] || '',
+        middle_name: user.middle_name || '',
+        last_name: user.last_name || user.name?.split(' ').slice(1).join(' ') || '',
+        suffix: user.suffix || '',
         email: user.email,
         password: '',
-        role: user.roles?.[0]?.name || 'Staff'
+        role: user.roles?.[0]?.name || 'Admin'
       });
     } else {
       if (updateUrl) setSearchParams({ action: 'new' });
       reset({
-        name: '',
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        suffix: '',
         email: '',
         password: '',
-        role: 'Staff'
+        role: 'Admin'
       });
     }
     setIsModalOpen(true);
@@ -192,8 +210,6 @@ const UserManager: React.FC = () => {
       setServerError(err.response?.data?.message || 'Failed to save user.');
     }
   };
-
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleDelete = (id: number) => setDeleteTarget(id);
   const handleApprove = (id: number) => setApproveTarget(id);
@@ -359,12 +375,37 @@ const UserManager: React.FC = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {serverError && <div className="p-3 bg-red-50 text-red-700 text-[13px] rounded">{serverError}</div>}
           
-          <Input 
-            label="Full Name" 
-            required 
-            error={errors.name?.message}
-            {...register('name')}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Input 
+              label="First Name" 
+              required 
+              error={errors.first_name?.message}
+              {...register('first_name')}
+            />
+            <Input 
+              label="Middle Name" 
+              hint="Optional"
+              error={errors.middle_name?.message}
+              {...register('middle_name')}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
+              <Input 
+                label="Last Name" 
+                required 
+                error={errors.last_name?.message}
+                {...register('last_name')}
+              />
+            </div>
+            <Input 
+              label="Suffix" 
+              hint="Optional (Jr., Ph.D.)"
+              error={errors.suffix?.message}
+              {...register('suffix')}
+            />
+          </div>
           
           <Input 
             label="Email Address" 

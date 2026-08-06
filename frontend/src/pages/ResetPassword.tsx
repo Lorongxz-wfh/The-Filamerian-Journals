@@ -20,6 +20,16 @@ const ResetPassword: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const passwordChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+  };
+
+  const isPasswordValid = Object.values(passwordChecks).every(Boolean);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== passwordConfirmation) {
@@ -27,8 +37,8 @@ const ResetPassword: React.FC = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (!isPasswordValid) {
+      setError('Password must meet all 5 complexity requirements (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol).');
       return;
     }
 
@@ -133,6 +143,29 @@ const ResetPassword: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {password && (
+              <div className="p-3 bg-background border border-border text-xs space-y-1.5 font-mono">
+                <div className="font-sans font-bold text-[11px] uppercase tracking-wider text-muted mb-1">
+                  Password Requirements:
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.length ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.length ? '✓' : '○'}</span> At least 8 characters long
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.uppercase ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.uppercase ? '✓' : '○'}</span> At least 1 uppercase letter (A-Z)
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.lowercase ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.lowercase ? '✓' : '○'}</span> At least 1 lowercase letter (a-z)
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.number ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.number ? '✓' : '○'}</span> At least 1 number (0-9)
+                </div>
+                <div className={`flex items-center gap-2 ${passwordChecks.symbol ? 'text-emerald-600 font-bold' : 'text-muted/60'}`}>
+                  <span>{passwordChecks.symbol ? '✓' : '○'}</span> At least 1 special symbol (!@#$%^&*)
+                </div>
+              </div>
+            )}
 
             <div>
               <label htmlFor="confirm_password" className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">

@@ -15,14 +15,32 @@ class UserSeeder extends Seeder
         // Super Admin User (IT)
         $superAdmin = User::updateOrCreate(
             ['email' => 'superadmin@filamerian.com'],
-            ['name' => 'IT Super Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
+            [
+                'name' => 'IT Super Admin',
+                'first_name' => 'IT Super',
+                'middle_name' => null,
+                'last_name' => 'Admin',
+                'suffix' => null,
+                'password' => $password,
+                'is_approved' => true,
+                'email_verified_at' => now()
+            ]
         );
         $superAdmin->assignRole('Super Admin');
 
         // Admin User (Primary User)
         $admin = User::updateOrCreate(
             ['email' => 'admin@filamerian.com'],
-            ['name' => 'Admin', 'password' => $password, 'is_approved' => true, 'email_verified_at' => now()]
+            [
+                'name' => 'Admin User',
+                'first_name' => 'Admin',
+                'middle_name' => null,
+                'last_name' => 'User',
+                'suffix' => null,
+                'password' => $password,
+                'is_approved' => true,
+                'email_verified_at' => now()
+            ]
         );
         $admin->assignRole('Admin');
 
