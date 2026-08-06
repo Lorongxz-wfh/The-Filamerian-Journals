@@ -82,7 +82,10 @@ class UserController extends Controller
 
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
 
-        return response()->json($user->load('roles'), 201);
+        return response()->json([
+            'user' => $user->load('roles'),
+            'temp_password' => $tempPassword,
+        ], 201);
     }
 
     public function show(User $user)

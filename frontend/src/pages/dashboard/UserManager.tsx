@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit2, Trash2, CheckCircle, Users, Power, MoreVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle, Users, Power, MoreVertical, Copy, Check, AlertTriangle } from 'lucide-react';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -70,6 +70,8 @@ const UserManager: React.FC = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [approveTarget, setApproveTarget] = useState<number | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{ user: any; tempPassword: string } | null>(null);
+  const [copiedPass, setCopiedPass] = useState(false);
 
   const {
     register,
@@ -201,12 +203,18 @@ const UserManager: React.FC = () => {
     try {
       if (editingUser) {
         await api.put(`/users/${editingUser.id}`, data);
+        toast.success('User updated successfully');
       } else {
-        await api.post('/users', data);
+        const res = await api.post('/users', data);
+        const createdUser = res.data.user || res.data;
+        const tempPass = res.data.temp_password;
+        if (tempPass) {
+          setCreatedCredentials({ user: createdUser, tempPassword: tempPass });
+        }
+        toast.success('User account created successfully');
       }
       handleCloseModal();
       reset();
-      toast.success(editingUser ? 'User updated successfully' : 'User created successfully');
       fetchUsers();
     } catch (err: any) {
       setServerError(err.response?.data?.message || 'Failed to save user.');
@@ -559,6 +567,89 @@ const UserManager: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Created Credentials Modal (Single-view password display) */}
+      {createdCredentials && (
+        <Modal
+          isOpen={!!createdCredentials}
+          onClose={() => setCreatedCredentials(null)}
+          title="Account Created - Temporary Credentials"
+        >
+          <div className="space-y-4 pt-1">
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-800 text-xs flex items-start gap-2.5">
+              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <span className="font-bold block uppercase tracking-wider text-[10px] text-amber-700 mb-0.5">Important Notice</span>
+                Please copy or save these account credentials now. For security reasons, temporary passwords are only displayed once upon creation.
+              </div>
+            </div>
+
+            <div className="space-y-3 bg-background p-4 border border-border">
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">User Full Name</label>
+                <div className="text-xs font-semibold text-primary">{createdCredentials.user?.name}</div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">Email Address</label>
+                <div className="text-xs font-mono text-primary">{createdCredentials.user?.email}</div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">Assigned Role</label>
+                <Badge variant="secondary" className="text-[10px] uppercase font-bold">
+                  {createdCredentials.user?.roles?.[0]?.name || 'Admin'}
+                </Badge>
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1.5">Temporary Password</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 px-3 py-2 bg-surface border border-primary/30 font-mono text-sm font-bold text-primary select-all">
+                    {createdCredentials.tempPassword}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdCredentials.tempPassword);
+                      setCopiedPass(true);
+                      toast.success('Temporary password copied to clipboard');
+                      setTimeout(() => setCopiedPass(false), 2000);
+                    }}
+                    className="shrink-0 flex items-center gap-1.5 text-xs py-2"
+                  >
+                    {copiedPass ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                    {copiedPass ? 'Copied!' : 'Copy'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const fullDetails = `Full Name: ${createdCredentials.user?.name}\nEmail: ${createdCredentials.user?.email}\nTemporary Password: ${createdCredentials.tempPassword}`;
+                  navigator.clipboard.writeText(fullDetails);
+                  toast.success('All credentials copied to clipboard');
+                }}
+                className="text-xs"
+              >
+                Copy All Details
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setCreatedCredentials(null)}
+                className="text-xs"
+              >
+                Done & Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       <ConfirmDialog 
         isOpen={!!deleteTarget}

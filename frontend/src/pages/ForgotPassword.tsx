@@ -46,6 +46,14 @@ const ForgotPassword: React.FC = () => {
           </p>
         </div>
 
+        <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 text-amber-800 text-xs flex items-start gap-2.5">
+          <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-bold block uppercase tracking-wider text-[10px] text-amber-700 mb-0.5">System Maintenance Notice</span>
+            Automated email dispatch is currently offline for server maintenance. Please contact your Super Admin directly to retrieve or reset your account password.
+          </div>
+        </div>
+
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 text-xs flex items-start gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
