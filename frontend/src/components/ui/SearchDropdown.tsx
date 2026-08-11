@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { BookOpen, FileText, ArrowRight, Loader2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getFileUrl } from '@/services/api';
+import api, { getFileUrl } from '@/services/api';
 
 import HighlightText from '@/components/ui/HighlightText';
 
@@ -22,6 +22,21 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard');
 
+  const [categories, setCategories] = React.useState<{ id: number; name: string }[]>([]);
+
+  useEffect(() => {
+    if (isOpen && categories.length === 0) {
+      api.get('/categories')
+        .then(res => {
+          const cats = res.data.data || [];
+          if (cats.length > 0) {
+            setCategories(cats.slice(0, 6));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOpen, categories.length]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -39,13 +54,15 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
 
   if (!isOpen) return null;
 
-  const popularTopics = [
+  const defaultTopics = [
     'Information Technology',
     'Education & Pedagogy',
     'Health Sciences & Nursing',
     'Capiz Agriculture & Ecology',
     'Business Administration'
   ];
+
+  const popularTopics = categories.length > 0 ? categories.map(c => c.name) : defaultTopics;
 
   // Render recent / popular topics when query is empty
   if (!query.trim()) {
