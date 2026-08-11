@@ -304,7 +304,11 @@ const UserManager: React.FC = () => {
               users.map((user) => {
                 const isSelf = user.id === currentUser.id;
                 return (
-                  <TableRow key={user.id} className={`group ${user.is_disabled ? 'bg-red-50/20 opacity-75' : ''}`}>
+                  <TableRow 
+                    key={user.id} 
+                    className={`group hover:bg-primary/5 cursor-pointer transition-colors ${user.is_disabled ? 'bg-red-50/20 opacity-75' : ''}`}
+                    onClick={() => handleOpenModal(user)}
+                  >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
@@ -359,7 +363,7 @@ const UserManager: React.FC = () => {
                         )}
                         <DropdownMenuItem onClick={() => handleOpenModal(user)}>
                           <div className="flex items-center gap-2 text-foreground">
-                            <Edit2 className="h-4 w-4 text-muted" /> Edit & Status
+                            <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
                           </div>
                         </DropdownMenuItem>
                       </DropdownMenu>

@@ -66,47 +66,42 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-primary flex flex-col justify-center items-center px-4 py-12">
-      <div className="w-full max-w-md bg-surface p-8 border border-border shadow-2xl space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full text-primary mb-2">
-            <Lock className="h-6 w-6" />
-          </div>
-          <h1 className="text-xl font-mono font-bold uppercase tracking-wider text-primary">
-            Set New Password
-          </h1>
-          <p className="text-xs text-muted">
-            Choose a new secure password for your account.
+    <div className="min-h-[80vh] flex items-center justify-center p-4">
+      <div className="w-full max-w-sm space-y-6 bg-surface border border-border p-8">
+        <div className="flex flex-col items-center text-center space-y-2">
+          <h1 className="text-xl text-primary font-serif">Set New Password</h1>
+          <p className="text-[13px] text-muted">
+            Choose a new secure password for your account
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 text-xs flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-            <span>{error}</span>
+          <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 text-red-700 text-[13px]">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <p>{error}</p>
           </div>
         )}
 
         {success ? (
           <div className="space-y-6">
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 text-xs flex items-start gap-2.5">
+            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-[13px] flex items-start gap-2.5">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-emerald-800">Password Reset Successful!</p>
-                <p className="mt-1 leading-relaxed">Your password has been updated. Redirecting to login page in 3 seconds...</p>
+                <p className="font-semibold text-emerald-900">Password Reset Successful!</p>
+                <p className="mt-1 leading-relaxed">Your password has been updated. Redirecting to login in 3 seconds...</p>
               </div>
             </div>
             <Link
               to="/login"
-              className="w-full py-2.5 text-xs font-semibold uppercase tracking-wider border border-border flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90 transition-colors"
+              className="w-full py-3 text-[13px] font-medium bg-primary text-white flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
             >
               Sign In Now &rarr;
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="text-[12px] font-medium text-primary uppercase tracking-wider block">
                 Account Email
               </label>
               <input
@@ -116,12 +111,12 @@ const ResetPassword: React.FC = () => {
                 readOnly={!!emailParam}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 bg-background border border-border text-xs focus:outline-none focus:border-primary transition-colors font-mono opacity-80"
+                className="w-full px-4 py-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors opacity-80"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="text-[12px] font-medium text-primary uppercase tracking-wider block">
                 New Password
               </label>
               <div className="relative">
@@ -131,7 +126,7 @@ const ResetPassword: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-3 pr-10 py-2.5 bg-background border border-border text-xs focus:outline-none focus:border-primary transition-colors font-mono"
+                  className="w-full pl-4 pr-10 py-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors"
                   placeholder="••••••••"
                 />
                 <button
@@ -167,8 +162,8 @@ const ResetPassword: React.FC = () => {
               </div>
             )}
 
-            <div>
-              <label htmlFor="confirm_password" className="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">
+            <div className="space-y-1.5">
+              <label htmlFor="confirm_password" className="text-[12px] font-medium text-primary uppercase tracking-wider block">
                 Confirm New Password
               </label>
               <input
@@ -177,7 +172,7 @@ const ResetPassword: React.FC = () => {
                 required
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
-                className="w-full px-3 py-2.5 bg-background border border-border text-xs focus:outline-none focus:border-primary transition-colors font-mono"
+                className="w-full px-4 py-3 bg-background border border-border text-sm focus:outline-none focus:border-primary transition-colors"
                 placeholder="••••••••"
               />
             </div>
@@ -186,6 +181,7 @@ const ResetPassword: React.FC = () => {
               type="submit"
               className="w-full py-3 text-[13px] font-medium"
               isLoading={loading}
+              disabled={!isPasswordValid}
             >
               {loading ? 'Updating Password...' : 'Save New Password'}
             </Button>
@@ -195,7 +191,7 @@ const ResetPassword: React.FC = () => {
                 to="/login"
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-primary transition-colors"
               >
-                <ArrowLeft className="h-3.5 w-3.5" /> Return to Login
+                <ArrowLeft className="h-3.5 w-3.5" /> Return to Sign In
               </Link>
             </div>
           </form>

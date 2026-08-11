@@ -19,6 +19,8 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTabl
 import Badge from '@/components/ui/Badge';
 import { useSmartPolling } from '@/hooks/useSmartPolling';
 
+import ArticleQuickViewModal from '@/components/ui/ArticleQuickViewModal';
+
 const PER_PAGE = 10;
 
 interface Article {
@@ -35,8 +37,6 @@ interface Article {
   created_at: string;
   updated_at?: string;
 }
-
-
 
 const articleHasPdf = (article: Article) => !!article.pdf_url;
 
@@ -55,6 +55,7 @@ const Articles: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [selectedArticleForView, setSelectedArticleForView] = useState<Article | null>(null);
   
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
@@ -296,12 +297,9 @@ const Articles: React.FC = () => {
                   <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
                 </TableHead>
                 <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('journal')}>
-                  <div className="flex items-center gap-1">Journal {getSortIcon('journal')}</div>
+                  <div className="flex items-center gap-1">Journal & Volume {getSortIcon('journal')}</div>
                 </TableHead>
-                <TableHead>Authors</TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('created_at')}>
-                  <div className="flex items-center gap-1">Submitted {getSortIcon('created_at')}</div>
-                </TableHead>
+                <TableHead>Lead Author</TableHead>
                 <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
                   <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
                 </TableHead>
@@ -313,76 +311,95 @@ const Articles: React.FC = () => {
                 <ArticlesTableSkeleton rows={PER_PAGE} />
               ) : sortedArticles.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center">
+                  <TableCell colSpan={5} className="h-32 text-center">
                     <EmptyState title="No articles" description="No articles match your criteria." className="bg-transparent border-0 py-16" />
                   </TableCell>
                 </TableRow>
               ) : (
-                pagedArticles.map((article) => (
-                  <TableRow 
-                    key={article.id} 
-                    className={`group ${articleHasPdf(article) ? 'cursor-pointer' : ''}`}
-                    onClick={() => articleHasPdf(article) && viewPdf(article)}
-                  >
-                    <TableCell>
-                      <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-primary/20 shrink-0" />
-                          <span className="text-[13px] font-medium text-primary truncate max-w-[280px]" title={article.title}>
-                            {truncateMiddle(article.title, 42)}
-                          </span>
+                pagedArticles.map((article) => {
+                  const leadAuthor = article.authors?.[0]?.name || '-';
+                  const coAuthorsCount = (article.authors?.length || 0) - 1;
+                  const journalTitle = article.volume?.journal?.title || '-';
+                  const volNum = article.volume?.volume_number ? `Vol. ${article.volume.volume_number}` : '';
+
+                  return (
+                    <TableRow 
+                      key={article.id} 
+                      className="group hover:bg-primary/5 cursor-pointer transition-colors"
+                      onClick={() => setSelectedArticleForView(article)}
+                    >
+                      <TableCell>
+                        <div className="flex flex-col min-w-0 pr-2">
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-primary/30 shrink-0" />
+                            <span className="text-[13px] font-medium text-primary line-clamp-1 group-hover:text-primary transition-colors" title={article.title}>
+                              {article.title}
+                            </span>
+                          </div>
+                          <div className="mt-1 pl-6">
+                            <Badge 
+                              variant={article.status === 'Draft' ? 'outline' : 'secondary'}
+                              className={article.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0 font-semibold' : 'text-[9px] px-1.5 py-0 font-semibold'}
+                            >
+                              {article.status || 'Published'}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="mt-1 pl-6">
-                          <Badge 
-                            variant={article.status === 'Draft' ? 'outline' : 'secondary'}
-                            className={article.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0 font-semibold' : 'text-[9px] px-1.5 py-0 font-semibold'}
-                          >
-                            {article.status || 'Published'}
-                          </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted text-xs">
+                        <div className="truncate max-w-[200px]" title={journalTitle}>
+                          <span className="font-medium text-primary/90">{journalTitle}</span>
+                          {volNum && <span className="text-muted/70 text-[11px] block">{volNum}</span>}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted truncate max-w-[180px]">
-                      {article.volume?.journal?.title || '-'}
-                    </TableCell>
-                    <TableCell className="text-muted">
-                      {article.authors?.map(a => a.name).join(', ') || '-'}
-                    </TableCell>
-                    <TableCell className="text-muted">
-                      {new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </TableCell>
-                    <TableCell className="text-muted">
-                      {article.updated_at
-                        ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                        : '-'}
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
-                      <DropdownMenu
-                        trigger={
-                          <IconButton icon={MoreVertical} title="Actions" />
-                        }
-                      >
-                        {article.pdf_url && (
-                          <DropdownMenuItem onClick={() => viewPdf(article)}>
+                      </TableCell>
+                      <TableCell className="text-muted text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate max-w-[150px] font-medium text-primary/80">{leadAuthor}</span>
+                          {coAuthorsCount > 0 && (
+                            <Badge variant="outline" className="text-[9px] px-1 py-0 font-mono text-muted bg-surface">
+                              +{coAuthorsCount}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted text-xs whitespace-nowrap">
+                        {article.updated_at
+                          ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                          : new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                        <DropdownMenu
+                          trigger={
+                            <IconButton icon={MoreVertical} title="Actions" />
+                          }
+                        >
+                          <DropdownMenuItem onClick={() => setSelectedArticleForView(article)}>
                             <div className="flex items-center gap-2 text-foreground">
-                              <Eye className="h-4 w-4 text-muted" /> View PDF
+                              <FileText className="h-4 w-4 text-muted" /> Quick Details
                             </div>
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onClick={() => handleOpenModal(article)}>
-                          <div className="flex items-center gap-2 text-foreground">
-                            <Edit2 className="h-4 w-4 text-muted" /> Edit Article
-                          </div>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(article.id)}>
-                          <div className="flex items-center gap-2 text-red-600">
-                            <Trash2 className="h-4 w-4 text-red-600" /> Delete Article
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
+                          {article.pdf_url && (
+                            <DropdownMenuItem onClick={() => viewPdf(article)}>
+                              <div className="flex items-center gap-2 text-foreground">
+                                <Eye className="h-4 w-4 text-muted" /> View PDF
+                              </div>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={() => handleOpenModal(article)}>
+                            <div className="flex items-center gap-2 text-foreground">
+                              <Edit2 className="h-4 w-4 text-muted" /> Edit Article
+                            </div>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(article.id)}>
+                            <div className="flex items-center gap-2 text-red-600">
+                              <Trash2 className="h-4 w-4 text-red-600" /> Delete Article
+                            </div>
+                          </DropdownMenuItem>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -395,6 +412,14 @@ const Articles: React.FC = () => {
           />
         </div>
       </div>
+
+      <ArticleQuickViewModal
+        isOpen={!!selectedArticleForView}
+        onClose={() => setSelectedArticleForView(null)}
+        article={selectedArticleForView}
+        onEdit={handleOpenModal}
+        onViewPdf={viewPdf}
+      />
 
       <ArticleFormModal
         isOpen={isModalOpen}

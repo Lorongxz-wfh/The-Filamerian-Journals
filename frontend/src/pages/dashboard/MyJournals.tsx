@@ -483,7 +483,7 @@ const MyJournals: React.FC = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleOpenModal(journal)}>
                           <div className="flex items-center gap-2 text-foreground">
-                            <Edit2 className="h-4 w-4 text-muted" /> Edit Journal
+                            <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
                           </div>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDelete(journal.slug)}>
