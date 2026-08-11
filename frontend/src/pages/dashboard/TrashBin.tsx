@@ -375,7 +375,7 @@ const TrashBin: React.FC = () => {
                   : item.category?.name || 'Journal Collection';
 
                 return (
-                  <TableRow key={itemKey} className={isSelected ? 'bg-primary/5' : ''}>
+                  <TableRow key={itemKey} className={`hover:bg-primary/5 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}>
                     {isSelectMode && (
                       <TableCell className="text-center">
                         <input 

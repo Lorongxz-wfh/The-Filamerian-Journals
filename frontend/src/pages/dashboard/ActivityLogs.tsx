@@ -179,7 +179,7 @@ const ActivityLogs: React.FC = () => {
                 </TableRow>
               ) : (
                 logs.map((log) => (
-                  <TableRow key={log.id} className="hover:bg-background/80 transition-colors">
+                  <TableRow key={log.id} className="hover:bg-primary/5 transition-colors">
                     <TableCell className="text-xs font-mono text-muted whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString('en-US', {
                         month: 'short',

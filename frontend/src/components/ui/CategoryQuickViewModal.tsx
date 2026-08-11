@@ -128,7 +128,7 @@ const CategoryQuickViewModal: React.FC<CategoryQuickViewModalProps> = ({
                         size="sm"
                         onClick={() => {
                           onClose();
-                          navigate(`/dashboard/journals/${journal.slug}`);
+                          navigate(`/dashboard/journals?edit=${journal.slug}`);
                         }}
                         className="text-[11px] h-7 px-2.5 flex items-center gap-1"
                       >

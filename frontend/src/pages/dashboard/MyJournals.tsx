@@ -194,11 +194,11 @@ const MyJournals: React.FC = () => {
   // URL Sync
   useEffect(() => {
     const action = searchParams.get('action');
-    const slug = searchParams.get('journal_slug');
+    const editSlug = searchParams.get('edit') || searchParams.get('journal_slug');
     if (action === 'new') {
       handleOpenModal(null, false);
-    } else if (action === 'edit' && slug && journals.length > 0) {
-      const target = journals.find(j => j.slug === slug);
+    } else if ((action === 'edit' || editSlug) && editSlug && journals.length > 0) {
+      const target = journals.find(j => j.slug === editSlug);
       if (target) {
         handleOpenModal(target, false);
       }
@@ -439,13 +439,13 @@ const MyJournals: React.FC = () => {
                   <TableRow
                     key={journal.id}
                     onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
-                    className="group cursor-pointer"
+                    className="group hover:bg-primary/5 cursor-pointer transition-colors"
                   >
                     <TableCell>
                       <div className="flex items-center gap-3 min-w-0">
                         <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
                         <div className="flex flex-col min-w-0">
-                          <span className="text-[13px] font-medium text-primary group-hover:text-secondary transition-colors truncate" title={journal.title}>
+                          <span className="text-[13px] font-medium text-primary group-hover:text-primary transition-colors truncate" title={journal.title}>
                             {truncateMiddle(journal.title, 42)}
                           </span>
                           <div className="flex items-center gap-1.5 mt-0.5">
