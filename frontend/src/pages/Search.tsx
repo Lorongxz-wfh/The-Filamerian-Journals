@@ -142,14 +142,14 @@ const Search: React.FC = () => {
       {/* Main Content Layout */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Sidebar Filters */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] overflow-y-auto">
-          <div className="bg-surface border border-border p-4">
-            <h3 className="text-xs font-bold text-primary uppercase tracking-wider border-b border-border pb-3 mb-4">
+        <aside className="w-full lg:w-[220px] shrink-0">
+          <div className="sticky top-24 space-y-1">
+            <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest mb-4">
               Filter Results
             </h3>
 
             {/* Content Type */}
-            <div className="border border-border mb-4">
+            <div className="border border-border">
               <button
                 onClick={() => toggleSection('type')}
                 className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
@@ -181,7 +181,7 @@ const Search: React.FC = () => {
 
             {/* Category / Subject */}
             {availableCategories.length > 0 && (
-              <div className="border border-border mb-4">
+              <div className="border border-border">
                 <button
                   onClick={() => toggleSection('subject')}
                   className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
