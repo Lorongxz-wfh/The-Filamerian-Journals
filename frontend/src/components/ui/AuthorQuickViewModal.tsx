@@ -79,9 +79,19 @@ const AuthorQuickViewModal: React.FC<AuthorQuickViewModalProps> = ({
           </div>
 
           {loading ? (
-            <div className="py-8 text-center text-xs text-muted space-y-2">
-              <div className="inline-block h-4 w-4 border-2 border-primary border-t-transparent animate-spin rounded-full" />
-              <p>Loading authored publications...</p>
+            <div className="space-y-2.5">
+              {[1, 2].map((i) => (
+                <div key={i} className="p-3 bg-background border border-border flex items-center justify-between gap-3 animate-pulse">
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="h-3.5 bg-muted/20 rounded w-5/6" />
+                    <div className="h-2.5 bg-muted/20 rounded w-1/2" />
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="h-7 w-16 bg-muted/20 rounded" />
+                    <div className="h-7 w-16 bg-muted/20 rounded" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : articles.length === 0 ? (
             <div className="p-6 text-center text-xs text-muted border border-dashed border-border bg-background">
