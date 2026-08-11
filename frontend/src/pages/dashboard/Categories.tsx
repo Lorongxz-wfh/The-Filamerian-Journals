@@ -16,6 +16,8 @@ import Textarea from '@/components/ui/Textarea';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
+import CategoryQuickViewModal from '@/components/ui/CategoryQuickViewModal';
+
 interface Category {
   id: number;
   name: string;
@@ -34,6 +36,7 @@ interface CategoryRowProps {
   openModal: (cat: Category) => void;
   setDeleteId: (id: number) => void;
   setIsReordering: (val: boolean) => void;
+  onSelectForView: (cat: Category) => void;
 }
 
 const CategoryRow: React.FC<CategoryRowProps> = ({
@@ -45,6 +48,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
   openModal,
   setDeleteId,
   setIsReordering,
+  onSelectForView,
 }) => {
   const controls = useDragControls();
 
@@ -115,7 +119,10 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
   const hasJournals = (cat.journals_count || 0) > 0;
 
   return (
-    <tr className="hover:bg-background transition-colors group">
+    <tr 
+      className="hover:bg-primary/5 cursor-pointer transition-colors group"
+      onClick={() => onSelectForView(cat)}
+    >
       <td className="px-5 py-4">
         <div className="flex items-center gap-2.5 min-w-0">
           <Tag className="h-4 w-4 text-primary/30 shrink-0" />
@@ -143,6 +150,11 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
             <IconButton icon={MoreVertical} title="Actions" />
           }
         >
+          <DropdownMenuItem onClick={() => onSelectForView(cat)}>
+            <div className="flex items-center gap-2 text-foreground">
+              <Tag className="h-4 w-4 text-muted" /> Quick Details
+            </div>
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openModal(cat)}>
             <div className="flex items-center gap-2 text-foreground">
               <Edit2 className="h-4 w-4 text-muted" /> Edit Category
@@ -167,6 +179,7 @@ const Categories: React.FC = () => {
   const [filter, setFilter] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [selectedCatForView, setSelectedCatForView] = useState<Category | null>(null);
   const [formData, setFormData] = useState({ name: '', slug: '', description: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -358,6 +371,7 @@ const Categories: React.FC = () => {
                   openModal={openModal}
                   setDeleteId={setDeleteId}
                   setIsReordering={setIsReordering}
+                  onSelectForView={setSelectedCatForView}
                 />
               ))}
             </Reorder.Group>
@@ -404,6 +418,7 @@ const Categories: React.FC = () => {
                       openModal={openModal}
                       setDeleteId={setDeleteId}
                       setIsReordering={setIsReordering}
+                      onSelectForView={setSelectedCatForView}
                     />
                   ))
                 )}
@@ -419,6 +434,12 @@ const Categories: React.FC = () => {
         )}
         </div>
       </div>
+
+      <CategoryQuickViewModal
+        isOpen={!!selectedCatForView}
+        onClose={() => setSelectedCatForView(null)}
+        category={selectedCatForView}
+      />
 
       <Modal 
         isOpen={isModalOpen} 

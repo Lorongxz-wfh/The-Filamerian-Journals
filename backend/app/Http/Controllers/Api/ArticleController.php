@@ -31,6 +31,12 @@ class ArticleController extends Controller
             });
         }
 
+        if ($request->filled('author_id')) {
+            $query->whereHas('authors', function($q) use ($request) {
+                $q->where('authors.id', $request->query('author_id'));
+            });
+        }
+
         $query->orderBy('created_at', 'desc');
 
         return ArticleResource::collection($query->paginate(50));

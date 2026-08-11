@@ -22,6 +22,7 @@ class AuthorResource extends JsonResource
             'last_name' => $this->last_name,
             'suffix' => $this->suffix,
             'email' => $this->email,
+            'articles_count' => $this->articles_count ?? 0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

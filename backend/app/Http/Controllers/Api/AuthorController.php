@@ -11,7 +11,7 @@ class AuthorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Author::query();
+        $query = Author::withCount('articles');
 
         if ($request->filled('search')) {
             $s = $request->search;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
-import api from '@/services/api';
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, MoreVertical, User } from 'lucide-react';
+import api, { getFileUrl } from '@/services/api';
 import { toast } from 'sonner';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
@@ -14,6 +14,8 @@ import EmptyState from '@/components/ui/EmptyState';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
 import AuthorFormFields from '@/components/ui/AuthorFormFields';
+import AuthorQuickViewModal from '@/components/ui/AuthorQuickViewModal';
+import PdfViewerModal from '@/components/ui/PdfViewerModal';
 
 const PER_PAGE = 15;
 
@@ -25,6 +27,7 @@ interface Author {
   suffix: string | null;
   email: string | null;
   name: string; // formatted_name
+  articles_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -56,6 +59,10 @@ const ManageAuthors: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
+  const [selectedAuthorForView, setSelectedAuthorForView] = useState<Author | null>(null);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
+  
   const [form, setForm] = useState<AuthorForm>(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -235,16 +242,12 @@ const ManageAuthors: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('last_name')}>
-                <div className="flex items-center gap-1">Last Name {getSortIcon('last_name')}</div>
+                <div className="flex items-center gap-1">Author Name {getSortIcon('last_name')}</div>
               </TableHead>
-              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('first_name')}>
-                <div className="flex items-center gap-1">First Name {getSortIcon('first_name')}</div>
-              </TableHead>
-              <TableHead>Middle</TableHead>
-              <TableHead>Suffix</TableHead>
               <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('email')}>
                 <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
               </TableHead>
+              <TableHead className="text-center">Publications</TableHead>
               <TableHead className="w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -253,7 +256,7 @@ const ManageAuthors: React.FC = () => {
               <AuthorsTableSkeleton rows={PER_PAGE} />
             ) : sortedAuthors.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center">
+                <TableCell colSpan={4} className="h-32 text-center">
                   <EmptyState
                     title="No authors"
                     description="No authors match your search. Create one to get started."
@@ -262,33 +265,58 @@ const ManageAuthors: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              sortedAuthors.map((author) => (
-                <TableRow key={author.id} className="group">
-                  <TableCell className="font-medium text-primary">{author.last_name}</TableCell>
-                  <TableCell className="text-muted">{author.first_name}</TableCell>
-                  <TableCell className="text-muted">{author.middle_name || '-'}</TableCell>
-                  <TableCell className="text-muted">{author.suffix || '-'}</TableCell>
-                  <TableCell className="text-muted text-[12px]">{author.email || '-'}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
-                    <DropdownMenu
-                      trigger={
-                        <IconButton icon={MoreVertical} title="Actions" />
-                      }
-                    >
-                      <DropdownMenuItem onClick={() => openModal(author)}>
-                        <div className="flex items-center gap-2 text-foreground">
-                          <Edit2 className="h-4 w-4 text-muted" /> Edit Author
+              sortedAuthors.map((author) => {
+                const fullName = author.name || [author.last_name + ',', author.first_name, author.middle_name, author.suffix].filter(Boolean).join(' ');
+                const articlesCount = author.articles_count || 0;
+
+                return (
+                  <TableRow 
+                    key={author.id} 
+                    className="group hover:bg-primary/5 cursor-pointer transition-colors"
+                    onClick={() => setSelectedAuthorForView(author)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
+                          {author.first_name ? author.first_name.charAt(0).toUpperCase() : (author.last_name ? author.last_name.charAt(0).toUpperCase() : 'A')}
                         </div>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setDeleteTarget(author.id)}>
-                        <div className="flex items-center gap-2 text-red-600">
-                          <Trash2 className="h-4 w-4 text-red-600" /> Delete Author
-                        </div>
-                      </DropdownMenuItem>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+                        <span className="text-[13px] font-medium text-primary">{fullName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted text-xs font-mono">{author.email || '-'}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        articlesCount > 0 ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-muted/10 text-muted'
+                      }`}>
+                        {articlesCount} article{articlesCount !== 1 ? 's' : ''}
+                      </span>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                      <DropdownMenu
+                        trigger={
+                          <IconButton icon={MoreVertical} title="Actions" />
+                        }
+                      >
+                        <DropdownMenuItem onClick={() => setSelectedAuthorForView(author)}>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <User className="h-4 w-4 text-muted" /> Quick Details
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openModal(author)}>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Edit2 className="h-4 w-4 text-muted" /> Edit Author
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDeleteTarget(author.id)}>
+                          <div className="flex items-center gap-2 text-red-600">
+                            <Trash2 className="h-4 w-4 text-red-600" /> Delete Author
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -301,6 +329,25 @@ const ManageAuthors: React.FC = () => {
         />
         </div>
       </div>
+
+      <AuthorQuickViewModal
+        isOpen={!!selectedAuthorForView}
+        onClose={() => setSelectedAuthorForView(null)}
+        author={selectedAuthorForView}
+        onViewPdf={(art) => {
+          if (art.pdf_url) {
+            setPdfViewUrl(getFileUrl(art.pdf_url));
+            setIsPdfModalOpen(true);
+          }
+        }}
+      />
+
+      <PdfViewerModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        pdfUrl={pdfViewUrl}
+        allowDownload={true}
+      />
 
       {/* Create/Edit Modal */}
       <Modal
