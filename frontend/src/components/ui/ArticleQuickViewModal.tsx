@@ -3,7 +3,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { getFileUrl } from '@/services/api';
-import { FileText, Eye, Edit2, Download, Calendar, BookOpen, Users, Tag, Hash } from 'lucide-react';
+import { Eye, Edit2, Download, Calendar, BookOpen, Users, Tag, Hash } from 'lucide-react';
 
 interface ArticleQuickViewModalProps {
   isOpen: boolean;

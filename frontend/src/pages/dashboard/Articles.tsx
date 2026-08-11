@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { FileText, Plus, Edit2, Trash2, Eye, Upload, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
-import { truncateMiddle } from '@/lib/utils';
 import ArticleFormModal from '@/components/ui/ArticleFormModal';
 import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import { toast } from 'sonner';
@@ -38,7 +37,6 @@ interface Article {
   updated_at?: string;
 }
 
-const articleHasPdf = (article: Article) => !!article.pdf_url;
 
 const Articles: React.FC = () => {
   const navigate = useNavigate();
