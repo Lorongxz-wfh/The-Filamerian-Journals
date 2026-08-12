@@ -44,45 +44,54 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        try {
+            $user = User::where('email', $request->email)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            if ($user) {
-                ActivityLogger::log('Failed Login Attempt', "Failed login attempt for {$request->email}", User::class, $user->id, $user->id);
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                if ($user) {
+                    ActivityLogger::log('Failed Login Attempt', "Failed login attempt for {$request->email}", User::class, $user->id, $user->id);
+                }
+                
+                throw ValidationException::withMessages([
+                    'email' => ['The provided credentials are incorrect.'],
+                ]);
+            }
+
+            if (! $user->hasVerifiedEmail()) {
+                throw ValidationException::withMessages([
+                    'email' => ['Please verify your email address before logging in. Check your inbox.'],
+                ]);
             }
             
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+            if ($user->is_disabled) {
+                throw ValidationException::withMessages([
+                    'email' => ['Your account has been disabled by an administrator. Please contact support.'],
+                ]);
+            }
+
+            if (! $user->is_approved) {
+                throw ValidationException::withMessages([
+                    'email' => ['Your account is pending administrator approval.'],
+                ]);
+            }
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            ActivityLogger::log('Logged In', "User logged in", User::class, $user->id, $user->id);
+
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $user->load('roles'),
             ]);
+        } catch (ValidationException $ve) {
+            throw $ve;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Login Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json([
+                'message' => 'Login server error: ' . $e->getMessage()
+            ], 500);
         }
-
-        if (! $user->hasVerifiedEmail()) {
-            throw ValidationException::withMessages([
-                'email' => ['Please verify your email address before logging in. Check your inbox.'],
-            ]);
-        }
-        
-        if ($user->is_disabled) {
-            throw ValidationException::withMessages([
-                'email' => ['Your account has been disabled by an administrator. Please contact support.'],
-            ]);
-        }
-
-        if (! $user->is_approved) {
-            throw ValidationException::withMessages([
-                'email' => ['Your account is pending administrator approval.'],
-            ]);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        ActivityLogger::log('Logged In', "User logged in", User::class, $user->id, $user->id);
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user->load('roles'),
-        ]);
     }
 
     public function logout(Request $request)
