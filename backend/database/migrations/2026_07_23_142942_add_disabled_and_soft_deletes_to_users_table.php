@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_disabled')->default(false)->after('is_approved');
-            $table->timestamp('disabled_at')->nullable()->after('is_disabled');
-            $table->softDeletes();
+            if (! Schema::hasColumn('users', 'is_disabled')) {
+                $table->boolean('is_disabled')->default(false);
+            }
+            if (! Schema::hasColumn('users', 'disabled_at')) {
+                $table->timestamp('disabled_at')->nullable();
+            }
+            if (! Schema::hasColumn('users', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
     }
 
