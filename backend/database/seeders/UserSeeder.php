@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
         $password = 'Filamerian@2026!'; // Raw password string; model 'hashed' cast will hash automatically
 
         // Super Admin User (IT)
-        $superAdmin = User::updateOrCreate(
+        $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@filamerian.com'],
             [
                 'name' => 'IT Super Admin',
@@ -26,10 +26,12 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now()
             ]
         );
-        $superAdmin->assignRole('Super Admin');
+        if (! $superAdmin->hasRole('Super Admin')) {
+            $superAdmin->assignRole('Super Admin');
+        }
 
         // Admin User (Primary User)
-        $admin = User::updateOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@filamerian.com'],
             [
                 'name' => 'Admin User',
@@ -42,7 +44,9 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now()
             ]
         );
-        $admin->assignRole('Admin');
+        if (! $admin->hasRole('Admin')) {
+            $admin->assignRole('Admin');
+        }
 
         // Default Admin User (If they want a default admin, though the Super Admin can create them)
         // Kept clean, just Super Admin for now
