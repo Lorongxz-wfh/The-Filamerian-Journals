@@ -8,17 +8,24 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
+        // Essential seeders for all environments (Production, Staging, Local)
         $this->call([
             RoleSeeder::class,
             UserSeeder::class,
             ResourceSeeder::class,
-            ContentSeeder::class,
+            CategorySeeder::class,
         ]);
+
+        // Sample dummy data (journals, articles, announcements) ONLY for Local / Staging!
+        if (! app()->environment('production')) {
+            $this->call([
+                ContentSeeder::class,
+            ]);
+        }
     }
 }
