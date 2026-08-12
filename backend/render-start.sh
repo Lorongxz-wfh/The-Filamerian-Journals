@@ -1,18 +1,15 @@
 #!/bin/bash
 set -e
 
-BUILD_STAMP=$(cat /var/www/html/BUILD_STAMP 2>/dev/null || echo "0")
-LAST_DB_BUILD=$(php artisan tinker --execute="try { echo \App\Models\Setting::where('key', 'last_docker_build_stamp')->value('value'); } catch (\Throwable \$e) { echo 'none'; }" 2>/dev/null | tr -d '\r\n' || echo "none")
+echo "🚀 Running Database Migrations..."
+php artisan migrate --force
 
-echo "🔍 Build Stamp Check -> Current Image: [${BUILD_STAMP}] | Database Recorded: [${LAST_DB_BUILD}]"
+echo "🌱 Checking Essential Database Seeding..."
+USER_COUNT=$(php artisan tinker --execute="try { echo \App\Models\User::count(); } catch (\Throwable \$e) { echo '0'; }" 2>/dev/null | tr -d '\r\n' || echo "0")
 
-if [ "$BUILD_STAMP" != "$LAST_DB_BUILD" ] && [ "$BUILD_STAMP" != "0" ]; then
-  echo "🚀 NEW DEPLOYMENT DETECTED! Running fresh migrations & seeding initial data..."
-  php artisan migrate:fresh --seed --force
-  php artisan tinker --execute="\App\Models\Setting::updateOrCreate(['key' => 'last_docker_build_stamp'], ['value' => '${BUILD_STAMP}']);" 2>/dev/null || true
-else
-  echo "💤 WAKING UP FROM SLEEP (Same Build: ${BUILD_STAMP}). Preserving existing database records!"
-  php artisan migrate --force
+if [ "$USER_COUNT" = "0" ] || [ "$USER_COUNT" = "" ]; then
+  echo "✨ Empty Database detected! Seeding essential roles, admin account, and default categories..."
+  php artisan db:seed --force
 fi
 
 echo "Linking Storage..."
