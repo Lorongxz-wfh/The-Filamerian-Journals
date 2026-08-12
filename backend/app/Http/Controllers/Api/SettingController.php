@@ -12,11 +12,15 @@ class SettingController extends Controller
 {
     public function index()
     {
-        // Return settings as a key-value object with infinite cache
-        $settings = Cache::rememberForever('public_settings', function () {
-            return Setting::all()->pluck('value', 'key');
-        });
-        return response()->json(['data' => $settings]);
+        try {
+            $settings = Cache::remember('public_settings', 3600, function () {
+                return Setting::all()->pluck('value', 'key');
+            });
+            return response()->json(['data' => $settings]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Settings fetch error: ' . $e->getMessage());
+            return response()->json(['data' => (object)[]]);
+        }
     }
 
     public function store(Request $request)
