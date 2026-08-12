@@ -83,8 +83,8 @@ class UserController extends Controller
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
 
         return response()->json([
+            'message' => 'User account created successfully. Credentials have been emailed to the user.',
             'user' => $user->load('roles'),
-            'temp_password' => $tempPassword,
         ], 201);
     }
 

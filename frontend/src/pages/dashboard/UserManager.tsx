@@ -205,13 +205,8 @@ const UserManager: React.FC = () => {
         await api.put(`/users/${editingUser.id}`, data);
         toast.success('User updated successfully');
       } else {
-        const res = await api.post('/users', data);
-        const createdUser = res.data.user || res.data;
-        const tempPass = res.data.temp_password;
-        if (tempPass) {
-          setCreatedCredentials({ user: createdUser, tempPassword: tempPass });
-        }
-        toast.success('User account created successfully');
+        await api.post('/users', data);
+        toast.success('User account created successfully. Credentials have been emailed to the user.');
       }
       handleCloseModal();
       reset();
