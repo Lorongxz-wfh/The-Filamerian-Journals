@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
   const schoolName = settings.footer_school_name || 'Filamer Christian University';
   const copyrightText = settings.footer_copyright || `© ${new Date().getFullYear()} ${schoolName}, Inc. All rights reserved.`;
 
-  // Dynamic Column Helper
+  // Dynamic Column Helper with Default Fallbacks
   const getColumnLinks = (colNum: number) => {
     const title = settings[`footer_col${colNum}_title`] || (colNum === 1 ? 'NAVIGATION' : colNum === 2 ? 'PUBLISHING POLICIES' : '');
     const links: { text: string; url: string }[] = [];
@@ -22,6 +22,34 @@ const Footer: React.FC = () => {
         links.push({ text: text.trim(), url: (url || '#').trim() });
       }
     }
+
+    // Default presets if database settings are unseeded
+    if (links.length === 0) {
+      if (colNum === 1) {
+        return {
+          title: title || 'NAVIGATION',
+          links: [
+            { text: 'Home Portal', url: '/' },
+            { text: 'Browse Journals', url: '/journals' },
+            { text: 'Volume Archives', url: '/archives' },
+            { text: 'About Repository', url: '/about' },
+            { text: 'Contact Editorial Office', url: '/contact' },
+          ]
+        };
+      } else if (colNum === 2) {
+        return {
+          title: title || 'PUBLISHING POLICIES',
+          links: [
+            { text: 'Open Access Policy', url: '/about' },
+            { text: 'Repository Guidelines', url: '/about' },
+            { text: 'Publication Ethics', url: '/about' },
+            { text: 'Journal Policies', url: '/about' },
+            { text: 'Staff & Admin Login', url: '/login' },
+          ]
+        };
+      }
+    }
+
     return { title, links };
   };
 
