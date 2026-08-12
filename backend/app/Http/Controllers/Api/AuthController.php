@@ -89,8 +89,8 @@ class AuthController extends Controller
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Login Exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             return response()->json([
-                'message' => 'Login server error: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Login error: ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')'
+            ], 422);
         }
     }
 
