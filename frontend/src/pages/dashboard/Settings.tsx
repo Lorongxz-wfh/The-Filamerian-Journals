@@ -225,39 +225,39 @@ const Settings: React.FC = () => {
   // TAB 1: System & Security (First Tab)
   // ----------------------------------------------------
   const systemTabContent = (
-    <div className="space-y-6 w-full">
+    <div className="space-y-4 sm:space-y-6 w-full">
       {!isSuperAdmin && (
-        <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 text-[13px] font-medium flex items-center gap-2">
+        <div className="p-3.5 sm:p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs sm:text-[13px] font-medium flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
           System & Security configuration is restricted to Super Admins.
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Storage & Limits */}
-        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col justify-between">
-          <div className="space-y-4">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-4 sm:space-y-5 flex flex-col justify-between">
+          <div className="space-y-3.5 sm:space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <Database className="h-4 w-4 text-primary/50" />
-                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Storage & File Limits</h2>
+                <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Storage & File Limits</h2>
               </div>
               {loadingSettings && (
-                <span className="text-[11px] text-muted flex items-center gap-1.5 font-medium">
+                <span className="text-[10px] sm:text-[11px] text-muted flex items-center gap-1.5 font-medium">
                   <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                   Syncing...
                 </span>
               )}
             </div>
 
-            <div className="space-y-4 text-[13px]">
+            <div className="space-y-3 sm:space-y-4 text-xs sm:text-[13px]">
               {/* Max PDF Upload Size */}
-              <div className="flex items-center justify-between py-2 border-b border-border/60">
-                <div>
-                  <span className="font-medium text-primary block">Max PDF Upload Size (MB)</span>
-                  <span className="text-[11px] text-muted">Applies to all article and journal PDF documents</span>
+              <div className="flex items-center justify-between py-2 border-b border-border/60 gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-primary block truncate">Max PDF Upload Size (MB)</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted line-clamp-1">Applies to all article and journal PDF documents</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <input 
                     type="number" 
                     min="1"
@@ -265,19 +265,19 @@ const Settings: React.FC = () => {
                     disabled={!isSuperAdmin}
                     value={settings.max_pdf_upload_size || '10'}
                     onChange={(e) => handleSettingsChange('max_pdf_upload_size', e.target.value)}
-                    className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
+                    className="w-16 sm:w-20 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-background border border-border text-xs sm:text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
                   />
-                  <span className="text-xs font-mono text-muted">MB</span>
+                  <span className="text-[11px] sm:text-xs font-mono text-muted">MB</span>
                 </div>
               </div>
 
               {/* Max Image Upload Size */}
-              <div className="flex items-center justify-between py-2 border-b border-border/60">
-                <div>
-                  <span className="font-medium text-primary block">Max Image Upload Size (MB)</span>
-                  <span className="text-[11px] text-muted">Applies to cover images and resource graphics</span>
+              <div className="flex items-center justify-between py-2 border-b border-border/60 gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-primary block truncate">Max Image Upload Size (MB)</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted line-clamp-1">Applies to cover images and resource graphics</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <input 
                     type="number" 
                     min="1"
@@ -285,19 +285,19 @@ const Settings: React.FC = () => {
                     disabled={!isSuperAdmin}
                     value={settings.max_image_upload_size || '5'}
                     onChange={(e) => handleSettingsChange('max_image_upload_size', e.target.value)}
-                    className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
+                    className="w-16 sm:w-20 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-background border border-border text-xs sm:text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
                   />
-                  <span className="text-xs font-mono text-muted">MB</span>
+                  <span className="text-[11px] sm:text-xs font-mono text-muted">MB</span>
                 </div>
               </div>
 
               {/* Storage Quota Cap */}
-              <div className="flex items-center justify-between py-2 border-b border-border/60">
-                <div>
-                  <span className="font-medium text-primary block">Storage Quota Cap Limit (GB)</span>
-                  <span className="text-[11px] text-muted">Configurable visual disk quota capacity target</span>
+              <div className="flex items-center justify-between py-2 border-b border-border/60 gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-primary block truncate">Storage Quota Cap Limit (GB)</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted line-clamp-1">Configurable visual disk quota capacity target</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <input 
                     type="number" 
                     min="1"
@@ -305,20 +305,20 @@ const Settings: React.FC = () => {
                     disabled={!isSuperAdmin}
                     value={settings.storage_quota_cap_gb || '50'}
                     onChange={(e) => handleSettingsChange('storage_quota_cap_gb', e.target.value)}
-                    className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
+                    className="w-16 sm:w-20 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-background border border-border text-xs sm:text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
                   />
-                  <span className="text-xs font-mono text-muted">GB</span>
+                  <span className="text-[11px] sm:text-xs font-mono text-muted">GB</span>
                 </div>
               </div>
 
               {/* Storage Meter Bar */}
-              <div className="space-y-2 py-3 border-b border-border/60">
-                <div className="flex justify-between items-center text-[12px]">
-                  <span className="text-muted flex items-center gap-1.5 font-medium">
-                    <HardDrive className="h-3.5 w-3.5 text-primary/70" />
+              <div className="space-y-2 py-2 sm:py-3 border-b border-border/60">
+                <div className="flex justify-between items-center text-xs sm:text-[12px] gap-2">
+                  <span className="text-muted flex items-center gap-1.5 font-medium truncate">
+                    <HardDrive className="h-3.5 w-3.5 text-primary/70 shrink-0" />
                     Media Storage Capacity Meter
                   </span>
-                  <span className="font-mono text-xs text-primary font-semibold">
+                  <span className="font-mono text-[11px] sm:text-xs text-primary font-semibold shrink-0">
                     {loadingSettings ? 'Calculating...' : `${formatBytes(usedStorageBytes)} / ${settings.storage_quota_cap_gb || 50} GB`}
                   </span>
                 </div>
@@ -344,11 +344,11 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Formats */}
-              <div className="flex justify-between items-center py-1.5">
-                <span className="text-muted">Allowed Formats</span>
-                <div className="flex items-center gap-1">
+              <div className="flex justify-between items-center py-1.5 gap-2">
+                <span className="text-muted text-xs sm:text-[13px] shrink-0">Allowed Formats</span>
+                <div className="flex flex-wrap items-center justify-end gap-1">
                   {['PDF', 'DOCX', 'JPG', 'PNG', 'WEBP'].map((fmt) => (
-                    <span key={fmt} className="text-[10px] font-mono font-bold bg-background border border-border px-1.5 py-0.5 text-primary uppercase">
+                    <span key={fmt} className="text-[9px] sm:text-[10px] font-mono font-bold bg-background border border-border px-1.5 py-0.5 text-primary uppercase">
                       {fmt}
                     </span>
                   ))}
@@ -359,28 +359,28 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Governance & Maintenance */}
-        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col justify-between">
-          <div className="space-y-4">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-4 sm:space-y-5 flex flex-col justify-between">
+          <div className="space-y-3.5 sm:space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <Shield className="h-4 w-4 text-primary/50" />
-                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Security & Governance</h2>
+                <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Security & Governance</h2>
               </div>
             </div>
 
-            <div className="space-y-4 text-[13px]">
+            <div className="space-y-3 sm:space-y-4 text-xs sm:text-[13px]">
               {/* Maintenance Mode */}
-              <div className="flex items-center justify-between py-2 border-b border-border/60">
-                <div>
-                  <span className="font-medium text-primary flex items-center gap-1.5">
+              <div className="flex items-center justify-between py-2 border-b border-border/60 gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-primary flex items-center gap-1.5 truncate">
                     Maintenance Mode
                     {settings.maintenance_mode === '1' && (
-                      <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.2">
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 border border-amber-500/20 px-1.5 py-0.2 shrink-0">
                         Active
                       </span>
                     )}
                   </span>
-                  <span className="text-[11px] text-muted">Restrict public access during maintenance</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted line-clamp-1">Restrict public access during maintenance</span>
                 </div>
                 <button
                   type="button"
@@ -399,12 +399,12 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Session Timeout */}
-              <div className="flex items-center justify-between py-2 border-b border-border/60">
-                <div>
-                  <span className="font-medium text-primary block">Session Timeout</span>
-                  <span className="text-[11px] text-muted">Inactivity duration before requiring re-login</span>
+              <div className="flex items-center justify-between py-2 border-b border-border/60 gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium text-primary block truncate">Session Timeout</span>
+                  <span className="text-[10px] sm:text-[11px] text-muted line-clamp-1">Inactivity duration before requiring re-login</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                   <input 
                     type="number" 
                     min="15"
@@ -412,23 +412,23 @@ const Settings: React.FC = () => {
                     disabled={!isSuperAdmin}
                     value={settings.session_timeout || '120'}
                     onChange={(e) => handleSettingsChange('session_timeout', e.target.value)}
-                    className="w-20 px-2.5 py-1.5 bg-background border border-border text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
+                    className="w-16 sm:w-20 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-background border border-border text-xs sm:text-[13px] text-right font-mono focus:outline-none focus:border-primary transition-colors disabled:opacity-50" 
                   />
-                  <span className="text-xs font-mono text-muted">min</span>
+                  <span className="text-[11px] sm:text-xs font-mono text-muted">min</span>
                 </div>
               </div>
 
               {/* Engine Badges */}
-              <div className="flex items-center justify-between py-1.5 border-b border-border/60">
-                <span className="text-muted">Authentication Engine</span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5">
+              <div className="flex items-center justify-between py-1.5 border-b border-border/60 gap-2">
+                <span className="text-muted text-xs sm:text-[13px] shrink-0">Authentication Engine</span>
+                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 sm:px-2 py-0.5 shrink-0">
                   <CheckCircle2 className="h-3 w-3" /> Laravel Sanctum
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-1.5">
-                <span className="text-muted">Access Control (RBAC)</span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5">
+              <div className="flex items-center justify-between py-1.5 gap-2">
+                <span className="text-muted text-xs sm:text-[13px] shrink-0">Access Control (RBAC)</span>
+                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 sm:px-2 py-0.5 shrink-0">
                   <CheckCircle2 className="h-3 w-3" /> Spatie Permission
                 </span>
               </div>
@@ -442,6 +442,7 @@ const Settings: React.FC = () => {
           <Button 
             onClick={handleSaveSettings}
             isLoading={savingSettings}
+            className="text-xs sm:text-sm cursor-pointer"
           >
             {savingSettings ? 'Saving...' : 'Save System Settings'}
           </Button>
@@ -595,8 +596,9 @@ const Settings: React.FC = () => {
             <Globe className="h-4 w-4 text-primary/40" />
             <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">About Page Resources</h2>
           </div>
-          <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2 h-8 text-[11px] px-3">
-            <Plus className="h-3 w-3" /> New Resource
+          <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-8 text-xs px-2.5 sm:px-3 cursor-pointer" title="New Resource">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Resource</span>
           </Button>
         </div>
 
@@ -607,16 +609,16 @@ const Settings: React.FC = () => {
             placeholder="Filter resources..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary"
+            className="w-full pl-9 pr-4 py-1.5 sm:py-2 bg-background border border-border text-xs sm:text-[13px] focus:outline-none focus:border-primary"
           />
         </div>
 
         <div className="border border-border bg-background overflow-x-auto max-h-[500px] overflow-y-auto relative">
-          <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted uppercase tracking-wider">
-            <div className="col-span-1 text-center">Order</div>
-            <div className="col-span-5">Title</div>
-            <div className="col-span-4">Slug</div>
-            <div className="col-span-2"></div>
+          <div className="sticky top-0 bg-surface z-10 shadow-sm shadow-black/5 grid grid-cols-12 gap-3 sm:gap-4 px-3.5 sm:px-5 py-2.5 sm:py-3 border-b border-border text-[10px] sm:text-[11px] font-semibold text-muted uppercase tracking-wider">
+            <div className="col-span-2 sm:col-span-1 text-center">Order</div>
+            <div className="col-span-8 sm:col-span-5">Title</div>
+            <div className="hidden sm:block sm:col-span-4">Slug</div>
+            <div className="col-span-2 text-right"></div>
           </div>
           
           {loadingResources ? (
@@ -625,19 +627,22 @@ const Settings: React.FC = () => {
             <EmptyState title="No resources" description="No resources found." className="border-0 bg-transparent py-16" />
           ) : (
             filteredResources.map((item) => (
-              <div key={item.id} className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-border last:border-b-0 hover:bg-surface transition-colors group cursor-default items-center">
-                <div className="col-span-1 text-center text-[13px] text-muted">{item.order}</div>
-                <div className="col-span-5 flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-primary/30 shrink-0" />
-                  <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
+              <div key={item.id} className="grid grid-cols-12 gap-3 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4 border-b border-border last:border-b-0 hover:bg-surface transition-colors group cursor-default items-center">
+                <div className="col-span-2 sm:col-span-1 text-center text-xs sm:text-[13px] text-muted font-mono">{item.order}</div>
+                <div className="col-span-8 sm:col-span-5 flex items-start sm:items-center gap-2.5 min-w-0">
+                  <FileText className="h-4 w-4 text-primary/30 shrink-0 mt-0.5 sm:mt-0" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs sm:text-[13px] font-medium text-primary line-clamp-1">{item.title}</span>
+                    <span className="sm:hidden text-[10px] text-muted font-mono block truncate">{item.slug}</span>
+                  </div>
                 </div>
-                <div className="col-span-4 text-[12px] text-muted truncate">{item.slug}</div>
-                <div className="col-span-2 flex justify-end gap-2">
-                  <button onClick={() => handleOpenModal(item)} className="text-muted/60 hover:text-primary hover:bg-black/5 rounded h-7 w-7 flex items-center justify-center transition-all">
-                    <Edit2 className="h-4 w-4" />
+                <div className="hidden sm:block sm:col-span-4 text-xs text-muted truncate font-mono">{item.slug}</div>
+                <div className="col-span-2 flex justify-end gap-1 sm:gap-2">
+                  <button onClick={() => handleOpenModal(item)} className="text-muted/60 hover:text-primary hover:bg-black/5 rounded h-7 w-7 flex items-center justify-center transition-all cursor-pointer" title="Edit">
+                    <Edit2 className="h-3.5 w-3.5" />
                   </button>
-                  <button onClick={() => handleDeleteResource(item.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 rounded h-7 w-7 flex items-center justify-center transition-all">
-                    <Trash2 className="h-4 w-4" />
+                  <button onClick={() => handleDeleteResource(item.id)} className="text-muted/60 hover:text-red-500 hover:bg-red-500/10 rounded h-7 w-7 flex items-center justify-center transition-all cursor-pointer" title="Delete">
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>

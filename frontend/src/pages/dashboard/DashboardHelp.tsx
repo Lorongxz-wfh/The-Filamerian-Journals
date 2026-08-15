@@ -67,45 +67,45 @@ const DashboardHelp: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 sm:space-y-6 pb-12">
       <DashboardHeader 
         title="Admin User Manual & System Guide" 
-        className="mb-4"
+        className="mb-2 sm:mb-4"
       />
 
       {/* Quick Stats / Highlights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="border border-border bg-surface p-5 flex items-start gap-4">
-          <div className="w-10 h-10 rounded bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-            <BookOpen className="h-5 w-5 text-primary" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="border border-border bg-surface p-4 sm:p-5 flex items-start gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
           <div>
-            <h4 className="text-[13px] font-bold text-primary uppercase tracking-wider">Editorial Management</h4>
-            <p className="text-[12px] text-muted mt-1 leading-relaxed">
+            <h4 className="text-xs sm:text-[13px] font-bold text-primary uppercase tracking-wider">Editorial Management</h4>
+            <p className="text-[11px] sm:text-[12px] text-muted mt-0.5 sm:mt-1 leading-relaxed">
               Step-by-step guides for journal creation, volume indexing, and manuscript publishing.
             </p>
           </div>
         </div>
 
-        <div className="border border-border bg-surface p-5 flex items-start gap-4">
-          <div className="w-10 h-10 rounded bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0">
-            <ShieldCheck className="h-5 w-5 text-secondary" />
+        <div className="border border-border bg-surface p-4 sm:p-5 flex items-start gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded bg-secondary/10 border border-secondary/20 flex items-center justify-center shrink-0 mt-0.5">
+            <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
           </div>
           <div>
-            <h4 className="text-[13px] font-bold text-primary uppercase tracking-wider">System & Security</h4>
-            <p className="text-[12px] text-muted mt-1 leading-relaxed">
+            <h4 className="text-xs sm:text-[13px] font-bold text-primary uppercase tracking-wider">System & Security</h4>
+            <p className="text-[11px] sm:text-[12px] text-muted mt-0.5 sm:mt-1 leading-relaxed">
               Super Admin controls for user approvals, security toggles, logs, and maintenance mode.
             </p>
           </div>
         </div>
 
-        <div className="border border-border bg-surface p-5 flex items-start gap-4">
-          <div className="w-10 h-10 rounded bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-            <Command className="h-5 w-5 text-primary" />
+        <div className="border border-border bg-surface p-4 sm:p-5 flex items-start gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+            <Command className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
           <div>
-            <h4 className="text-[13px] font-bold text-primary uppercase tracking-wider">Power Shortcuts</h4>
-            <p className="text-[12px] text-muted mt-1 leading-relaxed">
+            <h4 className="text-xs sm:text-[13px] font-bold text-primary uppercase tracking-wider">Power Shortcuts</h4>
+            <p className="text-[11px] sm:text-[12px] text-muted mt-0.5 sm:mt-1 leading-relaxed">
               Keyboard navigation cheat sheet (`Ctrl+K`, `/`) for instant search across all modules.
             </p>
           </div>
@@ -113,47 +113,53 @@ const DashboardHelp: React.FC = () => {
       </div>
 
       {/* Main Tab Navigation */}
-      <div className="border-b border-border flex items-center gap-2 overflow-x-auto pt-2">
+      <div className="border-b border-border flex items-center gap-1 sm:gap-2 overflow-x-auto custom-scrollbar pt-1 sm:pt-2 pb-0.5">
         <button
           onClick={() => setActiveTab('workflows')}
-          className={`px-4 py-3 text-[12px] font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-2 shrink-0 ${
+          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
             activeTab === 'workflows'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted hover:text-primary'
           }`}
         >
-          <FileText className="h-4 w-4" /> Core Workflows
+          <FileText className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">Core Workflows</span>
+          <span className="sm:hidden">Workflows</span>
         </button>
         <button
           onClick={() => setActiveTab('faqs')}
-          className={`px-4 py-3 text-[12px] font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-2 shrink-0 ${
+          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
             activeTab === 'faqs'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted hover:text-primary'
           }`}
         >
-          <HelpCircle className="h-4 w-4" /> Admin FAQs & Troubleshooting
+          <HelpCircle className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">Admin FAQs & Troubleshooting</span>
+          <span className="sm:hidden">FAQs & Help</span>
         </button>
         <button
           onClick={() => setActiveTab('shortcuts')}
-          className={`px-4 py-3 text-[12px] font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-2 shrink-0 ${
+          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-colors flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
             activeTab === 'shortcuts'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted hover:text-primary'
           }`}
         >
-          <Key className="h-4 w-4" /> Keyboard Shortcuts
+          <Key className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">Keyboard Shortcuts</span>
+          <span className="sm:hidden">Shortcuts</span>
         </button>
       </div>
 
       {/* Tab 1: Core Workflows */}
       {activeTab === 'workflows' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Guide Card 1 */}
-          <div className="border border-border bg-surface p-6 space-y-4">
-            <div className="flex items-center gap-3 border-b border-border pb-3">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <h3 className="text-sm font-bold text-primary uppercase tracking-wider">1. Creating & Managing Journals</h3>
+          <div className="border border-border bg-surface p-4 sm:p-6 space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2.5 sm:gap-3 border-b border-border pb-2.5 sm:pb-3">
+              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <h3 className="text-xs sm:text-sm font-bold text-primary uppercase tracking-wider">1. Creating & Managing Journals</h3>
             </div>
             <div className="text-[13px] text-muted space-y-3 leading-relaxed">
               <p>
