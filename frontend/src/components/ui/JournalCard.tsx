@@ -134,7 +134,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
   return (
     <Link
       to={`/journals/${slug}`}
-      className={cn('group relative flex flex-col sm:flex-row items-stretch gap-4 sm:gap-6 md:gap-8 p-4 sm:p-6 border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-1 transition-all duration-300 mb-4 overflow-hidden', className)}
+      className={cn('group relative flex flex-row items-start sm:items-stretch gap-3.5 sm:gap-6 md:gap-8 p-3.5 sm:p-5 md:p-6 border border-border bg-transparent hover:bg-surface hover:shadow-md hover:-translate-y-0.5 sm:hover:-translate-y-1 transition-all duration-300 mb-3 sm:mb-4 overflow-hidden', className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -142,8 +142,8 @@ const JournalCard: React.FC<JournalCardProps> = ({
       <div className="absolute top-0 left-0 w-full h-[3px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10" />
 
       <FloatingCard />
-      {/* Image (Portrait) */}
-      <div className="relative w-full sm:w-[120px] md:w-[140px] aspect-[3/4] sm:aspect-auto shrink-0 overflow-hidden bg-background border border-border flex items-center justify-center">
+      {/* Image Thumbnail (Left) */}
+      <div className="relative w-20 sm:w-[120px] md:w-[140px] aspect-[3/4] shrink-0 overflow-hidden bg-background border border-border flex items-center justify-center shadow-xs">
         {image && !imgError ? (
           <img
             src={image}
@@ -152,45 +152,50 @@ const JournalCard: React.FC<JournalCardProps> = ({
             className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="flex items-center justify-center h-full min-h-[140px] sm:min-h-[160px]">
-            <BookOpen className="w-8 sm:w-10 h-8 sm:h-10 text-muted/40" />
+          <div className="flex flex-col items-center justify-center h-full p-1 text-center">
+            <BookOpen className="w-6 sm:w-8 md:w-10 h-6 sm:h-8 md:h-10 text-primary/30" />
+            <span className="text-[8px] sm:text-[10px] font-bold text-primary uppercase tracking-widest line-clamp-2 mt-1 sm:hidden">
+              {title}
+            </span>
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0 flex flex-col h-full py-1 sm:py-2">
-        <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-          <span className="text-xs sm:text-[13px] font-semibold text-primary uppercase tracking-wider">
-            {date || 'March 2024'}
-          </span>
-          {categoryName && (
-            <span className="text-[10px] sm:text-[11px] font-medium text-muted bg-surface border border-border px-1.5 sm:px-2 py-0.5 uppercase tracking-wider">
-              {categoryName}
+      {/* Content (Right) */}
+      <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5 sm:py-1">
+        <div>
+          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2 flex-wrap">
+            <span className="text-[10px] sm:text-xs md:text-[13px] font-semibold text-primary uppercase tracking-wider font-mono">
+              {date || 'March 2024'}
             </span>
+            {categoryName && (
+              <span className="text-[9px] sm:text-[10px] md:text-[11px] font-medium text-muted bg-surface border border-border px-1.5 sm:px-2 py-0.5 uppercase tracking-wider">
+                {categoryName}
+              </span>
+            )}
+          </div>
+
+          <h3 className="text-sm sm:text-lg md:text-[22px] font-bold text-primary mb-1.5 sm:mb-2 leading-snug uppercase tracking-wider transition-colors duration-200 line-clamp-2">
+            <HighlightText text={title} query={searchQuery} />
+          </h3>
+
+          <div 
+            className="text-xs sm:text-[13.5px] md:text-[14.5px] text-muted line-clamp-2 sm:line-clamp-3 leading-relaxed mb-2 sm:mb-4 max-w-3xl prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+          />
+          
+          {publisher && (
+            <div className="hidden sm:block text-[11px] sm:text-[12px] text-muted/80 mb-3 sm:mb-4">
+              <span className="font-semibold text-gray-900">Year Published:</span> <span className="text-[#0077cc]">{publisher}</span>
+            </div>
           )}
         </div>
 
-        <h3 className="text-base sm:text-lg md:text-[22px] font-bold text-primary mb-2 sm:mb-3 leading-snug uppercase tracking-wider transition-colors duration-200">
-          <HighlightText text={title} query={searchQuery} />
-        </h3>
-
-        <div 
-          className="text-xs sm:text-[13.5px] md:text-[14.5px] text-muted line-clamp-2 sm:line-clamp-3 leading-relaxed mb-3 sm:mb-5 max-w-3xl prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
-        />
-        
-        {publisher && (
-          <div className="text-[11px] sm:text-[12px] text-muted/80 mb-3 sm:mb-4">
-            <span className="font-semibold text-gray-900">Year Published:</span> <span className="text-[#0077cc]">{publisher}</span>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between mt-auto pt-3 sm:pt-4 border-t border-border">
-          <span className="text-xs sm:text-[13px] font-medium text-primary">
+        <div className="flex items-center justify-between pt-2 sm:pt-3 border-t border-border mt-auto">
+          <span className="text-[11px] sm:text-xs md:text-[13px] font-medium text-primary">
             {volume || 'No Volumes'}
           </span>
-          <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all" />
+          <ArrowRight className="w-3.5 sm:w-4 md:w-5 h-3.5 sm:h-4 md:h-5 text-muted group-hover:text-primary group-hover:translate-x-1 transition-all" />
         </div>
       </div>
     </Link>
