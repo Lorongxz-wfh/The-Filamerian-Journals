@@ -206,13 +206,13 @@ const TrashBin: React.FC = () => {
           </span>
         }
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <SearchInput
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search deleted items..."
-            containerClassName="w-full sm:w-72"
-            className="h-9"
+            placeholder="Search..."
+            containerClassName="w-32 xs:w-44 sm:w-72"
+            className="h-9 text-xs"
           />
           <Button
             type="button"
@@ -223,15 +223,16 @@ const TrashBin: React.FC = () => {
               }
               setIsSelectMode(!isSelectMode);
             }}
-            className="h-9 text-[12px] flex items-center gap-1.5 px-3 shrink-0 font-medium"
+            className="h-9 text-xs flex items-center gap-1.5 px-2.5 sm:px-3 shrink-0 font-medium cursor-pointer"
+            title={isSelectMode ? "Cancel Selection" : "Bulk Select"}
           >
             {isSelectMode ? <X className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}
-            {isSelectMode ? 'Cancel Selection' : 'Select'}
+            <span className="hidden sm:inline">{isSelectMode ? 'Cancel' : 'Select'}</span>
           </Button>
           <button
             onClick={fetchTrashItems}
             disabled={loading}
-            className="h-9 w-9 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0 rounded flex items-center justify-center"
+            className="h-9 w-9 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0 flex items-center justify-center cursor-pointer"
             title="Refresh Trash Bin"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -240,21 +241,21 @@ const TrashBin: React.FC = () => {
       </DashboardHeader>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between border-b border-border pb-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+      <div className="flex items-center justify-between border-b border-border pb-2 sm:pb-3">
+        <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto custom-scrollbar pr-2">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-3 py-2 text-[12px] font-bold uppercase tracking-wider transition-colors shrink-0 ${
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer ${
               activeTab === 'all'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted hover:text-primary'
             }`}
           >
-            All Items ({allItems.length})
+            All ({allItems.length})
           </button>
           <button
             onClick={() => setActiveTab('article')}
-            className={`px-3 py-2 text-[12px] font-bold uppercase tracking-wider transition-colors shrink-0 ${
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer ${
               activeTab === 'article'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted hover:text-primary'
@@ -264,7 +265,7 @@ const TrashBin: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('volume')}
-            className={`px-3 py-2 text-[12px] font-bold uppercase tracking-wider transition-colors shrink-0 ${
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer ${
               activeTab === 'volume'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted hover:text-primary'
@@ -274,7 +275,7 @@ const TrashBin: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('journal')}
-            className={`px-3 py-2 text-[12px] font-bold uppercase tracking-wider transition-colors shrink-0 ${
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer ${
               activeTab === 'journal'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted hover:text-primary'
@@ -335,18 +336,18 @@ const TrashBin: React.FC = () => {
                 </TableHead>
               )}
               <TableHead>Item Name / Title</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Original Context</TableHead>
-              <TableHead>Deleted On</TableHead>
-              <TableHead>Retention</TableHead>
-              <TableHead className="w-12 text-right"></TableHead>
+              <TableHead className="hidden sm:table-cell">Type</TableHead>
+              <TableHead className="hidden md:table-cell">Original Context</TableHead>
+              <TableHead className="hidden lg:table-cell">Deleted On</TableHead>
+              <TableHead className="hidden sm:table-cell">Retention</TableHead>
+              <TableHead className="w-10 sm:w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
                 <TableCell colSpan={isSelectMode ? 7 : 6} className="text-center py-16">
-                  <div className="flex items-center justify-center gap-2 text-muted text-[13px]">
+                  <div className="flex items-center justify-center gap-2 text-muted text-xs sm:text-[13px]">
                     <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                     Loading trash bin items...
                   </div>
@@ -377,7 +378,7 @@ const TrashBin: React.FC = () => {
                 return (
                   <TableRow key={itemKey} className={`hover:bg-primary/5 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}>
                     {isSelectMode && (
-                      <TableCell className="text-center">
+                      <TableCell className="text-center py-2.5 sm:py-3.5">
                         <input 
                           type="checkbox"
                           checked={isSelected}
@@ -387,17 +388,25 @@ const TrashBin: React.FC = () => {
                       </TableCell>
                     )}
 
-                    <TableCell className="font-medium text-foreground">
-                      <div className="flex items-center gap-2.5">
-                        {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0" />}
-                        {item.type === 'volume' && <Layers className="h-4 w-4 text-secondary shrink-0" />}
-                        {item.type === 'journal' && <BookOpen className="h-4 w-4 text-emerald-600 shrink-0" />}
-                        <span className="line-clamp-1 font-semibold">{title}</span>
+                    <TableCell className="font-medium text-foreground py-2.5 sm:py-3.5">
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0 mt-0.5" />}
+                        {item.type === 'volume' && <Layers className="h-4 w-4 text-secondary shrink-0 mt-0.5" />}
+                        {item.type === 'journal' && <BookOpen className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />}
+                        <div className="min-w-0">
+                          <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
+                          {/* Mobile subtitle */}
+                          <div className="sm:hidden text-[10px] text-muted truncate mt-0.5">
+                            <span className="capitalize font-medium text-primary/80">{item.type}</span>
+                            <span> • {context}</span>
+                            <span className="text-amber-600 font-medium"> • {item.days_remaining}d left</span>
+                          </div>
+                        </div>
                       </div>
                     </TableCell>
 
-                    <TableCell>
-                      <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
+                    <TableCell className="hidden sm:table-cell">
+                      <span className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-full border ${
                         item.type === 'article'
                           ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
                           : item.type === 'volume'
@@ -408,11 +417,11 @@ const TrashBin: React.FC = () => {
                       </span>
                     </TableCell>
 
-                    <TableCell className="text-muted text-[12px]">
+                    <TableCell className="text-muted text-[12px] hidden md:table-cell truncate max-w-[200px]">
                       {context}
                     </TableCell>
 
-                    <TableCell className="text-muted text-[12px]">
+                    <TableCell className="text-muted text-[12px] hidden lg:table-cell whitespace-nowrap">
                       {new Date(item.deleted_at).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',
@@ -420,17 +429,17 @@ const TrashBin: React.FC = () => {
                       })}
                     </TableCell>
 
-                    <TableCell>
-                      <span className="inline-flex items-center gap-1.5 text-[12px] text-muted">
+                    <TableCell className="hidden sm:table-cell">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-muted">
                         <Clock className="h-3.5 w-3.5 shrink-0" />
                         {item.days_remaining} days left
                       </span>
                     </TableCell>
 
-                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="text-right py-2.5 sm:py-3.5" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu
                         trigger={
-                          <IconButton icon={MoreVertical} title="Actions" />
+                          <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
                         }
                       >
                         <DropdownMenuItem
@@ -461,9 +470,9 @@ const TrashBin: React.FC = () => {
                 );
               })
             )}
-            </TableBody>
-          </Table>
-          <DataTableFooter
+          </TableBody>
+        </Table>
+        <DataTableFooter
             showingText={`Showing ${filteredItems.length} of ${allItems.length} deleted item${allItems.length !== 1 ? 's' : ''}`}
             loading={loading}
           />

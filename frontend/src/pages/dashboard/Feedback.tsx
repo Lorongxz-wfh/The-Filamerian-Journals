@@ -98,41 +98,41 @@ const Feedback: React.FC = () => {
   const selectedItem = feedbacks.find((f) => f.id === selected);
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-4 sm:space-y-8 font-sans">
       <DashboardHeader title="User Feedback">
-        <div className="flex items-center gap-1 border border-border bg-surface p-1">
+        <div className="flex items-center gap-0.5 sm:gap-1 border border-border bg-surface p-0.5 sm:p-1">
           <button
             onClick={() => { setActiveTab('active'); setPage(1); }}
-            className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold tracking-wider transition-colors cursor-pointer ${
               activeTab === 'active'
                 ? 'bg-primary text-white'
                 : 'text-muted hover:text-primary hover:bg-background'
             }`}
           >
-            Active Feedback
+            Active <span className="hidden sm:inline">Feedback</span>
           </button>
           <button
             onClick={() => { setActiveTab('archived'); setPage(1); }}
-            className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold tracking-wider transition-colors flex items-center gap-1 sm:gap-1.5 cursor-pointer ${
               activeTab === 'archived'
                 ? 'bg-primary text-white'
                 : 'text-muted hover:text-primary hover:bg-background'
             }`}
           >
             <Archive className="h-3.5 w-3.5" />
-            Archived Messages
+            Archived <span className="hidden sm:inline">Messages</span>
           </button>
         </div>
       </DashboardHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[500px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 min-h-[450px] sm:min-h-[500px]">
         {/* Message List */}
-        <div className="lg:col-span-5 border border-border bg-surface flex flex-col max-h-[600px]">
+        <div className="lg:col-span-5 border border-border bg-surface flex flex-col max-h-[500px] sm:max-h-[600px]">
           <div className="divide-y divide-border overflow-auto flex-grow">
             {loading ? (
               <MessageListSkeleton rows={6} />
             ) : feedbacks.length === 0 ? (
-              <div className="p-8 text-center text-muted text-[13px]">
+              <div className="p-8 text-center text-muted text-xs sm:text-[13px]">
                 {activeTab === 'archived' ? 'No archived feedback messages.' : 'No active feedback messages.'}
               </div>
             ) : (
@@ -140,21 +140,21 @@ const Feedback: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item.id)}
-                  className={`w-full text-left px-5 py-4 transition-colors ${
+                  className={`w-full text-left px-3.5 sm:px-5 py-3 sm:py-4 transition-colors cursor-pointer ${
                     selected === item.id
                       ? 'bg-primary/5 border-l-2 border-l-primary'
                       : 'hover:bg-background border-l-2 border-l-transparent'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[13px] truncate ${!item.is_read ? 'font-semibold text-primary' : 'font-medium text-primary/70'}`}>
+                    <span className={`text-xs sm:text-[13px] truncate ${!item.is_read ? 'font-semibold text-primary' : 'font-medium text-primary/70'}`}>
                       {item.name}
                     </span>
-                    <span className="text-[11px] text-muted shrink-0 ml-3">
+                    <span className="text-[10px] sm:text-[11px] text-muted shrink-0 ml-2 sm:ml-3">
                       {new Date(item.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className={`text-[12px] truncate ${!item.is_read ? 'text-primary/80 font-medium' : 'text-muted'}`}>
+                  <p className={`text-[11px] sm:text-[12px] truncate ${!item.is_read ? 'text-primary/80 font-medium' : 'text-muted'}`}>
                     {item.subject}
                   </p>
                 </button>
@@ -163,7 +163,7 @@ const Feedback: React.FC = () => {
           </div>
           
           {lastPage > 1 && (
-            <div className="border-t border-border p-4 bg-background/50 flex items-center justify-between">
+            <div className="border-t border-border p-3 sm:p-4 bg-background/50 flex items-center justify-between">
               {loading && (
                 <span className="text-[11px] text-muted flex items-center gap-1.5 font-medium">
                   <span className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />

@@ -260,20 +260,23 @@ const UserManager: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="User Accounts">
-        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> User
+        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="New User">
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">User</span>
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-4">
         <div className="flex justify-end items-center">
-          <SearchInput 
-            placeholder="Search users by name or email..." 
-            value={filter} 
-            onChange={(e) => setFilter(e.target.value)} 
-          />
+          <div className="w-full sm:w-64">
+            <SearchInput 
+              placeholder="Search users by name or email..." 
+              value={filter} 
+              onChange={(e) => setFilter(e.target.value)} 
+            />
+          </div>
         </div>
 
         <div className="border border-border bg-surface flex flex-col">
@@ -281,9 +284,9 @@ const UserManager: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead className="hidden sm:table-cell">Email</TableHead>
               <TableHead>Role & Status</TableHead>
-              <TableHead className="w-12 text-right"></TableHead>
+              <TableHead className="w-10 sm:w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -304,49 +307,51 @@ const UserManager: React.FC = () => {
                     className={`group hover:bg-primary/5 cursor-pointer transition-colors ${user.is_disabled ? 'bg-red-50/20 opacity-75' : ''}`}
                     onClick={() => handleOpenModal(user)}
                   >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
+                    <TableCell className="py-2.5 sm:py-3.5">
+                      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
+                        <div className="h-6 w-6 sm:h-7 sm:w-7 bg-primary/10 flex items-center justify-center text-[10px] sm:text-[11px] font-semibold text-primary shrink-0 rounded mt-0.5 sm:mt-0">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-[13px] font-medium text-primary flex items-center gap-1.5">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs sm:text-[13px] font-medium text-primary flex items-center gap-1.5 truncate">
                             {user.name}
                             {isSelf && (
-                              <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary px-1.5 py-0.2 rounded">You</span>
+                              <span className="text-[9px] sm:text-[10px] font-mono font-bold bg-primary/10 text-primary px-1 py-0.2 rounded">You</span>
                             )}
                           </span>
+                          {/* Mobile email subtitle */}
+                          <span className="sm:hidden text-[10px] text-muted font-mono truncate">{user.email}</span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted">{user.email}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')}>
+                    <TableCell className="text-muted text-xs hidden sm:table-cell truncate max-w-[200px]">{user.email}</TableCell>
+                    <TableCell className="py-2.5 sm:py-3.5">
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+                        <Badge variant={getRoleVariant(user.roles?.[0]?.name || '')} className="text-[8px] sm:text-[9px] px-1.5 py-0 font-semibold">
                           {user.roles?.[0]?.name || 'No Role'}
                         </Badge>
 
                         {user.is_disabled ? (
-                          <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+                          <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 text-[8px] sm:text-[9px] px-1.5 py-0">
                             Disabled
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">
+                          <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 text-[8px] sm:text-[9px] px-1.5 py-0">
                             Active
                           </Badge>
                         )}
 
                         {!user.is_approved && (
-                          <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
-                            Pending Approval
+                          <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50 text-[8px] sm:text-[9px] px-1.5 py-0">
+                            Pending
                           </Badge>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right py-2.5 sm:py-3.5">
                       <DropdownMenu
                         trigger={
-                          <IconButton icon={MoreVertical} title="Actions" />
+                          <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
                         }
                       >
                         {!user.is_approved && (

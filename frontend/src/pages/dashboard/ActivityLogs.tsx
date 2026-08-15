@@ -96,23 +96,24 @@ const ActivityLogs: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 font-sans w-full">
+    <div className="space-y-3.5 sm:space-y-4 font-sans w-full">
       <DashboardHeader title="System Activity Logs">
         <Button
           onClick={() => fetchLogs()}
-          className="flex items-center gap-2 text-xs font-mono"
+          className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono h-9 px-2.5 sm:px-4 cursor-pointer"
           variant="outline"
+          title="Refresh Logs"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
+          <span className="hidden sm:inline">Refresh</span>
         </Button>
       </DashboardHeader>
 
       {/* Sleek, Compact Inline Filter Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Action Filter */}
-          <div className="flex items-center gap-2 w-48">
+          <div className="flex items-center gap-1.5 sm:gap-2 w-36 xs:w-44">
             <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
             <div className="w-full">
               <Select
@@ -133,7 +134,7 @@ const ActivityLogs: React.FC = () => {
           </div>
 
           {/* Timeframe Filter */}
-          <div className="flex items-center gap-2 w-44">
+          <div className="flex items-center gap-1.5 sm:gap-2 w-32 xs:w-40">
             <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
             <div className="w-full">
               <Select
@@ -160,14 +161,14 @@ const ActivityLogs: React.FC = () => {
                 setPeriodFilter('all');
                 setPage(1);
               }}
-              className="text-xs font-mono text-muted hover:text-primary transition-colors underline ml-2 cursor-pointer"
+              className="text-xs font-mono text-muted hover:text-primary transition-colors underline cursor-pointer"
             >
-              Reset Filters
+              Reset
             </button>
           )}
         </div>
-        <p className="text-[11px] font-mono text-muted">
-          💡 Click on any log row to inspect details
+        <p className="text-[10px] sm:text-[11px] font-mono text-muted">
+          💡 Tap row to inspect details
         </p>
       </div>
 
@@ -177,11 +178,11 @@ const ActivityLogs: React.FC = () => {
           <Table className="w-full border-collapse">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[180px] font-semibold">Date & Time</TableHead>
-                <TableHead className="w-[160px] font-semibold">User</TableHead>
-                <TableHead className="w-[150px] font-semibold">Action</TableHead>
+                <TableHead className="w-[140px] sm:w-[180px] font-semibold">Date & Time</TableHead>
+                <TableHead className="w-[160px] font-semibold hidden sm:table-cell">User</TableHead>
+                <TableHead className="w-[110px] sm:w-[150px] font-semibold">Action</TableHead>
                 <TableHead className="font-semibold">Description</TableHead>
-                <TableHead className="w-[70px] text-right font-semibold">Inspect</TableHead>
+                <TableHead className="w-10 sm:w-[70px] text-right font-semibold"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -205,27 +206,38 @@ const ActivityLogs: React.FC = () => {
                     onClick={() => setSelectedLog(log)}
                     className="hover:bg-primary/5 cursor-pointer transition-colors group"
                   >
-                    <TableCell className="text-xs font-mono text-muted whitespace-nowrap">
-                      {new Date(log.created_at).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        hour12: true
-                      })}
+                    <TableCell className="text-[11px] sm:text-xs font-mono text-muted py-2.5 sm:py-3.5">
+                      <div className="flex flex-col min-w-0">
+                        <span className="whitespace-nowrap">
+                          {new Date(log.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                        <span className="text-[10px] text-muted/70">
+                          {new Date(log.created_at).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </span>
+                        {/* Mobile user subtitle */}
+                        <span className="sm:hidden text-[10px] font-medium text-primary/80 mt-0.5 truncate">
+                          {log.user ? log.user.name : 'System'}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-xs font-semibold text-primary whitespace-nowrap">
+                    <TableCell className="text-xs font-semibold text-primary whitespace-nowrap hidden sm:table-cell">
                       {log.user ? log.user.name : 'System'}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="py-2.5 sm:py-3.5">
                       {renderActionBadge(log.action)}
                     </TableCell>
-                    <TableCell className="text-xs text-muted/90 leading-relaxed font-sans">
-                      {log.description}
+                    <TableCell className="text-[11px] sm:text-xs text-muted/90 leading-relaxed font-sans py-2.5 sm:py-3.5">
+                      <span className="line-clamp-2">{log.description}</span>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right py-2.5 sm:py-3.5">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -233,7 +245,7 @@ const ActivityLogs: React.FC = () => {
                           setSelectedLog(log);
                         }}
                         title="View Log Details"
-                        className="inline-flex items-center justify-center h-6 w-6 text-muted hover:text-primary hover:bg-black/5 rounded transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center h-7 w-7 text-muted hover:text-primary hover:bg-black/5 rounded transition-colors cursor-pointer"
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </button>

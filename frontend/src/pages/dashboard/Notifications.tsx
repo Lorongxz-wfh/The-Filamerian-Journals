@@ -71,14 +71,16 @@ const Notifications: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Notifications">
         <button 
           onClick={markAllAsRead}
-          className="flex items-center gap-2 px-4 py-2.5 bg-background border border-border text-primary text-[13px] font-medium hover:border-primary/50 transition-colors shrink-0"
+          className="flex items-center gap-1.5 sm:gap-2 h-9 px-2.5 sm:px-4 bg-background border border-border text-primary text-xs font-medium hover:border-primary/50 transition-colors shrink-0 cursor-pointer"
+          title="Mark all as read"
         >
-          <Check className="h-4 w-4" />
-          Mark all as read
+          <Check className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
+          <span className="hidden sm:inline">Mark all as read</span>
+          <span className="sm:hidden">Mark All</span>
         </button>
       </DashboardHeader>
 
@@ -86,14 +88,14 @@ const Notifications: React.FC = () => {
         {loading ? (
           <MessageListSkeleton rows={8} />
         ) : notifications.length === 0 ? (
-          <div className="p-10 text-center text-[13px] text-muted">No notifications found.</div>
+          <div className="p-10 text-center text-xs sm:text-[13px] text-muted">No notifications found.</div>
         ) : (
           <div className="divide-y divide-border">
             {notifications.map(notif => (
               <div 
                 key={notif.id}
                 onClick={() => markAsRead(notif.id, notif.data.action_url)}
-                className={`p-5 hover:bg-background transition-colors cursor-pointer flex gap-4 group ${!notif.read_at ? 'bg-primary/5' : ''}`}
+                className={`p-3.5 sm:p-5 hover:bg-background transition-colors cursor-pointer flex gap-3 sm:gap-4 group ${!notif.read_at ? 'bg-primary/5' : ''}`}
               >
                 <div className="shrink-0 pt-1">
                   <div className={`h-2 w-2 rounded-full mt-1.5 ${!notif.read_at ? 'bg-secondary' : 'bg-transparent'}`}></div>

@@ -138,20 +138,23 @@ const ManageAnnouncements: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Announcements">
-        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Announcement
+        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="New Announcement">
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Announcement</span>
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-4">
         <div className="flex justify-end items-center">
-          <SearchInput 
-            placeholder="Search announcements..." 
-            value={filter} 
-            onChange={(e) => setFilter(e.target.value)} 
-          />
+          <div className="w-full sm:w-64">
+            <SearchInput 
+              placeholder="Search announcements..." 
+              value={filter} 
+              onChange={(e) => setFilter(e.target.value)} 
+            />
+          </div>
         </div>
 
         <div className="border border-border bg-surface flex flex-col">
@@ -159,8 +162,8 @@ const ManageAnnouncements: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead className="w-44">Date</TableHead>
-              <TableHead className="w-12 text-right"></TableHead>
+              <TableHead className="w-44 hidden sm:table-cell">Date</TableHead>
+              <TableHead className="w-10 sm:w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -186,19 +189,25 @@ const ManageAnnouncements: React.FC = () => {
             ) : (
               announcements.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Megaphone className="h-4 w-4 text-primary/30 shrink-0" />
-                      <span className="text-[13px] font-medium text-primary truncate">{item.title}</span>
+                  <TableCell className="py-2.5 sm:py-3.5">
+                    <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
+                      <Megaphone className="h-4 w-4 text-primary/30 shrink-0 mt-0.5 sm:mt-0" />
+                      <div className="min-w-0">
+                        <span className="text-xs sm:text-[13px] font-medium text-primary line-clamp-1">{item.title}</span>
+                        {/* Mobile date subtitle */}
+                        <span className="sm:hidden text-[10px] text-muted block mt-0.5">
+                          {new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-[12px] text-muted">
+                  <TableCell className="text-[12px] text-muted hidden sm:table-cell">
                     {new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </TableCell>
-                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                  <TableCell className="text-right py-2.5 sm:py-3.5" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu
                       trigger={
-                        <IconButton icon={MoreVertical} title="Actions" />
+                        <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
                       }
                     >
                       <DropdownMenuItem onClick={() => handleOpenModal(item)}>
