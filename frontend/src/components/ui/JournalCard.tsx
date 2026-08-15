@@ -77,7 +77,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
     return (
       <Link
         to={`/journals/${slug}`}
-        className={cn('group bg-surface border border-border p-4 sm:p-5 flex flex-col justify-between hover:border-primary/50 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer min-h-[360px] sm:min-h-[396px] w-full max-w-[340px] sm:max-w-none mx-auto text-left relative overflow-hidden', className)}
+        className={cn('group bg-surface border border-border p-3 sm:p-5 flex flex-col justify-between hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 sm:hover:-translate-y-1 transition-all duration-300 cursor-pointer min-h-[290px] sm:min-h-[396px] w-full mx-auto text-left relative overflow-hidden', className)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -86,7 +86,7 @@ const JournalCard: React.FC<JournalCardProps> = ({
 
         <FloatingCard />
         
-        <div className="relative mx-auto w-full max-w-[140px] sm:max-w-[160px] aspect-[3/4] overflow-hidden mb-4 sm:mb-6 bg-background shadow-sm border border-border shrink-0">
+        <div className="relative mx-auto w-full max-w-[110px] sm:max-w-[160px] aspect-[3/4] overflow-hidden mb-2.5 sm:mb-6 bg-background shadow-xs border border-border shrink-0">
           {image && !imgError ? (
             <img
               src={image}
@@ -95,33 +95,33 @@ const JournalCard: React.FC<JournalCardProps> = ({
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full space-y-2 p-2">
-              <BookOpen className="h-7 sm:h-8 w-7 sm:w-8 text-primary/30" />
-              <span className="text-[10px] sm:text-[11px] font-bold text-primary uppercase tracking-widest line-clamp-3 text-center">
+            <div className="flex flex-col items-center justify-center h-full space-y-1.5 p-1.5 text-center">
+              <BookOpen className="h-6 sm:h-8 w-6 sm:w-8 text-primary/30" />
+              <span className="text-[8px] sm:text-[11px] font-bold text-primary uppercase tracking-widest line-clamp-2 leading-tight">
                 {title}
               </span>
             </div>
           )}
         </div>
 
-        <div className="space-y-1.5 flex-1 flex flex-col justify-between pt-1 sm:pt-2">
+        <div className="space-y-1 sm:space-y-1.5 flex-1 flex flex-col justify-between pt-1 sm:pt-2">
           <div>
             {categoryName && (
-              <span className="text-[9px] sm:text-[10px] font-bold text-secondary bg-primary/90 px-2 py-0.5 uppercase tracking-wider inline-block mb-1.5">
+              <span className="text-[8px] sm:text-[10px] font-bold text-secondary bg-primary/90 px-1.5 sm:px-2 py-0.5 uppercase tracking-wider inline-block mb-1 sm:mb-1.5">
                 {categoryName}
               </span>
             )}
-            <h3 className="text-[11px] sm:text-[12px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors">
+            <h3 className="text-[10px] sm:text-[12px] font-bold text-primary uppercase tracking-wider line-clamp-2 group-hover:text-secondary transition-colors leading-snug">
               <HighlightText text={title} query={searchQuery} />
             </h3>
           </div>
 
-          <div className="pt-2.5 sm:pt-3 border-t border-border flex items-center justify-between text-[10px] sm:text-[11px] text-muted">
+          <div className="pt-2 sm:pt-3 border-t border-border flex items-center justify-between text-[9px] sm:text-[11px] text-muted">
             <span className="font-mono">{date || publisher || '-'}</span>
             {volume && volume !== 'No Volumes' && (
-              <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-1">
-                {volume.split(' ')[0]} volume{volume.split(' ')[0] !== '1' ? 's' : ''}
-                <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-300 text-primary" />
+              <span className="font-semibold text-primary/80 group-hover:text-primary transition-colors flex items-center gap-0.5 sm:gap-1">
+                {volume.split(' ')[0]} vol{volume.split(' ')[0] !== '1' ? 's' : ''}
+                <ArrowRight className="h-2.5 sm:h-3 w-2.5 sm:w-3 group-hover:translate-x-1 transition-transform duration-300 text-primary" />
               </span>
             )}
           </div>

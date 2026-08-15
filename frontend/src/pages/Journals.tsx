@@ -448,18 +448,18 @@ const Journals: React.FC = () => {
           <div className="flex-1 flex flex-col">
             {loading ? (
               viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="bg-surface border border-border p-5 flex flex-col justify-between min-h-[396px] w-[95%] mx-auto">
-                      <Skeleton className="mx-auto w-[160px] aspect-[3/4]" />
-                      <div className="space-y-2 mt-4">
-                        <Skeleton className="h-3 w-20" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-2/3" />
+                    <div key={i} className="bg-surface border border-border p-3 sm:p-5 flex flex-col justify-between min-h-[300px] sm:min-h-[396px] w-full mx-auto">
+                      <Skeleton className="mx-auto w-[100px] sm:w-[160px] aspect-[3/4]" />
+                      <div className="space-y-2 mt-3 sm:mt-4">
+                        <Skeleton className="h-2.5 sm:h-3 w-16 sm:w-20" />
+                        <Skeleton className="h-3.5 sm:h-4 w-full" />
+                        <Skeleton className="h-3.5 sm:h-4 w-2/3" />
                       </div>
-                      <div className="pt-3 border-t border-border flex items-center justify-between mt-auto">
-                        <Skeleton className="h-3 w-16" />
-                        <Skeleton className="h-3 w-20" />
+                      <div className="pt-2 sm:pt-3 border-t border-border flex items-center justify-between mt-auto">
+                        <Skeleton className="h-2.5 sm:h-3 w-12 sm:w-16" />
+                        <Skeleton className="h-2.5 sm:h-3 w-14 sm:w-20" />
                       </div>
                     </div>
                   ))}
@@ -503,7 +503,7 @@ const Journals: React.FC = () => {
               />
             ) : (
               <div className={viewMode === 'grid' 
-                ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8" 
+                ? "grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6 lg:gap-8" 
                 : "flex flex-col space-y-4 w-full"
               }>
                 {filtered.map((j) => {
