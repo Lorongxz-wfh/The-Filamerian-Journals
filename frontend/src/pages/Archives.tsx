@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Eye, Layers, Search, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
@@ -93,6 +94,7 @@ const Archives: React.FC = () => {
   // Selected Volume for Split View and Modals
   const [selectedSplitVolume, setSelectedSplitVolume] = useState<VolumeItem | null>(null);
   const [activeVolumeModal, setActiveVolumeModal] = useState<VolumeItem | null>(null);
+  const [isMobileVolumeSelectorOpen, setIsMobileVolumeSelectorOpen] = useState(false);
   
   // Citation Modal State
   const [citationArticle, setCitationArticle] = useState<any>(null);
@@ -259,7 +261,7 @@ const Archives: React.FC = () => {
         />
 
         {/* Balanced 4-Column Summary Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border shadow-xs">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border border border-border shadow-xs">
           {[
             { label: 'Journals', value: journals.length },
             { label: 'Archived Volumes', value: totalVolumesCount },
@@ -267,17 +269,17 @@ const Archives: React.FC = () => {
             { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]}–${availableYears[0]}` : '-' },
           ].map((s) => (
             <div key={s.label} className="bg-surface py-2 sm:py-2.5 px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 text-center">
-              <span className="text-sm sm:text-sm font-bold text-primary font-mono whitespace-nowrap">{s.value}</span>
+              <span className="text-sm font-bold text-primary font-mono whitespace-nowrap">{s.value}</span>
               <span className="text-[9px] sm:text-[10px] font-semibold text-muted uppercase tracking-wider text-center">{s.label}</span>
             </div>
           ))}
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-2 bg-surface p-2.5 sm:px-3 sm:py-2 border border-border mb-6 sm:mb-8">
-          {/* Top Row on Mobile: Search + Mobile View Mode Switcher */}
-          <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
-            <div className="relative flex-1 sm:flex-none sm:w-48 min-w-0">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 lg:gap-2 bg-surface p-2.5 lg:px-3 lg:py-2 border border-border mb-6 sm:mb-8">
+          {/* Top Row on Mobile/Tablet: Search + View Mode Switcher */}
+          <div className="flex items-center gap-2 w-full lg:w-auto flex-1 min-w-0">
+            <div className="relative flex-1 lg:flex-none lg:w-48 min-w-0">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
               <input
                 type="text"
@@ -288,8 +290,8 @@ const Archives: React.FC = () => {
               />
             </div>
 
-            {/* View Mode Switcher on Mobile (Inline next to search) */}
-            <div className="flex sm:hidden items-center gap-0.5 bg-background border border-border p-0.5 shrink-0">
+            {/* View Mode Switcher on Mobile/Tablet (< lg) */}
+            <div className="flex lg:hidden items-center gap-0.5 bg-background border border-border p-0.5 shrink-0">
               <button
                 onClick={() => setViewMode('shelf')}
                 className={`p-1.5 transition-colors cursor-pointer ${
@@ -311,10 +313,10 @@ const Archives: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom Row on Mobile: Filters & Sort evenly distributed */}
-          <div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto shrink-0">
+          {/* Bottom Row on Mobile/Tablet: Filters & Sort evenly distributed */}
+          <div className="grid grid-cols-3 lg:flex items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0">
             {/* Year Filter */}
-            <div className="w-full sm:w-24">
+            <div className="w-full lg:w-24">
               <Select
                 value={selectedYear}
                 onChange={(val) => setSelectedYear(String(val))}
@@ -327,7 +329,7 @@ const Archives: React.FC = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="w-full sm:w-32">
+            <div className="w-full lg:w-32">
               <Select
                 value={selectedCategory}
                 onChange={(val) => setSelectedCategory(String(val))}
@@ -340,7 +342,7 @@ const Archives: React.FC = () => {
             </div>
 
             {/* Sort By Dropdown */}
-            <div className="w-full sm:w-28">
+            <div className="w-full lg:w-28">
               <Select
                 value={sortBy}
                 onChange={(val) => setSortBy(val as any)}
@@ -360,7 +362,7 @@ const Archives: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="col-span-3 sm:col-span-1 h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center justify-center gap-1 font-medium cursor-pointer"
+                className="col-span-3 lg:col-span-1 h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center justify-center gap-1 font-medium cursor-pointer"
                 title="Reset All Filters"
               >
                 <RotateCcw className="h-3 w-3" />
@@ -369,8 +371,8 @@ const Archives: React.FC = () => {
             )}
           </div>
 
-          {/* View Mode Switcher on Desktop (Right Aligned) */}
-          <div className="hidden sm:flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
+          {/* View Mode Switcher on Desktop (>= lg) */}
+          <div className="hidden lg:flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
             <button
               onClick={() => setViewMode('shelf')}
               className={`p-1.5 transition-colors cursor-pointer ${
@@ -420,7 +422,7 @@ const Archives: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <div className="lg:col-span-5 border border-border bg-surface flex flex-col divide-y divide-border min-h-[220px] max-h-[300px] lg:min-h-[400px] lg:max-h-[700px] overflow-hidden">
+              <div className="hidden lg:flex lg:col-span-5 border border-border bg-surface flex-col divide-y divide-border min-h-[400px] max-h-[700px] overflow-hidden">
                 <div className="p-3.5 border-b border-border bg-background flex items-center justify-between">
                   <Skeleton className="h-4 w-36" />
                   <Skeleton className="h-3 w-16" />
@@ -433,7 +435,7 @@ const Archives: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 min-h-[400px] lg:min-h-[600px]">
+              <div className="w-full lg:col-span-7 border border-border bg-surface flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 min-h-[400px] lg:min-h-[600px]">
                 <div className="border-b border-border pb-6 flex gap-6 items-start">
                   <Skeleton className="w-24 h-32 shrink-0" />
                   <div className="space-y-3 flex-1">
@@ -454,231 +456,327 @@ const Archives: React.FC = () => {
           /* ========================================================= */
           /* OPTION 2: SPLIT VIEW (LIST LEFT, LIVE PREVIEW RIGHT)     */
           /* ========================================================= */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
-            {/* LEFT COLUMN: Scrollable Volume Issues List (5/12 cols) */}
-            <div className="lg:col-span-5 border border-border bg-surface flex flex-col min-h-[220px] max-h-[300px] lg:min-h-[400px] lg:max-h-[700px] overflow-hidden">
-              <div className="p-3 sm:p-3.5 border-b border-border bg-background flex items-center justify-between shrink-0">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
-                </span>
-                <span className="text-[11px] font-mono text-muted">{filteredVolumes.length} volumes</span>
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+              {/* LEFT COLUMN (Desktop Only >= lg): Scrollable Volume Issues List (5/12 cols) */}
+              <div className="hidden lg:flex lg:col-span-5 border border-border bg-surface flex-col min-h-[400px] max-h-[700px] overflow-hidden">
+                <div className="p-3.5 border-b border-border bg-background flex items-center justify-between shrink-0">
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
+                  </span>
+                  <span className="text-[11px] font-mono text-muted">{filteredVolumes.length} volumes</span>
+                </div>
+
+                <div className="divide-y divide-border overflow-y-auto max-h-[640px] flex-1">
+                  {filteredVolumes.length === 0 ? (
+                    <div className="p-8 text-center text-xs text-muted flex flex-col items-center justify-center h-full space-y-2">
+                      <BookOpen className="h-6 w-6 text-muted/40" />
+                      <p className="font-semibold text-primary">No volumes found</p>
+                      <p>Try adjusting your search query or filters.</p>
+                    </div>
+                  ) : (
+                    filteredVolumes.map((vol) => {
+                      const isSelected = selectedSplitVolume?.id === vol.id && selectedSplitVolume?.journal.id === vol.journal.id;
+
+                      return (
+                        <button
+                          key={`${vol.journal.id}-${vol.id}`}
+                          onClick={() => {
+                             if (!isSelected) handleVolumeClick(vol);
+                          }}
+                          className={`w-full text-left p-3.5 transition-all flex items-start justify-between gap-3 group relative cursor-pointer ${
+                            isSelected
+                              ? 'bg-primary/5 border-l-4 border-l-primary font-medium'
+                              : 'hover:bg-background/80 border-l-4 border-l-transparent'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider">
+                                {formatVolumeName(vol.volume_number)}
+                              </span>
+                              <span className="text-[11px] font-mono text-muted">({vol.year})</span>
+                            </div>
+                            <h4 className={`text-[13px] font-bold uppercase line-clamp-1 transition-colors ${
+                              isSelected ? 'text-primary' : 'text-primary/90 group-hover:text-primary'
+                            }`}>
+                              {vol.journal.title}
+                            </h4>
+                            <div className="flex items-center justify-between text-[11px] text-muted mt-2">
+                              <span>{vol.journal.categoryName}</span>
+                              <span className="font-semibold">{vol.articles.length} articles</span>
+                            </div>
+                          </div>
+                          <ChevronDown className={`h-4 w-4 text-muted shrink-0 -rotate-90 transition-transform ${isSelected ? 'text-primary translate-x-1' : ''}`} />
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
 
-              <div className="divide-y divide-border overflow-y-auto max-h-[240px] lg:max-h-[640px] flex-1">
-                {filteredVolumes.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-muted flex flex-col items-center justify-center h-full space-y-2">
-                    <BookOpen className="h-6 w-6 text-muted/40" />
-                    <p className="font-semibold text-primary">No volumes found</p>
-                    <p>Try adjusting your search query or filters.</p>
-                  </div>
-                ) : (
-                  filteredVolumes.map((vol) => {
-                    const isSelected = selectedSplitVolume?.id === vol.id && selectedSplitVolume?.journal.id === vol.journal.id;
-
-                    return (
-                      <button
-                        key={`${vol.journal.id}-${vol.id}`}
-                        onClick={() => {
-                           if (!isSelected) handleVolumeClick(vol);
-                        }}
-                        className={`w-full text-left p-3 sm:p-4 transition-all flex items-start justify-between gap-3 group relative cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary/5 border-l-4 border-l-primary font-medium'
-                            : 'hover:bg-background/80 border-l-4 border-l-transparent'
-                        }`}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[9px] sm:text-[10px] font-bold text-secondary bg-primary px-1.5 sm:px-2 py-0.5 uppercase tracking-wider">
-                              {formatVolumeName(vol.volume_number)}
-                            </span>
-                            <span className="text-[10px] sm:text-[11px] font-mono text-muted">({vol.year})</span>
-                          </div>
-                          <h4 className={`text-xs sm:text-[13px] font-bold uppercase line-clamp-1 transition-colors ${
-                            isSelected ? 'text-primary' : 'text-primary/90 group-hover:text-primary'
-                          }`}>
-                            {vol.journal.title}
-                          </h4>
-                          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-muted mt-1.5 sm:mt-2">
-                            <span>{vol.journal.categoryName}</span>
-                            <span className="font-semibold">{vol.articles.length} articles</span>
-                          </div>
+              {/* RIGHT COLUMN / FULL WIDTH ON MOBILE: Live Selected Issue Preview Panel */}
+              <div className="w-full lg:col-span-7 border border-border bg-surface flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 min-h-[400px] lg:min-h-[600px]">
+                {isVolumeLoading ? (
+                  <>
+                    {/* Header skeleton — mirrors actual cover + journal info block */}
+                    <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+                      <div className="w-20 sm:w-24 h-28 sm:h-32 shrink-0 bg-background border border-border" />
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Skeleton className="h-5 w-16" />
+                          <Skeleton className="h-5 w-20" />
+                          <Skeleton className="h-4 w-24" />
                         </div>
-                        <ChevronDown className={`h-4 w-4 text-muted shrink-0 -rotate-90 transition-transform ${isSelected ? 'text-primary translate-x-1' : ''}`} />
-                      </button>
-                    );
-                  })
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-3 w-28 mt-2" />
+                      </div>
+                    </div>
+                    {/* Table of contents skeleton */}
+                    <div className="space-y-4 flex-1">
+                      <div className="flex items-center justify-between border-b border-border pb-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                      <div className="divide-y divide-border border border-border bg-background">
+                        {[...Array(2)].map((_, i) => (
+                          <div key={i} className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-3 w-1/2" />
+                              <div className="flex items-center gap-4 mt-1">
+                                <Skeleton className="h-3 w-14" />
+                                <Skeleton className="h-3 w-32" />
+                              </div>
+                            </div>
+                            <Skeleton className="h-7 w-14 shrink-0" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : selectedSplitVolume ? (
+                  <>
+                    <div className="border-b border-border pb-4 sm:pb-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+                      <div className="w-20 sm:w-24 h-28 sm:h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-xs">
+                        {selectedSplitVolume.journal.cover_image ? (
+                          <img
+                            src={getFileUrl(selectedSplitVolume.journal.cover_image)}
+                            alt={selectedSplitVolume.journal.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <BookOpen className="h-8 w-8 text-primary/30" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 sm:px-2.5 sm:py-1 uppercase tracking-wider">
+                            {formatVolumeName(selectedSplitVolume.volume_number)}
+                          </span>
+                          <span className="text-[11px] sm:text-xs font-mono font-bold text-primary border border-border px-1.5 sm:px-2 py-0.5">
+                            Year {selectedSplitVolume.year}
+                          </span>
+                          <span className="text-[11px] sm:text-xs text-muted">
+                            ISSN: {selectedSplitVolume.journal.issn || '-'}
+                          </span>
+                        </div>
+
+                        <h3 className="text-sm sm:text-base font-bold text-primary uppercase tracking-wide">
+                          {selectedSplitVolume.journal.title}
+                        </h3>
+
+                        <p className="text-[11px] sm:text-xs text-muted">
+                          Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · Contains {selectedSplitVolume.articles.length} published article(s).
+                        </p>
+
+                        <div className="pt-1 sm:pt-2">
+                          <Link
+                            to={`/journals/${selectedSplitVolume.journal.slug}`}
+                            className="text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
+                          >
+                            View Main Journal Page →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 sm:space-y-4 flex-1">
+                      <div className="flex items-center justify-between border-b border-border pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary" /> Table of Contents
+                        </h4>
+                        <span className="text-[11px] font-mono text-muted">{selectedSplitVolume.articles.length} articles</span>
+                      </div>
+
+                      {selectedSplitVolume.articles.length === 0 ? (
+                        <div className="p-8 text-center bg-background border border-border text-xs text-muted">
+                          No articles published under this volume issue yet.
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-border border border-border bg-background">
+                          {selectedSplitVolume.articles.map((article) => (
+                            <div
+                              key={article.id}
+                              className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-surface/50 transition-colors group"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <h5 className="text-xs sm:text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase leading-snug">
+                                  {article.title}
+                                </h5>
+                                <p className="text-xs text-muted mt-1">
+                                  {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
+                                </p>
+                                <div className="flex items-center gap-3 sm:gap-4 mt-2 text-[10px] sm:text-[11px] text-muted/60 flex-wrap font-mono">
+                                   {(article.page_start || article.page_end) && (
+                                     <span>
+                                       {article.page_start && article.page_end
+                                         ? `pp. ${article.page_start}–${article.page_end}`
+                                         : article.page_start
+                                         ? `p. ${article.page_start}`
+                                         : `p. ${article.page_end}`}
+                                     </span>
+                                   )}
+                                  {article.doi && <span>DOI: {article.doi}</span>}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center pt-1 sm:pt-0">
+                                <button
+                                  onClick={() => {
+                                    setCitationArticle(article);
+                                    setCitationContext({
+                                      journalTitle: selectedSplitVolume.journal.title,
+                                      volumeNumber: selectedSplitVolume.volume_number,
+                                      year: selectedSplitVolume.year,
+                                    });
+                                  }}
+                                  className="px-2.5 sm:px-3 py-1.5 border border-border text-xs font-semibold text-muted hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5 bg-surface cursor-pointer"
+                                >
+                                  <Quote className="h-3 w-3" /> Cite
+                                </button>
+                                {article.pdf_path && (
+                                  <button
+                                    onClick={() => handleArticlePdfView(article.id)}
+                                    className="px-2.5 sm:px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-secondary hover:text-primary transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                                  >
+                                    <Eye className="h-3 w-3" /> Read PDF
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center text-muted space-y-3">
+                    <BookOpen className="h-8 sm:h-10 w-8 sm:w-10 text-primary/20" />
+                    <p className="text-sm font-medium text-primary">No Volume Selected</p>
+                    <p className="text-xs">No volume issue matches your selected search or filter criteria.</p>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Live Selected Issue Preview Panel (7/12 cols) */}
-            <div className="lg:col-span-7 border border-border bg-surface flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 min-h-[400px] lg:min-h-[600px]">
-              {isVolumeLoading ? (
-                <>
-                  {/* Header skeleton — mirrors actual cover + journal info block */}
-                  <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-                    <div className="w-20 sm:w-24 h-28 sm:h-32 shrink-0 bg-background border border-border" />
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Skeleton className="h-5 w-16" />
-                        <Skeleton className="h-5 w-20" />
-                        <Skeleton className="h-4 w-24" />
-                      </div>
-                      <Skeleton className="h-5 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                      <Skeleton className="h-3 w-28 mt-2" />
-                    </div>
-                  </div>
-                  {/* Table of contents skeleton */}
-                  <div className="space-y-4 flex-1">
-                    <div className="flex items-center justify-between border-b border-border pb-2">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-16" />
-                    </div>
-                    <div className="divide-y divide-border border border-border bg-background">
-                      {[...Array(2)].map((_, i) => (
-                        <div key={i} className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                          <div className="min-w-0 flex-1 space-y-1.5">
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-3 w-1/2" />
-                            <div className="flex items-center gap-4 mt-1">
-                              <Skeleton className="h-3 w-14" />
-                              <Skeleton className="h-3 w-32" />
-                            </div>
-                          </div>
-                          <Skeleton className="h-7 w-14 shrink-0" />
+            {/* Mobile / Tablet Sticky Bottom Dropup Volume Selector (< lg) */}
+            <div className="lg:hidden sticky bottom-4 z-30 mt-6">
+              <div className="relative">
+                {/* Upward Dropup List */}
+                <AnimatePresence>
+                  {isMobileVolumeSelectorOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 bg-black/50 z-30"
+                        onClick={() => setIsMobileVolumeSelectorOpen(false)}
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 12, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute bottom-full mb-2 left-0 right-0 bg-surface border border-border shadow-2xl z-40 max-h-[300px] flex flex-col overflow-hidden"
+                      >
+                        <div className="p-3 border-b border-border bg-background flex items-center justify-between shrink-0">
+                          <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-primary" /> Select Issue Volume
+                          </span>
+                          <span className="text-[11px] font-mono text-muted">{filteredVolumes.length} volumes</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : selectedSplitVolume ? (
-                <>
-                  <div className="border-b border-border pb-4 sm:pb-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-                    <div className="w-20 sm:w-24 h-28 sm:h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-xs">
-                      {selectedSplitVolume.journal.cover_image ? (
-                        <img
-                          src={getFileUrl(selectedSplitVolume.journal.cover_image)}
-                          alt={selectedSplitVolume.journal.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                        />
-                      ) : (
-                        <BookOpen className="h-8 w-8 text-primary/30" />
-                      )}
-                    </div>
 
-                    <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 sm:px-2.5 sm:py-1 uppercase tracking-wider">
-                          {formatVolumeName(selectedSplitVolume.volume_number)}
-                        </span>
-                        <span className="text-[11px] sm:text-xs font-mono font-bold text-primary border border-border px-1.5 sm:px-2 py-0.5">
-                          Year {selectedSplitVolume.year}
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-muted">
-                          ISSN: {selectedSplitVolume.journal.issn || '-'}
-                        </span>
-                      </div>
-
-                      <h3 className="text-sm sm:text-base font-bold text-primary uppercase tracking-wide">
-                        {selectedSplitVolume.journal.title}
-                      </h3>
-
-                      <p className="text-[11px] sm:text-xs text-muted">
-                        Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · Contains {selectedSplitVolume.articles.length} published article(s).
-                      </p>
-
-                      <div className="pt-1 sm:pt-2">
-                        <Link
-                          to={`/journals/${selectedSplitVolume.journal.slug}`}
-                          className="text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
-                        >
-                          View Main Journal Page →
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 sm:space-y-4 flex-1">
-                    <div className="flex items-center justify-between border-b border-border pb-2">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" /> Table of Contents
-                      </h4>
-                      <span className="text-[11px] font-mono text-muted">{selectedSplitVolume.articles.length} articles</span>
-                    </div>
-
-                    {selectedSplitVolume.articles.length === 0 ? (
-                      <div className="p-8 text-center bg-background border border-border text-xs text-muted">
-                        No articles published under this volume issue yet.
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-border border border-border bg-background">
-                        {selectedSplitVolume.articles.map((article) => (
-                          <div
-                            key={article.id}
-                            className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-surface/50 transition-colors group"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <h5 className="text-xs sm:text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase leading-snug">
-                                {article.title}
-                              </h5>
-                              <p className="text-xs text-muted mt-1">
-                                {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
-                              </p>
-                              <div className="flex items-center gap-3 sm:gap-4 mt-2 text-[10px] sm:text-[11px] text-muted/60 flex-wrap font-mono">
-                                 {(article.page_start || article.page_end) && (
-                                   <span>
-                                     {article.page_start && article.page_end
-                                       ? `pp. ${article.page_start}–${article.page_end}`
-                                       : article.page_start
-                                       ? `p. ${article.page_start}`
-                                       : `p. ${article.page_end}`}
-                                   </span>
-                                 )}
-                                {article.doi && <span>DOI: {article.doi}</span>}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0 self-start sm:self-center pt-1 sm:pt-0">
-                              <button
-                                onClick={() => {
-                                  setCitationArticle(article);
-                                  setCitationContext({
-                                    journalTitle: selectedSplitVolume.journal.title,
-                                    volumeNumber: selectedSplitVolume.volume_number,
-                                    year: selectedSplitVolume.year,
-                                  });
-                                }}
-                                className="px-2.5 sm:px-3 py-1.5 border border-border text-xs font-semibold text-muted hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5 bg-surface cursor-pointer"
-                              >
-                                <Quote className="h-3 w-3" /> Cite
-                              </button>
-                              {article.pdf_path && (
+                        <div className="divide-y divide-border overflow-y-auto max-h-[220px] flex-1">
+                          {filteredVolumes.length === 0 ? (
+                            <div className="p-6 text-center text-xs text-muted">No volumes match filters.</div>
+                          ) : (
+                            filteredVolumes.map((vol) => {
+                              const isSelected = selectedSplitVolume?.id === vol.id && selectedSplitVolume?.journal.id === vol.journal.id;
+                              return (
                                 <button
-                                  onClick={() => handleArticlePdfView(article.id)}
-                                  className="px-2.5 sm:px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-secondary hover:text-primary transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                                  key={`${vol.journal.id}-${vol.id}`}
+                                  onClick={() => {
+                                    handleVolumeClick(vol);
+                                    setIsMobileVolumeSelectorOpen(false);
+                                  }}
+                                  className={`w-full text-left p-3 transition-colors flex items-center justify-between gap-3 cursor-pointer ${
+                                    isSelected ? 'bg-primary text-white font-semibold' : 'hover:bg-background text-primary'
+                                  }`}
                                 >
-                                  <Eye className="h-3 w-3" /> Read PDF
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <span className={`text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-wider ${
+                                        isSelected ? 'bg-secondary text-primary' : 'bg-primary text-secondary'
+                                      }`}>
+                                        {formatVolumeName(vol.volume_number)}
+                                      </span>
+                                      <span className={`text-[10px] font-mono ${isSelected ? 'text-white/80' : 'text-muted'}`}>({vol.year})</span>
+                                    </div>
+                                    <p className={`text-xs font-bold uppercase truncate ${isSelected ? 'text-white' : 'text-primary'}`}>
+                                      {vol.journal.title}
+                                    </p>
+                                  </div>
+                                  <span className={`text-[10px] shrink-0 ${isSelected ? 'text-white/80' : 'text-muted'}`}>
+                                    {vol.articles.length} art{vol.articles.length !== 1 ? 's' : ''}
+                                  </span>
                                 </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                              );
+                            })
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+
+                {/* Bottom Sticky Toggle Bar Trigger */}
+                <button
+                  onClick={() => setIsMobileVolumeSelectorOpen(!isMobileVolumeSelectorOpen)}
+                  className="w-full bg-primary text-white p-3 border border-secondary/40 shadow-2xl flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition-transform"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span className="text-[10px] font-bold text-primary bg-secondary px-2 py-0.5 uppercase tracking-wider shrink-0">
+                      {selectedSplitVolume ? formatVolumeName(selectedSplitVolume.volume_number) : 'VOL'}
+                    </span>
+                    <div className="min-w-0 text-left">
+                      <p className="text-xs font-bold text-white uppercase truncate">
+                        {selectedSplitVolume ? selectedSplitVolume.journal.title : 'Select Issue Volume'}
+                      </p>
+                      <p className="text-[10px] text-white/70 font-mono">
+                        {selectedSplitVolume ? `Year ${selectedSplitVolume.year} · ${selectedSplitVolume.articles.length} articles` : 'Tap to switch volume'}
+                      </p>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center text-muted space-y-3">
-                  <BookOpen className="h-8 sm:h-10 w-8 sm:w-10 text-primary/20" />
-                  <p className="text-sm font-medium text-primary">No Volume Selected</p>
-                  <p className="text-xs">No volume issue matches your selected search or filter criteria.</p>
-                </div>
-              )}
+                  <div className="flex items-center gap-1.5 shrink-0 bg-white/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold text-secondary uppercase tracking-wider">
+                    <span>Switch</span>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${isMobileVolumeSelectorOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         ) : viewMode === 'shelf' ? (
           /* ========================================================= */
           /* OPTION 1: VISUAL LIBRARY SHELF (GRID OF VOLUME COVERS)     */
