@@ -252,44 +252,45 @@ const BulkImport: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Bulk Import">
-        <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2">
-          <Download className="h-4 w-4" /> {activeTab === 'articles' ? 'Articles' : 'Journals'} Template
+        <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="Download Template">
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">{activeTab === 'articles' ? 'Articles' : 'Journals'} Template</span>
         </Button>
       </DashboardHeader>
 
       {/* Tabs */}
-      <div className="flex border-b border-border gap-6">
+      <div className="flex border-b border-border gap-3 sm:gap-6">
         <button
           onClick={() => handleTabChange('articles')}
-          className={`flex items-center gap-2 pb-3 text-sm font-semibold transition-colors relative ${
+          className={`flex items-center gap-1.5 sm:gap-2 pb-2.5 sm:pb-3 text-xs sm:text-sm font-semibold transition-colors relative cursor-pointer ${
             activeTab === 'articles'
               ? 'text-primary border-b-2 border-primary -mb-px'
               : 'text-muted hover:text-primary'
           }`}
         >
           <FileText className="h-4 w-4" />
-          Import Articles
+          <span>Import Articles</span>
         </button>
         <button
           onClick={() => handleTabChange('journals')}
-          className={`flex items-center gap-2 pb-3 text-sm font-semibold transition-colors relative ${
+          className={`flex items-center gap-1.5 sm:gap-2 pb-2.5 sm:pb-3 text-xs sm:text-sm font-semibold transition-colors relative cursor-pointer ${
             activeTab === 'journals'
               ? 'text-primary border-b-2 border-primary -mb-px'
               : 'text-muted hover:text-primary'
           }`}
         >
           <BookOpen className="h-4 w-4" />
-          Import Journals & Volumes
+          <span>Import Journals & Volumes</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="md:col-span-1 space-y-4 sm:space-y-6">
           {activeTab === 'articles' ? (
-            <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-4">
-              <h3 className="text-sm font-semibold text-primary">1. Destination</h3>
+            <div className="p-4 sm:p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-primary">1. Destination</h3>
               <Select 
                 label="Select Journal"
                 required
@@ -318,16 +319,16 @@ const BulkImport: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-3">
-              <h3 className="text-sm font-semibold text-primary">1. Journal & Volume Creator</h3>
-              <p className="text-[12px] text-muted leading-relaxed">
+            <div className="p-4 sm:p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-2.5 sm:space-y-3">
+              <h3 className="text-xs sm:text-sm font-semibold text-primary">1. Journal & Volume Creator</h3>
+              <p className="text-[11px] sm:text-[12px] text-muted leading-relaxed">
                 Upload a spreadsheet with journal details. Missing categories and initial volumes will be automatically generated.
               </p>
             </div>
           )}
 
-          <div className="p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-4">
-            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
+          <div className="p-4 sm:p-5 border border-border bg-surface shadow-sm shadow-black/5 space-y-3 sm:space-y-4">
+            <h3 className="text-xs sm:text-sm font-semibold text-primary flex items-center gap-2">
               2. Upload File
               {isParsing && <span className="text-[11px] font-normal text-muted italic ml-auto">Parsing...</span>}
             </h3>
@@ -340,8 +341,8 @@ const BulkImport: React.FC = () => {
               onFileSelect={handleFileSelect}
             />
             
-            <div className="bg-primary/5 p-3 rounded border border-primary/10">
-              <p className="text-[12px] text-muted flex items-start gap-2 leading-relaxed">
+            <div className="bg-primary/5 p-2.5 sm:p-3 rounded border border-primary/10">
+              <p className="text-[11px] sm:text-[12px] text-muted flex items-start gap-2 leading-relaxed">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-primary/60" />
                 <span>
                   {activeTab === 'articles' 
@@ -353,7 +354,7 @@ const BulkImport: React.FC = () => {
           </div>
           
           <Button 
-            className="w-full flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 text-xs sm:text-sm h-10 cursor-pointer"
             disabled={
               (activeTab === 'articles' ? (parsedArticles.length === 0 || !selectedVolume) : parsedJournals.length === 0) || isSubmitting
             }
@@ -365,7 +366,7 @@ const BulkImport: React.FC = () => {
         </div>
 
         <div className="md:col-span-2">
-          <div className="border border-border bg-surface shadow-sm shadow-black/5 overflow-hidden flex flex-col h-[600px]">
+          <div className="border border-border bg-surface shadow-sm shadow-black/5 overflow-hidden flex flex-col h-[480px] sm:h-[600px]">
             <div className="p-4 border-b border-border flex items-center justify-between bg-background/50">
               <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
                 <FileSpreadsheet className="h-4 w-4 text-emerald-600" />

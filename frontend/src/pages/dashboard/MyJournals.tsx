@@ -344,38 +344,40 @@ const MyJournals: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Journals">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button 
             variant="outline"
             onClick={() => navigate('/dashboard/import?tab=journals')}
-            className="shrink-0 flex items-center gap-2"
+            className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer"
+            title="Import Journals"
           >
             <Upload className="h-4 w-4" />
-            Import
+            <span className="hidden sm:inline">Import</span>
           </Button>
           <Button 
             onClick={() => handleOpenModal()}
-            className="shrink-0 flex items-center gap-2"
+            className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer"
+            title="New Journal"
           >
             <Plus className="h-4 w-4" />
-            Journal
+            <span className="hidden sm:inline">Journal</span>
           </Button>
         </div>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
             {/* Status tabs */}
-            <div className="flex gap-1 border border-border bg-surface h-9 items-center shrink-0">
+            <div className="flex gap-0.5 border border-border bg-surface h-9 items-center p-0.5 shrink-0">
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setStatusTab(t.key)}
-                  className={`px-4 h-full text-[12px] font-medium transition-colors flex items-center justify-center ${
-                    statusTab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                  className={`px-3 sm:px-4 h-full text-xs font-medium transition-colors flex items-center justify-center cursor-pointer ${
+                    statusTab === t.key ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
                   }`}
                 >
                   {t.label}
@@ -384,11 +386,11 @@ const MyJournals: React.FC = () => {
             </div>
 
             {/* Category filter */}
-            <div className="flex items-center gap-2">
-              <label className="text-[12px] font-medium text-muted uppercase tracking-wider shrink-0">Category:</label>
-              <div className="w-[200px]">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Category:</label>
+              <div className="w-full sm:w-[200px]">
                 <Select
-                  className="py-1.5 h-9 text-[12px]"
+                  className="py-1.5 h-9 text-xs"
                   value={categoryFilter}
                   onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
                   options={[
@@ -399,11 +401,13 @@ const MyJournals: React.FC = () => {
               </div>
             </div>
           </div>
-          <SearchInput 
-            placeholder="Search journals..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
+          <div className="w-full md:w-64">
+            <SearchInput 
+              placeholder="Search journals..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="border border-border bg-surface flex flex-col">
@@ -413,16 +417,16 @@ const MyJournals: React.FC = () => {
                 <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
                   <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
                 </TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('category')}>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden sm:table-cell" onClick={() => requestSort('category')}>
                   <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
                 </TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden lg:table-cell" onClick={() => requestSort('updated_at')}>
                   <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
                 </TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('editor')}>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden md:table-cell" onClick={() => requestSort('editor')}>
                   <div className="flex items-center gap-1">Editor {getSortIcon('editor')}</div>
                 </TableHead>
-                <TableHead className="w-12 text-right"></TableHead>
+                <TableHead className="w-10 sm:w-12 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -441,17 +445,22 @@ const MyJournals: React.FC = () => {
                     onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}
                     className="group hover:bg-primary/5 cursor-pointer transition-colors"
                   >
-                    <TableCell>
-                      <div className="flex items-center gap-3 min-w-0">
-                        <BookOpen className="h-4 w-4 text-primary/30 shrink-0" />
+                    <TableCell className="py-2.5 sm:py-3.5">
+                      <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+                        <BookOpen className="h-4 w-4 text-primary/30 shrink-0 mt-0.5" />
                         <div className="flex flex-col min-w-0">
-                          <span className="text-[13px] font-medium text-primary group-hover:text-primary transition-colors truncate" title={journal.title}>
+                          <span className="text-xs sm:text-[13px] font-medium text-primary group-hover:text-primary transition-colors truncate" title={journal.title}>
                             {truncateMiddle(journal.title, 42)}
                           </span>
+                          {/* Mobile subtitle showing category and editor */}
+                          <div className="sm:hidden text-[11px] text-muted truncate mt-0.5">
+                            <span className="font-medium text-primary/80">{journal.category?.name || 'General'}</span>
+                            {journal.editor && <span> • Ed. {journal.editor}</span>}
+                          </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <Badge 
                               variant={journal.status === 'Draft' ? 'outline' : 'secondary'} 
-                              className={journal.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0' : 'text-[9px] px-1.5 py-0'}
+                              className={journal.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[8px] sm:text-[9px] px-1.5 py-0' : 'text-[8px] sm:text-[9px] px-1.5 py-0'}
                             >
                               {journal.status || 'Published'}
                             </Badge>
@@ -459,21 +468,21 @@ const MyJournals: React.FC = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted truncate">
+                    <TableCell className="text-muted truncate hidden sm:table-cell">
                       {journal.category?.name || '-'}
                     </TableCell>
-                    <TableCell className="text-muted text-[12px]">
+                    <TableCell className="text-muted text-[12px] hidden lg:table-cell">
                       {journal.updated_at
                         ? new Date(journal.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                         : '-'}
                     </TableCell>
-                    <TableCell className="text-muted truncate">
+                    <TableCell className="text-muted truncate hidden md:table-cell">
                       {journal.editor || '-'}
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right py-2.5 sm:py-3.5">
                       <DropdownMenu
                         trigger={
-                          <IconButton icon={MoreVertical} title="Actions" />
+                          <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
                         }
                       >
                         <DropdownMenuItem onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}>

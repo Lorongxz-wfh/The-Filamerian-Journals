@@ -58,7 +58,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
         value={cat}
         dragListener={false}
         dragControls={controls}
-        className="flex items-center justify-between px-5 py-3 transition-colors bg-surface hover:bg-background/50 border-b border-border last:border-b-0"
+        className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 transition-colors bg-surface hover:bg-background/50 border-b border-border last:border-b-0"
         whileDrag={{ 
           scale: 1.01,
           boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
@@ -66,7 +66,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
           backgroundColor: "var(--surface)"
         }}
       >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
           {/* Drag Handle */}
           <div
             className="p-1.5 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 cursor-grab active:cursor-grabbing touch-none select-none transition-colors bg-primary/10 text-primary"
@@ -82,7 +82,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
           {/* Up / Down Buttons */}
           <div className="flex flex-col gap-0.5 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
             <button 
-              type="button"
+              type="button" 
               onClick={() => moveCategory(idx, 'up')}
               disabled={idx === 0}
               title="Move Up"
@@ -91,7 +91,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
               <ArrowUp className="h-3.5 w-3.5" />
             </button>
             <button 
-              type="button"
+              type="button" 
               onClick={() => moveCategory(idx, 'down')}
               disabled={isLast}
               title="Move Down"
@@ -102,12 +102,12 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
           </div>
 
           {/* Category Info */}
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <Tag className="h-4 w-4 text-primary/30 shrink-0" />
-            <span className="text-[13px] font-semibold text-primary truncate">
+            <span className="text-xs sm:text-[13px] font-semibold text-primary truncate">
               {cat.name}
             </span>
-            <span className="text-[11px] font-mono text-muted">
+            <span className="text-[10px] sm:text-[11px] font-mono text-muted truncate">
               ({cat.slug})
             </span>
           </div>
@@ -123,31 +123,31 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
       className="hover:bg-primary/5 cursor-pointer transition-colors group"
       onClick={() => onSelectForView(cat)}
     >
-      <td className="px-5 py-4">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <td className="px-3 sm:px-5 py-2.5 sm:py-4">
+        <div className="flex items-center gap-2 min-w-0">
           <Tag className="h-4 w-4 text-primary/30 shrink-0" />
-          <span className="text-[13px] font-medium text-primary truncate">
+          <span className="text-xs sm:text-[13px] font-medium text-primary truncate">
             {cat.name}
           </span>
         </div>
       </td>
-      <td className="px-5 py-4 text-[12px] text-muted font-mono">
+      <td className="px-3 sm:px-5 py-2.5 sm:py-4 text-[11px] sm:text-xs text-muted font-mono truncate max-w-[120px] sm:max-w-none">
         {cat.slug}
       </td>
-      <td className="px-5 py-4 text-[12px] text-muted hidden md:table-cell truncate max-w-xs">
+      <td className="px-3 sm:px-5 py-2.5 sm:py-4 text-xs text-muted hidden md:table-cell truncate max-w-xs">
         {cat.description || '-'}
       </td>
-      <td className="px-5 py-4 text-center">
-        <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+      <td className="px-3 sm:px-5 py-2.5 sm:py-4 text-center">
+        <span className={`inline-flex items-center text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${
           hasJournals ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-muted/10 text-muted'
         }`}>
-          {cat.journals_count || 0} journal{(cat.journals_count || 0) !== 1 ? 's' : ''}
+          {cat.journals_count || 0} <span className="hidden sm:inline">&nbsp;journal{(cat.journals_count || 0) !== 1 ? 's' : ''}</span>
         </span>
       </td>
-      <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+      <td className="px-3 sm:px-5 py-2.5 sm:py-4 text-right" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu
           trigger={
-            <IconButton icon={MoreVertical} title="Actions" />
+            <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
           }
         >
           <DropdownMenuItem onClick={() => onSelectForView(cat)}>
@@ -306,26 +306,37 @@ const Categories: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Journal Categories">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {!isReordering ? (
             <>
               {categories.length > 1 && (
-                <Button variant="outline" onClick={() => setIsReordering(true)} className="shrink-0 flex items-center gap-2">
-                  <GripVertical className="h-4 w-4" /> Edit Order
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsReordering(true)} 
+                  className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer"
+                  title="Edit Order"
+                >
+                  <GripVertical className="h-4 w-4" />
+                  <span className="hidden sm:inline">Edit Order</span>
                 </Button>
               )}
-              <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2">
-                <Plus className="h-4 w-4" /> Category
+              <Button 
+                onClick={() => openModal()} 
+                className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer"
+                title="New Category"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Category</span>
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={handleCancelReorder} disabled={isSavingOrder}>
+              <Button variant="outline" onClick={handleCancelReorder} disabled={isSavingOrder} className="h-9 text-xs px-3 cursor-pointer">
                 Cancel
               </Button>
-              <Button onClick={handleSaveOrder} isLoading={isSavingOrder}>
+              <Button onClick={handleSaveOrder} isLoading={isSavingOrder} className="h-9 text-xs px-3 cursor-pointer">
                 Save Order
               </Button>
             </>
@@ -333,24 +344,26 @@ const Categories: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-4">
         {/* Search Input */}
         {!isReordering && (
           <div className="flex justify-end items-center">
-            <SearchInput
-              placeholder="Search categories..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
+            <div className="w-full sm:w-64">
+              <SearchInput
+                placeholder="Search categories..."
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </div>
           </div>
         )}
 
         {/* Reorder Info Banner */}
         {isReordering && (
-          <div className="bg-primary/5 border border-primary/20 p-4 text-[13px] text-primary flex items-center justify-between rounded-lg">
+          <div className="bg-primary/5 border border-primary/20 p-3 sm:p-4 text-xs sm:text-[13px] text-primary flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <GripVertical className="h-4 w-4 text-primary" />
-              <span>Drag items using the handle or use the <strong>Up</strong> and <strong>Down</strong> arrows to adjust category display order.</span>
+              <GripVertical className="h-4 w-4 text-primary shrink-0" />
+              <span>Drag items using the handle or use <strong>Up/Down</strong> arrows to adjust category display order.</span>
             </div>
           </div>
         )}
@@ -383,7 +396,7 @@ const Categories: React.FC = () => {
                   <TableHead>Slug</TableHead>
                   <TableHead className="hidden md:table-cell">Description</TableHead>
                   <TableHead className="text-center">Journals</TableHead>
-                  <TableHead className="w-12 text-right"></TableHead>
+                  <TableHead className="w-10 sm:w-12 text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

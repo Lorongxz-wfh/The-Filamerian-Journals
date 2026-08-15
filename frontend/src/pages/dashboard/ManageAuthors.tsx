@@ -221,20 +221,23 @@ const ManageAuthors: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Authors">
-        <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Author
+        <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="New Author">
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Author</span>
         </Button>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-4">
         <div className="flex justify-end items-center">
-          <SearchInput
-            placeholder="Search by name or email..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
+          <div className="w-full sm:w-64">
+            <SearchInput
+              placeholder="Search by name or email..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="border border-border bg-surface flex flex-col">
@@ -244,11 +247,11 @@ const ManageAuthors: React.FC = () => {
               <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('last_name')}>
                 <div className="flex items-center gap-1">Author Name {getSortIcon('last_name')}</div>
               </TableHead>
-              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('email')}>
+              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden sm:table-cell" onClick={() => requestSort('email')}>
                 <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
               </TableHead>
               <TableHead className="text-center">Publications</TableHead>
-              <TableHead className="w-12 text-right"></TableHead>
+              <TableHead className="w-10 sm:w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -275,26 +278,30 @@ const ManageAuthors: React.FC = () => {
                     className="group hover:bg-primary/5 cursor-pointer transition-colors"
                     onClick={() => setSelectedAuthorForView(author)}
                   >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-7 w-7 bg-primary/10 flex items-center justify-center text-[11px] font-semibold text-primary shrink-0 rounded">
+                    <TableCell className="py-2.5 sm:py-3.5">
+                      <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
+                        <div className="h-6 w-6 sm:h-7 sm:w-7 bg-primary/10 flex items-center justify-center text-[10px] sm:text-[11px] font-semibold text-primary shrink-0 rounded mt-0.5 sm:mt-0">
                           {author.first_name ? author.first_name.charAt(0).toUpperCase() : (author.last_name ? author.last_name.charAt(0).toUpperCase() : 'A')}
                         </div>
-                        <span className="text-[13px] font-medium text-primary">{fullName}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs sm:text-[13px] font-medium text-primary truncate">{fullName}</span>
+                          {/* Mobile Email subtitle */}
+                          <span className="sm:hidden text-[10px] text-muted font-mono truncate">{author.email || '-'}</span>
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted text-xs font-mono">{author.email || '-'}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    <TableCell className="text-muted text-xs font-mono hidden sm:table-cell truncate max-w-[200px]">{author.email || '-'}</TableCell>
+                    <TableCell className="text-center py-2.5 sm:py-3.5">
+                      <span className={`inline-flex items-center text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${
                         articlesCount > 0 ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-muted/10 text-muted'
                       }`}>
-                        {articlesCount} article{articlesCount !== 1 ? 's' : ''}
+                        {articlesCount} <span className="hidden sm:inline">&nbsp;article{articlesCount !== 1 ? 's' : ''}</span>
                       </span>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                    <TableCell onClick={(e) => e.stopPropagation()} className="text-right py-2.5 sm:py-3.5">
                       <DropdownMenu
                         trigger={
-                          <IconButton icon={MoreVertical} title="Actions" />
+                          <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
                         }
                       >
                         <DropdownMenuItem onClick={() => setSelectedAuthorForView(author)}>

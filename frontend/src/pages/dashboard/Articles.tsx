@@ -231,33 +231,40 @@ const Articles: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <DashboardHeader title="Articles">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button 
             variant="outline"
             onClick={() => navigate('/dashboard/import?tab=articles')}
-            className="shrink-0 flex items-center gap-2"
+            className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer"
+            title="Import Articles"
           >
-            <Upload className="h-4 w-4" /> Import
+            <Upload className="h-4 w-4" />
+            <span className="hidden sm:inline">Import</span>
           </Button>
-          <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Article
+          <Button 
+            onClick={() => handleOpenModal()} 
+            className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer"
+            title="New Article"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Article</span>
           </Button>
         </div>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="flex flex-col gap-2.5 sm:gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
             {/* Status tabs */}
-            <div className="flex gap-1 border border-border bg-surface h-9 items-center shrink-0">
+            <div className="flex gap-0.5 border border-border bg-surface h-9 items-center p-0.5 shrink-0">
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className={`px-4 h-full text-[12px] font-medium transition-colors flex items-center justify-center ${
-                    tab === t.key ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                  className={`px-3 sm:px-4 h-full text-xs font-medium transition-colors flex items-center justify-center cursor-pointer ${
+                    tab === t.key ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
                   }`}
                 >
                   {t.label}
@@ -265,11 +272,11 @@ const Articles: React.FC = () => {
               ))}
             </div>
             {/* Category filter */}
-            <div className="flex items-center gap-2">
-              <label className="text-[12px] font-medium text-muted uppercase tracking-wider shrink-0">Category:</label>
-              <div className="w-[200px]">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Category:</label>
+              <div className="w-full sm:w-[200px]">
                 <Select
-                  className="py-1.5 h-9 text-[12px]"
+                  className="py-1.5 h-9 text-xs"
                   value={categoryFilter}
                   onChange={(val) => setCategoryFilter(val as string)}
                   options={[
@@ -280,11 +287,13 @@ const Articles: React.FC = () => {
               </div>
             </div>
           </div>
-          <SearchInput
-            placeholder="Search articles..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
+          <div className="w-full md:w-64">
+            <SearchInput
+              placeholder="Search articles..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="border border-border bg-surface flex flex-col">
@@ -294,14 +303,14 @@ const Articles: React.FC = () => {
                 <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
                   <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
                 </TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('journal')}>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden sm:table-cell" onClick={() => requestSort('journal')}>
                   <div className="flex items-center gap-1">Journal & Volume {getSortIcon('journal')}</div>
                 </TableHead>
-                <TableHead>Lead Author</TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('updated_at')}>
+                <TableHead className="hidden md:table-cell">Lead Author</TableHead>
+                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden lg:table-cell" onClick={() => requestSort('updated_at')}>
                   <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
                 </TableHead>
-                <TableHead className="w-12 text-right"></TableHead>
+                <TableHead className="w-10 sm:w-12 text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -326,31 +335,39 @@ const Articles: React.FC = () => {
                       className="group hover:bg-primary/5 cursor-pointer transition-colors"
                       onClick={() => setSelectedArticleForView(article)}
                     >
-                      <TableCell>
+                      <TableCell className="py-2.5 sm:py-3.5">
                         <div className="flex flex-col min-w-0 pr-2">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-primary/30 shrink-0" />
-                            <span className="text-[13px] font-medium text-primary line-clamp-1 group-hover:text-primary transition-colors" title={article.title}>
-                              {article.title}
-                            </span>
+                          <div className="flex items-start gap-2">
+                            <FileText className="h-4 w-4 text-primary/30 shrink-0 mt-0.5" />
+                            <div className="min-w-0">
+                              <span className="text-xs sm:text-[13px] font-medium text-primary line-clamp-1 group-hover:text-primary transition-colors" title={article.title}>
+                                {article.title}
+                              </span>
+                              {/* Mobile Subtitle with Journal & Volume + Lead Author */}
+                              <div className="sm:hidden text-[11px] text-muted truncate mt-0.5">
+                                <span className="font-medium text-primary/80">{journalTitle}</span>
+                                {volNum && <span> • {volNum}</span>}
+                                {leadAuthor !== '-' && <span> • {leadAuthor}</span>}
+                              </div>
+                            </div>
                           </div>
                           <div className="mt-1 pl-6">
                             <Badge 
                               variant={article.status === 'Draft' ? 'outline' : 'secondary'}
-                              className={article.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0 font-semibold' : 'text-[9px] px-1.5 py-0 font-semibold'}
+                              className={article.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200 text-[8px] sm:text-[9px] px-1.5 py-0 font-semibold' : 'text-[8px] sm:text-[9px] px-1.5 py-0 font-semibold'}
                             >
                               {article.status || 'Published'}
                             </Badge>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted text-xs">
+                      <TableCell className="text-muted text-xs hidden sm:table-cell">
                         <div className="truncate max-w-[200px]" title={journalTitle}>
                           <span className="font-medium text-primary/90">{journalTitle}</span>
                           {volNum && <span className="text-muted/70 text-[11px] block">{volNum}</span>}
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted text-xs">
+                      <TableCell className="text-muted text-xs hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
                           <span className="truncate max-w-[150px] font-medium text-primary/80">{leadAuthor}</span>
                           {coAuthorsCount > 0 && (
@@ -360,15 +377,15 @@ const Articles: React.FC = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted text-xs whitespace-nowrap">
+                      <TableCell className="text-muted text-xs whitespace-nowrap hidden lg:table-cell">
                         {article.updated_at
                           ? new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                           : new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                      <TableCell onClick={(e) => e.stopPropagation()} className="text-right py-2.5 sm:py-3.5">
                         <DropdownMenu
                           trigger={
-                            <IconButton icon={MoreVertical} title="Actions" />
+                            <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
                           }
                         >
                           <DropdownMenuItem onClick={() => setSelectedArticleForView(article)}>
