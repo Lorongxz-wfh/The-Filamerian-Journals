@@ -13,7 +13,10 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
-    if (localStorage.getItem('token')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('expired') === '1') {
+      setError('Your session has expired. Please log in again to continue.');
+    } else if (localStorage.getItem('token')) {
       navigate('/dashboard');
     }
   }, [navigate]);
