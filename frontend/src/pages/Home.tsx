@@ -100,37 +100,37 @@ const Home: React.FC = () => {
   const aboutHtml = settings.about_us || settings.home_about_us || '';;
 
   return (
-    <PageWrapper className="flex flex-col relative pb-16">
+    <PageWrapper className="flex flex-col relative pb-12 sm:pb-16">
       <Seo
         title="Home"
         description={`${siteTitle} — Official online database of academic journals, faculty research, theses, and case studies.`}
       />
 
-      <div className="space-y-12 w-full">
+      <div className="space-y-8 sm:space-y-12 w-full">
 
         {/* ── Hero Banner ──────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
 
           {/* Left: Site intro + search + stats */}
-          <div className="lg:col-span-8 border border-border bg-surface p-8 lg:p-10 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-secondary text-[11px] font-bold uppercase tracking-widest">
+          <div className="lg:col-span-8 border border-border bg-surface p-5 sm:p-8 lg:p-10 flex flex-col justify-between">
+            <div className="space-y-3.5 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 bg-primary text-secondary text-[10px] sm:text-[11px] font-bold uppercase tracking-widest">
                 <span>Filamer Christian University</span>
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-display font-normal text-primary tracking-wider uppercase leading-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-normal text-primary tracking-wider uppercase leading-tight">
                 {siteTitle}
               </h1>
 
               {aboutHtml ? (
                 <div
-                  className="text-left text-muted text-sm leading-relaxed max-w-xl prose prose-sm max-w-none [&_*]:text-left"
+                  className="text-left text-muted text-xs sm:text-sm leading-relaxed max-w-xl prose prose-sm max-w-none [&_*]:text-left"
                   dangerouslySetInnerHTML={{ 
                     __html: DOMPurify.sanitize(aboutHtml.replace(/<h[12][^>]*>.*?<\/h[12]>/gi, '')) 
                   }}
                 />
               ) : (
-                <p className="text-left text-muted text-sm leading-relaxed max-w-xl">
+                <p className="text-left text-muted text-xs sm:text-sm leading-relaxed max-w-xl">
                   The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
                 </p>
               )}
@@ -149,7 +149,7 @@ const Home: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-secondary hover:text-primary transition-colors shrink-0 flex items-center gap-1.5"
+                  className="px-4 sm:px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider hover:bg-secondary hover:text-primary transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer"
                 >
                   Search
                 </button>
@@ -157,26 +157,26 @@ const Home: React.FC = () => {
             </div>
 
             {/* Live Stats */}
-            <div className="pt-5 flex flex-wrap gap-8 border-t border-border mt-6">
+            <div className="pt-4 sm:pt-5 grid grid-cols-3 gap-2 sm:gap-8 border-t border-border mt-5 sm:mt-6">
               {loading ? (
                 <>
-                  <Skeleton className="h-10 w-20" />
-                  <Skeleton className="h-10 w-20" />
-                  <Skeleton className="h-10 w-20" />
+                  <Skeleton className="h-10 w-16 sm:w-20" />
+                  <Skeleton className="h-10 w-16 sm:w-20" />
+                  <Skeleton className="h-10 w-16 sm:w-20" />
                 </>
               ) : (
                 <>
                   <div>
-                    <div className="text-2xl font-bold text-primary font-mono">{journals.length}</div>
-                    <div className="text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
+                    <div className="text-lg sm:text-2xl font-bold text-primary font-mono">{journals.length}</div>
+                    <div className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-medium">Academic Journals</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-primary font-mono">{totalPublishedArticles}</div>
-                    <div className="text-xs text-muted uppercase tracking-wider font-medium">Published Papers</div>
+                    <div className="text-lg sm:text-2xl font-bold text-primary font-mono">{totalPublishedArticles}</div>
+                    <div className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-medium">Published Papers</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-primary font-mono">{categoriesList.length}</div>
-                    <div className="text-xs text-muted uppercase tracking-wider font-medium">Research Fields</div>
+                    <div className="text-lg sm:text-2xl font-bold text-primary font-mono">{categoriesList.length}</div>
+                    <div className="text-[10px] sm:text-xs text-muted uppercase tracking-wider font-medium">Research Fields</div>
                   </div>
                 </>
               )}
@@ -186,7 +186,7 @@ const Home: React.FC = () => {
           {/* Right: Announcements Panel */}
           <div className="lg:col-span-4 border border-border bg-background flex flex-col overflow-hidden h-full">
             {/* Header Bar */}
-            <div className="bg-primary px-4 py-3 flex items-center justify-between border-b border-secondary/30 shrink-0">
+            <div className="bg-primary px-3.5 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between border-b border-secondary/30 shrink-0">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-secondary" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white">Announcements</span>
@@ -196,8 +196,8 @@ const Home: React.FC = () => {
               </Link>
             </div>
 
-            {/* Announcements List — Clean 3 items fitting height without scrollbar */}
-            <div className="p-4 flex-1 flex flex-col justify-between overflow-hidden divide-y divide-border/40">
+            {/* Announcements List */}
+            <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between overflow-hidden divide-y divide-border/40">
               {loading ? (
                 <div className="flex-1 flex flex-col justify-between py-1">
                   {[1, 2, 3].map((i) => (
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Footer Bar */}
-            <div className="bg-surface px-4 py-2.5 border-t border-border flex items-center justify-between shrink-0">
+            <div className="bg-surface px-3.5 sm:px-4 py-2.5 border-t border-border flex items-center justify-between shrink-0">
               <span className="text-[9px] text-muted font-medium">FCU Official Bulletin</span>
               <Link to="/announcements" className="text-[10px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
                 Read All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />
@@ -252,21 +252,21 @@ const Home: React.FC = () => {
         </div>
 
         {/* ── Content Sections ─────────────────────────────────────── */}
-        <div className="space-y-10 border-t border-border pt-8">
+        <div className="space-y-8 sm:space-y-10 border-t border-border pt-6 sm:pt-8">
 
           {/* Latest Articles */}
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Latest Articles</h2>
+              <h2 className="text-base sm:text-lg font-bold uppercase tracking-wider text-primary">Latest Articles</h2>
               <Link to="/archives" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">
                 Explore Archives →
               </Link>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="border border-border bg-surface p-5 h-[230px] space-y-3">
+                  <div key={i} className="border border-border bg-surface p-4 sm:p-5 h-[230px] space-y-3">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-5 w-full" />
                     <Skeleton className="h-5 w-4/5" />
@@ -279,23 +279,23 @@ const Home: React.FC = () => {
             ) : latestArticles.length === 0 ? (
               <p className="text-sm text-muted py-4">No articles published yet.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                 {latestArticles.slice(0, 3).map((art) => (
                   <Link
                     key={art.id}
                     to={`/articles/${art.id}`}
-                    className="border border-border bg-surface p-5 hover:border-primary transition-colors flex flex-col justify-between h-[230px] group"
+                    className="border border-border bg-surface p-4 sm:p-5 hover:border-primary transition-colors flex flex-col justify-between min-h-[200px] md:h-[230px] group"
                   >
                     <div className="space-y-2">
                       <span className="text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">
                         {art.volume?.journal?.title || 'Journal Paper'}
                       </span>
-                      <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2.5">
+                      <h4 className="text-sm font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 mt-2">
                         {art.title}
                       </h4>
-                      <p className="text-xs text-muted line-clamp-3">{art.abstract}</p>
+                      <p className="text-xs text-muted line-clamp-3 leading-relaxed">{art.abstract}</p>
                     </div>
-                    <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-primary pt-3 border-t border-border flex items-center justify-between mt-3">
                       Read Paper <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                     </span>
                   </Link>
@@ -307,17 +307,17 @@ const Home: React.FC = () => {
           {/* Recently Updated Journals */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Recently Updated Journals</h2>
+              <h2 className="text-base sm:text-lg font-bold uppercase tracking-wider text-primary">Recently Updated Journals</h2>
               <Link to="/journals" className="text-xs font-bold text-muted hover:text-primary uppercase tracking-wider">
                 View All Journals →
               </Link>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="border border-border bg-surface p-4 flex gap-4 items-center">
-                    <Skeleton className="w-16 h-[84px] shrink-0" />
+                  <div key={i} className="border border-border bg-surface p-3.5 sm:p-4 flex gap-3 sm:gap-4 items-center">
+                    <Skeleton className="w-14 sm:w-16 h-[74px] sm:h-[84px] shrink-0" />
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-3 w-16" />
                       <Skeleton className="h-4 w-full" />
@@ -329,15 +329,15 @@ const Home: React.FC = () => {
             ) : recentJournals.length === 0 ? (
               <p className="text-sm text-muted py-4">No journals available yet.</p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {recentJournals.map((j) => (
                   <Link
                     key={j.id}
                     to={`/journals/${j.slug}`}
-                    className="border border-border bg-surface p-4 flex gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
+                    className="border border-border bg-surface p-3.5 sm:p-4 flex gap-3 sm:gap-4 hover:border-primary hover:shadow-md transition-all group items-center"
                   >
                     {/* Journal Cover */}
-                    <div className="w-16 h-[84px] shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
+                    <div className="w-14 sm:w-16 h-[74px] sm:h-[84px] shrink-0 bg-background border border-border overflow-hidden flex items-center justify-center p-1 shadow-xs">
                       {j.cover_image ? (
                         <img
                           src={getFileUrl(j.cover_image)}
@@ -351,16 +351,16 @@ const Home: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <span className="text-[9px] font-bold text-secondary bg-primary px-2 py-0.5 uppercase tracking-wider inline-block">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <span className="text-[9px] font-bold text-secondary bg-primary px-1.5 sm:px-2 py-0.5 uppercase tracking-wider inline-block">
                         {typeof j.category === 'object' && j.category !== null
                           ? (j.category as any).name
                           : j.category || 'Journal'}
                       </span>
-                      <h4 className="text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
+                      <h4 className="text-xs sm:text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase line-clamp-2 leading-snug">
                         {j.title}
                       </h4>
-                      <span className="text-[11px] text-muted block font-mono">
+                      <span className="text-[10px] sm:text-[11px] text-muted block font-mono">
                         {j.volumes?.length || 0} Volume{(j.volumes?.length || 0) !== 1 ? 's' : ''} Published
                       </span>
                     </div>
