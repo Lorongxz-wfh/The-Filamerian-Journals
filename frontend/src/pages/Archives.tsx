@@ -276,7 +276,7 @@ const Archives: React.FC = () => {
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 lg:gap-2 bg-surface p-2.5 lg:px-3 lg:py-2 border border-border mb-6 sm:mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 lg:gap-2 bg-surface p-2 sm:p-2.5 lg:px-3 lg:py-2 border border-border mb-6 sm:mb-8">
           {/* Top Row on Mobile/Tablet: Search + View Mode Switcher */}
           <div className="flex items-center gap-2 w-full lg:w-auto flex-1 min-w-0">
             <div className="relative flex-1 lg:flex-none lg:w-48 min-w-0">
@@ -313,10 +313,10 @@ const Archives: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom Row on Mobile/Tablet: Filters & Sort evenly distributed */}
-          <div className="grid grid-cols-3 lg:flex items-center gap-1.5 lg:gap-2 w-full lg:w-auto shrink-0">
+          {/* Bottom Row on Mobile/Tablet: Filters & Sort comfortably distributed */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap lg:flex-nowrap items-center gap-1.5 sm:gap-2 w-full lg:w-auto shrink-0">
             {/* Year Filter */}
-            <div className="w-full lg:w-24">
+            <div className="w-full sm:w-24">
               <Select
                 value={selectedYear}
                 onChange={(val) => setSelectedYear(String(val))}
@@ -329,7 +329,7 @@ const Archives: React.FC = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="w-full lg:w-32">
+            <div className="w-full sm:w-32">
               <Select
                 value={selectedCategory}
                 onChange={(val) => setSelectedCategory(String(val))}
@@ -342,7 +342,7 @@ const Archives: React.FC = () => {
             </div>
 
             {/* Sort By Dropdown */}
-            <div className="w-full lg:w-28">
+            <div className="col-span-2 sm:col-span-1 w-full sm:w-28">
               <Select
                 value={sortBy}
                 onChange={(val) => setSortBy(val as any)}
@@ -362,7 +362,7 @@ const Archives: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="col-span-3 lg:col-span-1 h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center justify-center gap-1 font-medium cursor-pointer"
+                className="col-span-2 sm:col-span-1 h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center justify-center gap-1 font-medium cursor-pointer"
                 title="Reset All Filters"
               >
                 <RotateCcw className="h-3 w-3" />
@@ -516,19 +516,19 @@ const Archives: React.FC = () => {
               </div>
 
               {/* RIGHT COLUMN / FULL WIDTH ON MOBILE: Live Selected Issue Preview Panel */}
-              <div className="w-full lg:col-span-7 border border-border bg-surface flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 min-h-[400px] lg:min-h-[600px]">
+              <div className="w-full lg:col-span-7 border border-border bg-surface flex flex-col p-3.5 sm:p-6 space-y-4 sm:space-y-6 min-h-[400px] lg:min-h-[600px] pb-24 lg:pb-6">
                 {isVolumeLoading ? (
                   <>
                     {/* Header skeleton — mirrors actual cover + journal info block */}
-                    <div className="border-b border-border pb-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-                      <div className="w-20 sm:w-24 h-28 sm:h-32 shrink-0 bg-background border border-border" />
+                    <div className="border-b border-border pb-4 sm:pb-6 flex flex-row gap-3.5 sm:gap-6 items-start">
+                      <div className="w-16 sm:w-24 h-22 sm:h-32 shrink-0 bg-background border border-border" />
                       <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Skeleton className="h-5 w-16" />
-                          <Skeleton className="h-5 w-20" />
-                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 sm:h-5 w-16" />
+                          <Skeleton className="h-4 sm:h-5 w-20" />
+                          <Skeleton className="h-3 sm:h-4 w-24" />
                         </div>
-                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 sm:h-5 w-3/4" />
                         <Skeleton className="h-3 w-1/2" />
                         <Skeleton className="h-3 w-28 mt-2" />
                       </div>
@@ -558,8 +558,8 @@ const Archives: React.FC = () => {
                   </>
                 ) : selectedSplitVolume ? (
                   <>
-                    <div className="border-b border-border pb-4 sm:pb-6 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-                      <div className="w-20 sm:w-24 h-28 sm:h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-2 text-center shadow-xs">
+                    <div className="border-b border-border pb-3.5 sm:pb-6 flex flex-row gap-3 sm:gap-6 items-start">
+                      <div className="w-16 sm:w-24 h-22 sm:h-32 shrink-0 bg-background border border-border overflow-hidden flex flex-col items-center justify-center p-1 sm:p-2 text-center shadow-xs">
                         {selectedSplitVolume.journal.cover_image ? (
                           <img
                             src={getFileUrl(selectedSplitVolume.journal.cover_image)}
@@ -568,35 +568,35 @@ const Archives: React.FC = () => {
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
                         ) : (
-                          <BookOpen className="h-8 w-8 text-primary/30" />
+                          <BookOpen className="h-6 sm:h-8 w-6 sm:w-8 text-primary/30" />
                         )}
                       </div>
 
-                      <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span className="text-[9px] sm:text-[10px] font-bold text-secondary bg-primary px-2 py-0.5 sm:px-2.5 sm:py-1 uppercase tracking-wider">
+                      <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                          <span className="text-[8px] sm:text-[10px] font-bold text-secondary bg-primary px-1.5 sm:px-2.5 py-0.5 sm:py-1 uppercase tracking-wider">
                             {formatVolumeName(selectedSplitVolume.volume_number)}
                           </span>
-                          <span className="text-[11px] sm:text-xs font-mono font-bold text-primary border border-border px-1.5 sm:px-2 py-0.5">
+                          <span className="text-[10px] sm:text-xs font-mono font-bold text-primary border border-border px-1 sm:px-2 py-0.5">
                             Year {selectedSplitVolume.year}
                           </span>
-                          <span className="text-[11px] sm:text-xs text-muted">
+                          <span className="text-[10px] sm:text-xs text-muted">
                             ISSN: {selectedSplitVolume.journal.issn || '-'}
                           </span>
                         </div>
 
-                        <h3 className="text-sm sm:text-base font-bold text-primary uppercase tracking-wide">
+                        <h3 className="text-xs sm:text-base font-bold text-primary uppercase tracking-wide line-clamp-2 leading-snug">
                           {selectedSplitVolume.journal.title}
                         </h3>
 
-                        <p className="text-[11px] sm:text-xs text-muted">
-                          Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · Contains {selectedSplitVolume.articles.length} published article(s).
+                        <p className="text-[10px] sm:text-xs text-muted">
+                          Field: <strong className="text-primary">{selectedSplitVolume.journal.categoryName}</strong> · {selectedSplitVolume.articles.length} article(s).
                         </p>
 
-                        <div className="pt-1 sm:pt-2">
+                        <div className="pt-0.5 sm:pt-2">
                           <Link
                             to={`/journals/${selectedSplitVolume.journal.slug}`}
-                            className="text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
+                            className="text-[11px] sm:text-xs font-semibold text-primary hover:text-secondary transition-colors inline-flex items-center gap-1"
                           >
                             View Main Journal Page →
                           </Link>
@@ -621,16 +621,16 @@ const Archives: React.FC = () => {
                           {selectedSplitVolume.articles.map((article) => (
                             <div
                               key={article.id}
-                              className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-surface/50 transition-colors group"
+                              className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-surface/50 transition-colors group"
                             >
                               <div className="min-w-0 flex-1">
                                 <h5 className="text-xs sm:text-[13px] font-bold text-primary group-hover:text-secondary transition-colors uppercase leading-snug">
                                   {article.title}
                                 </h5>
-                                <p className="text-xs text-muted mt-1">
+                                <p className="text-[11px] sm:text-xs text-muted mt-1">
                                   {article.authors?.map((a) => a.name).join(', ') || 'Unknown Author'}
                                 </p>
-                                <div className="flex items-center gap-3 sm:gap-4 mt-2 text-[10px] sm:text-[11px] text-muted/60 flex-wrap font-mono">
+                                <div className="flex items-center gap-3 sm:gap-4 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-muted/60 flex-wrap font-mono">
                                    {(article.page_start || article.page_end) && (
                                      <span>
                                        {article.page_start && article.page_end
@@ -684,7 +684,7 @@ const Archives: React.FC = () => {
             </div>
 
             {/* Mobile / Tablet Sticky Bottom Dropup Volume Selector (< lg) */}
-            <div className="lg:hidden sticky bottom-4 z-30 mt-6">
+            <div className="lg:hidden sticky bottom-3 z-30 mt-6 px-1">
               <div className="relative">
                 {/* Upward Dropup List */}
                 <AnimatePresence>
@@ -754,10 +754,10 @@ const Archives: React.FC = () => {
                 {/* Bottom Sticky Toggle Bar Trigger */}
                 <button
                   onClick={() => setIsMobileVolumeSelectorOpen(!isMobileVolumeSelectorOpen)}
-                  className="w-full bg-primary text-white p-3 border border-secondary/40 shadow-2xl flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition-transform"
+                  className="w-full bg-primary text-white p-2.5 sm:p-3 border border-secondary/40 shadow-2xl flex items-center justify-between gap-2.5 cursor-pointer active:scale-[0.99] transition-transform rounded-xs"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <span className="text-[10px] font-bold text-primary bg-secondary px-2 py-0.5 uppercase tracking-wider shrink-0">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-[9px] sm:text-[10px] font-bold text-primary bg-secondary px-1.5 sm:px-2 py-0.5 uppercase tracking-wider shrink-0">
                       {selectedSplitVolume ? formatVolumeName(selectedSplitVolume.volume_number) : 'VOL'}
                     </span>
                     <div className="min-w-0 text-left">
@@ -769,7 +769,7 @@ const Archives: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 bg-white/10 px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold text-secondary uppercase tracking-wider">
+                  <div className="flex items-center gap-1 shrink-0 bg-white/10 px-2 py-1 text-[10px] sm:text-[11px] font-semibold text-secondary uppercase tracking-wider">
                     <span>Switch</span>
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${isMobileVolumeSelectorOpen ? 'rotate-180' : ''}`} />
                   </div>
