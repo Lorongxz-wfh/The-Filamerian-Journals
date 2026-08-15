@@ -450,12 +450,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           </div>
         )}
         {/* Dashboard Header */}
-        <header className="h-14 bg-surface border-b border-border flex items-center justify-between px-6 shrink-0">
+        <header className="h-14 bg-surface border-b border-border flex items-center justify-between px-3 sm:px-6 shrink-0">
           
-          <div className="flex items-center min-w-[40px]">
+          <div className="flex items-center min-w-[36px] sm:min-w-[40px]">
             {/* Mobile hamburger */}
             <button
-              className="lg:hidden h-8 w-8 flex items-center justify-center text-muted hover:text-primary"
+              className="lg:hidden h-8 w-8 flex items-center justify-center text-muted hover:text-primary cursor-pointer"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -463,9 +463,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           </div>
 
           {/* Center Search */}
-          <div className="flex-1 max-w-md px-4">
+          <div className="flex-1 max-w-md px-2 sm:px-4">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted/40" />
               <input
                 ref={dashSearchInputRef}
                 type="text"
@@ -476,9 +476,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
                   if (searchQuery.trim()) setIsDropdownOpen(true);
                 }}
                 onKeyDown={handleSearch}
-                className="w-full pl-9 pr-14 py-2 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors"
+                className="w-full pl-8 sm:pl-9 pr-8 sm:pr-14 py-1.5 sm:py-2 bg-background border border-border text-xs sm:text-[13px] focus:outline-none focus:border-primary transition-colors"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <div className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted/70 bg-surface border border-border rounded shadow-2xs">
                   Ctrl K
                 </kbd>
@@ -494,10 +494,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end min-w-[40px] gap-2">
+          <div className="flex items-center justify-end min-w-[36px] sm:min-w-[40px] gap-1 sm:gap-2">
             <button
               onClick={() => setIsShortcutsOpen(true)}
-              className="h-8 w-8 flex items-center justify-center text-muted hover:text-primary transition-colors rounded-none"
+              className="h-8 w-8 flex items-center justify-center text-muted hover:text-primary transition-colors rounded-none cursor-pointer"
               title="Keyboard Shortcuts & Help Guide (?)"
             >
               <HelpCircle className="h-4 w-4" />
@@ -506,7 +506,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
             <div className="relative" ref={notifRef}>
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className="relative h-8 w-8 flex items-center justify-center text-muted hover:text-primary transition-colors"
+                className="relative h-8 w-8 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer"
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
@@ -516,7 +516,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 
               <div 
                 className={cn(
-                  "absolute right-0 mt-2 w-80 bg-surface border border-border shadow-xl z-50 origin-top-right transition-all duration-200 ease-out",
+                  "absolute right-0 mt-2 w-72 sm:w-80 bg-surface border border-border shadow-xl z-50 origin-top-right transition-all duration-200 ease-out",
                   isNotifOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible pointer-events-none"
                 )}
               >
@@ -561,14 +561,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
               </div>
             </div>
             
-            <span className="text-[11px] text-muted hidden sm:inline">
+            <span className="text-[11px] text-muted hidden sm:inline truncate max-w-[120px]">
               {user.name || 'User'}
             </span>
           </div>
         </header>
 
         {/* Dashboard Content */}
-        <main className="flex-grow p-6 overflow-y-auto">
+        <main className="flex-grow p-3.5 sm:p-6 overflow-y-auto">
           <Outlet />
         </main>
 
