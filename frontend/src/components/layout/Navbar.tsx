@@ -93,115 +93,160 @@ const Navbar = () => {
         </div>
       )}
       <nav className="bg-primary sticky top-0 z-50 shadow-md border-b border-white/10">
-      <div className="container-custom flex h-16 items-center justify-between gap-4 lg:gap-6">
-        {/* Brand — flush left */}
-        <Link to="/" className="flex items-center gap-3 shrink-0">
-          <span className="font-display font-normal text-secondary text-xl tracking-wider uppercase leading-none">
-            {settings.site_title}
-          </span>
-        </Link>
-
-        {/* Search — center, fills available space (hidden on Home page to prevent double search) */}
-        {path !== '/' ? (
-          <div className="hidden md:block flex-grow max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search journals, articles, authors..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => {
-                  setIsDropdownOpen(true);
-                }}
-                onKeyDown={handleSearch}
-                className="w-full pl-10 pr-16 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
-                {searchQuery ? (
-                  <button 
-                    onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
-                    className="text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center pointer-events-auto"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                ) : (
-                  <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted/70 bg-white border border-border rounded shadow-2xs">
-                    Ctrl K
-                  </kbd>
-                )}
-              </div>
-              
-              <SearchDropdown 
-                query={debouncedSearch}
-                results={searchResults}
-                loading={isSearchLoading}
-                isOpen={isDropdownOpen}
-                onClose={() => setIsDropdownOpen(false)}
-                onSelectQuery={(q) => {
-                  setSearchQuery(q);
-                  setIsDropdownOpen(true);
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="flex-grow max-w-md hidden md:block" />
-        )}
-
-        {/* Nav links + Login — flush right */}
-        <div className="hidden md:flex items-center gap-6 shrink-0 h-full">
-          <Link to="/" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path === '/' ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
-            Home
+        {/* Desktop Navbar Layout (>= md) */}
+        <div className="container-custom hidden md:flex h-16 items-center justify-between gap-4 lg:gap-6">
+          {/* Brand — flush left */}
+          <Link to="/" className="flex items-center gap-3 shrink-0">
+            <span className="font-display font-normal text-secondary text-xl tracking-wider uppercase leading-none">
+              {settings.site_title}
+            </span>
           </Link>
-          
-          <div className="relative group h-full flex items-center">
-            <Link to="/journals" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/journals') || path.startsWith('/articles') ? 'text-secondary' : 'text-white/70 group-hover:text-white'}`}>
-              Journals
+
+          {/* Search — center, fills available space (hidden on Home page to prevent double search) */}
+          {path !== '/' ? (
+            <div className="flex-grow max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search journals, articles, authors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    setIsDropdownOpen(true);
+                  }}
+                  onKeyDown={handleSearch}
+                  className="w-full pl-10 pr-16 py-2 bg-[#f4f4f5] border border-transparent text-[13px] text-primary placeholder:text-muted/60 focus:outline-none focus:bg-white focus:ring-2 focus:ring-white/30 transition-all"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                  {searchQuery ? (
+                    <button 
+                      onClick={() => { setSearchQuery(''); setIsDropdownOpen(false); }} 
+                      className="text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center pointer-events-auto cursor-pointer"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted/70 bg-white border border-border rounded shadow-2xs">
+                      Ctrl K
+                    </kbd>
+                  )}
+                </div>
+                
+                <SearchDropdown 
+                  query={debouncedSearch}
+                  results={searchResults}
+                  loading={isSearchLoading}
+                  isOpen={isDropdownOpen}
+                  onClose={() => setIsDropdownOpen(false)}
+                  onSelectQuery={(q) => {
+                    setSearchQuery(q);
+                    setIsDropdownOpen(true);
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-grow max-w-md" />
+          )}
+
+          {/* Nav links + Login — flush right */}
+          <div className="flex items-center gap-6 shrink-0 h-full">
+            <Link to="/" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path === '/' ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
+              Home
             </Link>
             
-            {/* UP Diliman Style Dropdown */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-56 w-max max-w-2xl bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto flex flex-col">
-              <div 
-                className="grid bg-white/10 gap-px max-h-[340px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-secondary/40 [&::-webkit-scrollbar-track]:bg-primary" 
-                style={{ 
-                  gridTemplateColumns: dropdownCategories.length > 10 ? 'repeat(3, minmax(180px, 1fr))' : 
-                                       dropdownCategories.length > 5 ? 'repeat(2, minmax(180px, 1fr))' : 
-                                       '1fr' 
-                }}
-              >
-                {dropdownCategories.map(cat => (
-                  <Link 
-                    key={cat.id}
-                    to={`/journals?category=${encodeURIComponent(cat.slug)}`} 
-                    className="flex px-6 py-4 bg-primary text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest"
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-              <Link
-                to="/journals"
-                className="block p-4 text-center text-[12px] font-bold text-secondary uppercase tracking-widest bg-primary/95 hover:bg-secondary hover:text-primary transition-colors border-t border-white/10"
-              >
-                View All Categories →
+            <div className="relative group h-full flex items-center">
+              <Link to="/journals" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/journals') || path.startsWith('/articles') ? 'text-secondary' : 'text-white/70 group-hover:text-white'}`}>
+                Journals
               </Link>
+              
+              {/* UP Diliman Style Dropdown */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-56 w-max max-w-2xl bg-primary border-t-[3px] border-secondary opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50 pointer-events-none group-hover:pointer-events-auto flex flex-col">
+                <div 
+                  className="grid bg-white/10 gap-px max-h-[340px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-secondary/40 [&::-webkit-scrollbar-track]:bg-primary" 
+                  style={{ 
+                    gridTemplateColumns: dropdownCategories.length > 10 ? 'repeat(3, minmax(180px, 1fr))' : 
+                                         dropdownCategories.length > 5 ? 'repeat(2, minmax(180px, 1fr))' : 
+                                         '1fr' 
+                  }}
+                >
+                  {dropdownCategories.map(cat => (
+                    <Link 
+                      key={cat.id}
+                      to={`/journals?category=${encodeURIComponent(cat.slug)}`} 
+                      className="flex px-6 py-4 bg-primary text-[13px] font-medium text-white/80 hover:text-primary hover:bg-secondary transition-colors uppercase tracking-widest"
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+                <Link
+                  to="/journals"
+                  className="block p-4 text-center text-[12px] font-bold text-secondary uppercase tracking-widest bg-primary/95 hover:bg-secondary hover:text-primary transition-colors border-t border-white/10"
+                >
+                  View All Categories →
+                </Link>
+              </div>
+            </div>
+
+            <Link to="/archives" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/archives') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
+              Archives
+            </Link>
+            <Link to="/about" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/about') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
+              About
+            </Link>
+            <Link to="/contact" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/contact') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
+              Contact
+            </Link>
+
+            <div className="flex items-center h-full">
+              <span className="w-px h-5 bg-white/20 mx-4" />
+              {localStorage.getItem('token') ? (
+                <Link
+                  to="/dashboard"
+                  title="Dashboard"
+                  aria-label="Go to Dashboard"
+                  className="h-9 w-9 rounded-sm flex items-center justify-center border border-secondary/40 text-secondary bg-secondary/10 hover:bg-secondary/20 hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  title="Portal Login"
+                  aria-label="Portal Login"
+                  className="h-9 w-9 rounded-sm flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           </div>
+        </div>
 
-          <Link to="/archives" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/archives') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
-            Archives
-          </Link>
-          <Link to="/about" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/about') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
-            About
-          </Link>
-          <Link to="/contact" className={`text-[13px] font-medium tracking-wide h-full flex items-center transition-colors ${path.startsWith('/contact') ? 'text-secondary' : 'text-white/70 hover:text-white'}`}>
-            Contact
+        {/* Mobile Navbar Layout (< md): Left Menu Button, Center Brand, Right Portal Login */}
+        <div className="container-custom flex md:hidden h-16 items-center justify-between gap-3 px-4">
+          {/* Left: Mobile Menu Trigger */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="h-9 w-9 flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer shrink-0"
+            title="Open Navigation Menu"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          {/* Center: Brand Name (Centered and fitted) */}
+          <Link to="/" className="flex-1 min-w-0 text-center px-2">
+            <span className="font-display font-normal text-secondary text-[16px] sm:text-lg tracking-wider uppercase leading-tight block truncate">
+              {settings.site_title}
+            </span>
           </Link>
 
-          <div className="flex items-center h-full">
-            <span className="w-px h-5 bg-white/20 mx-4" />
+          {/* Right: Dashboard / Login Icon */}
+          <div className="shrink-0">
             {localStorage.getItem('token') ? (
               <Link
                 to="/dashboard"
@@ -224,52 +269,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Action Icons */}
-        <div className="flex md:hidden items-center gap-2 shrink-0">
-          {/* Quick Search Trigger */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="h-9 w-9 flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer"
-            title="Search"
-            aria-label="Search"
-          >
-            <Search className="h-4 w-4" />
-          </button>
-
-          {/* Portal / Dashboard Icon */}
-          {localStorage.getItem('token') ? (
-            <Link
-              to="/dashboard"
-              title="Dashboard"
-              aria-label="Go to Dashboard"
-              className="h-9 w-9 rounded-sm flex items-center justify-center border border-secondary/40 text-secondary bg-secondary/10 hover:bg-secondary/20 hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs"
-            >
-              <BookOpen className="h-4 w-4" />
-            </Link>
-          ) : (
-            <Link
-              to="/login"
-              title="Portal Login"
-              aria-label="Portal Login"
-              className="h-9 w-9 rounded-sm flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs"
-            >
-              <BookOpen className="h-4 w-4" />
-            </Link>
-          )}
-
-          {/* Menu Drawer Trigger */}
-          <button 
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="h-9 w-9 flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer"
-            title="Open Menu"
-            aria-label="Open Menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Menu Drawer (Slides out from LEFT) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -284,11 +284,11 @@ const Navbar = () => {
             
             {/* Drawer */}
             <motion.div
-              initial={{ x: '100%' }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
+              exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface z-[101] md:hidden flex flex-col shadow-2xl border-l border-border"
+              className="fixed top-0 left-0 bottom-0 w-[85vw] max-w-sm bg-surface z-[101] md:hidden flex flex-col shadow-2xl border-r border-border"
             >
               <div className="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-border bg-primary text-white shrink-0">
                 <span className="font-display font-bold text-secondary uppercase tracking-widest text-sm">
