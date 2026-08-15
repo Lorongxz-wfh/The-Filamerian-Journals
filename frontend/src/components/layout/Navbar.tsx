@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router';
-import { Menu, Search, X, ChevronRight, BookOpen } from 'lucide-react';
+import { Menu, Search, X, ChevronRight, Sparkles, ShieldCheck, ArrowRight, Lock, User, LayoutDashboard } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -7,6 +7,8 @@ import SearchDropdown from '@/components/ui/SearchDropdown';
 import { useSettings } from '@/contexts/SettingsContext';
 
 import api from '@/services/api';
+
+type PortalBtnStyle = 'editorial-badge' | 'solid-gold-pill' | 'swiss-line' | 'glass-pill' | 'compact-luxury';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -20,6 +22,14 @@ const Navbar = () => {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
+  const [btnStyle, setBtnStyle] = useState<PortalBtnStyle>(() => {
+    return (localStorage.getItem('navbar_portal_btn_style') as PortalBtnStyle) || 'editorial-badge';
+  });
+  const [styleSwitcherOpen, setStyleSwitcherOpen] = useState(false);
+  const isLoggedIn = !!localStorage.getItem('token');
+  const targetUrl = isLoggedIn ? '/dashboard' : '/login';
+  const targetLabel = isLoggedIn ? 'Dashboard' : 'Portal Login';
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   interface Category {
     id: number;
@@ -27,6 +37,80 @@ const Navbar = () => {
     slug: string;
   }
   const [dropdownCategories, setDropdownCategories] = useState<Category[]>([]);
+
+  const handleSelectStyle = (style: PortalBtnStyle) => {
+    setBtnStyle(style);
+    localStorage.setItem('navbar_portal_btn_style', style);
+    setStyleSwitcherOpen(false);
+  };
+
+  const renderPortalButton = () => {
+    switch (btnStyle) {
+      case 'editorial-badge':
+        return (
+          <Link
+            to={targetUrl}
+            title={targetLabel}
+            className="flex items-center gap-2 px-3.5 py-1.5 border border-secondary/40 text-secondary bg-secondary/5 hover:bg-secondary hover:text-primary font-serif tracking-wider text-[11px] uppercase transition-all duration-200 shadow-xs"
+          >
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span className="font-semibold">{targetLabel}</span>
+          </Link>
+        );
+
+      case 'solid-gold-pill':
+        return (
+          <Link
+            to={targetUrl}
+            title={targetLabel}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-secondary text-primary font-sans font-bold text-[11px] uppercase tracking-wider rounded shadow-sm hover:bg-[#f0aa0f] hover:shadow-md hover:-translate-y-px transition-all duration-150"
+          >
+            {isLoggedIn ? <LayoutDashboard className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+            <span>{targetLabel}</span>
+          </Link>
+        );
+
+      case 'swiss-line':
+        return (
+          <Link
+            to={targetUrl}
+            title={targetLabel}
+            className="flex items-center gap-1.5 px-3 py-1.5 border border-white/20 text-white/90 hover:border-secondary hover:text-secondary font-sans text-[11px] font-semibold uppercase tracking-widest transition-all duration-150"
+          >
+            <span>{targetLabel}</span>
+            <ArrowRight className="h-3.5 w-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        );
+
+      case 'glass-pill':
+        return (
+          <Link
+            to={targetUrl}
+            title={targetLabel}
+            className="flex items-center gap-2 px-3.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-sans text-[11px] font-medium tracking-wide rounded-full backdrop-blur-xs transition-all duration-150"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+            <span>{targetLabel}</span>
+          </Link>
+        );
+
+      case 'compact-luxury':
+      default:
+        return (
+          <Link
+            to={targetUrl}
+            title={targetLabel}
+            className="group flex items-center justify-center h-8 w-8 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all duration-150 shadow-xs"
+          >
+            {isLoggedIn ? (
+              <LayoutDashboard className="h-4 w-4 group-hover:scale-105 transition-transform" />
+            ) : (
+              <User className="h-4 w-4 group-hover:scale-105 transition-transform" />
+            )}
+          </Link>
+        );
+    }
+  };
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -200,27 +284,76 @@ const Navbar = () => {
             Contact
           </Link>
 
-          <div className="flex items-center h-full">
-
             <span className="w-px h-5 bg-white/20 mx-4" />
-            {localStorage.getItem('token') ? (
-              <Link
-                to="/dashboard"
-                title="Dashboard"
-                className="flex items-center justify-center p-2 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all shadow-sm"
+            
+            {/* Interactive Design Variant Selector & Portal Button */}
+            <div className="relative flex items-center gap-2">
+              {/* Variant Switcher Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setStyleSwitcherOpen(prev => !prev)}
+                title="Switch Button Design Style (5 Variants)"
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono tracking-wider text-white/50 hover:text-secondary hover:bg-white/5 border border-white/15 transition-all cursor-pointer"
               >
-                <BookOpen className="h-4 w-4" />
-              </Link>
-            ) : (
-              <Link
-                to="/login"
-                title="Portal Login"
-                className="flex items-center justify-center p-2 bg-secondary/10 border border-secondary/30 text-secondary hover:bg-secondary hover:text-primary transition-all shadow-sm"
-              >
-                <BookOpen className="h-4 w-4" />
-              </Link>
-            )}
-          </div>
+                <Sparkles className="h-3 w-3 text-secondary" />
+                <span>Style Previewer</span>
+              </button>
+
+              {/* Style Switcher Dropdown Menu */}
+              <AnimatePresence>
+                {styleSwitcherOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-3 w-72 bg-primary border-2 border-secondary shadow-2xl p-3 z-50 flex flex-col gap-2"
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-white/15">
+                      <span className="text-[11px] font-bold text-secondary uppercase tracking-widest flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-secondary" /> Choose Button Style
+                      </span>
+                      <button
+                        onClick={() => setStyleSwitcherOpen(false)}
+                        className="text-white/40 hover:text-white text-xs"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 pt-1">
+                      {[
+                        { id: 'editorial-badge', name: '1. Oxford Editorial Badge', desc: 'Serif font with subtle gold outline & smooth gold fill' },
+                        { id: 'solid-gold-pill', name: '2. Solid Gold Accent Pill', desc: 'High-contrast Filamer Gold pill with dark navy text' },
+                        { id: 'swiss-line', name: '3. Swiss Architectural Line', desc: 'Minimalist border with directional arrow icon' },
+                        { id: 'glass-pill', name: '4. Institutional Glass Tag', desc: 'Frosted translucent pill with pulsating security beacon' },
+                        { id: 'compact-luxury', name: '5. Compact Luxury Icon', desc: 'Minimalist square with gold micro-accent & user icon' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleSelectStyle(item.id as PortalBtnStyle)}
+                          className={`text-left p-2 transition-all flex flex-col gap-0.5 border cursor-pointer ${
+                            btnStyle === item.id 
+                              ? 'bg-secondary/15 border-secondary text-white' 
+                              : 'bg-white/5 border-transparent text-white/70 hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          <span className="text-[11px] font-bold tracking-wide flex items-center justify-between">
+                            {item.name}
+                            {btnStyle === item.id && <span className="text-[9px] bg-secondary text-primary px-1 font-mono font-bold">ACTIVE</span>}
+                          </span>
+                          <span className="text-[10px] text-white/50 leading-tight">{item.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Render Selected Portal Button Variant */}
+              {renderPortalButton()}
+            </div>
         </div>
 
         {/* Mobile Menu Trigger */}
