@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Trash2, Archive, ArchiveRestore } from 'lucide-react';
+import { MessageSquare, Trash2, Archive, ArchiveRestore, ArrowLeft, X } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import { MessageListSkeleton } from '@/components/ui/Skeleton';
@@ -98,7 +98,7 @@ const Feedback: React.FC = () => {
   const selectedItem = feedbacks.find((f) => f.id === selected);
 
   return (
-    <div className="space-y-4 sm:space-y-8 font-sans">
+    <div className="space-y-4 sm:space-y-8 font-sans relative">
       <DashboardHeader title="User Feedback">
         <div className="flex items-center gap-0.5 sm:gap-1 border border-border bg-surface p-0.5 sm:p-1">
           <button
@@ -182,8 +182,8 @@ const Feedback: React.FC = () => {
           )}
         </div>
 
-        {/* Message Detail */}
-        <div className="lg:col-span-7 border border-border bg-surface p-6 flex flex-col h-full min-h-[400px]">
+        {/* Message Detail (Desktop side-by-side) */}
+        <div className="hidden lg:flex lg:col-span-7 border border-border bg-surface p-6 flex-col h-full min-h-[400px]">
           {selectedItem ? (
             <div className="space-y-6 flex-grow flex flex-col">
               <div className="border-b border-border pb-4 space-y-3">
@@ -197,7 +197,7 @@ const Feedback: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleToggleArchive(selectedItem.id, activeTab === 'archived')}
-                      className="px-2.5 py-1.5 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1.5"
+                      className="px-2.5 py-1.5 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1.5 cursor-pointer"
                       title={activeTab === 'archived' ? 'Restore to Active Inbox' : 'Move to Archive'}
                     >
                       {activeTab === 'archived' ? (
@@ -215,7 +215,7 @@ const Feedback: React.FC = () => {
                     {isSuperAdmin && (
                       <button 
                         onClick={() => setDeleteTargetId(selectedItem.id)}
-                        className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded"
+                        className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/50 hover:text-red-500 hover:bg-red-50 transition-colors rounded cursor-pointer"
                         title="Permanently Delete Message (Super Admin only)"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -240,6 +240,98 @@ const Feedback: React.FC = () => {
             <div className="h-full flex flex-col items-center justify-center text-center py-20 flex-grow">
               <MessageSquare className="h-8 w-8 text-muted/20 mb-3" />
               <p className="text-[13px] text-muted">Select a message to view</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile & Tablet Slide-in Panel from Left */}
+      <div
+        className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${
+          selectedItem ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Backdrop */}
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+          onClick={() => setSelected(null)}
+        />
+
+        {/* Drawer Sliding from Left */}
+        <div
+          className={`fixed inset-y-0 left-0 max-w-full w-full sm:w-[480px] bg-surface border-r border-border shadow-2xl flex flex-col z-10 transition-transform duration-300 ease-out transform ${
+            selectedItem ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {selectedItem && (
+            <div className="flex flex-col h-full overflow-hidden">
+              {/* Drawer Header */}
+              <div className="p-3.5 border-b border-border bg-background flex items-center justify-between gap-2">
+                <button
+                  onClick={() => setSelected(null)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-secondary transition-colors cursor-pointer py-1 px-2 -ml-1 rounded"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Feedback</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleToggleArchive(selectedItem.id, activeTab === 'archived')}
+                    className="px-2.5 py-1 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1 cursor-pointer rounded"
+                    title={activeTab === 'archived' ? 'Restore to Active Inbox' : 'Move to Archive'}
+                  >
+                    {activeTab === 'archived' ? (
+                      <>
+                        <ArchiveRestore className="h-3.5 w-3.5" />
+                        <span>Restore</span>
+                      </>
+                    ) : (
+                      <>
+                        <Archive className="h-3.5 w-3.5" />
+                        <span>Archive</span>
+                      </>
+                    )}
+                  </button>
+                  {isSuperAdmin && (
+                    <button 
+                      onClick={() => setDeleteTargetId(selectedItem.id)}
+                      className="h-7 w-7 shrink-0 flex items-center justify-center text-red-500/60 hover:text-red-600 hover:bg-red-50 transition-colors rounded cursor-pointer"
+                      title="Permanently Delete Message"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="h-7 w-7 shrink-0 flex items-center justify-center text-muted hover:text-primary rounded cursor-pointer"
+                    title="Close"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-grow space-y-4">
+                <div className="border-b border-border pb-3.5 space-y-2">
+                  <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider">
+                    {selectedItem.category || 'General'}
+                  </span>
+                  <h2 className="text-sm sm:text-base font-serif font-bold text-primary leading-snug">
+                    {selectedItem.subject}
+                  </h2>
+                  <div className="flex flex-col gap-1 text-xs text-muted pt-1">
+                    <div>From: <span className="font-semibold text-primary">{selectedItem.name}</span></div>
+                    <div>Email: <a href={`mailto:${selectedItem.email}`} className="text-primary underline font-mono text-[11px]">{selectedItem.email}</a></div>
+                    <div className="text-[11px] text-muted/80">{new Date(selectedItem.created_at).toLocaleString()}</div>
+                  </div>
+                </div>
+
+                <p className="text-xs sm:text-[13px] text-primary/85 leading-relaxed whitespace-pre-wrap flex-grow">
+                  {selectedItem.message}
+                </p>
+              </div>
             </div>
           )}
         </div>

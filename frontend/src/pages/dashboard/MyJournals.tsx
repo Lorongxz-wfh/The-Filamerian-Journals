@@ -371,12 +371,12 @@ const MyJournals: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
             {/* Status tabs */}
-            <div className="flex gap-0.5 border border-border bg-surface h-9 items-center p-0.5 shrink-0">
+            <div className="grid grid-cols-3 w-full sm:w-auto border border-border bg-surface h-9 items-center p-0.5 shrink-0">
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setStatusTab(t.key)}
-                  className={`px-3 sm:px-4 h-full text-xs font-medium transition-colors flex items-center justify-center cursor-pointer ${
+                  className={`px-2.5 sm:px-4 h-full text-xs font-medium transition-colors flex items-center justify-center cursor-pointer ${
                     statusTab === t.key ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
                   }`}
                 >
