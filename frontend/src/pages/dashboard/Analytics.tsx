@@ -133,14 +133,14 @@ const Analytics: React.FC = () => {
   const totalViews = data?.websiteChartData?.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0) || 0;
 
   return (
-    <div className="space-y-8 font-sans w-full print:p-0">
-      <DashboardHeader title="Repository Reports & Analytics">
-        <div className="flex items-center gap-2 print:hidden">
-          <Button onClick={handleExportCSV} variant="outline" className="flex items-center gap-2 text-xs h-9">
-            <Download className="h-3.5 w-3.5" /> Export CSV
+    <div className="space-y-4 sm:space-y-8 font-sans w-full print:p-0">
+      <DashboardHeader title="Reports & Analytics">
+        <div className="flex items-center gap-1.5 sm:gap-2 print:hidden">
+          <Button onClick={handleExportCSV} variant="outline" className="flex items-center gap-1.5 text-[11px] sm:text-xs h-8 sm:h-9 px-2 sm:px-3 cursor-pointer">
+            <Download className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> <span className="hidden xs:inline">Export</span> CSV
           </Button>
-          <Button onClick={handlePrint} className="flex items-center gap-2 text-xs h-9">
-            <Printer className="h-3.5 w-3.5" /> Print Summary
+          <Button onClick={handlePrint} className="flex items-center gap-1.5 text-[11px] sm:text-xs h-8 sm:h-9 px-2 sm:px-3 cursor-pointer">
+            <Printer className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> <span className="hidden xs:inline">Print</span> Summary
           </Button>
         </div>
       </DashboardHeader>
@@ -168,113 +168,113 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
         {/* Total Articles */}
-        <div className="border border-border bg-surface p-6 space-y-4">
+        <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2 sm:space-y-4">
           <div className="flex justify-between items-start">
-            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Articles</span>
-            <div className="p-2.5 bg-emerald-500/10 text-emerald-600">
-              <FileText className="h-4 w-4" />
+            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider truncate">Total Articles</span>
+            <div className="p-1.5 sm:p-2.5 bg-emerald-500/10 text-emerald-600 shrink-0">
+              <FileText className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
             </div>
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
               {loading ? (
                 <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 data?.articles || 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-              <TrendingUp className="h-3 w-3" />
-              <span>{data?.trends?.articles?.trend || 'Stable'} vs previous month</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-emerald-600 truncate">
+              <TrendingUp className="h-3 w-3 shrink-0" />
+              <span>{data?.trends?.articles?.trend || 'Stable'}</span>
             </div>
           </div>
         </div>
 
         {/* Active Journals */}
-        <div className="border border-border bg-surface p-6 space-y-4">
+        <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2 sm:space-y-4">
           <div className="flex justify-between items-start">
-            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Active Journals</span>
-            <div className="p-2.5 bg-blue-500/10 text-blue-600">
-              <BookOpen className="h-4 w-4" />
+            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider truncate">Active Journals</span>
+            <div className="p-1.5 sm:p-2.5 bg-blue-500/10 text-blue-600 shrink-0">
+              <BookOpen className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
             </div>
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
               {loading ? (
                 <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 data?.journals || 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-medium text-muted">
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted truncate">
               <span>{data?.trends?.journals?.trend || 'Stable'} growth</span>
             </div>
           </div>
         </div>
 
         {/* Registered FCU Authors */}
-        <div className="border border-border bg-surface p-6 space-y-4">
+        <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2 sm:space-y-4">
           <div className="flex justify-between items-start">
-            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">FCU Authors</span>
-            <div className="p-2.5 bg-purple-500/10 text-purple-600">
-              <Users className="h-4 w-4" />
+            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider truncate">FCU Authors</span>
+            <div className="p-1.5 sm:p-2.5 bg-purple-500/10 text-purple-600 shrink-0">
+              <Users className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
             </div>
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
               {loading ? (
                 <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 data?.authors || 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-              <TrendingUp className="h-3 w-3" />
-              <span>{data?.trends?.authors?.trend || 'Stable'} active contributors</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-emerald-600 truncate">
+              <TrendingUp className="h-3 w-3 shrink-0" />
+              <span>{data?.trends?.authors?.trend || 'Stable'} active</span>
             </div>
           </div>
         </div>
 
         {/* Reader Views */}
-        <div className="border border-border bg-surface p-6 space-y-4">
+        <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2 sm:space-y-4">
           <div className="flex justify-between items-start">
-            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Reader Views</span>
-            <div className="p-2.5 bg-amber-500/10 text-amber-600">
-              <Eye className="h-4 w-4" />
+            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider truncate">Reader Views</span>
+            <div className="p-1.5 sm:p-2.5 bg-amber-500/10 text-amber-600 shrink-0">
+              <Eye className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
             </div>
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+          <div className="space-y-0.5 sm:space-y-1">
+            <div className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
               {loading ? (
                 <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
                 totalViews.toLocaleString()
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-medium text-muted">
-              <span>Past 30 days engagement</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted truncate">
+              <span>30-day engagement</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Row 1: Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Readership & Activity Trend (2 cols) */}
-        <div className="lg:col-span-2 border border-border bg-surface p-6 space-y-5">
+        <div className="lg:col-span-2 border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5">
           <div className="flex items-center justify-between border-b border-border pb-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary/50" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Repository Readership & Traffic Trend</h2>
+            <div className="flex items-center gap-2 min-w-0">
+              <TrendingUp className="h-4 w-4 text-primary/50 shrink-0" />
+              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider truncate">Readership & Traffic Trend</h2>
             </div>
-            <span className="text-[10px] font-mono font-bold bg-background border border-border px-2 py-0.5 text-muted uppercase">
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold bg-background border border-border px-2 py-0.5 text-muted uppercase shrink-0">
               30-Day Activity
             </span>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-48 sm:h-64 w-full">
             {loading ? (
               <div className="h-full flex items-center justify-center gap-2 text-muted text-xs">
                 <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
@@ -293,9 +293,9 @@ const Analytics: React.FC = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
+                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
                   <Area type="monotone" dataKey="views" stroke="#1e3a8a" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Article Views" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -304,23 +304,23 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Content Category Distribution (1 col) */}
-        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary/50" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Category Distribution</h2>
+              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Category Distribution</h2>
             </div>
           </div>
 
-          <div className="space-y-4 pt-1 max-h-[250px] overflow-y-auto custom-scrollbar pr-1 print:max-h-none print:overflow-visible">
+          <div className="space-y-3 pt-1 max-h-[250px] overflow-y-auto custom-scrollbar pr-1 print:max-h-none print:overflow-visible">
             {categoryBreakdown.length === 0 ? (
               <p className="text-xs text-muted py-8 text-center">No categories recorded yet.</p>
             ) : (
               categoryBreakdown.map((cat: any) => (
-                <div key={cat.name} className="space-y-1.5">
-                  <div className="flex justify-between items-center text-[12px]">
-                    <span className="font-medium text-primary truncate max-w-[190px]">{cat.name}</span>
-                    <span className="font-mono text-muted text-[11px]">{cat.count} journal{cat.count !== 1 ? 's' : ''} ({cat.percentage}%)</span>
+                <div key={cat.name} className="space-y-1">
+                  <div className="flex justify-between items-center text-[11px] sm:text-[12px]">
+                    <span className="font-medium text-primary truncate max-w-[150px] sm:max-w-[190px]">{cat.name}</span>
+                    <span className="font-mono text-muted text-[10px] sm:text-[11px]">{cat.count} ({cat.percentage}%)</span>
                   </div>
                   <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
                     <div 
@@ -336,15 +336,15 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Row 2: Leaderboards & Full Rankings */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Research Paper Readership Ranking */}
-        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col print:border-none print:p-0">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col print:border-none print:p-0">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Award className="h-4 w-4 text-amber-600" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Research Paper Readership Ranking</h2>
+              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Paper Readership Ranking</h2>
             </div>
-            <span className="text-[10px] font-mono text-muted uppercase">By Views</span>
+            <span className="text-[9px] sm:text-[10px] font-mono text-muted uppercase">By Views</span>
           </div>
 
           <div className="divide-y divide-border border border-border max-h-[340px] overflow-y-auto custom-scrollbar pr-1 print:max-h-none print:overflow-visible">
@@ -352,19 +352,19 @@ const Analytics: React.FC = () => {
               <p className="text-xs text-muted py-8 text-center">No articles available.</p>
             ) : (
               topArticles.map((art: TopArticle, index: number) => (
-                <div key={art.id} className="p-3 text-[12px] flex items-center justify-between gap-4 hover:bg-background/50 transition-colors">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold font-mono ${
+                <div key={art.id} className="p-2.5 sm:p-3 text-[11px] sm:text-[12px] flex items-center justify-between gap-3 hover:bg-background/50 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold font-mono ${
                       index === 0 ? 'bg-amber-500 text-white' : index === 1 ? 'bg-slate-400 text-white' : index === 2 ? 'bg-amber-700 text-white' : 'bg-muted/20 text-muted'
                     }`}>
                       {index + 1}
                     </span>
                     <div className="min-w-0">
                       <p className="font-medium text-primary truncate" title={art.title}>{art.title}</p>
-                      <p className="text-[10px] text-muted truncate">{art.journal} • {art.published_date}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted truncate">{art.journal} • {art.published_date}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0 text-xs font-mono font-bold text-primary bg-background border border-border px-2 py-0.5">
+                  <div className="flex items-center gap-1 shrink-0 text-[10px] sm:text-xs font-mono font-bold text-primary bg-background border border-border px-1.5 sm:px-2 py-0.5">
                     <Eye className="h-3 w-3 text-muted" />
                     <span>{art.views.toLocaleString()}</span>
                   </div>
@@ -375,13 +375,13 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Author Contribution Ranking */}
-        <div className="border border-border bg-surface p-6 space-y-5 flex flex-col print:border-none print:p-0">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col print:border-none print:p-0">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary/50" />
-              <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Author Contribution Ranking</h2>
+              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Author Contribution Ranking</h2>
             </div>
-            <span className="text-[10px] font-mono text-muted uppercase">By Papers</span>
+            <span className="text-[9px] sm:text-[10px] font-mono text-muted uppercase">By Papers</span>
           </div>
 
           <div className="divide-y divide-border border border-border max-h-[340px] overflow-y-auto custom-scrollbar pr-1 print:max-h-none print:overflow-visible">
@@ -389,18 +389,18 @@ const Analytics: React.FC = () => {
               <p className="text-xs text-muted py-8 text-center">No author contributions recorded.</p>
             ) : (
               topAuthors.map((author: TopAuthor, index: number) => (
-                <div key={author.name} className="p-3 text-[12px] flex items-center justify-between gap-4 hover:bg-background/50 transition-colors">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="w-5 h-5 shrink-0 bg-primary/10 text-primary rounded-full flex items-center justify-center text-[10px] font-bold font-mono">
+                <div key={author.name} className="p-2.5 sm:p-3 text-[11px] sm:text-[12px] flex items-center justify-between gap-3 hover:bg-background/50 transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 bg-primary/10 text-primary rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-bold font-mono">
                       {index + 1}
                     </span>
                     <div className="min-w-0">
                       <p className="font-medium text-primary truncate">{author.name}</p>
-                      <p className="text-[10px] text-muted truncate">{author.department}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted truncate">{author.department}</p>
                     </div>
                   </div>
-                  <div className="shrink-0 text-xs font-mono font-bold text-primary bg-background border border-border px-2 py-0.5">
-                    {author.papers} publication{author.papers !== 1 ? 's' : ''}
+                  <div className="shrink-0 text-[10px] sm:text-xs font-mono font-bold text-primary bg-background border border-border px-1.5 sm:px-2 py-0.5">
+                    {author.papers} pub{author.papers !== 1 ? 's' : ''}
                   </div>
                 </div>
               ))

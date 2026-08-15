@@ -60,6 +60,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   
   const notifRef = useRef<HTMLDivElement>(null);
 
+  // Auto-close mobile sidebar when route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
 
   const [searchQuery, setSearchQuery] = useState('');

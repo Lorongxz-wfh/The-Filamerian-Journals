@@ -116,97 +116,97 @@ const SystemHealth: React.FC = () => {
   const storageSizeBytes = typeof health?.storage === 'object' ? (health.storage?.size_bytes || 0) : 0;
 
   return (
-    <div className="space-y-8 font-sans w-full">
+    <div className="space-y-4 sm:space-y-8 font-sans w-full">
       <DashboardHeader title="System Health" />
 
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-8">
         {/* Health Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="border border-border bg-surface p-6 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+          <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2.5 sm:space-y-4">
             <div className="flex justify-between items-start">
-              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Application</span>
+              <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider">Application</span>
               {loading && !health ? (
                 <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {health?.status || 'Operational'}
                 </span>
               )}
             </div>
-            <div className="space-y-1">
-              <p className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+            <div className="space-y-0.5 sm:space-y-1">
+              <p className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
                 {loading && !health ? (
                   <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                 ) : (
                   health?.laravel_version ? `Laravel ${health.laravel_version}` : 'Laravel 12'
                 )}
               </p>
-              <p className="text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
+              <p className="text-[11px] sm:text-xs text-muted font-mono">{health?.php_version ? `PHP ${health.php_version}` : ''}</p>
             </div>
           </div>
 
-          <div className="border border-border bg-surface p-6 space-y-4">
+          <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2.5 sm:space-y-4">
             <div className="flex justify-between items-start">
-              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
+              <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider">
                 Database ({loading && !health ? '...' : dbDriverText.toUpperCase()})
               </span>
               {loading && !health ? (
                 <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {dbStatusText}
                 </span>
               )}
             </div>
-            <div className="space-y-1">
-              <p className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+            <div className="space-y-0.5 sm:space-y-1">
+              <p className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
                 {loading && !health ? (
                   <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                 ) : (
                   formatBytes(dbSizeBytes)
                 )}
               </p>
-              <p className="text-xs text-muted font-mono">Active Connection</p>
+              <p className="text-[11px] sm:text-xs text-muted font-mono">Active Connection</p>
             </div>
           </div>
 
-          <div className="border border-border bg-surface p-6 space-y-4">
+          <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2.5 sm:space-y-4 col-span-1 sm:col-span-2 md:col-span-1">
             <div className="flex justify-between items-start">
-              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Storage Provider</span>
+              <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider">Storage Provider</span>
               {loading && !health ? (
                 <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
               ) : (
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {storageDiskText.toUpperCase()}
                 </span>
               )}
             </div>
-            <div className="space-y-1">
-              <p className="text-2xl font-bold text-primary font-mono flex items-center min-h-[32px]">
+            <div className="space-y-0.5 sm:space-y-1">
+              <p className="text-xl sm:text-2xl font-bold text-primary font-mono flex items-center min-h-[28px] sm:min-h-[32px]">
                 {loading && !health ? (
                   <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                 ) : (
                   formatBytes(storageSizeBytes)
                 )}
               </p>
-              <p className="text-xs text-muted font-mono">{storageTypeText}</p>
+              <p className="text-[11px] sm:text-xs text-muted font-mono">{storageTypeText}</p>
             </div>
           </div>
         </div>
 
         {/* Database Entity Metrics */}
-        <div className="bg-surface border border-border p-6 space-y-6">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-primary">Database Entity Metrics</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
-              <div className="p-3 bg-emerald-500/10 text-emerald-500">
-                <FileText className="h-5 w-5" />
+        <div className="bg-surface border border-border p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-primary">Database Entity Metrics</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-6">
+            <div className="flex items-center gap-3 sm:gap-4 bg-surface p-3 sm:p-4 border border-border/50">
+              <div className="p-2 sm:p-3 bg-emerald-500/10 text-emerald-500 shrink-0">
+                <FileText className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
-              <div>
-                <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
-                <div className="text-xl font-extrabold text-primary font-mono min-h-[28px] flex items-center">
+              <div className="min-w-0">
+                <div className="text-[9px] sm:text-[10px] font-bold text-muted uppercase tracking-wider">Total Articles</div>
+                <div className="text-lg sm:text-xl font-extrabold text-primary font-mono min-h-[24px] sm:min-h-[28px] flex items-center">
                   {loading && !health ? (
-                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                    <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                   ) : (
                     health?.counts.articles ?? 0
                   )}
@@ -214,15 +214,15 @@ const SystemHealth: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
-              <div className="p-3 bg-blue-500/10 text-blue-500">
-                <BookOpen className="h-5 w-5" />
+            <div className="flex items-center gap-3 sm:gap-4 bg-surface p-3 sm:p-4 border border-border/50">
+              <div className="p-2 sm:p-3 bg-blue-500/10 text-blue-500 shrink-0">
+                <BookOpen className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
-              <div>
-                <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
-                <div className="text-xl font-extrabold text-primary font-mono min-h-[28px] flex items-center">
+              <div className="min-w-0">
+                <div className="text-[9px] sm:text-[10px] font-bold text-muted uppercase tracking-wider">Total Journals</div>
+                <div className="text-lg sm:text-xl font-extrabold text-primary font-mono min-h-[24px] sm:min-h-[28px] flex items-center">
                   {loading && !health ? (
-                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                    <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                   ) : (
                     health?.counts.journals ?? 0
                   )}
@@ -230,15 +230,15 @@ const SystemHealth: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-surface p-4 border border-border/50">
-              <div className="p-3 bg-purple-500/10 text-purple-500">
-                <Users className="h-5 w-5" />
+            <div className="flex items-center gap-3 sm:gap-4 bg-surface p-3 sm:p-4 border border-border/50">
+              <div className="p-2 sm:p-3 bg-purple-500/10 text-purple-500 shrink-0">
+                <Users className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
-              <div>
-                <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
-                <div className="text-xl font-extrabold text-primary font-mono min-h-[28px] flex items-center">
+              <div className="min-w-0">
+                <div className="text-[9px] sm:text-[10px] font-bold text-muted uppercase tracking-wider">Registered Users</div>
+                <div className="text-lg sm:text-xl font-extrabold text-primary font-mono min-h-[24px] sm:min-h-[28px] flex items-center">
                   {loading && !health ? (
-                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+                    <span className="w-3.5 h-3.5 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
                   ) : (
                     health?.counts.users ?? 0
                   )}
@@ -248,94 +248,94 @@ const SystemHealth: React.FC = () => {
           </div>
         </div>
 
-          {/* System Error Tracker & QA Logs */}
-          <div className="border border-border bg-surface p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-3">
-                <h2 className="text-[12px] font-semibold text-primary uppercase tracking-wider">System Error Tracker & QA Exception Logs</h2>
-                <span className="text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-2 py-0.5">
-                  {errors.filter(e => !e.is_resolved).length} Unresolved
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={fetchErrors}
-                  className="px-2.5 py-1 text-xs border border-border hover:bg-background transition-colors"
-                >
-                  Refresh Logs
-                </button>
-                <button
-                  onClick={handleClearResolvedErrors}
-                  className="px-2.5 py-1 text-xs border border-border text-muted hover:text-primary hover:bg-background transition-colors"
-                >
-                  Clear Resolved
-                </button>
-              </div>
+        {/* System Error Tracker & QA Logs */}
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-4 sm:space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 border-b border-border pb-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Error & Exception Logs</h2>
+              <span className="text-[9px] sm:text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-1.5 sm:px-2 py-0.5">
+                {errors.filter(e => !e.is_resolved).length} Unresolved
+              </span>
             </div>
-
-            {loadingErrors ? (
-              <div className="py-8 flex items-center justify-center gap-2 text-muted text-[13px]">
-                <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
-                Fetching exception logs...
-              </div>
-            ) : errors.length === 0 ? (
-              <div className="py-8 text-center space-y-1">
-                <p className="text-xs font-semibold text-emerald-600">No Exception Logged</p>
-                <p className="text-[11px] text-muted">System is running cleanly without recorded errors.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-border overflow-hidden border border-border">
-                {errors.map((err) => (
-                  <div key={err.id} className="p-3 text-[12px] space-y-2 hover:bg-background/50 transition-colors">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 shrink-0 ${
-                          err.level === 'client_error' ? 'bg-amber-500/10 text-amber-700 border border-amber-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'
-                        }`}>
-                          {err.level}
-                        </span>
-                        <span className="font-mono text-xs font-semibold text-primary truncate">
-                          {err.message}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[10px] font-mono text-muted">
-                          {new Date(err.created_at).toLocaleTimeString()}
-                        </span>
-                        <button
-                          onClick={() => setExpandedErrorId(expandedErrorId === err.id ? null : err.id)}
-                          className="text-[11px] text-primary hover:underline"
-                        >
-                          {expandedErrorId === err.id ? 'Hide Stack Trace' : 'View Stack Trace'}
-                        </button>
-                        <button
-                          onClick={() => toggleResolveError(err.id)}
-                          className={`text-[10px] font-bold px-2 py-0.5 ${
-                            err.is_resolved ? 'bg-emerald-500/10 text-emerald-600' : 'bg-background border border-border text-muted hover:text-primary'
-                          }`}
-                        >
-                          {err.is_resolved ? 'Resolved' : 'Mark Resolved'}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-[11px] font-mono text-muted">
-                      <span>Path: {err.path || '-'}</span>
-                      {err.file && <span>File: {err.file}:{err.line}</span>}
-                      {err.user && <span>User: {err.user.name} ({err.user.email})</span>}
-                    </div>
-
-                    {expandedErrorId === err.id && err.stack_trace && (
-                      <pre className="p-3 bg-black/90 text-emerald-400 font-mono text-[10px] overflow-x-auto max-h-48 border border-border">
-                        {err.stack_trace}
-                      </pre>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <button
+                onClick={fetchErrors}
+                className="px-2.5 py-1 text-[11px] sm:text-xs border border-border hover:bg-background transition-colors cursor-pointer"
+              >
+                Refresh Logs
+              </button>
+              <button
+                onClick={handleClearResolvedErrors}
+                className="px-2.5 py-1 text-[11px] sm:text-xs border border-border text-muted hover:text-primary hover:bg-background transition-colors cursor-pointer"
+              >
+                Clear Resolved
+              </button>
+            </div>
           </div>
+
+          {loadingErrors ? (
+            <div className="py-8 flex items-center justify-center gap-2 text-muted text-[12px] sm:text-[13px]">
+              <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
+              Fetching exception logs...
+            </div>
+          ) : errors.length === 0 ? (
+            <div className="py-8 text-center space-y-1">
+              <p className="text-xs font-semibold text-emerald-600">No Exception Logged</p>
+              <p className="text-[11px] text-muted">System is running cleanly without recorded errors.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border overflow-hidden border border-border">
+              {errors.map((err) => (
+                <div key={err.id} className="p-3 text-[11px] sm:text-[12px] space-y-2 hover:bg-background/50 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`text-[8px] sm:text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 shrink-0 ${
+                        err.level === 'client_error' ? 'bg-amber-500/10 text-amber-700 border border-amber-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                      }`}>
+                        {err.level}
+                      </span>
+                      <span className="font-mono text-xs font-semibold text-primary truncate">
+                        {err.message}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 self-start sm:self-auto">
+                      <span className="text-[10px] font-mono text-muted">
+                        {new Date(err.created_at).toLocaleTimeString()}
+                      </span>
+                      <button
+                        onClick={() => setExpandedErrorId(expandedErrorId === err.id ? null : err.id)}
+                        className="text-[10px] sm:text-[11px] text-primary hover:underline cursor-pointer"
+                      >
+                        {expandedErrorId === err.id ? 'Hide Trace' : 'View Trace'}
+                      </button>
+                      <button
+                        onClick={() => toggleResolveError(err.id)}
+                        className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 cursor-pointer ${
+                          err.is_resolved ? 'bg-emerald-500/10 text-emerald-600' : 'bg-background border border-border text-muted hover:text-primary'
+                        }`}
+                      >
+                        {err.is_resolved ? 'Resolved' : 'Mark Resolved'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-[11px] font-mono text-muted">
+                    <span>Path: {err.path || '-'}</span>
+                    {err.file && <span>File: {err.file}:{err.line}</span>}
+                    {err.user && <span>User: {err.user.name}</span>}
+                  </div>
+
+                  {expandedErrorId === err.id && err.stack_trace && (
+                    <pre className="p-2.5 sm:p-3 bg-black/90 text-emerald-400 font-mono text-[9px] sm:text-[10px] overflow-x-auto max-h-48 border border-border">
+                      {err.stack_trace}
+                    </pre>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+      </div>
     </div>
   );
 };
