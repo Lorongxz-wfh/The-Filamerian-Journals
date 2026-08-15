@@ -97,7 +97,7 @@ const ActivityLogs: React.FC = () => {
 
   return (
     <div className="space-y-3.5 sm:space-y-4 font-sans w-full">
-      <DashboardHeader title="System Activity Logs">
+      <DashboardHeader title="Activity Logs">
         <Button
           onClick={() => fetchLogs()}
           className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono h-9 px-2.5 sm:px-4 cursor-pointer"

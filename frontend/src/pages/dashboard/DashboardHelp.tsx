@@ -69,7 +69,7 @@ const DashboardHelp: React.FC = () => {
   return (
     <div className="space-y-4 sm:space-y-6 pb-12">
       <DashboardHeader 
-        title="Admin User Manual & System Guide" 
+        title="Help & Manual" 
         className="mb-2 sm:mb-4"
       />
 

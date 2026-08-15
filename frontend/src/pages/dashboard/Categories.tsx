@@ -307,7 +307,7 @@ const Categories: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Journal Categories">
+      <DashboardHeader title="Categories">
         <div className="flex items-center gap-2 sm:gap-3">
           {!isReordering ? (
             <>
