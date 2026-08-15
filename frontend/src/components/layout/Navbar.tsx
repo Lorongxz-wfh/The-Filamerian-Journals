@@ -224,13 +224,49 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu Trigger */}
-        <button 
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="md:hidden h-9 w-9 flex items-center justify-center border border-white/20 text-white/70 hover:text-white transition-colors"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        {/* Mobile Action Icons */}
+        <div className="flex md:hidden items-center gap-2 shrink-0">
+          {/* Quick Search Trigger */}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="h-9 w-9 flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer"
+            title="Search"
+            aria-label="Search"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+
+          {/* Portal / Dashboard Icon */}
+          {localStorage.getItem('token') ? (
+            <Link
+              to="/dashboard"
+              title="Dashboard"
+              aria-label="Go to Dashboard"
+              className="h-9 w-9 rounded-sm flex items-center justify-center border border-secondary/40 text-secondary bg-secondary/10 hover:bg-secondary/20 hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              title="Portal Login"
+              aria-label="Portal Login"
+              className="h-9 w-9 rounded-sm flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Link>
+          )}
+
+          {/* Menu Drawer Trigger */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="h-9 w-9 flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer"
+            title="Open Menu"
+            aria-label="Open Menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Drawer */}
@@ -254,77 +290,151 @@ const Navbar = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-surface z-[101] md:hidden flex flex-col shadow-2xl border-l border-border"
             >
-              <div className="h-16 flex items-center justify-between px-6 border-b border-border bg-primary text-white shrink-0">
+              <div className="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-border bg-primary text-white shrink-0">
                 <span className="font-display font-bold text-secondary uppercase tracking-widest text-sm">
-                  Menu
+                  Navigation Menu
                 </span>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white"
+                  className="h-8 w-8 flex items-center justify-center text-white/70 hover:text-white cursor-pointer"
+                  aria-label="Close Menu"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-6 py-8 flex flex-col gap-6">
-                {/* Mobile Search */}
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setIsMobileMenuOpen(false);
-                        handleSearch(e);
-                      }
-                    }}
-                    className="w-full pl-10 pr-10 py-3 bg-background border border-border text-[13px] text-primary focus:outline-none focus:border-primary transition-colors"
-                  />
-                  {searchQuery && (
-                    <button 
-                      onClick={() => setSearchQuery('')} 
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center"
+              <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-6 flex flex-col justify-between gap-6">
+                <div className="space-y-6">
+                  {/* Mobile Search Bar */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/50" />
+                    <input
+                      type="text"
+                      placeholder="Search journals, articles..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setIsMobileMenuOpen(false);
+                          handleSearch(e);
+                        }
+                      }}
+                      className="w-full pl-9 pr-9 py-2.5 bg-background border border-border text-xs text-primary focus:outline-none focus:border-primary transition-colors"
+                    />
+                    {searchQuery && (
+                      <button 
+                        onClick={() => setSearchQuery('')} 
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted/50 hover:text-primary transition-colors h-4 w-4 flex items-center justify-center cursor-pointer"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="space-y-2">
+                    <Link
+                      to="/"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        path === '/'
+                          ? 'bg-primary text-secondary border-l-3 border-secondary'
+                          : 'text-primary hover:bg-background'
+                      }`}
                     >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
+                      <span>Home</span>
+                      <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    </Link>
+
+                    <Link
+                      to="/journals"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        path.startsWith('/journals') || path.startsWith('/articles')
+                          ? 'bg-primary text-secondary border-l-3 border-secondary'
+                          : 'text-primary hover:bg-background'
+                      }`}
+                    >
+                      <span>Journals</span>
+                      <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    </Link>
+
+                    {/* Quick Category links under Journals */}
+                    {dropdownCategories.length > 0 && (
+                      <div className="pl-6 pr-2 py-1 space-y-1 border-l-2 border-border/40 ml-4">
+                        {dropdownCategories.slice(0, 4).map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/journals?category=${encodeURIComponent(cat.slug)}`}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block py-1 text-[11px] font-medium text-muted hover:text-primary transition-colors uppercase tracking-wider truncate"
+                          >
+                            · {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    <Link
+                      to="/archives"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        path.startsWith('/archives')
+                          ? 'bg-primary text-secondary border-l-3 border-secondary'
+                          : 'text-primary hover:bg-background'
+                      }`}
+                    >
+                      <span>Archives</span>
+                      <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    </Link>
+
+                    <Link
+                      to="/about"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        path.startsWith('/about')
+                          ? 'bg-primary text-secondary border-l-3 border-secondary'
+                          : 'text-primary hover:bg-background'
+                      }`}
+                    >
+                      <span>About Us</span>
+                      <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    </Link>
+
+                    <Link
+                      to="/contact"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-between py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+                        path.startsWith('/contact')
+                          ? 'bg-primary text-secondary border-l-3 border-secondary'
+                          : 'text-primary hover:bg-background'
+                      }`}
+                    >
+                      <span>Contact Us</span>
+                      <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    </Link>
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path === '/' ? 'text-secondary' : 'text-primary'}`}>
-                    Home <ChevronRight className="h-4 w-4 opacity-50" />
-                  </Link>
-                  <Link to="/journals" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/journals') ? 'text-secondary' : 'text-primary'}`}>
-                    Journals <ChevronRight className="h-4 w-4 opacity-50" />
-                  </Link>
-                  <Link to="/archives" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/archives') ? 'text-secondary' : 'text-primary'}`}>
-                    Archives <ChevronRight className="h-4 w-4 opacity-50" />
-                  </Link>
-                  <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/about') ? 'text-secondary' : 'text-primary'}`}>
-                    About <ChevronRight className="h-4 w-4 opacity-50" />
-                  </Link>
-                  <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between pb-3 border-b border-border text-sm font-semibold uppercase tracking-wider ${path.startsWith('/contact') ? 'text-secondary' : 'text-primary'}`}>
-                    Contact <ChevronRight className="h-4 w-4 opacity-50" />
-                  </Link>
-                </div>
-
-                <div className="mt-auto pt-8">
+                {/* Bottom Portal / Dashboard Action */}
+                <div className="pt-6 border-t border-border mt-auto">
                   {localStorage.getItem('token') ? (
                     <Link
                       to="/dashboard"
-                      className="flex w-full items-center justify-center py-3 bg-primary text-white text-[13px] font-semibold tracking-widest uppercase hover:bg-primary/90 transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 py-3 bg-primary text-white text-xs font-bold tracking-widest uppercase hover:bg-primary/90 transition-colors shadow-xs"
                     >
-                      Dashboard
+                      <BookOpen className="h-4 w-4 text-secondary" />
+                      <span>Open Dashboard</span>
                     </Link>
                   ) : (
                     <Link
                       to="/login"
-                      className="flex w-full items-center justify-center py-3 bg-secondary text-primary text-[13px] font-bold tracking-widest uppercase hover:bg-secondary/90 transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex w-full items-center justify-center gap-2 py-3 bg-secondary text-primary text-xs font-bold tracking-widest uppercase hover:bg-secondary/90 transition-colors shadow-xs"
                     >
-                      Portal Login
+                      <BookOpen className="h-4 w-4" />
+                      <span>Portal Login</span>
                     </Link>
                   )}
                 </div>

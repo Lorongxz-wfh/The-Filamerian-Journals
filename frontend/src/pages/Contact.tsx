@@ -57,61 +57,61 @@ const Contact: React.FC = () => {
       <PageHeader title="Contact Us" />
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 w-full">
         {/* Left Column - Contact Info */}
-        <div className="lg:col-span-4 space-y-8">
-          <div className="space-y-6">
-            <h2 className="text-[13px] font-semibold text-primary uppercase tracking-wider border-b border-border pb-3">
+        <div className="lg:col-span-4 space-y-6 sm:space-y-8">
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-xs sm:text-[13px] font-semibold text-primary uppercase tracking-wider border-b border-border pb-2.5 sm:pb-3">
               Editorial Office
             </h2>
             
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <MapPin className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+            <div className="space-y-3.5 sm:space-y-4">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <MapPin className="h-4 sm:h-5 w-4 sm:w-5 text-secondary shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[13px] font-medium text-primary">Filamer Christian University</p>
-                  <p className="text-[12px] text-muted leading-relaxed mt-1">
+                  <p className="text-xs sm:text-[13px] font-medium text-primary">Filamer Christian University</p>
+                  <p className="text-[11px] sm:text-[12px] text-muted leading-relaxed mt-0.5 sm:mt-1">
                     Roxas Avenue, Roxas City<br />
                     Capiz 5800, Philippines
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <Mail className="h-5 w-5 text-secondary shrink-0" />
-                <a href={`mailto:${settings.contact_email || 'journals@filamer.edu.ph'}`} className="text-[13px] font-medium text-primary hover:text-secondary transition-colors">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Mail className="h-4 sm:h-5 w-4 sm:w-5 text-secondary shrink-0" />
+                <a href={`mailto:${settings.contact_email || 'journals@filamer.edu.ph'}`} className="text-xs sm:text-[13px] font-medium text-primary hover:text-secondary transition-colors break-all">
                   {settings.contact_email || 'journals@filamer.edu.ph'}
                 </a>
               </div>
 
-              <div className="flex items-center gap-4">
-                <Phone className="h-5 w-5 text-secondary shrink-0" />
-                <p className="text-[13px] font-medium text-primary">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Phone className="h-4 sm:h-5 w-4 sm:w-5 text-secondary shrink-0" />
+                <p className="text-xs sm:text-[13px] font-medium text-primary">
                   {settings.contact_phone || '(036) 6210-471'}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-surface border border-border p-5 space-y-2">
-            <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Support Hours</h3>
-            <p className="text-[12px] text-muted">Monday - Friday<br />8:00 AM - 5:00 PM (PST)</p>
+          <div className="bg-surface border border-border p-4 sm:p-5 space-y-1.5 sm:space-y-2 shadow-xs">
+            <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">Support Hours</h3>
+            <p className="text-xs sm:text-[12px] text-muted">Monday - Friday<br />8:00 AM - 5:00 PM (PST)</p>
           </div>
 
           {/* Campus Map Embed Card */}
-          <div className="bg-surface border border-border p-5 space-y-3">
+          <div className="bg-surface border border-border p-4 sm:p-5 space-y-2.5 sm:space-y-3 shadow-xs">
             <div className="flex items-center justify-between">
-              <h3 className="text-[12px] font-semibold text-primary uppercase tracking-wider">Campus Map</h3>
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">Campus Map</h3>
               <a
                 href="https://maps.google.com/?q=Filamer+Christian+University,+Roxas+City,+Capiz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] font-medium text-secondary hover:underline flex items-center gap-1"
+                className="text-[10px] sm:text-[11px] font-medium text-secondary hover:underline flex items-center gap-1"
               >
                 Get Directions ↗
               </a>
             </div>
-            <div className="w-full h-52 border border-border overflow-hidden relative">
+            <div className="w-full h-44 sm:h-52 border border-border overflow-hidden relative">
               <iframe
                 title="Filamer Christian University Map"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3908.2868297621147!2d122.7516113!3d11.5794444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a5f2526e0e0a51%3A0xb3671239bfb1b369!2sFilamer%20Christian%20University!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph"
@@ -129,16 +129,16 @@ const Contact: React.FC = () => {
 
         {/* Contact Form */}
         <div className="lg:col-span-8">
-          <form onSubmit={handleSubmit} className="bg-surface border border-border p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-surface border border-border p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 shadow-xs">
             {success && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 text-[13px] flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" />
-                Your message has been sent successfully. We will get back to you soon.
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-[13px] flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>Your message has been sent successfully. We will get back to you soon.</span>
               </div>
             )}
             
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-[13px]">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-[13px]">
                 {error}
               </div>
             )}

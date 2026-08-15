@@ -68,9 +68,36 @@ const About: React.FC = () => {
       <PageHeader title="About Us" className="mb-8" />
 
       {/* Main Content Layout */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-8 items-start">
-        {/* Sidebar Navigation */}
-        <aside className="w-full lg:w-72 shrink-0 space-y-4 lg:sticky lg:top-24">
+      <div className="flex-1 flex flex-col lg:flex-row gap-5 sm:gap-8 items-start">
+        {/* Mobile Horizontal Tab Pill Bar (< lg) */}
+        <div className="lg:hidden w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] -mt-3 mb-1">
+          <div className="flex items-center gap-1.5 min-w-max pb-1">
+            {resources.map((res) => {
+              const ItemIcon = getResourceIcon(res.slug);
+              const isActive = activeTab === res.slug;
+              return (
+                <button
+                  key={res.id}
+                  onClick={() => {
+                    setActiveTab(res.slug);
+                    window.history.replaceState(null, '', `#${res.slug}`);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider border transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-primary text-white border-primary shadow-xs'
+                      : 'bg-surface text-muted border-border hover:text-primary hover:bg-background'
+                  }`}
+                >
+                  <ItemIcon className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-secondary' : 'text-muted'}`} />
+                  <span>{res.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Sidebar Navigation (Desktop Only >= lg) */}
+        <aside className="hidden lg:block w-72 shrink-0 space-y-4 lg:sticky lg:top-24">
           <div className="border border-border bg-surface shadow-xs">
             <div className="px-4 py-3 border-b border-border bg-background/50">
               <h3 className="text-[11px] font-bold text-primary uppercase tracking-wider">
@@ -94,7 +121,7 @@ const About: React.FC = () => {
                         setActiveTab(res.slug);
                         window.history.replaceState(null, '', `#${res.slug}`);
                       }}
-                      className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-medium transition-all group ${
+                      className={`w-full flex items-center justify-between px-3.5 py-3 text-[13px] font-medium transition-all group cursor-pointer ${
                         isActive
                           ? 'bg-primary text-white shadow-xs font-semibold'
                           : 'text-muted hover:text-primary hover:bg-background'
@@ -119,23 +146,23 @@ const About: React.FC = () => {
 
         {/* Content Body */}
         <main className="flex-1 w-full min-w-0">
-          <div className="bg-surface border border-border shadow-xs overflow-hidden min-h-[500px] flex flex-col">
+          <div className="bg-surface border border-border shadow-xs overflow-hidden min-h-[400px] sm:min-h-[500px] flex flex-col">
             {/* Content Top Bar */}
             {activeResource && (
-              <div className="px-6 py-4 border-b border-border bg-background/50 flex items-center gap-3">
-                <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <IconComponent className="h-4 w-4 text-primary" />
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-border bg-background/50 flex items-center gap-3">
+                <div className="w-7 sm:w-8 h-7 sm:h-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <IconComponent className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-primary" />
                 </div>
-                <h2 className="text-[14px] font-bold text-primary uppercase tracking-wider">
+                <h2 className="text-xs sm:text-[14px] font-bold text-primary uppercase tracking-wider">
                   {activeResource.title}
                 </h2>
               </div>
             )}
 
             {/* Main Article Body with Animation */}
-            <div className="p-6 sm:p-8 lg:p-10 flex-1">
+            <div className="p-4 sm:p-8 lg:p-10 flex-1">
               {loading ? (
-                <div className="flex-1 flex flex-col items-center justify-center py-20">
+                <div className="flex-1 flex flex-col items-center justify-center py-16 sm:py-20">
                   <Spinner text="Loading documentation..." />
                 </div>
               ) : activeResource ? (
@@ -148,30 +175,30 @@ const About: React.FC = () => {
                     transition={{ duration: 0.2 }}
                     className="prose prose-sm max-w-none 
                       prose-headings:font-display prose-headings:font-bold prose-headings:text-primary prose-headings:uppercase prose-headings:tracking-wider 
-                      prose-h2:text-[16px] prose-h2:border-b prose-h2:border-border prose-h2:pb-2 prose-h2:mt-6 prose-h2:mb-4
-                      prose-h3:text-[14px] prose-h3:mt-4 prose-h3:mb-2
-                      prose-p:text-muted prose-p:leading-relaxed prose-p:text-[13.5px]
-                      prose-li:text-muted prose-li:text-[13.5px] prose-li:marker:text-primary
+                      prose-h2:text-[15px] sm:prose-h2:text-[16px] prose-h2:border-b prose-h2:border-border prose-h2:pb-2 prose-h2:mt-5 sm:prose-h2:mt-6 prose-h2:mb-3 sm:prose-h2:mb-4
+                      prose-h3:text-[13px] sm:prose-h3:text-[14px] prose-h3:mt-3 sm:prose-h3:mt-4 prose-h3:mb-2
+                      prose-p:text-muted prose-p:leading-relaxed prose-p:text-xs sm:prose-p:text-[13.5px]
+                      prose-li:text-muted prose-li:text-xs sm:prose-li:text-[13.5px] prose-li:marker:text-primary
                       prose-strong:text-primary prose-strong:font-semibold
                       prose-a:text-secondary prose-a:underline hover:prose-a:text-primary
-                      prose-blockquote:border-l-2 prose-blockquote:border-secondary prose-blockquote:bg-primary/5 prose-blockquote:p-4 prose-blockquote:not-italic prose-blockquote:text-primary/90"
+                      prose-blockquote:border-l-2 prose-blockquote:border-secondary prose-blockquote:bg-primary/5 prose-blockquote:p-3 sm:prose-blockquote:p-4 prose-blockquote:not-italic prose-blockquote:text-primary/90"
                     dangerouslySetInnerHTML={{ __html: activeResource.content || '' }}
                   />
                 </AnimatePresence>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted text-[13px] py-20">
+                <div className="flex items-center justify-center h-full text-muted text-xs sm:text-[13px] py-16 sm:py-20">
                   Select a policy or guideline from the documentation menu.
                 </div>
               )}
             </div>
 
             {/* Bottom Footer Notice inside Card */}
-            <div className="px-6 py-4 border-t border-border bg-background/30 flex flex-wrap items-center justify-between text-[11.5px] text-muted gap-3">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-background/30 flex flex-wrap items-center justify-between text-[11px] sm:text-[11.5px] text-muted gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 <span>Filamer Christian University Academic Standard</span>
               </div>
-              <span className="font-mono text-[11px]">Updated Annually</span>
+              <span className="font-mono text-[10px] sm:text-[11px]">Updated Annually</span>
             </div>
           </div>
         </main>
