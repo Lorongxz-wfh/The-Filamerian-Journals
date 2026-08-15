@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import JournalCard from '@/components/ui/JournalCard';
-import { Search, LayoutGrid, List, ChevronDown, X, Loader2 } from 'lucide-react';
+import { Search, LayoutGrid, List, ChevronDown, X, Loader2, Filter } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import Select from '@/components/ui/Select';
@@ -210,11 +210,112 @@ const Journals: React.FC = () => {
     navigate('/journals');
   };
 
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const renderFilterControls = () => (
+    <div className="space-y-1">
+      <h3 className="hidden lg:block text-[11px] font-bold text-primary uppercase tracking-widest mb-4">Filter By</h3>
+
+      {/* Subject / Discipline */}
+      <div className="border border-border">
+        <button
+          onClick={() => toggleSection('subject')}
+          className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors cursor-pointer"
+        >
+          Subject / Discipline
+          <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.subject ? 'rotate-180' : ''}`} />
+        </button>
+        {openSections.subject && (
+          <div className="px-4 pb-4 space-y-2.5">
+            {(categoryList.length > 0 ? categoryList : actualCategories.map(slug => ({ id: slug, name: slug, slug }))).map(catObj => {
+              const slug = typeof catObj === 'string' ? catObj : catObj.slug;
+              const label = typeof catObj === 'string' ? catObj : catObj.name;
+              return (
+                <label key={slug} className="flex items-center gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(slug)}
+                    onChange={() => toggleCategory(slug)}
+                    className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                  />
+                  <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{label}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Publication Year */}
+      <div className="border border-border">
+        <button
+          onClick={() => toggleSection('year')}
+          className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors cursor-pointer"
+        >
+          Publication Year
+          <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.year ? 'rotate-180' : ''}`} />
+        </button>
+        {openSections.year && (
+          <div className="px-4 pb-4 space-y-3">
+            <div className="grid grid-cols-2 gap-2 pb-2 border-b border-border">
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">From</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 2020"
+                  value={fromYear}
+                  onChange={(e) => setFromYear(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">To</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 2024"
+                  value={toYear}
+                  onChange={(e) => setToYear(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
+                />
+              </div>
+            </div>
+            {availableYears.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Specific Years</span>
+                {availableYears.map(year => (
+                  <label key={year} className="flex items-center gap-2.5 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={selectedYears.includes(year)}
+                      onChange={() => toggleYear(year)}
+                      className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
+                    />
+                    <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{year}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Clear All */}
+      {hasActiveFilters && (
+        <button
+          onClick={clearAllFilters}
+          className="w-full mt-3 py-2 text-[11px] font-medium text-muted hover:text-red-600 border border-border hover:border-red-300 transition-colors uppercase tracking-wider cursor-pointer"
+        >
+          Clear All Filters
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <PageWrapper className="flex flex-col">
       {/* Page Header */}
       <PageHeader title="Our Journals">
-        <div className="relative w-full md:w-72 mt-4 md:mt-0 md:absolute md:right-0 md:bottom-4">
+        <div className="relative w-full md:w-72 mt-3 md:mt-0 md:absolute md:right-0 md:bottom-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted/40" />
           <input
             type="text"
@@ -234,106 +335,39 @@ const Journals: React.FC = () => {
         </div>
       </PageHeader>
 
-      {/* Main Layout: Sidebar + Results */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-8">
-        
-        {/* ── Left Sidebar ── */}
-        <aside className="w-full lg:w-[220px] shrink-0">
-          <div className="sticky top-24 space-y-1">
-            <h3 className="text-[11px] font-bold text-primary uppercase tracking-widest mb-4">Filter By</h3>
-
-            {/* Subject / Discipline */}
-            <div className="border border-border">
-              <button
-                onClick={() => toggleSection('subject')}
-                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
-              >
-                Subject / Discipline
-                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.subject ? 'rotate-180' : ''}`} />
-              </button>
-              {openSections.subject && (
-                <div className="px-4 pb-4 space-y-2.5">
-                  {(categoryList.length > 0 ? categoryList : actualCategories.map(slug => ({ id: slug, name: slug, slug }))).map(catObj => {
-                    const slug = typeof catObj === 'string' ? catObj : catObj.slug;
-                    const label = typeof catObj === 'string' ? catObj : catObj.name;
-                    return (
-                      <label key={slug} className="flex items-center gap-2.5 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.includes(slug)}
-                          onChange={() => toggleCategory(slug)}
-                          className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
-                        />
-                        <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Publication Year */}
-            <div className="border border-border">
-              <button
-                onClick={() => toggleSection('year')}
-                className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-semibold text-primary uppercase tracking-wider hover:bg-surface/50 transition-colors"
-              >
-                Publication Year
-                <ChevronDown className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${openSections.year ? 'rotate-180' : ''}`} />
-              </button>
-              {openSections.year && (
-                <div className="px-4 pb-4 space-y-3">
-                  <div className="grid grid-cols-2 gap-2 pb-2 border-b border-border">
-                    <div>
-                      <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">From</label>
-                      <input
-                        type="number"
-                        placeholder="e.g. 2020"
-                        value={fromYear}
-                        onChange={(e) => setFromYear(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">To</label>
-                      <input
-                        type="number"
-                        placeholder="e.g. 2024"
-                        value={toYear}
-                        onChange={(e) => setToYear(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
-                      />
-                    </div>
-                  </div>
-                  {availableYears.length > 0 && (
-                    <div className="space-y-2 pt-1">
-                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Specific Years</span>
-                      {availableYears.map(year => (
-                        <label key={year} className="flex items-center gap-2.5 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={selectedYears.includes(year)}
-                            onChange={() => toggleYear(year)}
-                            className="w-3.5 h-3.5 accent-[#005a9c] cursor-pointer"
-                          />
-                          <span className="text-[12px] text-muted group-hover:text-primary transition-colors">{year}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Clear All */}
+      {/* Mobile Collapsible Filter Drawer */}
+      <div className="lg:hidden border border-border bg-surface mb-5">
+        <button
+          type="button"
+          onClick={() => setMobileFiltersOpen(prev => !prev)}
+          className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-primary cursor-pointer hover:bg-black/5 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-secondary" />
+            Filter & Refine Journals
             {hasActiveFilters && (
-              <button
-                onClick={clearAllFilters}
-                className="w-full mt-3 py-2 text-[11px] font-medium text-muted hover:text-red-600 border border-border hover:border-red-300 transition-colors uppercase tracking-wider"
-              >
-                Clear All Filters
-              </button>
+              <span className="bg-primary text-secondary px-1.5 py-0.5 text-[10px] font-mono font-bold">
+                {selectedCategories.length + selectedYears.length + (fromYear ? 1 : 0) + (toYear ? 1 : 0)} Active
+              </span>
             )}
+          </span>
+          <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-200 ${mobileFiltersOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {mobileFiltersOpen && (
+          <div className="p-4 border-t border-border bg-background">
+            {renderFilterControls()}
+          </div>
+        )}
+      </div>
+
+      {/* Main Layout: Sidebar + Results */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-6 lg:gap-8">
+        
+        {/* ── Left Sidebar (Desktop Only) ── */}
+        <aside className="hidden lg:block w-[220px] shrink-0">
+          <div className="sticky top-24">
+            {renderFilterControls()}
           </div>
         </aside>
 
