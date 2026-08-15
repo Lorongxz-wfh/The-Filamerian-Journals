@@ -88,7 +88,7 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
       value={article}
       dragListener={false}
       dragControls={controls}
-      className="flex items-center justify-between px-5 py-3 transition-colors bg-surface hover:bg-background/50"
+      className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 transition-colors bg-surface hover:bg-background/50 border-b border-border/50 last:border-b-0"
       whileDrag={{ 
         scale: 1.01,
         boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
@@ -96,10 +96,10 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
         backgroundColor: "var(--surface)"
       }}
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
         {/* Drag Handle */}
         <div
-          className={`p-1.5 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 cursor-grab active:cursor-grabbing touch-none select-none transition-colors ${
+          className={`p-1 sm:p-1.5 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 cursor-grab active:cursor-grabbing touch-none select-none transition-colors shrink-0 ${
             isReordering ? 'bg-primary/10 text-primary' : 'hover:opacity-100'
           }`}
           onPointerDown={(e) => {
@@ -112,7 +112,7 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
         </div>
 
         {/* Up / Down Arrow buttons */}
-        <div className="flex flex-col gap-0.5 items-center shrink-0 w-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col gap-0.5 items-center shrink-0 w-6 sm:w-8" onClick={(e) => e.stopPropagation()}>
           <button 
             type="button"
             onClick={() => {
@@ -121,9 +121,9 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
             }} 
             disabled={index === 0}
             title="Move Up"
-            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+            className="p-1 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
           >
-            <ArrowUp className="h-3.5 w-3.5 stroke-[2.5]" />
+            <ArrowUp className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.5]" />
           </button>
           <button 
             type="button"
@@ -133,25 +133,25 @@ const ArticleRow: React.FC<ArticleRowProps> = ({
             }} 
             disabled={isLast}
             title="Move Down"
-            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+            className="p-1 rounded text-gray-400 hover:text-primary hover:bg-black/5 active:bg-black/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
           >
-            <ArrowDown className="h-3.5 w-3.5 stroke-[2.5]" />
+            <ArrowDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[2.5]" />
           </button>
         </div>
 
         {/* Article Details */}
         <div className="flex flex-col min-w-0 cursor-pointer" onClick={() => onEdit(article)}>
-          <span className="text-[14px] font-semibold text-primary truncate hover:underline">
+          <span className="text-xs sm:text-[14px] font-semibold text-primary truncate hover:underline">
             {article.title}
           </span>
-          <span className="text-[12px] text-muted truncate">
+          <span className="text-[11px] sm:text-[12px] text-muted truncate">
             {article.authors?.map((a: any) => a.name).join(', ') || 'Unknown Authors'}
           </span>
         </div>
       </div>
       
-      <div className="flex items-center gap-4 shrink-0 pl-4" onClick={(e) => e.stopPropagation()}>
-        <span className={`px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0 pl-2 sm:pl-4" onClick={(e) => e.stopPropagation()}>
+        <span className={`hidden xs:inline-block px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider ${statusColor[article.status] || 'bg-gray-100 text-gray-700'}`}>
           {article.status}
         </span>
         <DropdownMenu
@@ -330,7 +330,7 @@ const ManageVolume: React.FC = () => {
           <Breadcrumbs className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard/journals">Journals</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -352,8 +352,9 @@ const ManageVolume: React.FC = () => {
           </Breadcrumbs>
         }
       >
-        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Article
+        <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="Add Article">
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Article</span>
         </Button>
       </DashboardHeader>
 

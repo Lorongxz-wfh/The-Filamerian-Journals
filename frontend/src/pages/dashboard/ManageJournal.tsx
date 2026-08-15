@@ -126,7 +126,7 @@ const ManageJournal: React.FC = () => {
           <Breadcrumbs className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/journals">My Journals</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard/journals">Journals</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -138,8 +138,9 @@ const ManageJournal: React.FC = () => {
           </Breadcrumbs>
         }
       >
-        <Button onClick={() => handleOpenVolModal()} disabled={!journal} className="shrink-0 flex items-center gap-2">
-          <Plus className="h-4 w-4" /> New Volume
+        <Button onClick={() => handleOpenVolModal()} disabled={!journal} className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="New Volume">
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Volume</span>
         </Button>
       </DashboardHeader>
 
