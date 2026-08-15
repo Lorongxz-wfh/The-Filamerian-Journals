@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Calendar, Filter, Eye, Layers, Search, ArrowUpDown, RotateCcw } from 'lucide-react';
+import { ChevronDown, BookOpen, FileText, Quote, LayoutGrid, Columns, Eye, Layers, Search, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import api, { getFileUrl } from '@/services/api';
 import CitationModal from '@/components/ui/CitationModal';
@@ -264,82 +264,95 @@ const Archives: React.FC = () => {
             { label: 'Journals', value: journals.length },
             { label: 'Archived Volumes', value: totalVolumesCount },
             { label: 'Published Articles', value: totalArticlesCount },
-            { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]} – ${availableYears[0]}` : '-' },
+            { label: 'Years Covered', value: availableYears.length > 0 ? `${availableYears[availableYears.length - 1]}–${availableYears[0]}` : '-' },
           ].map((s) => (
-            <div key={s.label} className="bg-surface py-2.5 px-4 flex items-center justify-center gap-2.5 text-center">
-              <span className="text-sm font-bold text-primary font-mono">{s.value}</span>
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">{s.label}</span>
+            <div key={s.label} className="bg-surface py-2 sm:py-2.5 px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 text-center">
+              <span className="text-sm sm:text-sm font-bold text-primary font-mono whitespace-nowrap">{s.value}</span>
+              <span className="text-[9px] sm:text-[10px] font-semibold text-muted uppercase tracking-wider text-center">{s.label}</span>
             </div>
           ))}
         </div>
 
         {/* Filter, Sort & View Mode Controls Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 bg-surface px-3 py-2 border border-border mb-8">
-          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-            {/* Search within Archives (Debounced) */}
-            <div className="relative flex-1 sm:flex-none sm:w-44 min-w-[140px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-2 bg-surface p-2.5 sm:px-3 sm:py-2 border border-border mb-6 sm:mb-8">
+          {/* Top Row on Mobile: Search + Mobile View Mode Switcher */}
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
+            <div className="relative flex-1 sm:flex-none sm:w-48 min-w-0">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
               <input
                 type="text"
                 placeholder="Search archive issues..."
                 value={searchInputValue}
                 onChange={(e) => setSearchInputValue(e.target.value)}
-                className="w-full pl-8 pr-2 py-1.5 bg-background border border-border text-xs font-medium text-primary focus:outline-none focus:border-primary transition-colors"
+                className="w-full pl-8 pr-2 py-1.5 bg-background border border-border text-xs font-medium text-primary placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
+            {/* View Mode Switcher on Mobile (Inline next to search) */}
+            <div className="flex sm:hidden items-center gap-0.5 bg-background border border-border p-0.5 shrink-0">
+              <button
+                onClick={() => setViewMode('shelf')}
+                className={`p-1.5 transition-colors cursor-pointer ${
+                  viewMode === 'shelf' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                }`}
+                title="Shelf View"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('split')}
+                className={`p-1.5 transition-colors cursor-pointer ${
+                  viewMode === 'split' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
+                }`}
+                title="Split View"
+              >
+                <Columns className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Row on Mobile: Filters & Sort evenly distributed */}
+          <div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto shrink-0">
             {/* Year Filter */}
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Year:</span>
-              <div className="w-24">
-                <Select
-                  value={selectedYear}
-                  onChange={(val) => setSelectedYear(String(val))}
-                  options={[
-                    { value: 'all', label: 'All Years' },
-                    ...availableYears.map((y) => ({ value: String(y), label: String(y) }))
-                  ]}
-                  className="py-1 px-2 text-xs"
-                />
-              </div>
+            <div className="w-full sm:w-24">
+              <Select
+                value={selectedYear}
+                onChange={(val) => setSelectedYear(String(val))}
+                options={[
+                  { value: 'all', label: 'All Years' },
+                  ...availableYears.map((y) => ({ value: String(y), label: String(y) }))
+                ]}
+                className="py-1 px-1.5 sm:px-2 text-xs h-[30px]"
+              />
             </div>
 
             {/* Category Filter */}
-            <div className="flex items-center gap-1">
-              <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Field:</span>
-              <div className="w-28 sm:w-32">
-                <Select
-                  value={selectedCategory}
-                  onChange={(val) => setSelectedCategory(String(val))}
-                  options={[
-                    { value: 'all', label: 'All Fields' },
-                    ...availableCategories.map((c) => ({ value: c, label: c }))
-                  ]}
-                  className="py-1 px-2 text-xs"
-                />
-              </div>
+            <div className="w-full sm:w-32">
+              <Select
+                value={selectedCategory}
+                onChange={(val) => setSelectedCategory(String(val))}
+                options={[
+                  { value: 'all', label: 'All Fields' },
+                  ...availableCategories.map((c) => ({ value: c, label: c }))
+                ]}
+                className="py-1 px-1.5 sm:px-2 text-xs h-[30px]"
+              />
             </div>
 
             {/* Sort By Dropdown */}
-            <div className="flex items-center gap-1">
-              <ArrowUpDown className="h-3.5 w-3.5 text-muted shrink-0" />
-              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Sort:</span>
-              <div className="w-24 sm:w-28">
-                <Select
-                  value={sortBy}
-                  onChange={(val) => setSortBy(val as any)}
-                  options={[
-                    { value: 'newest', label: 'Newest' },
-                    { value: 'oldest', label: 'Oldest' },
-                    { value: 'title_asc', label: 'Title A–Z' },
-                    { value: 'title_desc', label: 'Title Z–A' },
-                    { value: 'volume_desc', label: 'Vol High–Low' }
-                  ]}
-                  className="py-1 px-2 text-xs"
-                />
-              </div>
+            <div className="w-full sm:w-28">
+              <Select
+                value={sortBy}
+                onChange={(val) => setSortBy(val as any)}
+                options={[
+                  { value: 'newest', label: 'Newest' },
+                  { value: 'oldest', label: 'Oldest' },
+                  { value: 'title_asc', label: 'Title A–Z' },
+                  { value: 'title_desc', label: 'Title Z–A' },
+                  { value: 'volume_desc', label: 'Vol High–Low' }
+                ]}
+                className="py-1 px-1.5 sm:px-2 text-xs h-[30px]"
+              />
             </div>
 
             {(selectedYear !== 'all' || selectedCategory !== 'all' || searchInputValue || sortBy !== 'newest') && (
@@ -347,20 +360,20 @@ const Archives: React.FC = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => { setSelectedYear('all'); setSelectedCategory('all'); setSearchInputValue(''); setSortBy('newest'); }}
-                className="h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center gap-1 font-medium"
+                className="col-span-3 sm:col-span-1 h-[28px] px-2 text-xs text-muted hover:text-red-600 hover:bg-red-50/60 border border-transparent hover:border-red-200 transition-colors shrink-0 flex items-center justify-center gap-1 font-medium cursor-pointer"
                 title="Reset All Filters"
               >
                 <RotateCcw className="h-3 w-3" />
-                <span>Reset</span>
+                <span>Reset Filters</span>
               </Button>
             )}
           </div>
 
-          {/* View Mode Switcher (Icon-only to stay compact on all screens) */}
-          <div className="flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
+          {/* View Mode Switcher on Desktop (Right Aligned) */}
+          <div className="hidden sm:flex items-center gap-0.5 bg-background border border-border p-0.5 shrink-0 ml-auto">
             <button
               onClick={() => setViewMode('shelf')}
-              className={`p-1.5 transition-colors ${
+              className={`p-1.5 transition-colors cursor-pointer ${
                 viewMode === 'shelf' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
               title="Shelf View"
@@ -369,7 +382,7 @@ const Archives: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('split')}
-              className={`p-1.5 transition-colors ${
+              className={`p-1.5 transition-colors cursor-pointer ${
                 viewMode === 'split' ? 'bg-primary text-white' : 'text-muted hover:text-primary'
               }`}
               title="Split View"
