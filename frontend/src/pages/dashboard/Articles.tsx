@@ -255,39 +255,38 @@ const Articles: React.FC = () => {
       </DashboardHeader>
 
       <div className="flex flex-col gap-2.5 sm:gap-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
-            {/* Status tabs */}
-            <div className="grid grid-cols-3 w-full sm:w-auto border border-border bg-surface h-9 items-center p-0.5 shrink-0">
-              {tabs.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`px-2.5 sm:px-4 h-full text-xs font-medium transition-colors flex items-center justify-center cursor-pointer ${
-                    tab === t.key ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            {/* Category filter */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Category:</label>
-              <div className="w-full sm:w-[200px]">
-                <Select
-                  className="py-1.5 h-9 text-xs"
-                  value={categoryFilter}
-                  onChange={(val) => setCategoryFilter(val as string)}
-                  options={[
-                    { value: '', label: 'All Categories' },
-                    ...categoriesData.map(c => ({ value: c.slug, label: c.name }))
-                  ]}
-                />
-              </div>
+        <div className="flex flex-col sm:flex-row sm:items-center flex-wrap gap-2.5 sm:gap-4">
+          {/* Status tabs */}
+          <div className="grid grid-cols-3 w-full sm:w-auto border border-border bg-surface h-9 items-center p-0.5 shrink-0">
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-2.5 sm:px-4 h-full text-xs font-medium transition-colors flex items-center justify-center cursor-pointer ${
+                  tab === t.key ? 'bg-primary text-white font-semibold' : 'text-muted hover:text-primary'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {/* Category filter */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Category:</label>
+            <div className="w-full sm:w-[180px]">
+              <Select
+                className="py-1.5 h-9 text-xs"
+                value={categoryFilter}
+                onChange={(val) => setCategoryFilter(val as string)}
+                options={[
+                  { value: '', label: 'All Categories' },
+                  ...categoriesData.map(c => ({ value: c.slug, label: c.name }))
+                ]}
+              />
             </div>
           </div>
-          <div className="w-full md:w-64">
+          {/* Search input */}
+          <div className="w-full sm:w-64">
             <SearchInput
               placeholder="Search articles..."
               value={filter}

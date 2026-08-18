@@ -347,7 +347,7 @@ const Categories: React.FC = () => {
       <div className="flex flex-col gap-2.5 sm:gap-4">
         {/* Search Input */}
         {!isReordering && (
-          <div className="flex justify-end items-center">
+          <div className="flex items-center">
             <div className="w-full sm:w-64">
               <SearchInput
                 placeholder="Search categories..."
