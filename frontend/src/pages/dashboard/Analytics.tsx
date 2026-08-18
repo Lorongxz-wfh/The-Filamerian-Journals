@@ -136,11 +136,22 @@ const Analytics: React.FC = () => {
     <div className="space-y-4 sm:space-y-8 font-sans w-full print:p-0">
       <DashboardHeader title="Reports & Analytics">
         <div className="flex items-center gap-1.5 sm:gap-2 print:hidden">
-          <Button onClick={handleExportCSV} variant="outline" className="flex items-center gap-1.5 text-[11px] sm:text-xs h-8 sm:h-9 px-2 sm:px-3 cursor-pointer">
-            <Download className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> <span className="hidden xs:inline">Export</span> CSV
+          <Button 
+            onClick={handleExportCSV} 
+            variant="outline" 
+            className="flex items-center gap-1.5 text-[11px] sm:text-xs h-8 sm:h-9 px-2.5 sm:px-3 cursor-pointer shrink-0"
+            title="Export CSV"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
           </Button>
-          <Button onClick={handlePrint} className="flex items-center gap-1.5 text-[11px] sm:text-xs h-8 sm:h-9 px-2 sm:px-3 cursor-pointer">
-            <Printer className="h-3 sm:h-3.5 w-3 sm:w-3.5" /> <span className="hidden xs:inline">Print</span> Summary
+          <Button 
+            onClick={handlePrint} 
+            className="flex items-center gap-1.5 text-[11px] sm:text-xs h-8 sm:h-9 px-2.5 sm:px-3 cursor-pointer shrink-0"
+            title="Print Summary"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Print Summary</span>
           </Button>
         </div>
       </DashboardHeader>

@@ -444,13 +444,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       {/* Main Content */}
       <div className="flex-grow flex flex-col min-w-0 h-screen overflow-hidden">
         {settings.maintenance_mode === '1' && (
-          <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-700 px-6 py-2 text-[11px] font-bold uppercase tracking-wider flex items-center justify-between shrink-0">
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              Maintenance Mode Active — Public visitors see a scheduled maintenance notice
+          <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-700 px-3 sm:px-6 py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center justify-between gap-2 shrink-0">
+            <span className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="truncate">
+                <span className="hidden sm:inline">Maintenance Mode Active — Public visitors see a scheduled maintenance notice</span>
+                <span className="sm:hidden">Maintenance Mode Active</span>
+              </span>
             </span>
-            <Link to="/dashboard/settings" className="underline hover:text-amber-900 transition-colors">
-              Configure Settings
+            <Link to="/dashboard/settings" className="underline hover:text-amber-900 transition-colors shrink-0 whitespace-nowrap text-[10px] sm:text-[11px]">
+              <span className="hidden sm:inline">Configure Settings</span>
+              <span className="sm:hidden">Settings</span>
             </Link>
           </div>
         )}
