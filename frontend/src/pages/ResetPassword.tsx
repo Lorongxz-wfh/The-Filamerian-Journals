@@ -69,7 +69,7 @@ const ResetPassword: React.FC = () => {
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-6 bg-surface border border-border p-8">
         <div className="flex flex-col items-center text-center space-y-2">
-          <h1 className="text-xl text-primary font-serif">Set New Password</h1>
+          <h1 className="text-xl text-primary font-sans font-bold tracking-tight">Set New Password</h1>
           <p className="text-[13px] text-muted">
             Choose a new secure password for your account
           </p>

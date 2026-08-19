@@ -55,7 +55,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-sm space-y-6 bg-surface border border-border p-8">
         <div className="flex flex-col items-center text-center space-y-2">
           <img src="/TFJ-50pxOutline.svg" alt="The FCU Journals Logo" className="h-16 w-16 object-contain mb-1" />
-          <h1 className="text-xl font-display font-bold uppercase tracking-wider text-primary">Portal Login</h1>
+          <h1 className="text-xl font-bold tracking-tight text-primary font-sans">Portal Login</h1>
           <p className="text-[13px] text-muted">
             Access The FCU Dashboard
           </p>
