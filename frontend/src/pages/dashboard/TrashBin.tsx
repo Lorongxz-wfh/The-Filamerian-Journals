@@ -13,7 +13,9 @@ import {
   X,
   MoreVertical,
   HelpCircle,
-  CornerDownRight
+  CornerDownRight,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -86,6 +88,45 @@ const TrashBin: React.FC = () => {
   const [actionType, setActionType] = useState<'restore' | 'forceDelete' | 'batchRestore' | 'batchForceDelete' | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Collapsible hierarchy state
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set());
+
+  const toggleCollapse = (key: string) => {
+    setCollapsedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const getItemTitle = (item: TrashedItem) => {
+    if (item.title) return item.title;
+    if (item.type === 'volume') {
+      const volStr = String(item.volume_number || '').replace(/^Vol(?:ume)?\.?\s*/i, '');
+      return `Volume ${volStr}${item.year ? ` (${item.year})` : ''}`;
+    }
+    return `Item #${item.id}`;
+  };
+
+  const getItemContext = (item: TrashedItem) => {
+    if (item.type === 'article') {
+      const jTitle = item.volume?.journal?.title || item.journal?.title;
+      const volNum = item.volume?.volume_number ? String(item.volume.volume_number).replace(/^Vol(?:ume)?\.?\s*/i, '') : '';
+      if (jTitle && volNum) return `${jTitle} • Vol. ${volNum}`;
+      if (jTitle) return jTitle;
+      if (volNum) return `Volume ${volNum}`;
+      return 'Academic Article';
+    }
+    if (item.type === 'volume') {
+      return item.journal?.title || 'Journal Volume';
+    }
+    return item.category?.name || 'Journal Collection';
+  };
+
   const fetchTrashItems = async () => {
     setLoading(true);
     try {
@@ -112,7 +153,7 @@ const TrashBin: React.FC = () => {
       const items = (activeTab === 'article' ? articles : activeTab === 'volume' ? volumes : journals);
       return items
         .filter((item) => {
-          const titleText = item.title || `Volume ${item.volume_number} (${item.year})`;
+          const titleText = getItemTitle(item);
           return !searchQuery || titleText.toLowerCase().includes(searchQuery.toLowerCase());
         })
         .map((item) => ({ ...item, level: 0 }));
@@ -125,6 +166,8 @@ const TrashBin: React.FC = () => {
     // 1. Trashed Journals (Parent Level 0)
     journals.forEach((journal) => {
       const journalKey = `journal-${journal.id}`;
+      const isJournalCollapsed = collapsedKeys.has(journalKey);
+
       const childVolumes = volumes.filter(
         (v) => (v.journal_id === journal.id) || (v.journal?.id === journal.id)
       );
@@ -142,7 +185,7 @@ const TrashBin: React.FC = () => {
 
       const matchesJournal = !searchQuery || (journal.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
       const matchingChildVolumes = childVolumes.filter(
-        (v) => !searchQuery || `Volume ${v.volume_number} (${v.year})`.toLowerCase().includes(searchQuery.toLowerCase())
+        (v) => !searchQuery || getItemTitle(v).toLowerCase().includes(searchQuery.toLowerCase())
       );
       const matchingArticles = [...childArticlesUnderJournalVolumes, ...directArticlesUnderJournal].filter(
         (a) => !searchQuery || (a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
@@ -156,34 +199,41 @@ const TrashBin: React.FC = () => {
           childCount: totalChildren,
         });
 
-        childVolumes.forEach((volume) => {
-          const articlesUnderVolume = articles.filter(
-            (a) => (a.volume_id === volume.id) || (a.volume?.id === volume.id)
-          );
-          result.push({
-            ...volume,
-            level: 1,
-            treeParentKey: journalKey,
-            hasChildren: articlesUnderVolume.length > 0,
-            childCount: articlesUnderVolume.length,
+        // Only append children if journal is not collapsed
+        if (!isJournalCollapsed) {
+          childVolumes.forEach((volume) => {
+            const volumeKey = `volume-${volume.id}`;
+            const isVolumeCollapsed = collapsedKeys.has(volumeKey);
+            const articlesUnderVolume = articles.filter(
+              (a) => (a.volume_id === volume.id) || (a.volume?.id === volume.id)
+            );
+            result.push({
+              ...volume,
+              level: 1,
+              treeParentKey: journalKey,
+              hasChildren: articlesUnderVolume.length > 0,
+              childCount: articlesUnderVolume.length,
+            });
+
+            if (!isVolumeCollapsed) {
+              articlesUnderVolume.forEach((article) => {
+                result.push({
+                  ...article,
+                  level: 2,
+                  treeParentKey: volumeKey,
+                });
+              });
+            }
           });
 
-          articlesUnderVolume.forEach((article) => {
+          directArticlesUnderJournal.forEach((article) => {
             result.push({
               ...article,
-              level: 2,
-              treeParentKey: `volume-${volume.id}`,
+              level: 1,
+              treeParentKey: journalKey,
             });
           });
-        });
-
-        directArticlesUnderJournal.forEach((article) => {
-          result.push({
-            ...article,
-            level: 1,
-            treeParentKey: journalKey,
-          });
-        });
+        }
       }
     });
 
@@ -195,11 +245,12 @@ const TrashBin: React.FC = () => {
       }
 
       const volumeKey = `volume-${volume.id}`;
+      const isVolumeCollapsed = collapsedKeys.has(volumeKey);
       const childArticles = articles.filter(
         (a) => (a.volume_id === volume.id) || (a.volume?.id === volume.id)
       );
 
-      const matchesVolume = !searchQuery || `Volume ${volume.volume_number} (${volume.year})`.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesVolume = !searchQuery || getItemTitle(volume).toLowerCase().includes(searchQuery.toLowerCase());
       const matchingArticles = childArticles.filter(
         (a) => !searchQuery || (a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
       );
@@ -212,13 +263,15 @@ const TrashBin: React.FC = () => {
           childCount: childArticles.length,
         });
 
-        childArticles.forEach((article) => {
-          result.push({
-            ...article,
-            level: 1,
-            treeParentKey: volumeKey,
+        if (!isVolumeCollapsed) {
+          childArticles.forEach((article) => {
+            result.push({
+              ...article,
+              level: 1,
+              treeParentKey: volumeKey,
+            });
           });
-        });
+        }
       }
     });
 
@@ -241,7 +294,7 @@ const TrashBin: React.FC = () => {
     });
 
     return result;
-  }, [activeTab, articles, volumes, journals, searchQuery]);
+  }, [activeTab, articles, volumes, journals, searchQuery, collapsedKeys]);
 
   const toggleSelectAll = () => {
     const allFilteredKeys = filteredItems.map(item => `${item.type}-${item.id}`);
@@ -506,7 +559,7 @@ const TrashBin: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <Skeleton className="h-4 w-14 rounded-full" />
+                    <Skeleton className="h-4 w-14" />
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <Skeleton className="h-3.5 w-36" />
@@ -537,12 +590,9 @@ const TrashBin: React.FC = () => {
               filteredItems.map((item) => {
                 const itemKey = `${item.type}-${item.id}`;
                 const isSelected = selectedKeys.includes(itemKey);
-                const title = item.title || `Volume ${item.volume_number} (${item.year})`;
-                const context = item.type === 'article'
-                  ? `${item.volume?.journal?.title || 'Journal'} → Vol. ${item.volume?.volume_number || ''}`
-                  : item.type === 'volume'
-                  ? item.journal?.title || 'Journal'
-                  : item.category?.name || 'Journal Collection';
+                const title = getItemTitle(item);
+                const context = getItemContext(item);
+                const isCollapsed = collapsedKeys.has(itemKey);
 
                 const indentClass = item.level === 2
                   ? 'pl-9 sm:pl-14'
@@ -575,9 +625,18 @@ const TrashBin: React.FC = () => {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
                             {activeTab === 'all' && item.hasChildren && item.childCount && item.childCount > 0 && (
-                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 bg-primary/10 text-primary border border-primary/20 shrink-0">
-                                {item.childCount} nested {item.childCount === 1 ? 'item' : 'items'}
-                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleCollapse(itemKey);
+                                }}
+                                className="inline-flex items-center gap-1 text-[9px] font-mono font-medium text-muted hover:text-primary transition-colors cursor-pointer bg-muted/10 hover:bg-muted/20 border border-border px-1.5 py-0.5 shrink-0"
+                                title={isCollapsed ? "Click to expand nested items" : "Click to collapse nested items"}
+                              >
+                                {isCollapsed ? <ChevronRight className="h-2.5 w-2.5 text-muted" /> : <ChevronDown className="h-2.5 w-2.5 text-muted" />}
+                                <span>{item.childCount} nested</span>
+                              </button>
                             )}
                           </div>
                           {/* Mobile subtitle */}
@@ -591,13 +650,7 @@ const TrashBin: React.FC = () => {
                     </TableCell>
 
                     <TableCell className="hidden sm:table-cell">
-                      <span className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-full border ${
-                        item.type === 'article'
-                          ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20'
-                          : item.type === 'volume'
-                          ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
-                          : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
-                      }`}>
+                      <span className="px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-widest text-primary/70 bg-surface border border-border">
                         {item.type}
                       </span>
                     </TableCell>
