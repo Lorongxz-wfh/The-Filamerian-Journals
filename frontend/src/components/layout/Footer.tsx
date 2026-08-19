@@ -6,7 +6,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 const Footer: React.FC = () => {
   const { settings } = useSettings();
 
-  const siteTitle = settings.site_title || 'The Filamerian Journals';
+  const siteTitle = settings.site_title || 'The FCU Journals';
   const schoolName = settings.footer_school_name || 'Filamer Christian University';
   const copyrightText = settings.footer_copyright || `© ${new Date().getFullYear()} ${schoolName}, Inc. All rights reserved.`;
 

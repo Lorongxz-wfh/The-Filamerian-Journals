@@ -20,7 +20,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
     <Modal isOpen={isOpen} onClose={onClose} title="Keyboard Shortcuts & Helper Guide" className="max-w-md">
       <div className="space-y-4 font-sans">
         <p className="text-[13px] text-muted">
-          Use these power-user keyboard shortcuts to navigate and manage <strong>The Filamerian Journals</strong> faster.
+          Use these power-user keyboard shortcuts to navigate and manage <strong>The FCU Journals</strong> faster.
         </p>
 
         <div className="divide-y divide-border border border-border bg-surface">

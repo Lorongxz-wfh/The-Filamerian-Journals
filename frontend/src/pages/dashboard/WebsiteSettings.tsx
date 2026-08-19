@@ -27,12 +27,12 @@ const WebsiteSettings: React.FC = () => {
 
   // --- General Settings State ---
   const [settings, setSettings] = useState<Record<string, string>>({
-    site_title: 'The Filamerian Journals',
+    site_title: 'The FCU Journals',
     tagline: 'Scholarly Excellence In Every Discipline',
     contact_email: 'journals@filamer.edu.ph',
     contact_phone: '(036) 6210-471',
     journal_categories: 'Science, Education, Arts, Multidisciplinary',
-    home_about_us: '<p class="text-sm text-muted leading-relaxed">\n  <strong>The Filamerian Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n</p>',
+    home_about_us: '<p class="text-sm text-muted leading-relaxed">\n  <strong>The FCU Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n</p>',
     show_tagline: 'false',
     show_about_us: 'true',
     footer_col1_title: 'NAVIGATION',
@@ -204,7 +204,7 @@ const WebsiteSettings: React.FC = () => {
               <label className="block text-[12px] font-medium text-primary uppercase tracking-wider">Hero Text</label>
             </div>
             <RichTextEditor 
-              value={settings.home_about_us || 'The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.'}
+              value={settings.home_about_us || 'The FCU Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.'}
               onChange={(val) => handleSettingsChange('home_about_us', val)}
             />
           </div>

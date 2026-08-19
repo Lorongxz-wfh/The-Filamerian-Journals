@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Reset Your Password - The Filamerian Journals</title>
+    <title>Reset Your Password - The FCU Journals</title>
     <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f5f7; color: #1e293b; margin: 0; padding: 0; }
         .container { max-width: 580px; margin: 30px auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; }
@@ -16,7 +16,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>The Filamerian Journals</h1>
+            <h1>The FCU Journals</h1>
         </div>
         <div class="content">
             <p>Hello <strong>{{ $user->name }}</strong>,</p>
@@ -31,7 +31,7 @@
             <p style="font-size: 12px; color: #64748b; margin-top: 24px;">If you did not request a password reset, no further action is required. Your password will remain unchanged.</p>
         </div>
         <div class="footer">
-            &copy; {{ date('Y') }} Filamer Christian University — The Filamerian Journals. All rights reserved.
+            &copy; {{ date('Y') }} Filamer Christian University — The FCU Journals. All rights reserved.
         </div>
     </div>
 </body>

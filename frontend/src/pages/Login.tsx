@@ -56,7 +56,7 @@ const Login: React.FC = () => {
         <div className="flex flex-col items-center text-center space-y-3">
           <h1 className="text-xl text-primary">Portal Login</h1>
           <p className="text-[13px] text-muted">
-            Access The Filamerian Dashboard
+            Access The FCU Dashboard
           </p>
         </div>
 

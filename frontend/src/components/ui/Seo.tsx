@@ -11,7 +11,7 @@ interface SeoProps {
 
 export const Seo: React.FC<SeoProps> = ({ title, description, url, image, type = 'website' }) => {
   const { settings } = useSettings();
-  const defaultTitle = settings.site_title || 'The Filamerian Journals';
+  const defaultTitle = settings.site_title || 'The FCU Journals';
   const defaultDescription = settings.tagline || 'Official online database of published journals, theses, case studies, and research papers from Filamer Christian University.';
   const defaultUrl = window.location.origin;
   const defaultImage = `${window.location.origin}/og-image.png`;

@@ -310,7 +310,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <Input 
-                label="DOI (Optional)" name="doi" value={formData.doi || ''} onChange={handleInputChange} placeholder="10.1234/filamerian.2026.01"
+                label="DOI (Optional)" name="doi" value={formData.doi || ''} onChange={handleInputChange} placeholder="10.1234/fcu.2026.01"
               />
               <p className="text-[11px] text-muted mt-1">Digital Object Identifier format (e.g. 10.xxxx/slug)</p>
             </div>

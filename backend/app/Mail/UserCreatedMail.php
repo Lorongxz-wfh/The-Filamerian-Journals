@@ -24,7 +24,7 @@ class UserCreatedMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Welcome to The Filamerian Journals - Account Created')
+        return $this->subject('Welcome to The FCU Journals - Account Created')
                     ->view('emails.user_created');
     }
 }

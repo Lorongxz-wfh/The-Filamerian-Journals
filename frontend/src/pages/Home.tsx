@@ -95,7 +95,7 @@ const Home: React.FC = () => {
     [journals]
   );
 
-  const siteTitle = settings.site_title || 'The Filamerian Journals';
+  const siteTitle = settings.site_title || 'The FCU Journals';
   // Priority: settings.about_us → settings.home_about_us → hardcoded FCU default
   const aboutHtml = settings.about_us || settings.home_about_us || '';;
 
@@ -131,7 +131,7 @@ const Home: React.FC = () => {
                 />
               ) : (
                 <p className="text-left text-muted text-xs sm:text-sm leading-relaxed max-w-xl">
-                  The Filamerian Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
+                  The FCU Journals is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.
                 </p>
               )}
 

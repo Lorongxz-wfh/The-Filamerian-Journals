@@ -276,7 +276,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
           <BookOpen className="h-5 w-5 text-secondary group-hover:text-white transition-colors" />
           <div className="flex flex-col">
             <span className="text-[13px] font-bold text-white uppercase tracking-[0.15em] group-hover:text-secondary transition-colors leading-none">
-              The Filamerian
+              The FCU
             </span>
             <span className="text-[9px] font-semibold text-white/50 uppercase tracking-[0.3em] mt-0.5">
               Dashboard

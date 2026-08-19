@@ -28,7 +28,7 @@ class ResourceSeeder extends Seeder
             [
                 'title' => 'Ethics & Malpractice',
                 'slug' => 'ethics-malpractice',
-                'content' => "<h3>Ethics & Malpractice</h3><p>The Filamerian Journals are committed to upholding the highest standards of publication ethics. We take all possible measures against any publication malpractices.</p><ul><li>Authors must ensure their work is entirely original.</li><li>Plagiarism in all its forms constitutes unethical publishing behavior and is unacceptable.</li><li>Any form of data fabrication or manipulation will lead to immediate rejection or retraction.</li></ul>",
+                'content' => "<h3>Ethics & Malpractice</h3><p>The FCU Journals are committed to upholding the highest standards of publication ethics. We take all possible measures against any publication malpractices.</p><ul><li>Authors must ensure their work is entirely original.</li><li>Plagiarism in all its forms constitutes unethical publishing behavior and is unacceptable.</li><li>Any form of data fabrication or manipulation will lead to immediate rejection or retraction.</li></ul>",
                 'order' => 3
             ],
             [

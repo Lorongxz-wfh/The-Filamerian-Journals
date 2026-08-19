@@ -112,7 +112,7 @@ class ArticleController extends Controller
                 }
             }
         } elseif (empty($authorIds)) {
-            $author = \App\Models\Author::firstOrCreate(['name' => 'The Filamerian Journals']);
+            $author = \App\Models\Author::firstOrCreate(['name' => 'The FCU Journals']);
             $authorIds[] = $author->id;
         }
 
@@ -263,7 +263,7 @@ class ArticleController extends Controller
                 }
             }
         } elseif (empty($authorIds)) {
-            $author = \App\Models\Author::firstOrCreate(['name' => 'The Filamerian Journals']);
+            $author = \App\Models\Author::firstOrCreate(['name' => 'The FCU Journals']);
             $authorIds[] = $author->id;
         }
 

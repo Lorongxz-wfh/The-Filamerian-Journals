@@ -119,11 +119,11 @@ const BulkImport: React.FC = () => {
       const ws = XLSX.utils.json_to_sheet(templateData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Articles');
-      XLSX.writeFile(wb, 'filamerian_articles_import_template.xlsx');
+      XLSX.writeFile(wb, 'fcu_articles_import_template.xlsx');
     } else {
       const templateData = [
         {
-          title: 'Filamer Journal of Information Technology',
+          title: 'FCU Journal of Information Technology',
           description: 'An academic research journal focused on IT and Software Engineering.',
           category: 'Technology',
           issn: '1234-5678',
@@ -138,7 +138,7 @@ const BulkImport: React.FC = () => {
       const ws = XLSX.utils.json_to_sheet(templateData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Journals');
-      XLSX.writeFile(wb, 'filamerian_journals_import_template.xlsx');
+      XLSX.writeFile(wb, 'fcu_journals_import_template.xlsx');
     }
   };
 
