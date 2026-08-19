@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, AlertTriangle, Copy, Check } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, Copy, Check } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
@@ -674,36 +674,27 @@ const MyJournals: React.FC = () => {
         </form>
       </Modal>
 
-      {/* GitHub-style Confirmation Modal for Journals with Contents */}
+      {/* Clean Confirmation Modal for Journal Deletion */}
       <Modal
         isOpen={!!cascadeDeleteJournal}
         onClose={() => !isDeleting && setCascadeDeleteJournal(null)}
-        title="Delete Journal Collection"
-        className="max-w-lg"
+        title="Delete Journal"
+        className="max-w-md"
       >
-        <div className="space-y-4 my-2">
-          <div className="p-3.5 rounded-lg flex items-start gap-3 border bg-red-500/10 border-red-500/25 text-red-900">
-            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-            <div className="space-y-1 text-xs sm:text-[13px] leading-relaxed">
-              <p className="font-bold text-red-950">
-                Warning: This journal contains active volumes & articles
-              </p>
-              <p className="text-red-900/90">
-                Moving <strong>"{cascadeDeleteJournal?.title}"</strong> to trash will cascade soft-delete its{' '}
-                <span className="font-semibold text-red-950">
-                  {cascadeDeleteJournal?.volumes_count ?? (cascadeDeleteJournal?.volumes ? cascadeDeleteJournal.volumes.length : 1)} volume(s)
-                </span>
-                {cascadeDeleteJournal?.articles_count ? ` and ${cascadeDeleteJournal.articles_count} article(s)` : ''}.
-              </p>
-              <p className="text-red-800/80 text-[11px] sm:text-[12px] pt-1">
-                All records and files will remain safely restorable from the Trash Bin for 30 days.
-              </p>
-            </div>
-          </div>
+        <div className="space-y-4 pt-1">
+          <p className="text-[13px] text-muted leading-relaxed">
+            This action will move <strong className="font-semibold text-foreground">"{cascadeDeleteJournal?.title}"</strong>
+            {((cascadeDeleteJournal?.volumes_count && cascadeDeleteJournal.volumes_count > 0) || (cascadeDeleteJournal?.volumes && cascadeDeleteJournal.volumes.length > 0))
+              ? ` and its ${cascadeDeleteJournal?.volumes_count ?? cascadeDeleteJournal?.volumes?.length} associated volume(s)`
+              : ''}{' '}
+            to the Trash Bin. Records remain restorable for 30 days.
+          </p>
 
-          <div className="space-y-2 pt-1">
+          <div className="space-y-2 pt-2 border-t border-border/60">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted font-medium">To confirm, type the journal name below:</span>
+              <span className="text-muted">
+                Type <strong className="text-foreground font-medium select-all">"{cascadeDeleteJournal?.title}"</strong> to confirm:
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -713,30 +704,26 @@ const MyJournals: React.FC = () => {
                     setTimeout(() => setCopiedTitle(false), 2000);
                   }
                 }}
-                className="flex items-center gap-1 text-[11px] font-mono text-primary hover:underline cursor-pointer"
-                title="Copy title to clipboard"
+                className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-primary transition-colors cursor-pointer shrink-0 ml-2"
+                title="Copy name to clipboard"
               >
                 {copiedTitle ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
-                <span>{copiedTitle ? 'Copied!' : 'Copy Name'}</span>
+                <span>{copiedTitle ? 'Copied' : 'Copy'}</span>
               </button>
-            </div>
-
-            <div className="p-2.5 bg-muted/10 border border-border text-xs font-mono text-foreground select-all break-all rounded">
-              {cascadeDeleteJournal?.title}
             </div>
 
             <Input
               type="text"
               value={confirmTitleInput}
               onChange={(e) => setConfirmTitleInput(e.target.value)}
-              placeholder="Type or paste exact journal title..."
-              className="text-xs font-sans"
+              placeholder={cascadeDeleteJournal?.title || 'Enter journal name...'}
+              className="text-[13px] font-sans"
               autoFocus
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border mt-4">
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border mt-5">
           <Button
             type="button"
             variant="outline"
@@ -754,7 +741,7 @@ const MyJournals: React.FC = () => {
             disabled={confirmTitleInput.trim() !== cascadeDeleteJournal?.title?.trim() || isDeleting}
             className="text-xs px-4 font-semibold cursor-pointer"
           >
-            Move Journal to Trash
+            I understand, delete journal
           </Button>
         </div>
       </Modal>
