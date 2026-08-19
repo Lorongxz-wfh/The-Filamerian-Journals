@@ -355,7 +355,10 @@ const MyJournals: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Journals">
+      <DashboardHeader 
+        title="Journals"
+        helpText="Manage institutional journal collections, create new publications, configure disciplines, and release volumes."
+      >
         <div className="flex items-center gap-2 sm:gap-3">
           <Button 
             variant="outline"

@@ -232,7 +232,10 @@ const Articles: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Articles">
+      <DashboardHeader 
+        title="Articles"
+        helpText="Browse, search, edit, and publish research articles, manage author attributions, abstracts, and PDF uploads."
+      >
         <div className="flex items-center gap-2 sm:gap-3">
           <Button 
             variant="outline"

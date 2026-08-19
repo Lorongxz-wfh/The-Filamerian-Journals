@@ -731,7 +731,11 @@ const Settings: React.FC = () => {
 
   return (
     <div className="space-y-2">
-      <DashboardHeader title="Settings" className="mb-2" />
+      <DashboardHeader 
+        title="Settings" 
+        helpText="Manage system security configurations, portal branding, landing page blocks, and footer navigation links."
+        className="mb-2" 
+      />
 
       <Tabs 
         tabs={[

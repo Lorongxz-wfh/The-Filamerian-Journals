@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, Info } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 
 interface DashboardHeaderProps {
@@ -60,12 +60,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           onClose={() => setIsHelpOpen(false)}
           title={typeof title === 'string' ? `${title} — Page Guide` : 'Page Information'}
         >
-          <div className="space-y-4 font-sans">
-            <div className="flex items-start gap-3 p-3.5 bg-primary/5 border border-primary/15 text-primary text-[13px] leading-relaxed">
-              <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-              <p>{helpText}</p>
-            </div>
-            <div className="flex justify-end pt-2">
+          <div className="space-y-4 font-sans pt-1">
+            <p className="text-[13px] text-muted leading-relaxed">
+              {helpText}
+            </p>
+            <div className="flex justify-end pt-2 border-t border-border/60">
               <button
                 type="button"
                 onClick={() => setIsHelpOpen(false)}

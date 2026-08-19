@@ -442,7 +442,11 @@ const WebsiteSettings: React.FC = () => {
 
   return (
     <div className="space-y-2">
-      <DashboardHeader title="Website Settings" className="mb-2" />
+      <DashboardHeader 
+        title="Website Settings" 
+        helpText="Customize public website branding, hero titles, about us content, contact details, and footer navigation links."
+        className="mb-2" 
+      />
 
       <Tabs 
         tabs={[

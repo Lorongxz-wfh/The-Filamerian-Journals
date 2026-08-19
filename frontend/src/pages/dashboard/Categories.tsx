@@ -312,7 +312,10 @@ const Categories: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Categories">
+      <DashboardHeader 
+        title="Categories"
+        helpText="Manage academic disciplines and research subject areas used to categorize journals and articles."
+      >
         <div className="flex items-center gap-2 sm:gap-3">
           {!isReordering ? (
             <>

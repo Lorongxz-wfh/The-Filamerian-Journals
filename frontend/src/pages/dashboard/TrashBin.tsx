@@ -577,15 +577,21 @@ const TrashBin: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredItems.map((item) => {
+              filteredItems.map((item, idx) => {
                 const itemKey = `${item.type}-${item.id}`;
                 const isSelected = selectedKeys.includes(itemKey);
                 const title = getItemTitle(item);
                 const context = getItemContext(item);
                 const isCollapsed = collapsedKeys.has(itemKey);
+                const isNewRootGroup = activeTab === 'all' && item.level === 0 && idx > 0;
 
                 return (
-                  <TableRow key={itemKey} className={`hover:bg-primary/5 transition-colors ${isSelected ? 'bg-primary/5' : ''} ${item.level > 0 ? 'bg-muted/[0.02]' : ''}`}>
+                  <TableRow 
+                    key={itemKey} 
+                    className={`hover:bg-primary/5 transition-colors ${
+                      isNewRootGroup ? 'border-t-2 border-primary/20' : ''
+                    } ${isSelected ? 'bg-primary/5' : ''} ${item.level === 0 ? 'bg-surface' : 'bg-muted/[0.02]'}`}
+                  >
                     {isSelectMode && (
                       <TableCell className="text-center py-2.5 sm:py-3.5">
                         <input 

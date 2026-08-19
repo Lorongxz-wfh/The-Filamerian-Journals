@@ -99,7 +99,10 @@ const Feedback: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8 font-sans relative">
-      <DashboardHeader title="User Feedback">
+      <DashboardHeader 
+        title="User Feedback"
+        helpText="Review inquiries, messages, suggestions, and research correspondence submitted through the public portal."
+      >
         <div className="flex items-center gap-0.5 sm:gap-1 border border-border bg-surface p-0.5 sm:p-1">
           <button
             onClick={() => { setActiveTab('active'); setPage(1); }}

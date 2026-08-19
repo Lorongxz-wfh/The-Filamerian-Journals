@@ -72,7 +72,10 @@ const Notifications: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Notifications">
+      <DashboardHeader 
+        title="Notifications"
+        helpText="System alerts, publication notices, reviewer assignments, account approvals, and security updates."
+      >
         <button 
           onClick={markAllAsRead}
           className="flex items-center gap-1.5 sm:gap-2 h-9 px-2.5 sm:px-4 bg-background border border-border text-primary text-xs font-medium hover:border-primary/50 transition-colors shrink-0 cursor-pointer"

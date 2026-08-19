@@ -253,7 +253,10 @@ const BulkImport: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Bulk Import">
+      <DashboardHeader 
+        title="Bulk Import"
+        helpText="Batch upload research articles, volumes, or metadata via CSV/ZIP archives into the repository."
+      >
         <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="Download Template">
           <Download className="h-4 w-4" />
           <span className="hidden sm:inline">{activeTab === 'articles' ? 'Articles' : 'Journals'} Template</span>

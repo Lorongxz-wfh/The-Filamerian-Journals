@@ -268,7 +268,10 @@ const UserManager: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="User Accounts">
+      <DashboardHeader 
+        title="User Accounts"
+        helpText="Manage user accounts, approve pending staff registrations, and assign roles (Super Admin, Admin, Editor, Author, User)."
+      >
         <Button onClick={() => handleOpenModal()} className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="New User">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">User</span>

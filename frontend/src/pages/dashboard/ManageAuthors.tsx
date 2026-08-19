@@ -222,7 +222,10 @@ const ManageAuthors: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8">
-      <DashboardHeader title="Authors">
+      <DashboardHeader 
+        title="Authors"
+        helpText="Directory of academic authors, research affiliations, author profiles, and associated published works."
+      >
         <Button onClick={() => openModal()} className="shrink-0 flex items-center gap-2 h-9 px-2.5 sm:px-4 text-xs cursor-pointer" title="New Author">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Author</span>

@@ -134,7 +134,10 @@ const Analytics: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8 font-sans w-full print:p-0">
-      <DashboardHeader title="Reports & Analytics">
+      <DashboardHeader 
+        title="Reports & Analytics"
+        helpText="Detailed traffic analytics, article read counts, PDF downloads, and readership demographic statistics."
+      >
         <div className="flex items-center gap-1.5 sm:gap-2 print:hidden">
           <Button 
             onClick={handleExportCSV} 
