@@ -273,7 +273,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     <>
       <div className="h-14 flex items-center px-6 border-b border-white/10 shrink-0">
         <Link to="/" className="flex items-center gap-3 group">
-          <BookOpen className="h-5 w-5 text-secondary group-hover:text-white transition-colors" />
+          <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="h-6 w-6 object-contain shrink-0" />
           <div className="flex flex-col">
             <span className="text-[13px] font-bold text-white uppercase tracking-[0.15em] group-hover:text-secondary transition-colors leading-none">
               The FCU

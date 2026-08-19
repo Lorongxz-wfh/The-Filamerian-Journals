@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { BookOpen, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 
 const Footer: React.FC = () => {
@@ -66,8 +66,8 @@ const Footer: React.FC = () => {
           {/* Column 1: Institutional Brand & Campus Location */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded bg-secondary/20 border border-secondary/40 flex items-center justify-center shrink-0">
-                <BookOpen className="h-5 w-5 text-secondary" />
+              <div className="w-10 h-10 rounded bg-secondary/10 border border-secondary/30 flex items-center justify-center shrink-0 p-1">
+                <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h3 className="font-display font-bold text-secondary text-base tracking-wider uppercase leading-tight">

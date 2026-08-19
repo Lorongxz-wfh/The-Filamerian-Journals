@@ -23,7 +23,8 @@ const SplashLoader: React.FC = () => {
           transition={{ duration: 0.4, ease: 'easeInOut' }}
           className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center"
         >
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-4">
+            <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="h-16 w-16 object-contain" />
             <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-widest text-primary font-serif text-center">
               The FCU {isDashboard ? 'Dashboard' : 'Journals'}
             </h1>
