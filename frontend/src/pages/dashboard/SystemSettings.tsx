@@ -187,7 +187,7 @@ const SystemSettings: React.FC = () => {
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-muted">Allowed Formats</span>
                   <div className="flex items-center gap-1">
-                    {['PDF', 'DOCX', 'JPG', 'PNG', 'WEBP'].map((fmt) => (
+                    {['PDF', 'JPG / JPEG', 'PNG'].map((fmt) => (
                       <span key={fmt} className="text-[10px] font-mono font-bold bg-background border border-border px-1.5 py-0.5 text-primary uppercase">
                         {fmt}
                       </span>

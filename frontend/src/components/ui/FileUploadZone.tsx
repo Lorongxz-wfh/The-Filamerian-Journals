@@ -133,6 +133,8 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     return <Upload className="h-5 w-5 text-muted group-hover:text-primary transition-colors shrink-0" />;
   };
 
+  const dynamicHint = hint !== undefined ? hint : (isPdf ? `PDF (Max: ${maxMb}MB)` : `JPG/PNG (Max: ${maxMb}MB)`);
+
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -140,9 +142,9 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
           <label className="block text-[11px] font-semibold text-primary uppercase tracking-wider">
             {label}
           </label>
-          {hint && (
-            <span className="text-[10px] text-muted normal-case tracking-normal">
-              {hint}
+          {dynamicHint && (
+            <span className="text-[10px] text-muted normal-case tracking-normal font-mono">
+              {dynamicHint}
             </span>
           )}
         </div>

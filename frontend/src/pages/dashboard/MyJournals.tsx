@@ -696,7 +696,6 @@ const MyJournals: React.FC = () => {
             <div className="md:col-span-1">
               <FileUploadZone
                 label="PDF Document"
-                hint="Max size: 10MB"
                 accept=".pdf,application/pdf"
                 iconType="pdf"
                 selectedFile={pdfFile}
@@ -708,7 +707,6 @@ const MyJournals: React.FC = () => {
             <div className="md:col-span-1">
               <FileUploadZone
                 label="Cover Image"
-                hint="Format: JPG/PNG, Max: 5MB"
                 accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                 iconType="image"
                 selectedFile={coverImage}
