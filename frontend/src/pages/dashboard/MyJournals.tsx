@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, Copy, Check } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, Copy, Check, EyeOff } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
@@ -256,7 +256,19 @@ const MyJournals: React.FC = () => {
   const onSubmit = async (data: JournalFormData) => {
     setServerError(null);
 
-    if (editingJournal && !isDirty && !pdfFile && !coverImage) {
+    const isValuesChanged = editingJournal && (
+      data.title !== (editingJournal.title || '') ||
+      (data.slug || '') !== (editingJournal.slug || '') ||
+      (data.description || '') !== (editingJournal.description || '') ||
+      data.category_id !== String(editingJournal.category_id || '') ||
+      data.status !== (editingJournal.status || 'Published') ||
+      (data.publisher || '') !== (editingJournal.publisher || '') ||
+      (data.issn || '') !== (editingJournal.issn || '') ||
+      (data.frequency || '') !== (editingJournal.frequency || '') ||
+      (data.editor || '') !== (editingJournal.editor || '')
+    );
+
+    if (editingJournal && !isDirty && !isValuesChanged && !pdfFile && !coverImage) {
       toast.info('No changes were made.');
       handleCloseModal();
       return;
@@ -305,6 +317,41 @@ const MyJournals: React.FC = () => {
   const [cascadeDeleteJournal, setCascadeDeleteJournal] = useState<Journal | null>(null);
   const [confirmTitleInput, setConfirmTitleInput] = useState('');
   const [copiedTitle, setCopiedTitle] = useState(false);
+
+  // Unpublish Journal state
+  const [unpublishJournal, setUnpublishJournal] = useState<Journal | null>(null);
+  const [confirmUnpublishTitle, setConfirmUnpublishTitle] = useState('');
+  const [isUnpublishing, setIsUnpublishing] = useState(false);
+  const [copiedUnpublishTitle, setCopiedUnpublishTitle] = useState(false);
+
+  const handleUnpublishClick = (journal: Journal) => {
+    setUnpublishJournal(journal);
+    setConfirmUnpublishTitle('');
+    setCopiedUnpublishTitle(false);
+  };
+
+  const confirmUnpublish = async () => {
+    if (!unpublishJournal || isUnpublishing) return;
+    if (confirmUnpublishTitle.trim() !== unpublishJournal.title.trim()) {
+      toast.error('Confirmation title does not match.');
+      return;
+    }
+    try {
+      setIsUnpublishing(true);
+      await api.put(`/journals/${unpublishJournal.slug}`, {
+        title: unpublishJournal.title,
+        status: 'Draft'
+      });
+      await fetchJournals();
+      toast.success(`'${unpublishJournal.title}' and all its volumes/articles are now unpublished (Draft).`);
+      setUnpublishJournal(null);
+    } catch (err: any) {
+      console.error('Unpublish failed:', err);
+      toast.error(err.response?.data?.message || 'Failed to unpublish journal.');
+    } finally {
+      setIsUnpublishing(false);
+    }
+  };
 
   const handleDelete = (journal: Journal) => {
     setCascadeDeleteJournal(journal);
@@ -501,12 +548,18 @@ const MyJournals: React.FC = () => {
                               <div className="flex items-center gap-2 text-foreground">
                                 <Settings2 className="h-4 w-4 text-muted" /> Manage Volumes
                               </div>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleOpenModal(journal)}>
+                            </DropdownMenuItem>                            <DropdownMenuItem onClick={() => handleOpenModal(journal)}>
                               <div className="flex items-center gap-2 text-foreground">
                                 <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
                               </div>
                             </DropdownMenuItem>
+                            {journal.status !== 'Draft' && (
+                              <DropdownMenuItem onClick={() => handleUnpublishClick(journal)}>
+                                <div className="flex items-center gap-2 text-amber-600">
+                                  <EyeOff className="h-4 w-4 text-amber-600" /> Unpublish Journal
+                                </div>
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => handleDelete(journal)}>
                               <div className="flex items-center gap-2 text-red-600">
                                 <Trash2 className="h-4 w-4 text-red-600" /> Delete Journal
@@ -558,20 +611,19 @@ const MyJournals: React.FC = () => {
             
             <div>
               <Input 
-                label="Slug" 
-                hint="Auto-generated if empty" 
-                placeholder="Auto-generated if empty"
+                label="Slug (URL identifier)" 
+                placeholder="auto-generated if blank"
                 error={errors.slug?.message}
                 {...register('slug')}
               />
             </div>
-
+            
             <div>
               <Select 
-                label="Category" 
+                label="Discipline / Category" 
                 required 
                 value={selectedCategoryId} 
-                onChange={(val) => setValue('category_id', String(val), { shouldValidate: true })}
+                onChange={(val) => setValue('category_id', String(val), { shouldValidate: true, shouldDirty: true })}
                 options={[
                   { value: "", label: "Select Category" },
                   ...availableCategories.map(cat => ({
@@ -589,7 +641,7 @@ const MyJournals: React.FC = () => {
                 label="Publication Status" 
                 required 
                 value={selectedStatus} 
-                onChange={(val) => setValue('status', val as 'Published' | 'Draft', { shouldValidate: true })}
+                onChange={(val) => setValue('status', val as 'Published' | 'Draft', { shouldValidate: true, shouldDirty: true })}
                 options={[
                   { value: "Published", label: "Published (Visible publicly)" },
                   { value: "Draft", label: "Draft / Hidden (Internal only)" }
@@ -637,7 +689,7 @@ const MyJournals: React.FC = () => {
               <RichTextEditor 
                 label="Description" 
                 value={descriptionValue} 
-                onChange={(value) => setValue('description', value)} 
+                onChange={(value) => setValue('description', value, { shouldDirty: true })} 
               />
             </div>
             
@@ -657,7 +709,7 @@ const MyJournals: React.FC = () => {
               <FileUploadZone
                 label="Cover Image"
                 hint="Format: JPG/PNG, Max: 5MB"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                 iconType="image"
                 selectedFile={coverImage}
                 existingUrl={editingJournal?.cover_image ? getFileUrl(editingJournal.cover_image) : undefined}
@@ -675,6 +727,74 @@ const MyJournals: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Confirmation Modal for Journal Unpublishing */}
+      <Modal
+        isOpen={!!unpublishJournal}
+        onClose={() => !isUnpublishing && setUnpublishJournal(null)}
+        title="Unpublish Journal"
+        className="max-w-md"
+      >
+        <div className="space-y-4 pt-1">
+          <p className="text-[13px] text-muted leading-relaxed">
+            This action will unpublish <strong className="font-semibold text-foreground">"{unpublishJournal?.title}"</strong> and set all its associated volumes and articles to <span className="font-semibold text-amber-700">Draft</span>. It will be hidden from the public website.
+          </p>
+
+          <div className="space-y-2 pt-2 border-t border-border/60">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted">
+                Type <strong className="text-foreground font-medium select-all">"{unpublishJournal?.title}"</strong> to confirm:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (unpublishJournal?.title) {
+                    navigator.clipboard.writeText(unpublishJournal.title);
+                    setCopiedUnpublishTitle(true);
+                    setTimeout(() => setCopiedUnpublishTitle(false), 2000);
+                  }
+                }}
+                className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-primary transition-colors cursor-pointer shrink-0 ml-2"
+                title="Copy title to clipboard"
+              >
+                {copiedUnpublishTitle ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
+                <span>{copiedUnpublishTitle ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            <Input
+              type="text"
+              value={confirmUnpublishTitle}
+              onChange={(e) => setConfirmUnpublishTitle(e.target.value)}
+              placeholder={unpublishJournal?.title || 'Enter journal name...'}
+              className="text-[13px] font-sans"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border mt-5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setUnpublishJournal(null)}
+            disabled={isUnpublishing}
+            className="text-xs px-4 cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={confirmUnpublish}
+            isLoading={isUnpublishing}
+            disabled={confirmUnpublishTitle.trim() !== unpublishJournal?.title?.trim() || isUnpublishing}
+            className="text-xs px-4 font-semibold text-amber-700 border-amber-300 hover:bg-amber-50 cursor-pointer"
+          >
+            Unpublish Entire Journal
+          </Button>
+        </div>
       </Modal>
 
       {/* Clean Confirmation Modal for Journal Deletion */}

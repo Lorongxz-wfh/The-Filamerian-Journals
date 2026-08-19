@@ -125,7 +125,17 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
     e.preventDefault();
     setError(null);
 
-    if (editingArticle && !isDirtyForm && !pdfFile) {
+    const isValuesChanged = editingArticle && (
+      formData.title !== (editingArticle.title || '') ||
+      String(formData.volume_id) !== String(editingArticle.volume?.id || editingArticle.volume_id || '') ||
+      formData.status !== (editingArticle.status || 'Draft') ||
+      formData.abstract !== (editingArticle.abstract || '') ||
+      formData.doi !== (editingArticle.doi || '') ||
+      String(formData.page_start || '') !== String(editingArticle.page_start || '') ||
+      String(formData.page_end || '') !== String(editingArticle.page_end || '')
+    );
+
+    if (editingArticle && !isDirtyForm && !isValuesChanged && !pdfFile) {
       toast.info('No changes were made.');
       onClose();
       return;

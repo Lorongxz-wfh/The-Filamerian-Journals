@@ -48,7 +48,10 @@ class JournalController extends Controller
 
         // Eager-load nested relationships when requested
         if ($request->boolean('with_volumes')) {
-            $query->with(['volumes.articles' => function($q) {
+            $query->with(['volumes.articles' => function($q) use ($request) {
+                if ($request->is('api/public/*') || $request->is('public/*')) {
+                    $q->where('status', 'Published');
+                }
                 $q->orderBy('order', 'asc')->orderBy('id', 'asc')->with('authors');
             }]);
         }
@@ -72,7 +75,7 @@ class JournalController extends Controller
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
             'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
         ]);
 
@@ -129,7 +132,10 @@ class JournalController extends Controller
             abort(404, 'Journal not found.');
         }
 
-        $journal->load(['category', 'volumes.articles' => function($q) {
+        $journal->load(['category', 'volumes.articles' => function($q) use ($request) {
+            if ($request->is('api/public/*') || $request->is('public/*')) {
+                $q->where('status', 'Published');
+            }
             $q->orderBy('order', 'asc')->orderBy('id', 'asc')->with('authors');
         }]);
 
@@ -151,7 +157,7 @@ class JournalController extends Controller
             'issn' => 'nullable|string|max:50',
             'frequency' => 'nullable|string|max:100',
             'editor' => 'nullable|string|max:255',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
             'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
         ]);
 
@@ -184,6 +190,14 @@ class JournalController extends Controller
         }
 
         $journal->update($validated);
+
+        // If journal is updated to Draft, cascade Draft status to all its articles
+        if (isset($validated['status']) && $validated['status'] === 'Draft') {
+            $volumeIds = $journal->volumes()->pluck('id');
+            if ($volumeIds->isNotEmpty()) {
+                \App\Models\Article::whereIn('volume_id', $volumeIds)->update(['status' => 'Draft']);
+            }
+        }
 
         \App\Services\ActivityLogger::log('Updated Journal', "Updated journal: {$journal->title}", get_class($journal), $journal->id);
 

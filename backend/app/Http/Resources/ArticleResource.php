@@ -24,6 +24,7 @@ class ArticleResource extends JsonResource
             'page_end' => $this->page_end,
             'doi' => $this->doi,
             'status' => $this->status,
+            'order' => $this->order,
             'volume' => new VolumeResource($this->whenLoaded('volume')),
             'authors' => AuthorResource::collection($this->whenLoaded('authors')),
             'keywords' => KeywordResource::collection($this->whenLoaded('keywords')),

@@ -148,6 +148,10 @@ class ArticleController extends Controller
     public function showPublic(Article $article)
     {
         // Public endpoint to retrieve article metadata for SEO/Google Scholar
+        if ($article->status !== 'Published') {
+            abort(404, 'Article not found.');
+        }
+
         $article->load(['volume.journal', 'authors', 'keywords']);
 
         if ($article->volume && $article->volume->journal && $article->volume->journal->status === 'Draft') {

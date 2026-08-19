@@ -29,7 +29,10 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   className = ''
 }) => {
   const { settings } = useSettings();
-  const maxMb = settings.max_file_size_mb ? parseInt(String(settings.max_file_size_mb), 10) : 25;
+  const isPdf = iconType === 'pdf' || accept.includes('pdf');
+  const maxMb = isPdf
+    ? (settings.max_pdf_upload_size ? parseInt(String(settings.max_pdf_upload_size), 10) : (settings.max_upload_size ? parseInt(String(settings.max_upload_size), 10) : 10))
+    : (settings.max_image_upload_size ? parseInt(String(settings.max_image_upload_size), 10) : 5);
   const [isDragging, setIsDragging] = useState(false);
   const inputId = id || `file-upload-${Math.random().toString(36).substring(2, 9)}`;
 
@@ -40,10 +43,20 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     }
     if (!accept || accept === '*') return true;
 
-    const acceptParts = accept.split(',').map(s => s.trim().toLowerCase());
     const fileName = file.name.toLowerCase();
     const fileType = file.type.toLowerCase();
 
+    // Strict cover image check (reject GIF, SVG, etc. if image upload)
+    if (iconType === 'image' || (accept.includes('image') && !accept.includes('pdf'))) {
+      const isRasterImage = fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileType === 'image/jpeg' || fileType === 'image/png';
+      if (!isRasterImage) {
+        toast.error('Only JPG and PNG image files are allowed for cover images.');
+        return false;
+      }
+      return true;
+    }
+
+    const acceptParts = accept.split(',').map(s => s.trim().toLowerCase());
     const matches = acceptParts.some(pattern => {
       if (pattern.startsWith('.')) {
         return fileName.endsWith(pattern);
@@ -59,7 +72,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
       if (accept.includes('pdf')) {
         toast.error('Only PDF files are allowed.');
       } else if (accept.includes('image')) {
-        toast.error('Only image files (JPG/PNG) are allowed.');
+        toast.error('Only JPG and PNG image files are allowed.');
       } else {
         toast.error('Invalid file type.');
       }
