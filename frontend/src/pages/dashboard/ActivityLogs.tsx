@@ -167,9 +167,6 @@ const ActivityLogs: React.FC = () => {
             </button>
           )}
         </div>
-        <p className="text-[10px] sm:text-[11px] font-mono text-muted">
-          💡 Tap row to inspect details
-        </p>
       </div>
 
       {/* Card Container */}
