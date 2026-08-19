@@ -362,20 +362,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
         )}
       </nav>
 
-      <div className="px-4 py-4 border-t border-white/10 shrink-0 mt-auto">
+      <div className="px-3 py-3 border-t border-white/10 shrink-0 mt-auto">
         <div 
           onClick={() => setIsProfileModalOpen(true)}
-          className="flex items-center gap-3 px-3 py-3 mb-2 hover:bg-white/10 transition-colors cursor-pointer rounded group"
+          className="flex items-center gap-3 px-3 py-2.5 mb-1.5 hover:bg-white/[0.08] transition-colors cursor-pointer rounded-none border border-transparent hover:border-white/10 group"
           title="Click to manage your Profile & Account Settings"
         >
-          <div className="h-8 w-8 bg-secondary flex items-center justify-center text-primary font-semibold text-sm shrink-0 border border-secondary/30">
+          <div className="h-8 w-8 bg-white/10 flex items-center justify-center text-white font-medium text-xs shrink-0 border border-white/15">
             {user.name?.charAt(0) || 'U'}
           </div>
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-[13px] font-medium text-white group-hover:text-secondary transition-colors truncate leading-none">
+            <span className="text-[13px] font-medium text-white/90 group-hover:text-white transition-colors truncate leading-tight">
               {user.name || 'User'}
             </span>
-            <span className="text-[11px] text-white/40 truncate mt-1">
+            <span className="text-[10px] text-white/50 truncate tracking-wide">
               {user.role || 'Member'} • Settings
             </span>
           </div>
@@ -383,9 +383,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="w-full flex items-center justify-center gap-3 px-3 py-2.5 text-white/40 hover:text-red-300 hover:bg-red-500/10 transition-colors text-[13px] disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2.5 px-3 py-2 text-white/40 hover:text-red-300 hover:bg-red-500/10 transition-colors text-[12px] disabled:opacity-50"
         >
-          {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+          {isLoggingOut ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
           <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
         </button>
       </div>

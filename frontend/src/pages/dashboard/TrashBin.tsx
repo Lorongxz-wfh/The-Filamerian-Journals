@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Trash2, 
   RotateCcw, 
@@ -12,7 +12,8 @@ import {
   CheckSquare,
   X,
   MoreVertical,
-  HelpCircle
+  HelpCircle,
+  CornerDownRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -24,6 +25,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import IconButton from '@/components/ui/IconButton';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface TrashedItem {
   id: number;
@@ -31,21 +33,34 @@ interface TrashedItem {
   title?: string;
   volume_number?: string | number;
   year?: number;
+  volume_id?: number;
+  journal_id?: number;
   deleted_at: string;
   days_remaining: number;
   volume?: {
+    id?: number;
     volume_number: string | number;
     year: number;
+    journal_id?: number;
     journal?: {
+      id?: number;
       title: string;
     };
   };
   journal?: {
+    id?: number;
     title: string;
   };
   category?: {
     name: string;
   };
+}
+
+interface HierarchicalTrashItem extends TrashedItem {
+  level: number;
+  treeParentKey?: string;
+  hasChildren?: boolean;
+  childCount?: number;
 }
 
 const TrashBin: React.FC = () => {
@@ -92,12 +107,141 @@ const TrashBin: React.FC = () => {
 
   const allItems: TrashedItem[] = [...articles, ...volumes, ...journals];
 
-  const filteredItems = allItems.filter((item) => {
-    const matchesTab = activeTab === 'all' || item.type === activeTab;
-    const titleText = item.title || `Volume ${item.volume_number}`;
-    const matchesSearch = !searchQuery || titleText.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
+  const filteredItems = useMemo<HierarchicalTrashItem[]>(() => {
+    if (activeTab !== 'all') {
+      const items = (activeTab === 'article' ? articles : activeTab === 'volume' ? volumes : journals);
+      return items
+        .filter((item) => {
+          const titleText = item.title || `Volume ${item.volume_number} (${item.year})`;
+          return !searchQuery || titleText.toLowerCase().includes(searchQuery.toLowerCase());
+        })
+        .map((item) => ({ ...item, level: 0 }));
+    }
+
+    const trashedJournalIds = new Set(journals.map((j) => j.id));
+    const trashedVolumeIds = new Set(volumes.map((v) => v.id));
+    const result: HierarchicalTrashItem[] = [];
+
+    // 1. Trashed Journals (Parent Level 0)
+    journals.forEach((journal) => {
+      const journalKey = `journal-${journal.id}`;
+      const childVolumes = volumes.filter(
+        (v) => (v.journal_id === journal.id) || (v.journal?.id === journal.id)
+      );
+      const childArticlesUnderJournalVolumes = articles.filter((a) => {
+        const volId = a.volume_id || a.volume?.id;
+        return childVolumes.some((v) => v.id === volId);
+      });
+      const directArticlesUnderJournal = articles.filter((a) => {
+        const jId = a.volume?.journal?.id || a.volume?.journal_id;
+        const volId = a.volume_id || a.volume?.id;
+        return jId === journal.id && (!volId || !childVolumes.some((v) => v.id === volId));
+      });
+
+      const totalChildren = childVolumes.length + childArticlesUnderJournalVolumes.length + directArticlesUnderJournal.length;
+
+      const matchesJournal = !searchQuery || (journal.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      const matchingChildVolumes = childVolumes.filter(
+        (v) => !searchQuery || `Volume ${v.volume_number} (${v.year})`.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      const matchingArticles = [...childArticlesUnderJournalVolumes, ...directArticlesUnderJournal].filter(
+        (a) => !searchQuery || (a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+      );
+
+      if (matchesJournal || matchingChildVolumes.length > 0 || matchingArticles.length > 0) {
+        result.push({
+          ...journal,
+          level: 0,
+          hasChildren: totalChildren > 0,
+          childCount: totalChildren,
+        });
+
+        childVolumes.forEach((volume) => {
+          const articlesUnderVolume = articles.filter(
+            (a) => (a.volume_id === volume.id) || (a.volume?.id === volume.id)
+          );
+          result.push({
+            ...volume,
+            level: 1,
+            treeParentKey: journalKey,
+            hasChildren: articlesUnderVolume.length > 0,
+            childCount: articlesUnderVolume.length,
+          });
+
+          articlesUnderVolume.forEach((article) => {
+            result.push({
+              ...article,
+              level: 2,
+              treeParentKey: `volume-${volume.id}`,
+            });
+          });
+        });
+
+        directArticlesUnderJournal.forEach((article) => {
+          result.push({
+            ...article,
+            level: 1,
+            treeParentKey: journalKey,
+          });
+        });
+      }
+    });
+
+    // 2. Trashed Volumes whose Journal is NOT in trash
+    volumes.forEach((volume) => {
+      const parentJournalId = volume.journal_id || volume.journal?.id;
+      if (parentJournalId && trashedJournalIds.has(parentJournalId)) {
+        return;
+      }
+
+      const volumeKey = `volume-${volume.id}`;
+      const childArticles = articles.filter(
+        (a) => (a.volume_id === volume.id) || (a.volume?.id === volume.id)
+      );
+
+      const matchesVolume = !searchQuery || `Volume ${volume.volume_number} (${volume.year})`.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchingArticles = childArticles.filter(
+        (a) => !searchQuery || (a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+      );
+
+      if (matchesVolume || matchingArticles.length > 0) {
+        result.push({
+          ...volume,
+          level: 0,
+          hasChildren: childArticles.length > 0,
+          childCount: childArticles.length,
+        });
+
+        childArticles.forEach((article) => {
+          result.push({
+            ...article,
+            level: 1,
+            treeParentKey: volumeKey,
+          });
+        });
+      }
+    });
+
+    // 3. Trashed Articles whose Volume & Journal are NOT in trash
+    articles.forEach((article) => {
+      const volId = article.volume_id || article.volume?.id;
+      const jId = article.volume?.journal?.id;
+
+      if ((volId && trashedVolumeIds.has(volId)) || (jId && trashedJournalIds.has(jId))) {
+        return;
+      }
+
+      const matchesArticle = !searchQuery || (article.title?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      if (matchesArticle) {
+        result.push({
+          ...article,
+          level: 0,
+        });
+      }
+    });
+
+    return result;
+  }, [activeTab, articles, volumes, journals, searchQuery]);
 
   const toggleSelectAll = () => {
     const allFilteredKeys = filteredItems.map(item => `${item.type}-${item.id}`);
@@ -345,14 +489,39 @@ const TrashBin: React.FC = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={isSelectMode ? 7 : 6} className="text-center py-16">
-                  <div className="flex items-center justify-center gap-2 text-muted text-xs sm:text-[13px]">
-                    <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
-                    Loading trash bin items...
-                  </div>
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 6 }).map((_, idx) => (
+                <TableRow key={idx}>
+                  {isSelectMode && (
+                    <TableCell className="w-10 text-center py-3.5">
+                      <Skeleton className="h-4 w-4 mx-auto" />
+                    </TableCell>
+                  )}
+                  <TableCell className="py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="h-4 w-4 shrink-0" />
+                      <div className="space-y-1 w-full max-w-[280px]">
+                        <Skeleton className="h-3.5 w-3/4" />
+                        <Skeleton className="h-2.5 w-1/2 sm:hidden" />
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <Skeleton className="h-4 w-14 rounded-full" />
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Skeleton className="h-3.5 w-36" />
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <Skeleton className="h-3.5 w-24" />
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <Skeleton className="h-3.5 w-20" />
+                  </TableCell>
+                  <TableCell className="text-right py-3.5">
+                    <Skeleton className="h-7 w-7 ml-auto" />
+                  </TableCell>
+                </TableRow>
+              ))
             ) : filteredItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isSelectMode ? 7 : 6} className="p-0">
@@ -375,8 +544,14 @@ const TrashBin: React.FC = () => {
                   ? item.journal?.title || 'Journal'
                   : item.category?.name || 'Journal Collection';
 
+                const indentClass = item.level === 2
+                  ? 'pl-9 sm:pl-14'
+                  : item.level === 1
+                  ? 'pl-5 sm:pl-7'
+                  : 'pl-0';
+
                 return (
-                  <TableRow key={itemKey} className={`hover:bg-primary/5 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}>
+                  <TableRow key={itemKey} className={`hover:bg-primary/5 transition-colors ${isSelected ? 'bg-primary/5' : ''} ${item.level > 0 ? 'bg-muted/[0.02]' : ''}`}>
                     {isSelectMode && (
                       <TableCell className="text-center py-2.5 sm:py-3.5">
                         <input 
@@ -388,13 +563,23 @@ const TrashBin: React.FC = () => {
                       </TableCell>
                     )}
 
-                    <TableCell className="font-medium text-foreground py-2.5 sm:py-3.5">
-                      <div className="flex items-start gap-2.5 min-w-0">
+                    <TableCell className={`font-medium text-foreground py-2.5 sm:py-3.5 ${indentClass}`}>
+                      <div className="flex items-start gap-2 min-w-0">
+                        {item.level > 0 && (
+                          <CornerDownRight className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${item.level === 2 ? 'text-muted/40' : 'text-muted/70'}`} />
+                        )}
                         {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0 mt-0.5" />}
                         {item.type === 'volume' && <Layers className="h-4 w-4 text-secondary shrink-0 mt-0.5" />}
                         {item.type === 'journal' && <BookOpen className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />}
-                        <div className="min-w-0">
-                          <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
+                            {activeTab === 'all' && item.hasChildren && item.childCount && item.childCount > 0 && (
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 bg-primary/10 text-primary border border-primary/20 shrink-0">
+                                {item.childCount} nested {item.childCount === 1 ? 'item' : 'items'}
+                              </span>
+                            )}
+                          </div>
                           {/* Mobile subtitle */}
                           <div className="sm:hidden text-[10px] text-muted truncate mt-0.5">
                             <span className="capitalize font-medium text-primary/80">{item.type}</span>
@@ -473,9 +658,8 @@ const TrashBin: React.FC = () => {
           </TableBody>
         </Table>
         <DataTableFooter
-            showingText={`Showing ${filteredItems.length} of ${allItems.length} deleted item${allItems.length !== 1 ? 's' : ''}`}
-            loading={loading}
-          />
+          showingText={loading ? 'Loading trash bin items...' : `Showing ${filteredItems.length} of ${allItems.length} deleted item${allItems.length !== 1 ? 's' : ''}`}
+        />
         </div>
 
       {/* Individual Restore Confirmation Modal */}

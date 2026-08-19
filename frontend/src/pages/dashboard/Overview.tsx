@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, FileText, Users, ArrowRight, Settings, BarChart2, Activity, Globe } from 'lucide-react';
+import { BookOpen, FileText, Users, ArrowRight, Settings, BarChart2, Activity, Globe, RefreshCw } from 'lucide-react';
 import api from '@/services/api';
 import EmptyState from '@/components/ui/EmptyState';
 import { Link } from 'react-router';
@@ -91,10 +91,14 @@ const Overview: React.FC = () => {
     <div className="space-y-4 sm:space-y-8">
       {/* Page Header */}
       <DashboardHeader title="Overview">
-        <div className="text-[10px] sm:text-[11px] font-medium text-muted uppercase tracking-wider bg-surface border border-border px-2.5 py-1.5 sm:px-4 sm:py-2 flex items-center gap-1.5 sm:gap-2 shadow-2xs shrink-0">
-          <Activity className="h-3 w-3 text-emerald-600 shrink-0" />
-          <span>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-        </div>
+        <button
+          onClick={() => fetchData()}
+          disabled={loading}
+          className="h-9 w-9 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0 flex items-center justify-center cursor-pointer"
+          title="Refresh Overview Stats"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </button>
       </DashboardHeader>
 
       {/* Stats Grid - 2 Columns on Mobile, 5 Columns on Desktop */}

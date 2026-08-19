@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
-import { FileText, BookOpen, Users } from 'lucide-react';
+import { FileText, BookOpen, Users, RefreshCw } from 'lucide-react';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface RecordCounts {
@@ -117,7 +117,16 @@ const SystemHealth: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8 font-sans w-full">
-      <DashboardHeader title="System Health" />
+      <DashboardHeader title="System Health">
+        <button
+          onClick={() => { fetchHealth(); fetchErrors(); }}
+          disabled={loading || loadingErrors}
+          className="h-9 w-9 border border-border bg-surface hover:bg-background text-muted hover:text-primary transition-colors shrink-0 flex items-center justify-center cursor-pointer"
+          title="Refresh System Health & Logs"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading || loadingErrors ? 'animate-spin' : ''}`} />
+        </button>
+      </DashboardHeader>
 
       <div className="space-y-4 sm:space-y-8">
         {/* Health Cards */}
