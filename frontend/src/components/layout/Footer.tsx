@@ -87,13 +87,13 @@ const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-secondary shrink-0" />
-                <a href={`mailto:${settings.contact_email || 'journals@filamer.edu.ph'}`} className="hover:text-white transition-colors">
-                  {settings.contact_email || 'journals@filamer.edu.ph'}
+                <a href={`mailto:${settings.contact_email || 'thefcujournals@gmail.com'}`} className="hover:text-white transition-colors">
+                  {settings.contact_email || 'thefcujournals@gmail.com'}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 text-secondary shrink-0" />
-                <span>{settings.contact_phone || '(036) 6210-471'}</span>
+                <span>{settings.contact_phone || '+63 9123456789'}</span>
               </div>
             </div>
           </div>

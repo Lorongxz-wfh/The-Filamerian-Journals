@@ -50,8 +50,8 @@ const Settings: React.FC = () => {
   const [settings, setSettings] = useState<Record<string, string>>({
     site_title: 'The FCU Journals',
     tagline: 'Scholarly Excellence In Every Discipline',
-    contact_email: 'journals@filamer.edu.ph',
-    contact_phone: '(036) 6210-471',
+    contact_email: 'thefcujournals@gmail.com',
+    contact_phone: '+63 9123456789',
     journal_categories: 'Science, Education, Arts, Multidisciplinary',
     home_about_us: '<p class="text-sm text-muted leading-relaxed">\n  <strong>The FCU Journals</strong> is the official online database of published journals by the faculty and students of Filamer Christian University, Inc. This database is composed of theses, case studies, capstone projects, and research papers in various disciplines.\n</p>',
     show_tagline: 'false',

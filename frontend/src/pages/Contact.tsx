@@ -79,15 +79,15 @@ const Contact: React.FC = () => {
 
               <div className="flex items-center gap-3 sm:gap-4">
                 <Mail className="h-4 sm:h-5 w-4 sm:w-5 text-secondary shrink-0" />
-                <a href={`mailto:${settings.contact_email || 'journals@filamer.edu.ph'}`} className="text-xs sm:text-[13px] font-medium text-primary hover:text-secondary transition-colors break-all">
-                  {settings.contact_email || 'journals@filamer.edu.ph'}
+                <a href={`mailto:${settings.contact_email || 'thefcujournals@gmail.com'}`} className="text-xs sm:text-[13px] font-medium text-primary hover:text-secondary transition-colors break-all">
+                  {settings.contact_email || 'thefcujournals@gmail.com'}
                 </a>
               </div>
 
               <div className="flex items-center gap-3 sm:gap-4">
                 <Phone className="h-4 sm:h-5 w-4 sm:w-5 text-secondary shrink-0" />
                 <p className="text-xs sm:text-[13px] font-medium text-primary">
-                  {settings.contact_phone || '(036) 6210-471'}
+                  {settings.contact_phone || '+63 9123456789'}
                 </p>
               </div>
             </div>
