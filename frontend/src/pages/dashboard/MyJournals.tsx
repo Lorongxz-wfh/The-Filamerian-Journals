@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, AlertTriangle } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, AlertTriangle, Copy, Check } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
@@ -304,13 +304,17 @@ const MyJournals: React.FC = () => {
     }
   };
 
-  const [restrictionJournal, setRestrictionJournal] = useState<Journal | null>(null);
+  const [cascadeDeleteJournal, setCascadeDeleteJournal] = useState<Journal | null>(null);
+  const [confirmTitleInput, setConfirmTitleInput] = useState('');
+  const [copiedTitle, setCopiedTitle] = useState(false);
 
   const handleDelete = (journal: Journal) => {
     const volCount = journal.volumes_count ?? (journal.volumes ? journal.volumes.length : 0);
     const artCount = journal.articles_count ?? 0;
     if (volCount > 0 || artCount > 0) {
-      setRestrictionJournal(journal);
+      setCascadeDeleteJournal(journal);
+      setConfirmTitleInput('');
+      setCopiedTitle(false);
       return;
     }
     setDeleteTarget(journal.slug);
@@ -329,6 +333,26 @@ const MyJournals: React.FC = () => {
     } finally {
       setIsDeleting(false);
       setDeleteTarget(null);
+    }
+  };
+
+  const confirmCascadeDelete = async () => {
+    if (!cascadeDeleteJournal || isDeleting) return;
+    if (confirmTitleInput.trim() !== cascadeDeleteJournal.title.trim()) {
+      toast.error('Confirmation title does not match.');
+      return;
+    }
+    try {
+      setIsDeleting(true);
+      await api.delete(`/journals/${cascadeDeleteJournal.slug}`);
+      await fetchJournals();
+      toast.success(`'${cascadeDeleteJournal.title}' and all its contents moved to Trash Bin`);
+      setCascadeDeleteJournal(null);
+    } catch (err: any) {
+      console.error('Delete failed:', err);
+      toast.error(err.response?.data?.message || 'Failed to delete journal.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -489,16 +513,11 @@ const MyJournals: React.FC = () => {
                       {journal.editor || '-'}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()} className="text-right py-2.5 sm:py-3.5">
-                      {(() => {
-                        const volCount = journal.volumes_count ?? (journal.volumes ? journal.volumes.length : 0);
-                        const artCount = journal.articles_count ?? 0;
-                        const isLocked = volCount > 0 || artCount > 0;
-                        return (
-                          <DropdownMenu
-                            trigger={
-                              <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
-                            }
-                          >
+                      <DropdownMenu
+                        trigger={
+                          <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
+                        }
+                      >
                             <DropdownMenuItem onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}>
                               <div className="flex items-center gap-2 text-foreground">
                                 <Settings2 className="h-4 w-4 text-muted" /> Manage Volumes
@@ -509,24 +528,12 @@ const MyJournals: React.FC = () => {
                                 <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
                               </div>
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDelete(journal)}
-                              title={isLocked ? `Cannot delete: Contains ${volCount} volume(s)${artCount ? ` and ${artCount} article(s)` : ''}` : "Delete Journal"}
-                            >
-                              <div className="flex items-center justify-between w-full">
-                                <div className={`flex items-center gap-2 ${isLocked ? 'text-muted/80' : 'text-red-600'}`}>
-                                  <Trash2 className={`h-4 w-4 ${isLocked ? 'text-muted/60' : 'text-red-600'}`} /> Delete Journal
-                                </div>
-                                {isLocked && (
-                                  <span className="text-[9px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20 px-1.5 py-0.5 rounded ml-2 shrink-0">
-                                    Locked
-                                  </span>
-                                )}
+                            <DropdownMenuItem onClick={() => handleDelete(journal)}>
+                              <div className="flex items-center gap-2 text-red-600">
+                                <Trash2 className="h-4 w-4 text-red-600" /> Delete Journal
                               </div>
                             </DropdownMenuItem>
                           </DropdownMenu>
-                        );
-                      })()}
                     </TableCell>
                   </TableRow>
                 ))
@@ -691,31 +698,65 @@ const MyJournals: React.FC = () => {
         </form>
       </Modal>
 
-      {/* Cannot Delete Journal Restriction Modal */}
+      {/* GitHub-style Confirmation Modal for Journals with Contents */}
       <Modal
-        isOpen={!!restrictionJournal}
-        onClose={() => setRestrictionJournal(null)}
-        title="Cannot Delete Journal"
-        className="max-w-md"
+        isOpen={!!cascadeDeleteJournal}
+        onClose={() => !isDeleting && setCascadeDeleteJournal(null)}
+        title="Delete Journal Collection"
+        className="max-w-lg"
       >
         <div className="space-y-4 my-2">
-          <div className="p-3.5 rounded-lg flex items-start gap-3 border bg-amber-500/10 border-amber-500/25 text-amber-900">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-lg flex items-start gap-3 border bg-red-500/10 border-red-500/25 text-red-900">
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
             <div className="space-y-1 text-xs sm:text-[13px] leading-relaxed">
-              <p className="font-bold text-amber-950">
-                Active Volumes / Articles Exist
+              <p className="font-bold text-red-950">
+                Warning: This journal contains active volumes & articles
               </p>
-              <p className="text-amber-900/90">
-                <strong>"{restrictionJournal?.title}"</strong> currently contains{' '}
-                <span className="font-semibold text-amber-950">
-                  {restrictionJournal?.volumes_count ?? (restrictionJournal?.volumes ? restrictionJournal.volumes.length : 1)} volume(s)
+              <p className="text-red-900/90">
+                Moving <strong>"{cascadeDeleteJournal?.title}"</strong> to trash will cascade soft-delete its{' '}
+                <span className="font-semibold text-red-950">
+                  {cascadeDeleteJournal?.volumes_count ?? (cascadeDeleteJournal?.volumes ? cascadeDeleteJournal.volumes.length : 1)} volume(s)
                 </span>
-                {restrictionJournal?.articles_count ? ` and ${restrictionJournal.articles_count} published article(s)` : ''}.
+                {cascadeDeleteJournal?.articles_count ? ` and ${cascadeDeleteJournal.articles_count} article(s)` : ''}.
               </p>
-              <p className="text-amber-800/80 text-[11px] sm:text-[12px] pt-1">
-                To protect scholarly data integrity, journals containing active volumes or articles cannot be moved to trash. Please remove or reassign all volumes first.
+              <p className="text-red-800/80 text-[11px] sm:text-[12px] pt-1">
+                All records and files will remain safely restorable from the Trash Bin for 30 days.
               </p>
             </div>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted font-medium">To confirm, type the journal name below:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (cascadeDeleteJournal?.title) {
+                    navigator.clipboard.writeText(cascadeDeleteJournal.title);
+                    setCopiedTitle(true);
+                    setTimeout(() => setCopiedTitle(false), 2000);
+                  }
+                }}
+                className="flex items-center gap-1 text-[11px] font-mono text-primary hover:underline cursor-pointer"
+                title="Copy title to clipboard"
+              >
+                {copiedTitle ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
+                <span>{copiedTitle ? 'Copied!' : 'Copy Name'}</span>
+              </button>
+            </div>
+
+            <div className="p-2.5 bg-muted/10 border border-border text-xs font-mono text-foreground select-all break-all rounded">
+              {cascadeDeleteJournal?.title}
+            </div>
+
+            <Input
+              type="text"
+              value={confirmTitleInput}
+              onChange={(e) => setConfirmTitleInput(e.target.value)}
+              placeholder="Type or paste exact journal title..."
+              className="text-xs font-sans"
+              autoFocus
+            />
           </div>
         </div>
 
@@ -723,22 +764,21 @@ const MyJournals: React.FC = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setRestrictionJournal(null)}
+            onClick={() => setCascadeDeleteJournal(null)}
+            disabled={isDeleting}
             className="text-xs px-4 cursor-pointer"
           >
-            Close
+            Cancel
           </Button>
           <Button
             type="button"
-            onClick={() => {
-              const slug = restrictionJournal?.slug;
-              setRestrictionJournal(null);
-              if (slug) navigate(`/dashboard/journals/${slug}`);
-            }}
-            className="text-xs px-4 font-semibold flex items-center gap-1.5 cursor-pointer"
+            variant="danger"
+            onClick={confirmCascadeDelete}
+            isLoading={isDeleting}
+            disabled={confirmTitleInput.trim() !== cascadeDeleteJournal?.title?.trim() || isDeleting}
+            className="text-xs px-4 font-semibold cursor-pointer"
           >
-            <Settings2 className="h-3.5 w-3.5" />
-            <span>Manage Volumes</span>
+            Move Journal to Trash
           </Button>
         </div>
       </Modal>

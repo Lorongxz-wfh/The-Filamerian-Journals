@@ -195,27 +195,20 @@ class JournalController extends Controller
      */
     public function destroy(Journal $journal)
     {
-        $volumeCount = $journal->volumes()->count();
-        if ($volumeCount > 0) {
-            return response()->json([
-                'message' => "Cannot move '{$journal->title}' to Trash because it contains {$volumeCount} active volume(s). Please move or remove the volumes first."
-            ], 422);
+        // Cascade soft-delete all articles inside volumes of this journal
+        $volumeIds = $journal->volumes()->pluck('id');
+        $volumeCount = $volumeIds->count();
+        $articleCount = 0;
+        if ($volumeIds->isNotEmpty()) {
+            $articleCount = \App\Models\Article::whereIn('volume_id', $volumeIds)->count();
+            \App\Models\Article::whereIn('volume_id', $volumeIds)->delete();
+            $journal->volumes()->delete();
         }
 
-        $articleCount = \App\Models\Article::whereHas('volume', function($q) use ($journal) {
-            $q->where('journal_id', $journal->id);
-        })->count();
-
-        if ($articleCount > 0) {
-            return response()->json([
-                'message' => "Cannot move '{$journal->title}' to Trash because it contains {$articleCount} active article(s). Please move or remove the articles first."
-            ], 422);
-        }
-
-        // Soft delete journal (preserve files for potential restore)
+        // Soft delete journal (preserve files for potential restore from Trash Bin)
         $journal->delete();
 
-        \App\Services\ActivityLogger::log('Soft Deleted Journal', "Moved journal to trash: {$journal->title}", get_class($journal), $journal->id);
+        \App\Services\ActivityLogger::log('Soft Deleted Journal', "Moved journal '{$journal->title}' ({$volumeCount} volume(s), {$articleCount} article(s)) to trash", get_class($journal), $journal->id);
 
         return response()->noContent();
     }
