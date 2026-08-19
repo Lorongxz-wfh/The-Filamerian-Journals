@@ -97,7 +97,7 @@ const Navbar = () => {
         <div className="container-custom hidden md:flex h-16 items-center justify-between gap-4 lg:gap-6">
           {/* Brand — flush left */}
           <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="h-9 w-9 object-contain shrink-0" />
+            <img src="/TFJ-50pxOutline.svg" alt="The FCU Journals Logo" className="h-9 w-9 object-contain shrink-0" />
             <span className="font-display font-normal text-secondary text-xl tracking-wider uppercase leading-none">
               {settings.site_title}
             </span>
@@ -241,7 +241,7 @@ const Navbar = () => {
 
           {/* Center: Brand Name (Centered and fitted) */}
           <Link to="/" className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2">
-            <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="h-6 w-6 object-contain shrink-0" />
+            <img src="/TFJ-50pxOutline.svg" alt="The FCU Journals Logo" className="h-6 w-6 object-contain shrink-0" />
             <span className="font-display font-normal text-secondary text-[15px] sm:text-lg tracking-wider uppercase leading-tight truncate">
               {settings.site_title}
             </span>
@@ -294,7 +294,7 @@ const Navbar = () => {
             >
               <div className="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-border bg-primary text-white shrink-0">
                 <div className="flex items-center gap-2.5">
-                  <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="h-6 w-6 object-contain shrink-0" />
+                  <img src="/TFJ-50pxOutline.svg" alt="The FCU Journals Logo" className="h-6 w-6 object-contain shrink-0" />
                   <span className="font-display font-bold text-secondary uppercase tracking-widest text-sm">
                     Navigation Menu
                   </span>
