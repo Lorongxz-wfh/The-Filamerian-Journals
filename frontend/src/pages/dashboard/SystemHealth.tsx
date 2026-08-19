@@ -117,7 +117,10 @@ const SystemHealth: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-8 font-sans w-full">
-      <DashboardHeader title="System Health">
+      <DashboardHeader 
+        title="System Health"
+        helpText="Real-time operational status, database connectivity diagnostics, cloud storage volume allocation, and server error log monitoring."
+      >
         <button
           onClick={() => { fetchHealth(); fetchErrors(); }}
           disabled={loading || loadingErrors}

@@ -90,7 +90,10 @@ const Overview: React.FC = () => {
   return (
     <div className="space-y-4 sm:space-y-8">
       {/* Page Header */}
-      <DashboardHeader title="Overview">
+      <DashboardHeader 
+        title="Overview"
+        helpText="Executive summary of published journals, articles, drafts, registered authors, system health status, and reader engagement analytics."
+      >
         <button
           onClick={() => fetchData()}
           disabled={loading}

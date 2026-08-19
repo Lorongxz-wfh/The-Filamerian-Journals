@@ -12,12 +12,11 @@ import {
   CheckSquare,
   X,
   MoreVertical,
-  HelpCircle,
   CornerDownRight,
-  ChevronDown,
-  ChevronRight
+  ChevronDown
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 import api from '@/services/api';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
@@ -391,17 +390,8 @@ const TrashBin: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <DashboardHeader 
-        title={
-          <span className="inline-flex items-center gap-2">
-            Trash Bin
-            <span className="group relative inline-flex items-center">
-              <HelpCircle className="h-4 w-4 text-muted/60 hover:text-primary cursor-pointer transition-colors" />
-              <span className="absolute left-0 top-full mt-2 hidden group-hover:block w-64 p-2.5 bg-primary text-white text-[11px] font-normal normal-case tracking-normal rounded shadow-md z-50 pointer-events-none leading-relaxed">
-                Soft-deleted articles, volumes, and journals are retained for 30 days before permanent deletion from storage.
-              </span>
-            </span>
-          </span>
-        }
+        title="Trash Bin"
+        helpText="Soft-deleted articles, volumes, and journals are retained here for 30 days before permanent deletion from storage. You can restore them anytime or permanently purge them."
       >
         <div className="flex items-center gap-1.5 sm:gap-2">
           <SearchInput
@@ -532,7 +522,7 @@ const TrashBin: React.FC = () => {
                   />
                 </TableHead>
               )}
-              <TableHead>Item Name / Title</TableHead>
+              <TableHead className="pl-4 sm:pl-6">Item Name / Title</TableHead>
               <TableHead className="hidden sm:table-cell">Type</TableHead>
               <TableHead className="hidden md:table-cell">Original Context</TableHead>
               <TableHead className="hidden lg:table-cell">Deleted On</TableHead>
@@ -549,7 +539,7 @@ const TrashBin: React.FC = () => {
                       <Skeleton className="h-4 w-4 mx-auto" />
                     </TableCell>
                   )}
-                  <TableCell className="py-3.5">
+                  <TableCell className="py-3.5 pl-4 sm:pl-6">
                     <div className="flex items-center gap-2.5">
                       <Skeleton className="h-4 w-4 shrink-0" />
                       <div className="space-y-1 w-full max-w-[280px]">
@@ -594,12 +584,6 @@ const TrashBin: React.FC = () => {
                 const context = getItemContext(item);
                 const isCollapsed = collapsedKeys.has(itemKey);
 
-                const indentClass = item.level === 2
-                  ? 'pl-9 sm:pl-14'
-                  : item.level === 1
-                  ? 'pl-5 sm:pl-7'
-                  : 'pl-0';
-
                 return (
                   <TableRow key={itemKey} className={`hover:bg-primary/5 transition-colors ${isSelected ? 'bg-primary/5' : ''} ${item.level > 0 ? 'bg-muted/[0.02]' : ''}`}>
                     {isSelectMode && (
@@ -613,39 +597,51 @@ const TrashBin: React.FC = () => {
                       </TableCell>
                     )}
 
-                    <TableCell className={`font-medium text-foreground py-2.5 sm:py-3.5 ${indentClass}`}>
-                      <div className="flex items-start gap-2 min-w-0">
-                        {item.level > 0 && (
-                          <CornerDownRight className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${item.level === 2 ? 'text-muted/40' : 'text-muted/70'}`} />
+                    <TableCell className="font-medium text-foreground py-2.5 sm:py-3.5 pl-4 sm:pl-6">
+                      <div className={`flex items-center gap-2.5 min-w-0 ${item.level === 2 ? 'pl-8 sm:pl-10' : item.level === 1 ? 'pl-4 sm:pl-5' : 'pl-0'}`}>
+                        {/* Left-side toggle chevron for collapsible parents */}
+                        {activeTab === 'all' && item.hasChildren ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCollapse(itemKey);
+                            }}
+                            className="h-5 w-5 -ml-1 flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer shrink-0 rounded-xs hover:bg-muted/15"
+                            title={isCollapsed ? "Click to expand" : "Click to collapse"}
+                          >
+                            <motion.span
+                              animate={{ rotate: isCollapsed ? -90 : 0 }}
+                              transition={{ duration: 0.15, ease: 'easeInOut' }}
+                              className="inline-flex items-center justify-center"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </motion.span>
+                          </button>
+                        ) : item.level > 0 ? (
+                          <CornerDownRight className={`h-3.5 w-3.5 shrink-0 ${item.level === 2 ? 'text-muted/40' : 'text-muted/70'}`} />
+                        ) : (
+                          <span className="w-4 -ml-0.5 shrink-0" />
                         )}
-                        {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0 mt-0.5" />}
-                        {item.type === 'volume' && <Layers className="h-4 w-4 text-secondary shrink-0 mt-0.5" />}
-                        {item.type === 'journal' && <BookOpen className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
-                            {activeTab === 'all' && item.hasChildren && item.childCount && item.childCount > 0 && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleCollapse(itemKey);
-                                }}
-                                className="inline-flex items-center gap-1 text-[9px] font-mono font-medium text-muted hover:text-primary transition-colors cursor-pointer bg-muted/10 hover:bg-muted/20 border border-border px-1.5 py-0.5 shrink-0"
-                                title={isCollapsed ? "Click to expand nested items" : "Click to collapse nested items"}
-                              >
-                                {isCollapsed ? <ChevronRight className="h-2.5 w-2.5 text-muted" /> : <ChevronDown className="h-2.5 w-2.5 text-muted" />}
-                                <span>{item.childCount} nested</span>
-                              </button>
-                            )}
-                          </div>
-                          {/* Mobile subtitle */}
-                          <div className="sm:hidden text-[10px] text-muted truncate mt-0.5">
-                            <span className="capitalize font-medium text-primary/80">{item.type}</span>
-                            <span> • {context}</span>
-                            <span className="text-amber-600 font-medium"> • {item.days_remaining}d left</span>
-                          </div>
+
+                        {item.type === 'article' && <FileText className="h-4 w-4 text-primary shrink-0" />}
+                        {item.type === 'volume' && <Layers className="h-4 w-4 text-secondary shrink-0" />}
+                        {item.type === 'journal' && <BookOpen className="h-4 w-4 text-emerald-600 shrink-0" />}
+
+                        <div className="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
+                          <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
+                          {activeTab === 'all' && item.hasChildren && item.childCount && item.childCount > 0 && (
+                            <span className="text-[10px] text-muted font-mono font-medium shrink-0">
+                              ({item.childCount})
+                            </span>
+                          )}
                         </div>
+                      </div>
+                      {/* Mobile subtitle */}
+                      <div className="sm:hidden text-[10px] text-muted truncate mt-1 pl-6">
+                        <span className="capitalize font-medium text-primary/80">{item.type}</span>
+                        <span> • {context}</span>
+                        <span className="text-amber-600 font-medium"> • {item.days_remaining}d left</span>
                       </div>
                     </TableCell>
 
