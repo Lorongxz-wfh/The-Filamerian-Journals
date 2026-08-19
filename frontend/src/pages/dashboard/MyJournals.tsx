@@ -18,7 +18,6 @@ import Select from '@/components/ui/Select';
 import DropdownMenu, { DropdownMenuItem } from '@/components/ui/DropdownMenu';
 import { JournalsTableSkeleton } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import FileUploadZone from '@/components/ui/FileUploadZone';
 import { toast } from 'sonner';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, DataTableFooter } from '@/components/ui/Table';
@@ -73,7 +72,6 @@ const MyJournals: React.FC = () => {
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [editingJournal, setEditingJournal] = useState<Journal | null>(null);
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -309,31 +307,9 @@ const MyJournals: React.FC = () => {
   const [copiedTitle, setCopiedTitle] = useState(false);
 
   const handleDelete = (journal: Journal) => {
-    const volCount = journal.volumes_count ?? (journal.volumes ? journal.volumes.length : 0);
-    const artCount = journal.articles_count ?? 0;
-    if (volCount > 0 || artCount > 0) {
-      setCascadeDeleteJournal(journal);
-      setConfirmTitleInput('');
-      setCopiedTitle(false);
-      return;
-    }
-    setDeleteTarget(journal.slug);
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteTarget || isDeleting) return;
-    try {
-      setIsDeleting(true);
-      await api.delete(`/journals/${deleteTarget}`);
-      await fetchJournals();
-      toast.success('Journal deleted successfully');
-    } catch (err: any) {
-      console.error('Delete failed:', err);
-      toast.error(err.response?.data?.message || 'Failed to delete journal.');
-    } finally {
-      setIsDeleting(false);
-      setDeleteTarget(null);
-    }
+    setCascadeDeleteJournal(journal);
+    setConfirmTitleInput('');
+    setCopiedTitle(false);
   };
 
   const confirmCascadeDelete = async () => {
@@ -782,15 +758,6 @@ const MyJournals: React.FC = () => {
           </Button>
         </div>
       </Modal>
-
-      <ConfirmDialog 
-        isOpen={!!deleteTarget}
-        onClose={() => !isDeleting && setDeleteTarget(null)}
-        onConfirm={confirmDelete}
-        title="Delete Journal"
-        message="Are you sure you want to delete this journal? It will be moved to the Trash Bin where it can be restored within 30 days."
-        isLoading={isDeleting}
-      />
     </div>
   );
 };
