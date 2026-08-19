@@ -191,9 +191,6 @@ const Home: React.FC = () => {
                 <span className="w-2 h-2 rounded-full bg-secondary" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white">Announcements</span>
               </div>
-              <Link to="/announcements" className="text-[9px] font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors">
-                All News →
-              </Link>
             </div>
 
             {/* Announcements List */}
@@ -213,7 +210,7 @@ const Home: React.FC = () => {
                 </div>
               ) : announcements.length === 0 ? (
                 <div className="py-8 text-center space-y-1">
-                  <p className="text-xs font-semibold text-primary">No Active Bulletins</p>
+                  <p className="text-xs font-semibold text-primary">No Active Announcements</p>
                   <p className="text-[10px] text-muted">Check back later for updates.</p>
                 </div>
               ) : (
@@ -243,9 +240,9 @@ const Home: React.FC = () => {
 
             {/* Footer Bar */}
             <div className="bg-surface px-3.5 sm:px-4 py-2.5 border-t border-border flex items-center justify-between shrink-0">
-              <span className="text-[9px] text-muted font-medium">FCU Official Bulletin</span>
+              <span className="text-[9px] text-muted font-medium">Research & Journal Notices</span>
               <Link to="/announcements" className="text-[10px] font-bold text-primary hover:text-secondary uppercase tracking-wider flex items-center gap-1 group">
-                Read All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />
+                View All <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           </div>

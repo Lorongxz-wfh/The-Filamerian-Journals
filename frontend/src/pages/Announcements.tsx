@@ -65,9 +65,9 @@ const Announcements: React.FC = () => {
     <PageWrapper className="flex flex-col w-full font-sans">
       <div className="w-full space-y-6 flex flex-col">
         {/* Page Header */}
-        <PageHeader title="Announcements & News">
+        <PageHeader title="Announcements & Notices">
           <p className="text-xs text-muted mt-1.5 font-sans">
-            Official Call for Papers, Journal News & Academic Announcements from Filamer Christian University
+            Official Call for Papers, Editorial Updates & Academic Research Announcements
           </p>
         </PageHeader>
 
@@ -77,7 +77,7 @@ const Announcements: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
             <input
               type="text"
-              placeholder="Search announcements & news..."
+              placeholder="Search announcements & notices..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -101,7 +101,7 @@ const Announcements: React.FC = () => {
           ) : filteredAnnouncements.length === 0 ? (
             <EmptyState 
               title="No announcements found" 
-              description={searchQuery ? "No matching news found for your search query." : "No announcements posted yet."} 
+              description={searchQuery ? "No matching announcements found for your search query." : "No announcements posted yet."} 
               className="border border-border bg-surface py-16" 
             />
           ) : (
