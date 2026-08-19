@@ -98,19 +98,23 @@ const ManageJournal: React.FC = () => {
     }
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const deleteVolume = (volId: number) => {
     setDeleteTarget(volId);
   };
 
   const confirmDeleteVolume = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || isDeleting) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/volumes/${deleteTarget}`);
       await fetchJournal();
       toast.success('Volume deleted successfully');
     } catch (err) {
       toast.error('Failed to delete volume');
     } finally {
+      setIsDeleting(false);
       setDeleteTarget(null);
     }
   };
@@ -236,10 +240,11 @@ const ManageJournal: React.FC = () => {
 
       <ConfirmDialog 
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={confirmDeleteVolume}
         title="Delete Volume"
         message="Are you sure you want to delete this volume? All articles inside it will be moved to the Trash Bin."
+        isLoading={isDeleting}
       />
     </div>
   );

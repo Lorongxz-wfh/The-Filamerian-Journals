@@ -37,6 +37,11 @@ class Journal extends Model
         return $this->hasMany(Volume::class);
     }
 
+    public function articles()
+    {
+        return $this->hasManyThrough(Article::class, Volume::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

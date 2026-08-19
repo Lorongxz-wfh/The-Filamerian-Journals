@@ -31,7 +31,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const finalConfirmText = confirmText || (isDestructive ? 'Confirm Deletion' : 'Confirm');
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} className="max-w-md">
+    <Modal isOpen={isOpen} onClose={() => !isLoading && onClose()} title={title} className="max-w-md">
       <div className="space-y-4 my-2">
         <div className={`p-3.5 rounded-lg flex items-start gap-3 border ${
           isDestructive 
@@ -57,7 +57,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           variant="outline" 
           onClick={onClose} 
           disabled={isLoading}
-          className="text-xs px-4"
+          className="text-xs px-4 cursor-pointer"
         >
           {cancelText}
         </Button>
@@ -67,9 +67,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           onClick={onConfirm} 
           isLoading={isLoading}
           disabled={isLoading}
-          className="text-xs px-4 font-semibold"
+          className="text-xs px-4 font-semibold cursor-pointer"
         >
-          {finalConfirmText}
+          {isLoading ? (isDestructive ? 'Deleting...' : 'Processing...') : finalConfirmText}
         </Button>
       </div>
     </Modal>

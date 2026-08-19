@@ -306,15 +306,19 @@ const ManageVolume: React.FC = () => {
     setHasOrderChanged(true);
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || isDeleting) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/articles/${deleteTarget}`);
       await fetchVolume();
       toast.success('Article deleted successfully');
     } catch (err) {
       toast.error('Failed to delete article');
     } finally {
+      setIsDeleting(false);
       setDeleteTarget(null);
     }
   };
@@ -464,10 +468,11 @@ const ManageVolume: React.FC = () => {
 
       <ConfirmDialog 
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Article"
         message="Are you sure you want to remove this article from the volume? It will be safely stored in the Trash Bin."
+        isLoading={isDeleting}
       />
     </div>
   );

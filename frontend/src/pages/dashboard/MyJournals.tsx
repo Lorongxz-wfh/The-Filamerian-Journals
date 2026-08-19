@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, AlertTriangle } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
@@ -39,6 +39,8 @@ interface Journal {
   cover_image: string | null;
   pdf_url: string | null;
   volumes?: any[];
+  volumes_count?: number;
+  articles_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -302,12 +304,20 @@ const MyJournals: React.FC = () => {
     }
   };
 
-  const handleDelete = (slug: string) => {
-    setDeleteTarget(slug);
+  const [restrictionJournal, setRestrictionJournal] = useState<Journal | null>(null);
+
+  const handleDelete = (journal: Journal) => {
+    const volCount = journal.volumes_count ?? (journal.volumes ? journal.volumes.length : 0);
+    const artCount = journal.articles_count ?? 0;
+    if (volCount > 0 || artCount > 0) {
+      setRestrictionJournal(journal);
+      return;
+    }
+    setDeleteTarget(journal.slug);
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || isDeleting) return;
     try {
       setIsDeleting(true);
       await api.delete(`/journals/${deleteTarget}`);
@@ -479,27 +489,44 @@ const MyJournals: React.FC = () => {
                       {journal.editor || '-'}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()} className="text-right py-2.5 sm:py-3.5">
-                      <DropdownMenu
-                        trigger={
-                          <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
-                        }
-                      >
-                        <DropdownMenuItem onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}>
-                          <div className="flex items-center gap-2 text-foreground">
-                            <Settings2 className="h-4 w-4 text-muted" /> Manage Volumes
-                          </div>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleOpenModal(journal)}>
-                          <div className="flex items-center gap-2 text-foreground">
-                            <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
-                          </div>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(journal.slug)}>
-                          <div className="flex items-center gap-2 text-red-600">
-                            <Trash2 className="h-4 w-4 text-red-600" /> Delete Journal
-                          </div>
-                        </DropdownMenuItem>
-                      </DropdownMenu>
+                      {(() => {
+                        const volCount = journal.volumes_count ?? (journal.volumes ? journal.volumes.length : 0);
+                        const artCount = journal.articles_count ?? 0;
+                        const isLocked = volCount > 0 || artCount > 0;
+                        return (
+                          <DropdownMenu
+                            trigger={
+                              <IconButton icon={MoreVertical} title="Actions" className="h-7 w-7" />
+                            }
+                          >
+                            <DropdownMenuItem onClick={() => navigate(`/dashboard/journals/${journal.slug}`)}>
+                              <div className="flex items-center gap-2 text-foreground">
+                                <Settings2 className="h-4 w-4 text-muted" /> Manage Volumes
+                              </div>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenModal(journal)}>
+                              <div className="flex items-center gap-2 text-foreground">
+                                <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
+                              </div>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDelete(journal)}
+                              title={isLocked ? `Cannot delete: Contains ${volCount} volume(s)${artCount ? ` and ${artCount} article(s)` : ''}` : "Delete Journal"}
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <div className={`flex items-center gap-2 ${isLocked ? 'text-muted/80' : 'text-red-600'}`}>
+                                  <Trash2 className={`h-4 w-4 ${isLocked ? 'text-muted/60' : 'text-red-600'}`} /> Delete Journal
+                                </div>
+                                {isLocked && (
+                                  <span className="text-[9px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/20 px-1.5 py-0.5 rounded ml-2 shrink-0">
+                                    Locked
+                                  </span>
+                                )}
+                              </div>
+                            </DropdownMenuItem>
+                          </DropdownMenu>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))
@@ -664,12 +691,64 @@ const MyJournals: React.FC = () => {
         </form>
       </Modal>
 
+      {/* Cannot Delete Journal Restriction Modal */}
+      <Modal
+        isOpen={!!restrictionJournal}
+        onClose={() => setRestrictionJournal(null)}
+        title="Cannot Delete Journal"
+        className="max-w-md"
+      >
+        <div className="space-y-4 my-2">
+          <div className="p-3.5 rounded-lg flex items-start gap-3 border bg-amber-500/10 border-amber-500/25 text-amber-900">
+            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1 text-xs sm:text-[13px] leading-relaxed">
+              <p className="font-bold text-amber-950">
+                Active Volumes / Articles Exist
+              </p>
+              <p className="text-amber-900/90">
+                <strong>"{restrictionJournal?.title}"</strong> currently contains{' '}
+                <span className="font-semibold text-amber-950">
+                  {restrictionJournal?.volumes_count ?? (restrictionJournal?.volumes ? restrictionJournal.volumes.length : 1)} volume(s)
+                </span>
+                {restrictionJournal?.articles_count ? ` and ${restrictionJournal.articles_count} published article(s)` : ''}.
+              </p>
+              <p className="text-amber-800/80 text-[11px] sm:text-[12px] pt-1">
+                To protect scholarly data integrity, journals containing active volumes or articles cannot be moved to trash. Please remove or reassign all volumes first.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setRestrictionJournal(null)}
+            className="text-xs px-4 cursor-pointer"
+          >
+            Close
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              const slug = restrictionJournal?.slug;
+              setRestrictionJournal(null);
+              if (slug) navigate(`/dashboard/journals/${slug}`);
+            }}
+            className="text-xs px-4 font-semibold flex items-center gap-1.5 cursor-pointer"
+          >
+            <Settings2 className="h-3.5 w-3.5" />
+            <span>Manage Volumes</span>
+          </Button>
+        </div>
+      </Modal>
+
       <ConfirmDialog 
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Journal"
-        message="Are you sure you want to delete this journal collection? Volumes and articles inside will be safely retained in retention."
+        message="Are you sure you want to delete this journal? It will be moved to the Trash Bin where it can be restored within 30 days."
         isLoading={isDeleting}
       />
     </div>

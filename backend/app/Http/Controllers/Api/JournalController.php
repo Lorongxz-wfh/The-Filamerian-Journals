@@ -15,7 +15,7 @@ class JournalController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Journal::with('category');
+        $query = Journal::with('category')->withCount(['volumes', 'articles']);
 
         if ($request->is('api/public/*') || $request->is('public/*')) {
             $query->where(function($q) {

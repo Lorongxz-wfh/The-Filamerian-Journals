@@ -428,7 +428,7 @@ const ManageAuthors: React.FC = () => {
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Author"
         message="Are you sure you want to delete this author? This may affect articles linked to them."

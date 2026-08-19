@@ -287,15 +287,20 @@ const Categories: React.FC = () => {
     }
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteId || isDeleting) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/categories/${deleteId}`);
       toast.success('Category deleted successfully');
       setDeleteId(null);
-      fetchCategories();
+      await fetchCategories();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to delete category');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -489,11 +494,12 @@ const Categories: React.FC = () => {
 
       <ConfirmDialog
         isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
+        onClose={() => !isDeleting && setDeleteId(null)}
         onConfirm={handleDelete}
         title="Delete Category"
         message="Are you sure you want to delete this category? Journals currently assigned to this category will lose their association."
         confirmText="Delete"
+        isLoading={isDeleting}
       />
     </div>
   );

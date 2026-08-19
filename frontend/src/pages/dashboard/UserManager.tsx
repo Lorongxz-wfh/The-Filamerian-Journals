@@ -233,28 +233,35 @@ const UserManager: React.FC = () => {
     }
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || isDeleting) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/users/${deleteTarget}`);
       await fetchUsers();
       toast.success('User deleted successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to delete user.');
     } finally {
+      setIsDeleting(false);
       setDeleteTarget(null);
     }
   };
 
   const confirmApprove = async () => {
-    if (!approveTarget) return;
+    if (!approveTarget || isApproving) return;
     try {
+      setIsApproving(true);
       await api.post(`/users/${approveTarget}/approve`);
       await fetchUsers();
       toast.success('User approved successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to approve user.');
     } finally {
+      setIsApproving(false);
       setApproveTarget(null);
     }
   };
@@ -657,20 +664,22 @@ const UserManager: React.FC = () => {
 
       <ConfirmDialog 
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete User"
         message="Are you sure you want to remove this user account? Their contributions and activity logs will remain preserved."
+        isLoading={isDeleting}
       />
       
       <ConfirmDialog 
         isOpen={!!approveTarget}
-        onClose={() => setApproveTarget(null)}
+        onClose={() => !isApproving && setApproveTarget(null)}
         onConfirm={confirmApprove}
         title="Approve User"
         message="Are you sure you want to approve this user's account?"
         confirmText="Approve"
         isDestructive={false}
+        isLoading={isApproving}
       />
     </div>
   );

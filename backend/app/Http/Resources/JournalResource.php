@@ -40,6 +40,8 @@ class JournalResource extends JsonResource
             'editor' => $this->editor,
             'cover_image' => $this->cover_image ? url('/api/public/journals/' . ($this->slug ?: $this->id) . '/cover') : null,
             'pdf_url' => $this->pdf_path ? url('/api/public/journals/' . ($this->slug ?: $this->id) . '/pdf') : null,
+            'volumes_count' => (int) ($this->volumes_count ?? ($this->relationLoaded('volumes') ? $this->volumes->count() : 0)),
+            'articles_count' => (int) ($this->articles_count ?? ($this->relationLoaded('articles') ? $this->articles->count() : 0)),
             'volumes' => VolumeResource::collection($this->whenLoaded('volumes')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

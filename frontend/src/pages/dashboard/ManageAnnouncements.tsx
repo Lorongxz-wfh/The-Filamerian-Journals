@@ -120,19 +120,23 @@ const ManageAnnouncements: React.FC = () => {
     }
   };
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDelete = (id: number) => {
     setDeleteTarget(id);
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || isDeleting) return;
     try {
+      setIsDeleting(true);
       await api.delete(`/announcements/${deleteTarget}`);
       await fetchData();
       toast.success('Announcement deleted');
     } catch (err) {
       toast.error('Failed to delete');
     } finally {
+      setIsDeleting(false);
       setDeleteTarget(null);
     }
   };
@@ -264,10 +268,11 @@ const ManageAnnouncements: React.FC = () => {
       </Modal>
       <ConfirmDialog 
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={confirmDelete}
         title="Delete Announcement"
         message="Are you sure you want to remove this announcement from active publication?"
+        isLoading={isDeleting}
       />
     </div>
   );
