@@ -66,9 +66,7 @@ const Footer: React.FC = () => {
           {/* Column 1: Institutional Brand & Campus Location */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded bg-secondary/10 border border-secondary/30 flex items-center justify-center shrink-0 p-1">
-                <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="w-full h-full object-contain" />
-              </div>
+              <img src="/TFJ-SVG.svg" alt="The FCU Journals Logo" className="h-10 w-10 object-contain shrink-0" />
               <div>
                 <h3 className="font-display font-bold text-secondary text-base tracking-wider uppercase leading-tight">
                   {siteTitle}
