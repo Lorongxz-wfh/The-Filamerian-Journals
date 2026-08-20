@@ -368,7 +368,7 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Content Category Distribution (1 col) */}
-        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col justify-between">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-primary/70" />
@@ -485,7 +485,7 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* 30-Day Activity Summary Breakdown (1 col) */}
-        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col justify-between">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary/70" />
