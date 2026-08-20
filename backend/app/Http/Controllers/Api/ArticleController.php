@@ -310,6 +310,23 @@ class ArticleController extends Controller
         \App\Services\ActivityLogger::log('Updated Article', "Updated article '{$article->title}': {$details}", get_class($article), $article->id);
         \Illuminate\Support\Facades\Cache::forget('public_settings');
 
+        // Notify admins if status changed
+        if ($article->wasChanged('status')) {
+            try {
+                $otherAdmins = \App\Models\User::role(['Super Admin', 'Admin'])->where('is_disabled', false)->where('id', '!=', auth()->id() ?? 0)->get();
+                if ($otherAdmins->isNotEmpty()) {
+                    $journalName = $article->volume?->journal?->title ?? 'Journal';
+                    $actionVerb = $article->status === 'Published' ? 'published' : 'moved to Draft';
+                    \Illuminate\Support\Facades\Notification::send($otherAdmins, new \App\Notifications\SystemNotification(
+                        "Article {$article->status}",
+                        "'{$article->title}' was {$actionVerb} in {$journalName}.",
+                        $article->status === 'Published' ? 'success' : 'warning',
+                        '/dashboard/articles'
+                    ));
+                }
+            } catch (\Throwable $t) {}
+        }
+
         return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
     }
 
@@ -323,6 +340,18 @@ class ArticleController extends Controller
 
         \App\Services\ActivityLogger::log('Soft Deleted Article', "Moved article to trash: {$title}", $class, $article->id);
         \Illuminate\Support\Facades\Cache::forget('public_settings');
+
+        try {
+            $otherAdmins = \App\Models\User::role(['Super Admin', 'Admin'])->where('is_disabled', false)->where('id', '!=', auth()->id() ?? 0)->get();
+            if ($otherAdmins->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send($otherAdmins, new \App\Notifications\SystemNotification(
+                    'Article Moved to Trash',
+                    "'{$title}' was moved to the Trash Bin.",
+                    'error',
+                    '/dashboard/trash'
+                ));
+            }
+        } catch (\Throwable $t) {}
 
         return response()->noContent();
     }

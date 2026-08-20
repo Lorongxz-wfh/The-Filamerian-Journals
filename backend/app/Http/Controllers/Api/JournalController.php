@@ -200,8 +200,30 @@ class JournalController extends Controller
                 $articleCount = \App\Models\Article::whereIn('volume_id', $volumeIds)->update(['status' => 'Draft']);
             }
             \App\Services\ActivityLogger::log('Unpublished Journal', "Unpublished journal '{$journal->title}' (status set to Draft, cascaded {$articleCount} article(s) to Draft)", get_class($journal), $journal->id);
+            try {
+                $otherAdmins = \App\Models\User::role(['Super Admin', 'Admin'])->where('is_disabled', false)->where('id', '!=', auth()->id() ?? 0)->get();
+                if ($otherAdmins->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send($otherAdmins, new \App\Notifications\SystemNotification(
+                        'Journal Unpublished',
+                        "'{$journal->title}' was unpublished and set to Draft.",
+                        'warning',
+                        "/dashboard/journals/{$journal->slug}"
+                    ));
+                }
+            } catch (\Throwable $t) {}
         } elseif (isset($validated['status']) && $validated['status'] === 'Published' && $oldStatus !== 'Published') {
             \App\Services\ActivityLogger::log('Published Journal', "Published journal '{$journal->title}' (made publicly visible)", get_class($journal), $journal->id);
+            try {
+                $otherAdmins = \App\Models\User::role(['Super Admin', 'Admin'])->where('is_disabled', false)->where('id', '!=', auth()->id() ?? 0)->get();
+                if ($otherAdmins->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send($otherAdmins, new \App\Notifications\SystemNotification(
+                        'Journal Published',
+                        "'{$journal->title}' is now live and published on the portal.",
+                        'success',
+                        "/dashboard/journals/{$journal->slug}"
+                    ));
+                }
+            } catch (\Throwable $t) {}
         } else {
             $changes = [];
             if ($journal->wasChanged('title')) $changes[] = "title changed to '{$journal->title}'";
@@ -243,6 +265,18 @@ class JournalController extends Controller
         $journal->delete();
 
         \App\Services\ActivityLogger::log('Soft Deleted Journal', "Moved journal '{$journal->title}' ({$volumeCount} volume(s), {$articleCount} article(s)) to trash", get_class($journal), $journal->id);
+
+        try {
+            $otherAdmins = \App\Models\User::role(['Super Admin', 'Admin'])->where('is_disabled', false)->where('id', '!=', auth()->id() ?? 0)->get();
+            if ($otherAdmins->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send($otherAdmins, new \App\Notifications\SystemNotification(
+                    'Journal Moved to Trash',
+                    "'{$journal->title}' and all its volumes/articles were moved to the Trash Bin.",
+                    'error',
+                    '/dashboard/trash'
+                ));
+            }
+        } catch (\Throwable $t) {}
 
         return response()->noContent();
     }

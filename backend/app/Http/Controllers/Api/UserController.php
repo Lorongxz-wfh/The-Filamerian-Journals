@@ -82,6 +82,21 @@ class UserController extends Controller
 
         \App\Services\ActivityLogger::log('Created User', "Created user account for {$user->name}", get_class($user), $user->id);
 
+        try {
+            $otherAdmins = User::role(['Super Admin', 'Admin'])
+                ->where('is_disabled', false)
+                ->where('id', '!=', auth()->id() ?? 0)
+                ->get();
+            if ($otherAdmins->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send($otherAdmins, new \App\Notifications\SystemNotification(
+                    'New User Account Created',
+                    "Account for {$user->name} ({$user->email}) created with role '{$validated['role']}'.",
+                    'info',
+                    '/dashboard/users'
+                ));
+            }
+        } catch (\Throwable $t) {}
+
         return response()->json([
             'message' => 'User account created successfully. Credentials have been emailed to the user.',
             'user' => $user->load('roles'),
@@ -141,6 +156,19 @@ class UserController extends Controller
         $details = count($changes) > 0 ? implode(', ', $changes) : 'profile';
         \App\Services\ActivityLogger::log('Updated User', "Updated user '{$user->name}': changed {$details}", get_class($user), $user->id);
 
+        // Notify the user if another admin modified their account
+        if (auth()->check() && $user->id !== auth()->id() && count($changes) > 0) {
+            try {
+                $actorName = auth()->user()->name;
+                $user->notify(new \App\Notifications\SystemNotification(
+                    'Account Details Updated',
+                    "Your account was updated by {$actorName}: changed {$details}.",
+                    'warning',
+                    '/dashboard/profile'
+                ));
+            } catch (\Throwable $t) {}
+        }
+
         return response()->json($user->load('roles'));
     }
 
@@ -167,6 +195,20 @@ class UserController extends Controller
 
         $actionText = $newDisabledState ? 'Disabled' : 'Enabled';
         \App\Services\ActivityLogger::log("{$actionText} User", "{$actionText} user account for {$user->name}", get_class($user), $user->id);
+
+        // Notify user about their status change
+        if (auth()->check() && $user->id !== auth()->id()) {
+            try {
+                $actorName = auth()->user()->name;
+                $statusLabel = $newDisabledState ? 'deactivated' : 'reactivated';
+                $user->notify(new \App\Notifications\SystemNotification(
+                    'Account Status Changed',
+                    "Your account has been {$statusLabel} by {$actorName}.",
+                    $newDisabledState ? 'error' : 'success',
+                    '/dashboard/profile'
+                ));
+            } catch (\Throwable $t) {}
+        }
 
         return response()->json([
             'message' => "User account {$actionText} successfully.",
@@ -220,6 +262,16 @@ class UserController extends Controller
         $user->update(['is_approved' => true]);
 
         \App\Services\ActivityLogger::log('Approved User', "Approved user account for {$user->name}", get_class($user), $user->id);
+
+        try {
+            $actorName = auth()->user()?->name ?? 'Administrator';
+            $user->notify(new \App\Notifications\SystemNotification(
+                'Account Approved',
+                "Your account has been approved by {$actorName}. You now have full access to the portal.",
+                'success',
+                '/dashboard'
+            ));
+        } catch (\Throwable $t) {}
 
         return response()->json(['message' => 'User approved successfully.']);
     }

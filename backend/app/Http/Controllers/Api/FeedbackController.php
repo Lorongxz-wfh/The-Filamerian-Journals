@@ -41,6 +41,19 @@ class FeedbackController extends Controller
         ]);
 
         $feedback = Feedback::create($validated);
+
+        try {
+            $admins = \App\Models\User::role(['Super Admin', 'Admin'])->where('is_disabled', false)->get();
+            if ($admins->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\SystemNotification(
+                    'New Feedback Received',
+                    "New {$feedback->category} from {$feedback->name}: \"{$feedback->subject}\"",
+                    'info',
+                    '/dashboard/feedback'
+                ));
+            }
+        } catch (\Throwable $t) {}
+
         return response()->json(['data' => $feedback], 201);
     }
 
