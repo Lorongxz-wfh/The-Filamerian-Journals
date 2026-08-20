@@ -60,6 +60,7 @@ class TrashController extends Controller
 
     /**
      * Restore a soft-deleted item. Accessible by Admin & Super Admin.
+     * Auto-restores parent hierarchy (Volume -> Journal, Article -> Volume -> Journal) to prevent orphaned records.
      */
     public function restore(Request $request, string $type, int $id)
     {
@@ -69,16 +70,60 @@ class TrashController extends Controller
             return response()->json(['message' => 'Trashed item not found.'], 404);
         }
 
-        $item->restore();
+        $restoredParents = [];
 
-        if ($type === 'volume') {
+        if ($type === 'article') {
+            $item->restore();
+            // Check parent volume
+            if ($item->volume_id) {
+                $parentVolume = Volume::withTrashed()->find($item->volume_id);
+                if ($parentVolume && $parentVolume->trashed()) {
+                    $parentVolume->restore();
+                    $restoredParents[] = "Volume {$parentVolume->volume_number}";
+                    
+                    // Check grandparent journal
+                    if ($parentVolume->journal_id) {
+                        $grandparentJournal = Journal::withTrashed()->find($parentVolume->journal_id);
+                        if ($grandparentJournal && $grandparentJournal->trashed()) {
+                            $grandparentJournal->restore();
+                            $restoredParents[] = "Journal '{$grandparentJournal->title}'";
+                        }
+                    }
+                }
+            }
+        } elseif ($type === 'volume') {
+            $item->restore();
+            // Restore child articles
             Article::onlyTrashed()->where('volume_id', $item->id)->restore();
+
+            // Check parent journal
+            if ($item->journal_id) {
+                $parentJournal = Journal::withTrashed()->find($item->journal_id);
+                if ($parentJournal && $parentJournal->trashed()) {
+                    $parentJournal->restore();
+                    $restoredParents[] = "parent Journal '{$parentJournal->title}'";
+                }
+            }
+        } elseif ($type === 'journal') {
+            $item->restore();
+            // Restore child volumes
+            $volumeIds = Volume::onlyTrashed()->where('journal_id', $item->id)->pluck('id');
+            Volume::onlyTrashed()->where('journal_id', $item->id)->restore();
+            // Restore child articles in those volumes
+            if ($volumeIds->isNotEmpty()) {
+                Article::onlyTrashed()->whereIn('volume_id', $volumeIds)->restore();
+            }
+        } else {
+            $item->restore();
         }
 
         $title = $item->title ?? ($item->volume_number ? "Volume {$item->volume_number}" : "Item #{$id}");
-        \App\Services\ActivityLogger::log('Restored Item', "Restored {$type}: {$title}", get_class($item), $item->id);
+        $parentNote = count($restoredParents) > 0 ? " (and auto-restored " . implode(', ', $restoredParents) . ")" : "";
+        $message = "Restored {$type}: {$title}{$parentNote}";
 
-        return response()->json(['message' => "{$type} restored successfully.", 'item' => $item]);
+        \App\Services\ActivityLogger::log('Restored Item', $message, get_class($item), $item->id);
+
+        return response()->json(['message' => "{$message}.", 'item' => $item]);
     }
 
     /**
@@ -133,7 +178,40 @@ class TrashController extends Controller
             $id = (int) ($target['id'] ?? 0);
             $item = $this->findTrashedItem($type, $id);
             if ($item) {
-                $item->restore();
+                if ($type === 'article') {
+                    $item->restore();
+                    if ($item->volume_id) {
+                        $parentVolume = Volume::withTrashed()->find($item->volume_id);
+                        if ($parentVolume && $parentVolume->trashed()) {
+                            $parentVolume->restore();
+                            if ($parentVolume->journal_id) {
+                                $grandparentJournal = Journal::withTrashed()->find($parentVolume->journal_id);
+                                if ($grandparentJournal && $grandparentJournal->trashed()) {
+                                    $grandparentJournal->restore();
+                                }
+                            }
+                        }
+                    }
+                } elseif ($type === 'volume') {
+                    $item->restore();
+                    Article::onlyTrashed()->where('volume_id', $item->id)->restore();
+                    if ($item->journal_id) {
+                        $parentJournal = Journal::withTrashed()->find($item->journal_id);
+                        if ($parentJournal && $parentJournal->trashed()) {
+                            $parentJournal->restore();
+                        }
+                    }
+                } elseif ($type === 'journal') {
+                    $item->restore();
+                    $volumeIds = Volume::onlyTrashed()->where('journal_id', $item->id)->pluck('id');
+                    Volume::onlyTrashed()->where('journal_id', $item->id)->restore();
+                    if ($volumeIds->isNotEmpty()) {
+                        Article::onlyTrashed()->whereIn('volume_id', $volumeIds)->restore();
+                    }
+                } else {
+                    $item->restore();
+                }
+
                 $title = $item->title ?? ($item->volume_number ? "Volume {$item->volume_number}" : "Item #{$id}");
                 \App\Services\ActivityLogger::log('Restored Item', "Batch restored {$type}: {$title}", get_class($item), $item->id);
                 $restoredCount++;
