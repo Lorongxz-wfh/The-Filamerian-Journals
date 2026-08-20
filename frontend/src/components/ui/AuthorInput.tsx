@@ -154,14 +154,7 @@ const AuthorInput: React.FC<AuthorInputProps> = ({ author, onChange, onRemove, i
           onClick={() => setIsEditing(true)}
           className="w-full px-3 py-2 pr-10 border border-border text-[13px] bg-background hover:border-primary/50 cursor-text transition-colors flex items-center justify-between"
         >
-          <div>
-            <span>{formatName()}</span>
-            {author.id ? (
-              <span className="ml-2 text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">existing</span>
-            ) : (
-              <span className="ml-2 text-[10px] text-blue-500 font-semibold uppercase tracking-wider">new ✓</span>
-            )}
-          </div>
+          <span className="text-foreground font-medium">{formatName()}</span>
         </div>
         {onRemove && (
           <button 

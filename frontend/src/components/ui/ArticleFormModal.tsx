@@ -66,6 +66,7 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           status: editingArticle.status || 'Draft',
           authors: editingArticle.authors && editingArticle.authors.length > 0 
             ? editingArticle.authors.map((a: any) => ({
+                id: a.id,
                 first_name: a.first_name || '',
                 middle_name: a.middle_name || '',
                 last_name: a.last_name || '',
@@ -164,6 +165,39 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
 
       if ((editingArticle.abstract || '') !== formData.abstract) {
         diffs.push({ label: 'Abstract', oldValue: editingArticle.abstract || '', newValue: formData.abstract });
+      }
+
+      if ((editingArticle.doi || '') !== (formData.doi || '')) {
+        diffs.push({ label: 'DOI', oldValue: editingArticle.doi || '(Empty)', newValue: formData.doi || '(Empty)' });
+      }
+
+      if (String(editingArticle.page_start || '') !== String(formData.page_start || '') || String(editingArticle.page_end || '') !== String(formData.page_end || '')) {
+        const oldPages = (editingArticle.page_start || editingArticle.page_end) 
+          ? `pp. ${editingArticle.page_start || '–'}–${editingArticle.page_end || '–'}` 
+          : '(None)';
+        const newPages = (formData.page_start || formData.page_end) 
+          ? `pp. ${formData.page_start || '–'}–${formData.page_end || '–'}` 
+          : '(None)';
+        diffs.push({ label: 'Page Range', oldValue: oldPages, newValue: newPages });
+      }
+
+      const oldKeywords = editingArticle.keywords && editingArticle.keywords.length > 0 ? editingArticle.keywords.map((k: any) => k.name).join(', ') : '';
+      if (oldKeywords.trim() !== formData.keywords_string.trim()) {
+        diffs.push({ label: 'Keywords', oldValue: oldKeywords || '(Empty)', newValue: formData.keywords_string || '(Empty)' });
+      }
+
+      const formatAuthorObj = (a: any) => {
+        let n = '';
+        if (a.last_name) n += a.last_name;
+        if (a.first_name) n += (n ? ', ' : '') + a.first_name;
+        if (a.middle_name) n += ' ' + a.middle_name.charAt(0).toUpperCase() + '.';
+        if (a.suffix) n += ' ' + a.suffix;
+        return n.trim();
+      };
+      const oldAuthorsStr = editingArticle.authors ? editingArticle.authors.map(formatAuthorObj).filter(Boolean).join('; ') : '';
+      const newAuthorsStr = formData.authors ? formData.authors.map(formatAuthorObj).filter(Boolean).join('; ') : '';
+      if (oldAuthorsStr !== newAuthorsStr) {
+        diffs.push({ label: 'Authors', oldValue: oldAuthorsStr || '(Empty)', newValue: newAuthorsStr || '(Empty)' });
       }
 
       if (pdfFile) {

@@ -258,6 +258,7 @@ const MyJournals: React.FC = () => {
   const [journalDiffModalOpen, setJournalDiffModalOpen] = useState(false);
   const [pendingJournalDiffs, setPendingJournalDiffs] = useState<DiffItem[]>([]);
   const [pendingJournalSaveData, setPendingJournalSaveData] = useState<JournalFormData | null>(null);
+  const [isSavingJournal, setIsSavingJournal] = useState(false);
 
   const onSubmit = async (data: JournalFormData) => {
     setServerError(null);
@@ -340,7 +341,9 @@ const MyJournals: React.FC = () => {
   };
 
   const executeJournalSave = async (data: JournalFormData) => {
+    if (isSavingJournal) return;
     try {
+      setIsSavingJournal(true);
       const payload = new FormData();
       payload.append('title', data.title);
       payload.append('slug', data.slug || '');
@@ -373,11 +376,15 @@ const MyJournals: React.FC = () => {
       
       handleCloseModal();
       setPendingUnpublishData(null);
+      setJournalDiffModalOpen(false);
+      setPendingJournalSaveData(null);
       toast.success(editingJournal ? 'Journal updated successfully' : 'Journal created successfully');
       await fetchJournals();
     } catch (err: any) {
       console.error('Save failed:', err);
       setServerError(err.response?.data?.message || 'Failed to save journal.');
+    } finally {
+      setIsSavingJournal(false);
     }
   };
 
@@ -891,17 +898,15 @@ const MyJournals: React.FC = () => {
       {/* Review Journal Changes Modal */}
       <EditDiffModal
         isOpen={journalDiffModalOpen}
-        onClose={() => setJournalDiffModalOpen(false)}
+        onClose={() => !isSavingJournal && setJournalDiffModalOpen(false)}
         onConfirm={async () => {
-          if (pendingJournalSaveData) {
+          if (pendingJournalSaveData && !isSavingJournal) {
             await executeJournalSave(pendingJournalSaveData);
-            setJournalDiffModalOpen(false);
-            setPendingJournalSaveData(null);
           }
         }}
         entityName="Journal"
         diffs={pendingJournalDiffs}
-        loading={isSubmitting}
+        loading={isSavingJournal}
       />
 
       {/* Clean Confirmation Modal for Journal Deletion */}
