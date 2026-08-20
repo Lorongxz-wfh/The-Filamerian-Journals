@@ -39,6 +39,7 @@ class JournalResource extends JsonResource
             'frequency' => $this->frequency,
             'editor' => $this->editor,
             'cover_image' => $this->cover_image ? url('/api/public/journals/' . ($this->slug ?: $this->id) . '/cover') : null,
+            'pdf_url' => $this->pdf_path ? url('/api/public/journals/' . ($this->slug ?: $this->id) . '/pdf') : null,
             'volumes_count' => (int) ($this->resource->volumes_count ?? $this->volumes()->count()),
             'articles_count' => (int) ($this->resource->articles_count ?? \App\Models\Article::whereHas('volume', fn($q) => $q->where('journal_id', $this->id))->count()),
             'volumes' => VolumeResource::collection($this->whenLoaded('volumes')),
