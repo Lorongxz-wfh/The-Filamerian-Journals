@@ -264,10 +264,12 @@ const Overview: React.FC = () => {
                         if (active && payload && payload.length) {
                           const total = payload.reduce((acc: number, cur: any) => acc + (cur.value || 0), 0);
                           return (
-                            <div className="bg-surface border border-border p-2.5 shadow-md text-xs font-sans space-y-1.5 min-w-[170px]">
-                              <div className="flex items-center justify-between border-b border-border/80 pb-1 font-mono">
+                            <div className="bg-surface border border-border p-2.5 shadow-md text-xs font-sans space-y-2 min-w-[200px]">
+                              <div className="flex items-center justify-between border-b border-border/80 pb-1.5 gap-4 font-mono">
                                 <span className="font-semibold text-foreground">{label}</span>
-                                <span className="font-bold text-primary">{total} Total Actions</span>
+                                <span className="font-bold text-[11px] text-primary bg-primary/10 px-1.5 py-0.5">
+                                  {total} Total
+                                </span>
                               </div>
                               <div className="space-y-1 text-[11px]">
                                 {payload.map((entry: any, index: number) => (

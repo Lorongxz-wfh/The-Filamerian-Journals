@@ -8,12 +8,14 @@ import {
   Printer, 
   TrendingUp, 
   Award, 
-  Layers
+  Layers,
+  BarChart2,
+  Activity
 } from 'lucide-react';
 import api from '@/services/api';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
 import { useSmartPolling } from '@/hooks/useSmartPolling';
 import { ChartSkeleton } from '@/components/ui/Skeleton';
@@ -31,7 +33,7 @@ interface AnalyticsData {
     users: { trend: string; isPositive: boolean };
   };
   websiteChartData: { date: string; views: number; downloads: number }[];
-  chartData: { date: string; actions: number }[];
+  chartData: { date: string; publications?: number; users?: number; trash?: number; system?: number; actions: number }[];
 }
 
 interface TopArticle {
@@ -132,6 +134,12 @@ const Analytics: React.FC = () => {
   };
 
   const totalViews = data?.websiteChartData?.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0) || 0;
+  const totalDownloads = data?.websiteChartData?.reduce((acc: number, curr: any) => acc + (curr.downloads || 0), 0) || 0;
+  const totalActions = data?.chartData?.reduce((acc: number, curr: any) => acc + (curr.actions || 0), 0) || 0;
+  const totalPublications = data?.chartData?.reduce((acc: number, curr: any) => acc + (curr.publications || 0), 0) || 0;
+  const totalUserActions = data?.chartData?.reduce((acc: number, curr: any) => acc + (curr.users || 0), 0) || 0;
+  const totalTrashActions = data?.chartData?.reduce((acc: number, curr: any) => acc + (curr.trash || 0), 0) || 0;
+  const totalSystemActions = data?.chartData?.reduce((acc: number, curr: any) => acc + (curr.system || 0), 0) || 0;
 
   return (
     <div className="space-y-4 sm:space-y-8 font-sans w-full print:p-0">
@@ -177,6 +185,8 @@ const Analytics: React.FC = () => {
           <div><span className="font-semibold text-slate-900">Total Authors:</span> {data?.authors || 0}</div>
           <div><span className="font-semibold text-slate-900">Registered Admin Users:</span> {data?.users || 0}</div>
           <div><span className="font-semibold text-slate-900">Drafts:</span> {data?.drafts || 0}</div>
+          <div><span className="font-semibold text-slate-900">30-Day Article Views:</span> {totalViews.toLocaleString()}</div>
+          <div><span className="font-semibold text-slate-900">30-Day PDF Reads:</span> {totalDownloads.toLocaleString()}</div>
           <div className="col-span-2"><span className="font-semibold text-slate-900">Top Contributor (Author):</span> {topAuthorStr}</div>
           <div className="col-span-2"><span className="font-semibold text-slate-900">Top Readership Article:</span> {topArticleStr}</div>
         </div>
@@ -223,16 +233,17 @@ const Analytics: React.FC = () => {
                 data?.journals || 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted truncate">
-              <span>{data?.trends?.journals?.trend || 'Stable'} growth</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-blue-600 truncate">
+              <TrendingUp className="h-3 w-3 shrink-0" />
+              <span>{data?.trends?.journals?.trend || 'Stable'}</span>
             </div>
           </div>
         </div>
 
-        {/* Registered FCU Authors */}
+        {/* Authors */}
         <div className="border border-border bg-surface p-3.5 sm:p-6 space-y-2 sm:space-y-4">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider truncate">FCU Authors</span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-wider truncate">Total Authors</span>
             <div className="p-1.5 sm:p-2.5 bg-purple-500/10 text-purple-600 shrink-0">
               <Users className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
             </div>
@@ -245,9 +256,9 @@ const Analytics: React.FC = () => {
                 data?.authors || 0
               )}
             </div>
-            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-emerald-600 truncate">
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-purple-600 truncate">
               <TrendingUp className="h-3 w-3 shrink-0" />
-              <span>{data?.trends?.authors?.trend || 'Stable'} active</span>
+              <span>{data?.trends?.authors?.trend || 'Stable'}</span>
             </div>
           </div>
         </div>
@@ -275,7 +286,7 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 1: Charts */}
+      {/* Row 1: Readership Traffic & Category Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Readership & Activity Trend (2 cols) */}
         <div className="lg:col-span-2">
@@ -357,10 +368,10 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Content Category Distribution (1 col) */}
-        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col">
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary/50" />
+              <Layers className="h-4 w-4 text-primary/70" />
               <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">Category Distribution</h2>
             </div>
           </div>
@@ -384,6 +395,185 @@ const Analytics: React.FC = () => {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Row 2: Portal Activity (Stacked Bar Chart) & 30-Day Activity Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Portal Activity (2 cols) */}
+        <div className="lg:col-span-2">
+          {loading ? (
+            <ChartSkeleton />
+          ) : (
+            <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 h-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-3 gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <BarChart2 className="h-4 w-4 text-primary/70 shrink-0" />
+                  <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider truncate">
+                    Portal & Administrative Activity (30 Days)
+                  </h2>
+                </div>
+                {/* Multi-category Stacked Legend */}
+                <div className="flex flex-wrap items-center gap-3 text-[10px] sm:text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#002d72] shrink-0" />
+                    <span className="text-foreground font-medium">Content</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#d97706] shrink-0" />
+                    <span className="text-foreground font-medium">Users</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#059669] shrink-0" />
+                    <span className="text-foreground font-medium">Trash/Restores</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#64748b] shrink-0" />
+                    <span className="text-foreground font-medium">System</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-48 sm:h-64 w-full pt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data?.chartData || []} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
+                    <Tooltip 
+                      cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const total = payload.reduce((acc: number, cur: any) => acc + (cur.value || 0), 0);
+                          return (
+                            <div className="bg-surface border border-border p-2.5 shadow-md text-xs font-sans space-y-2 min-w-[200px]">
+                              <div className="flex items-center justify-between border-b border-border/80 pb-1.5 gap-4 font-mono">
+                                <span className="font-semibold text-foreground">{label}</span>
+                                <span className="font-bold text-[11px] text-primary bg-primary/10 px-1.5 py-0.5">
+                                  {total} Total
+                                </span>
+                              </div>
+                              <div className="space-y-1 text-[11px]">
+                                {payload.map((entry: any, index: number) => (
+                                  entry.value > 0 ? (
+                                    <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: entry.color }} />
+                                        <span className="text-muted">{entry.name}</span>
+                                      </div>
+                                      <span className="font-mono font-semibold text-foreground">{entry.value}</span>
+                                    </div>
+                                  ) : null
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="publications" stackId="a" fill="#002d72" name="Content & Articles" />
+                    <Bar dataKey="users" stackId="a" fill="#d97706" name="User Management" />
+                    <Bar dataKey="trash" stackId="a" fill="#059669" name="Trash & Restores" />
+                    <Bar dataKey="system" stackId="a" fill="#64748b" radius={[2, 2, 0, 0]} name="System & Config" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 30-Day Activity Summary Breakdown (1 col) */}
+        <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary/70" />
+              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">
+                30-Day Operations
+              </h2>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5">
+              {totalActions.toLocaleString()} Operations
+            </span>
+          </div>
+
+          <div className="space-y-3.5 pt-1">
+            {/* Content & Articles */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px] sm:text-[12px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-[#002d72] shrink-0" />
+                  <span className="font-medium text-foreground">Content & Publications</span>
+                </div>
+                <span className="font-mono font-bold text-primary text-[11px]">
+                  {totalPublications.toLocaleString()} ({totalActions > 0 ? Math.round((totalPublications / totalActions) * 100) : 0}%)
+                </span>
+              </div>
+              <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
+                <div 
+                  className="bg-[#002d72] h-full transition-all duration-500" 
+                  style={{ width: `${totalActions > 0 ? (totalPublications / totalActions) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* User Governance */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px] sm:text-[12px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-[#d97706] shrink-0" />
+                  <span className="font-medium text-foreground">User Management</span>
+                </div>
+                <span className="font-mono font-bold text-primary text-[11px]">
+                  {totalUserActions.toLocaleString()} ({totalActions > 0 ? Math.round((totalUserActions / totalActions) * 100) : 0}%)
+                </span>
+              </div>
+              <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
+                <div 
+                  className="bg-[#d97706] h-full transition-all duration-500" 
+                  style={{ width: `${totalActions > 0 ? (totalUserActions / totalActions) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Trash & Restores */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px] sm:text-[12px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-[#059669] shrink-0" />
+                  <span className="font-medium text-foreground">Trash & Restorations</span>
+                </div>
+                <span className="font-mono font-bold text-primary text-[11px]">
+                  {totalTrashActions.toLocaleString()} ({totalActions > 0 ? Math.round((totalTrashActions / totalActions) * 100) : 0}%)
+                </span>
+              </div>
+              <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
+                <div 
+                  className="bg-[#059669] h-full transition-all duration-500" 
+                  style={{ width: `${totalActions > 0 ? (totalTrashActions / totalActions) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {/* System & Governance */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px] sm:text-[12px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-[#64748b] shrink-0" />
+                  <span className="font-medium text-foreground">System & Governance</span>
+                </div>
+                <span className="font-mono font-bold text-primary text-[11px]">
+                  {totalSystemActions.toLocaleString()} ({totalActions > 0 ? Math.round((totalSystemActions / totalActions) * 100) : 0}%)
+                </span>
+              </div>
+              <div className="w-full bg-background border border-border h-2 overflow-hidden p-0.5">
+                <div 
+                  className="bg-[#64748b] h-full transition-all duration-500" 
+                  style={{ width: `${totalActions > 0 ? (totalSystemActions / totalActions) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
