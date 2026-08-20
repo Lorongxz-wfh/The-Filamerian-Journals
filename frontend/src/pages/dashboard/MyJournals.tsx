@@ -8,6 +8,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
 import Modal from '@/components/ui/Modal';
+import EditDiffModal, { type DiffItem } from '@/components/ui/EditDiffModal';
 
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import Button from '@/components/ui/Button';
@@ -254,6 +255,9 @@ const MyJournals: React.FC = () => {
   };
 
   const [pendingUnpublishData, setPendingUnpublishData] = useState<JournalFormData | null>(null);
+  const [journalDiffModalOpen, setJournalDiffModalOpen] = useState(false);
+  const [pendingJournalDiffs, setPendingJournalDiffs] = useState<DiffItem[]>([]);
+  const [pendingJournalSaveData, setPendingJournalSaveData] = useState<JournalFormData | null>(null);
 
   const onSubmit = async (data: JournalFormData) => {
     setServerError(null);
@@ -276,13 +280,60 @@ const MyJournals: React.FC = () => {
       return;
     }
 
-    // If editing an existing published journal and switching status to Draft, intercept with title confirmation modal
-    if (editingJournal && (editingJournal.status === 'Published' || !editingJournal.status) && data.status === 'Draft') {
-      setPendingUnpublishData(data);
-      setUnpublishJournal(editingJournal);
-      setConfirmUnpublishTitle('');
-      setCopiedUnpublishTitle(false);
-      return;
+    if (editingJournal) {
+      // If editing an existing published journal and switching status to Draft, intercept with title confirmation modal
+      if ((editingJournal.status === 'Published' || !editingJournal.status) && data.status === 'Draft') {
+        setPendingUnpublishData(data);
+        setUnpublishJournal(editingJournal);
+        setConfirmUnpublishTitle('');
+        setCopiedUnpublishTitle(false);
+        return;
+      }
+
+      // Calculate diffs
+      const diffs: DiffItem[] = [];
+      if (editingJournal.title !== data.title) {
+        diffs.push({ label: 'Title', oldValue: editingJournal.title || '', newValue: data.title });
+      }
+      if ((editingJournal.slug || '') !== (data.slug || '')) {
+        diffs.push({ label: 'Slug (URL identifier)', oldValue: editingJournal.slug || '', newValue: data.slug || '(Auto-generated)' });
+      }
+      if (String(editingJournal.category_id || '') !== data.category_id) {
+        const oldCat = availableCategories.find(c => String(c.id) === String(editingJournal.category_id));
+        const newCat = availableCategories.find(c => String(c.id) === data.category_id);
+        diffs.push({ label: 'Discipline / Category', oldValue: oldCat ? oldCat.name : 'None', newValue: newCat ? newCat.name : 'None' });
+      }
+      if (editingJournal.status !== data.status) {
+        diffs.push({ label: 'Publication Status', oldValue: editingJournal.status || 'Published', newValue: data.status });
+      }
+      if ((editingJournal.publisher || '') !== (data.publisher || '')) {
+        diffs.push({ label: 'Year Published', oldValue: editingJournal.publisher || '(Empty)', newValue: data.publisher || '(Empty)' });
+      }
+      if ((editingJournal.issn || '') !== (data.issn || '')) {
+        diffs.push({ label: 'ISSN', oldValue: editingJournal.issn || '(Empty)', newValue: data.issn || '(Empty)' });
+      }
+      if ((editingJournal.frequency || '') !== (data.frequency || '')) {
+        diffs.push({ label: 'Frequency', oldValue: editingJournal.frequency || '(Empty)', newValue: data.frequency || '(Empty)' });
+      }
+      if ((editingJournal.editor || '') !== (data.editor || '')) {
+        diffs.push({ label: 'Editor in Chief', oldValue: editingJournal.editor || '(Empty)', newValue: data.editor || '(Empty)' });
+      }
+      if ((editingJournal.description || '') !== (data.description || '')) {
+        diffs.push({ label: 'Description', oldValue: editingJournal.description ? 'Existing description' : '(Empty)', newValue: data.description ? 'Updated description' : '(Empty)' });
+      }
+      if (pdfFile) {
+        diffs.push({ label: 'PDF Document', oldValue: editingJournal.pdf_url ? 'Existing PDF' : 'None', newValue: pdfFile.name });
+      }
+      if (coverImage) {
+        diffs.push({ label: 'Cover Image', oldValue: editingJournal.cover_image ? 'Existing Image' : 'None', newValue: coverImage.name });
+      }
+
+      if (diffs.length > 0) {
+        setPendingJournalSaveData(data);
+        setPendingJournalDiffs(diffs);
+        setJournalDiffModalOpen(true);
+        return;
+      }
     }
 
     await executeJournalSave(data);
@@ -626,7 +677,7 @@ const MyJournals: React.FC = () => {
 
       {/* Modal Form */}
       <Modal 
-        isOpen={isModalOpen} 
+        isOpen={isModalOpen && !journalDiffModalOpen && !unpublishJournal} 
         onClose={() => !isSubmitting && handleCloseModal()}
         title={editingJournal ? 'Edit Journal' : 'Create New Journal'}
         className="max-w-2xl"
@@ -836,6 +887,22 @@ const MyJournals: React.FC = () => {
           </Button>
         </div>
       </Modal>
+
+      {/* Review Journal Changes Modal */}
+      <EditDiffModal
+        isOpen={journalDiffModalOpen}
+        onClose={() => setJournalDiffModalOpen(false)}
+        onConfirm={async () => {
+          if (pendingJournalSaveData) {
+            await executeJournalSave(pendingJournalSaveData);
+            setJournalDiffModalOpen(false);
+            setPendingJournalSaveData(null);
+          }
+        }}
+        entityName="Journal"
+        diffs={pendingJournalDiffs}
+        loading={isSubmitting}
+      />
 
       {/* Clean Confirmation Modal for Journal Deletion */}
       <Modal

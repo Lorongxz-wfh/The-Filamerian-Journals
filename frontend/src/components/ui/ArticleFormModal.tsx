@@ -243,13 +243,14 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={() => !isSubmitting && onClose()} 
-      title={editingArticle ? 'Edit Article' : 'Submit Article'} 
-      className="max-w-2xl"
-      isDirty={isDirtyForm || !!pdfFile}
-    >
+    <>
+      <Modal 
+        isOpen={isOpen && !diffModalOpen} 
+        onClose={() => !isSubmitting && onClose()} 
+        title={editingArticle ? 'Edit Article' : 'Submit Article'} 
+        className="max-w-2xl"
+        isDirty={isDirtyForm || !!pdfFile}
+      >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px]">{error}</div>}
         
@@ -368,16 +369,17 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           </Button>
         </div>
       </form>
-
-      <EditDiffModal
-        isOpen={diffModalOpen}
-        onClose={() => setDiffModalOpen(false)}
-        onConfirm={executeSave}
-        entityName="Article"
-        diffs={pendingDiffs}
-        loading={isSubmitting}
-      />
     </Modal>
+
+    <EditDiffModal
+      isOpen={diffModalOpen}
+      onClose={() => setDiffModalOpen(false)}
+      onConfirm={executeSave}
+      entityName="Article"
+      diffs={pendingDiffs}
+      loading={isSubmitting}
+    />
+    </>
   );
 };
 
