@@ -189,17 +189,37 @@ class JournalController extends Controller
             return response()->json(['message' => 'File storage upload failed: ' . $reason], 500);
         }
 
+        $oldStatus = $journal->status;
         $journal->update($validated);
 
         // If journal is updated to Draft, cascade Draft status to all its articles
-        if (isset($validated['status']) && $validated['status'] === 'Draft') {
+        if (isset($validated['status']) && $validated['status'] === 'Draft' && $oldStatus !== 'Draft') {
             $volumeIds = $journal->volumes()->pluck('id');
+            $articleCount = 0;
             if ($volumeIds->isNotEmpty()) {
-                \App\Models\Article::whereIn('volume_id', $volumeIds)->update(['status' => 'Draft']);
+                $articleCount = \App\Models\Article::whereIn('volume_id', $volumeIds)->update(['status' => 'Draft']);
             }
-        }
+            \App\Services\ActivityLogger::log('Unpublished Journal', "Unpublished journal '{$journal->title}' (status set to Draft, cascaded {$articleCount} article(s) to Draft)", get_class($journal), $journal->id);
+        } elseif (isset($validated['status']) && $validated['status'] === 'Published' && $oldStatus !== 'Published') {
+            \App\Services\ActivityLogger::log('Published Journal', "Published journal '{$journal->title}' (made publicly visible)", get_class($journal), $journal->id);
+        } else {
+            $changes = [];
+            if ($journal->wasChanged('title')) $changes[] = "title changed to '{$journal->title}'";
+            if ($journal->wasChanged('category_id')) {
+                $catName = $journal->category?->name ?? 'None';
+                $changes[] = "category set to '{$catName}'";
+            }
+            if ($journal->wasChanged('editor')) $changes[] = "editor set to '{$journal->editor}'";
+            if ($journal->wasChanged('issn')) $changes[] = "ISSN set to '{$journal->issn}'";
+            if ($journal->wasChanged('frequency')) $changes[] = "frequency set to '{$journal->frequency}'";
+            if ($journal->wasChanged('publisher')) $changes[] = "year/publisher set to '{$journal->publisher}'";
+            if ($journal->wasChanged('description')) $changes[] = "description updated";
+            if ($journal->wasChanged('cover_image')) $changes[] = "uploaded new cover image";
+            if ($journal->wasChanged('pdf_path')) $changes[] = "uploaded new PDF document";
 
-        \App\Services\ActivityLogger::log('Updated Journal', "Updated journal: {$journal->title}", get_class($journal), $journal->id);
+            $details = count($changes) > 0 ? implode(', ', $changes) : 'metadata';
+            \App\Services\ActivityLogger::log('Updated Journal', "Updated journal '{$journal->title}': {$details}", get_class($journal), $journal->id);
+        }
 
         return new JournalResource($journal);
     }

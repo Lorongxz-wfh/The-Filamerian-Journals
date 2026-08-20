@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, Copy, Check, EyeOff } from 'lucide-react';
+import { BookOpen, Plus, Settings2, Edit2, Trash2, Upload, ArrowUp, ArrowDown, MoreVertical, Copy, Check, EyeOff, Globe } from 'lucide-react';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import api, { getFileUrl } from '@/services/api';
 import { truncateMiddle } from '@/lib/utils';
@@ -253,6 +253,8 @@ const MyJournals: React.FC = () => {
     setSearchParams(newParams);
   };
 
+  const [pendingUnpublishData, setPendingUnpublishData] = useState<JournalFormData | null>(null);
+
   const onSubmit = async (data: JournalFormData) => {
     setServerError(null);
 
@@ -274,6 +276,19 @@ const MyJournals: React.FC = () => {
       return;
     }
 
+    // If editing an existing published journal and switching status to Draft, intercept with title confirmation modal
+    if (editingJournal && (editingJournal.status === 'Published' || !editingJournal.status) && data.status === 'Draft') {
+      setPendingUnpublishData(data);
+      setUnpublishJournal(editingJournal);
+      setConfirmUnpublishTitle('');
+      setCopiedUnpublishTitle(false);
+      return;
+    }
+
+    await executeJournalSave(data);
+  };
+
+  const executeJournalSave = async (data: JournalFormData) => {
     try {
       const payload = new FormData();
       payload.append('title', data.title);
@@ -306,6 +321,7 @@ const MyJournals: React.FC = () => {
       }
       
       handleCloseModal();
+      setPendingUnpublishData(null);
       toast.success(editingJournal ? 'Journal updated successfully' : 'Journal created successfully');
       await fetchJournals();
     } catch (err: any) {
@@ -325,9 +341,24 @@ const MyJournals: React.FC = () => {
   const [copiedUnpublishTitle, setCopiedUnpublishTitle] = useState(false);
 
   const handleUnpublishClick = (journal: Journal) => {
+    setPendingUnpublishData(null);
     setUnpublishJournal(journal);
     setConfirmUnpublishTitle('');
     setCopiedUnpublishTitle(false);
+  };
+
+  const handlePublishClick = async (journal: Journal) => {
+    try {
+      await api.put(`/journals/${journal.slug}`, {
+        title: journal.title,
+        status: 'Published'
+      });
+      await fetchJournals();
+      toast.success(`'${journal.title}' is now published and live on the public site.`);
+    } catch (err: any) {
+      console.error('Publish failed:', err);
+      toast.error(err.response?.data?.message || 'Failed to publish journal.');
+    }
   };
 
   const confirmUnpublish = async () => {
@@ -338,13 +369,18 @@ const MyJournals: React.FC = () => {
     }
     try {
       setIsUnpublishing(true);
-      await api.put(`/journals/${unpublishJournal.slug}`, {
-        title: unpublishJournal.title,
-        status: 'Draft'
-      });
-      await fetchJournals();
+      if (pendingUnpublishData) {
+        await executeJournalSave(pendingUnpublishData);
+      } else {
+        await api.put(`/journals/${unpublishJournal.slug}`, {
+          title: unpublishJournal.title,
+          status: 'Draft'
+        });
+        await fetchJournals();
+      }
       toast.success(`'${unpublishJournal.title}' and all its volumes/articles are now unpublished (Draft).`);
       setUnpublishJournal(null);
+      setPendingUnpublishData(null);
     } catch (err: any) {
       console.error('Unpublish failed:', err);
       toast.error(err.response?.data?.message || 'Failed to unpublish journal.');
@@ -553,7 +589,13 @@ const MyJournals: React.FC = () => {
                                 <Edit2 className="h-4 w-4 text-muted" /> Edit & Details
                               </div>
                             </DropdownMenuItem>
-                            {journal.status !== 'Draft' && (
+                            {journal.status === 'Draft' ? (
+                              <DropdownMenuItem onClick={() => handlePublishClick(journal)}>
+                                <div className="flex items-center gap-2 text-emerald-600">
+                                  <Globe className="h-4 w-4 text-emerald-600" /> Publish Journal
+                                </div>
+                              </DropdownMenuItem>
+                            ) : (
                               <DropdownMenuItem onClick={() => handleUnpublishClick(journal)}>
                                 <div className="flex items-center gap-2 text-amber-600">
                                   <EyeOff className="h-4 w-4 text-amber-600" /> Unpublish Journal

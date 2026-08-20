@@ -124,12 +124,22 @@ class UserController extends Controller
         if (!empty($validated['password'])) $user->password = Hash::make($validated['password']);
         $user->save();
 
+        $changes = [];
+        if ($user->wasChanged('name')) $changes[] = "name to '{$user->name}'";
+        if ($user->wasChanged('email')) $changes[] = "email to '{$user->email}'";
+        if (!empty($validated['password'])) $changes[] = "password updated";
+
         if (!empty($validated['role'])) {
+            $oldRoles = $user->getRoleNames()->implode(', ');
             $roleObj = \Spatie\Permission\Models\Role::firstOrCreate(['name' => $validated['role']]);
             $user->syncRoles([$roleObj]);
+            if ($oldRoles !== $validated['role']) {
+                $changes[] = "role ({$oldRoles} ➔ {$validated['role']})";
+            }
         }
 
-        \App\Services\ActivityLogger::log('Updated User', "Updated user account for {$user->name}", get_class($user), $user->id);
+        $details = count($changes) > 0 ? implode(', ', $changes) : 'profile';
+        \App\Services\ActivityLogger::log('Updated User', "Updated user '{$user->name}': changed {$details}", get_class($user), $user->id);
 
         return response()->json($user->load('roles'));
     }

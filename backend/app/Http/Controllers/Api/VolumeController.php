@@ -30,8 +30,9 @@ class VolumeController extends Controller
         ]);
 
         $volume = Volume::create($validated);
+        $journalTitle = $volume->journal?->title ?? "Journal #{$volume->journal_id}";
 
-        \App\Services\ActivityLogger::log('Created Volume', "Created volume number {$volume->volume_number} for journal ID {$volume->journal_id}", get_class($volume), $volume->id);
+        \App\Services\ActivityLogger::log('Created Volume', "Created Volume {$volume->volume_number} ({$volume->year}) for '{$journalTitle}'", get_class($volume), $volume->id);
 
         return new VolumeResource($volume);
     }
@@ -54,7 +55,9 @@ class VolumeController extends Controller
             \App\Models\Article::where('id', $id)->where('volume_id', $volume->id)->update(['order' => $index]);
         }
 
-        \App\Services\ActivityLogger::log('Reordered Articles', "Reordered articles in volume {$volume->volume_number}", get_class($volume), $volume->id);
+        $count = count($validated['article_ids']);
+        $journalTitle = $volume->journal?->title ?? "Journal #{$volume->journal_id}";
+        \App\Services\ActivityLogger::log('Reordered Articles', "Reordered {$count} article(s) in Volume {$volume->volume_number} ({$volume->year}) of '{$journalTitle}'", get_class($volume), $volume->id);
 
         return response()->json(['message' => 'Articles reordered successfully']);
     }
@@ -68,14 +71,18 @@ class VolumeController extends Controller
         ]);
 
         $volume->update($validated);
+        $journalTitle = $volume->journal?->title ?? "Journal #{$volume->journal_id}";
 
-        \App\Services\ActivityLogger::log('Updated Volume', "Updated volume number {$volume->volume_number}", get_class($volume), $volume->id);
+        \App\Services\ActivityLogger::log('Updated Volume', "Updated Volume {$volume->volume_number} ({$volume->year}) of '{$journalTitle}'", get_class($volume), $volume->id);
 
         return new VolumeResource($volume);
     }
 
     public function destroy(Volume $volume)
     {
+        $articleCount = $volume->articles()->count();
+        $journalTitle = $volume->journal?->title ?? "Journal #{$volume->journal_id}";
+
         \Illuminate\Support\Facades\DB::transaction(function () use ($volume) {
             // Soft delete all active articles in this volume
             $volume->articles()->delete();
@@ -83,7 +90,7 @@ class VolumeController extends Controller
             $volume->delete();
         });
 
-        $desc = "Moved volume number {$volume->volume_number} and its articles to trash";
+        $desc = "Moved Volume {$volume->volume_number} ({$volume->year}) and {$articleCount} article(s) of '{$journalTitle}' to trash";
         $class = get_class($volume);
 
         \App\Services\ActivityLogger::log('Soft Deleted Volume', $desc, $class, $volume->id);

@@ -209,7 +209,7 @@ const Navbar = () => {
                   to="/dashboard"
                   title="Dashboard"
                   aria-label="Go to Dashboard"
-                  className="h-9 w-9 rounded-sm flex items-center justify-center border border-secondary/40 text-secondary bg-secondary/10 hover:bg-secondary/20 hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
+                  className="h-9 w-9 rounded-none flex items-center justify-center border border-secondary/40 text-secondary bg-transparent hover:bg-secondary/[0.08] hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
                 >
                   <BookOpen className="h-4 w-4" />
                 </Link>
@@ -218,7 +218,7 @@ const Navbar = () => {
                   to="/login"
                   title="Portal Login"
                   aria-label="Portal Login"
-                  className="h-9 w-9 rounded-sm flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
+                  className="h-9 w-9 rounded-none flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
                 >
                   <BookOpen className="h-4 w-4" />
                 </Link>
@@ -232,7 +232,7 @@ const Navbar = () => {
           {/* Left: Mobile Menu Trigger */}
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className="h-9 w-9 flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer shrink-0"
+            className="h-9 w-9 rounded-none flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 cursor-pointer shrink-0"
             title="Open Navigation Menu"
             aria-label="Open Navigation Menu"
           >
@@ -254,7 +254,7 @@ const Navbar = () => {
                 to="/dashboard"
                 title="Dashboard"
                 aria-label="Go to Dashboard"
-                className="h-9 w-9 rounded-sm flex items-center justify-center border border-secondary/40 text-secondary bg-secondary/10 hover:bg-secondary/20 hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs"
+                className="h-9 w-9 rounded-none flex items-center justify-center border border-secondary/40 text-secondary bg-transparent hover:bg-secondary/[0.08] hover:border-secondary transition-all duration-200 active:scale-95 shadow-xs"
               >
                 <BookOpen className="h-4 w-4" />
               </Link>
@@ -263,7 +263,7 @@ const Navbar = () => {
                 to="/login"
                 title="Portal Login"
                 aria-label="Portal Login"
-                className="h-9 w-9 rounded-sm flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs"
+                className="h-9 w-9 rounded-none flex items-center justify-center border border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/[0.08] transition-all duration-200 active:scale-95 shadow-xs"
               >
                 <BookOpen className="h-4 w-4" />
               </Link>

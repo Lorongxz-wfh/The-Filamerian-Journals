@@ -290,7 +290,24 @@ class ArticleController extends Controller
             $article->keywords()->sync($keywordIds);
         }
 
-        \App\Services\ActivityLogger::log('Updated Article', "Updated article: {$article->title}", get_class($article), $article->id);
+        $changes = [];
+        if ($article->wasChanged('title')) $changes[] = "title changed to '{$article->title}'";
+        if ($article->wasChanged('status')) $changes[] = "status changed to '{$article->status}'";
+        if ($article->wasChanged('volume_id')) {
+            $vol = $article->volume;
+            $changes[] = "reassigned to Vol. {$vol?->volume_number} ({$vol?->year})";
+        }
+        if ($article->wasChanged('doi')) $changes[] = "DOI set to '{$article->doi}'";
+        if ($article->wasChanged('abstract')) $changes[] = "abstract updated";
+        if ($article->wasChanged('page_start') || $article->wasChanged('page_end')) {
+            $changes[] = "pages set to pp. {$article->page_start}–{$article->page_end}";
+        }
+        if ($article->wasChanged('pdf_path')) $changes[] = "uploaded new manuscript PDF";
+        if ($request->has('authors') || $request->has('author_names')) $changes[] = "updated author list";
+        if ($request->has('keyword_names') || $request->has('keyword_ids')) $changes[] = "updated keywords";
+
+        $details = count($changes) > 0 ? implode(', ', $changes) : 'metadata';
+        \App\Services\ActivityLogger::log('Updated Article', "Updated article '{$article->title}': {$details}", get_class($article), $article->id);
         \Illuminate\Support\Facades\Cache::forget('public_settings');
 
         return new ArticleResource($article->load(['authors', 'keywords', 'volume.journal']));
