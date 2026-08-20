@@ -152,12 +152,23 @@ const Overview: React.FC = () => {
             <ChartSkeleton />
           ) : (
             <div className="border border-border bg-surface p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b border-border pb-3 mb-3 sm:pb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-3 mb-3 sm:pb-4 sm:mb-6 gap-2">
                 <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-primary/50" />
+                  <Globe className="h-4 w-4 text-primary/70" />
                   <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">
                     Website Activity (30 Days)
                   </h2>
+                </div>
+                {/* Right-aligned legend */}
+                <div className="flex items-center gap-4 text-[10px] sm:text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#002d72] shrink-0" />
+                    <span className="text-foreground font-medium">Views</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#059669] shrink-0" />
+                    <span className="text-foreground font-medium">PDF Reads</span>
+                  </div>
                 </div>
               </div>
               <div className="h-48 sm:h-64 pt-2 sm:pt-4">
@@ -165,53 +176,122 @@ const Overview: React.FC = () => {
                   <AreaChart data={websiteChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#002d72" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#002d72" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorDownloads" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#059669" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#6b7280' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#6b7280' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '11px' }}
-                      itemStyle={{ color: '#111827' }}
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-surface border border-border p-2.5 shadow-md text-xs font-sans space-y-1.5 min-w-[150px]">
+                              <div className="border-b border-border/80 pb-1 font-mono font-semibold text-foreground">
+                                {label}
+                              </div>
+                              <div className="space-y-1 text-[11px]">
+                                {payload.map((entry: any, index: number) => (
+                                  <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                                      <span className="text-muted">{entry.name}</span>
+                                    </div>
+                                    <span className="font-mono font-semibold text-foreground">{entry.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
                     />
-                    <Area type="monotone" dataKey="views" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Views" />
-                    <Area type="monotone" dataKey="downloads" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="PDF Reads" />
+                    <Area type="monotone" dataKey="views" stroke="#002d72" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Article Views" />
+                    <Area type="monotone" dataKey="downloads" stroke="#059669" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" name="PDF Reads" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
 
-          {/* Portal Chart Section */}
+          {/* Portal Activity (Stacked Multi-Category Bar Chart) */}
           {loading ? (
             <ChartSkeleton />
           ) : (
             <div className="border border-border bg-surface p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center justify-between border-b border-border pb-3 mb-3 sm:pb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-3 mb-3 sm:pb-4 sm:mb-6 gap-2">
                 <div className="flex items-center gap-2">
-                  <BarChart2 className="h-4 w-4 text-primary/50" />
+                  <BarChart2 className="h-4 w-4 text-primary/70" />
                   <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider">
                     Portal Activity (30 Days)
                   </h2>
+                </div>
+                {/* Multi-category Stacked Legend */}
+                <div className="flex flex-wrap items-center gap-3 text-[10px] sm:text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#002d72] shrink-0" />
+                    <span className="text-foreground font-medium">Content</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#d97706] shrink-0" />
+                    <span className="text-foreground font-medium">Users</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#059669] shrink-0" />
+                    <span className="text-foreground font-medium">Trash/Restores</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-[#64748b] shrink-0" />
+                    <span className="text-foreground font-medium">System</span>
+                  </div>
                 </div>
               </div>
               <div className="h-48 sm:h-64 pt-2 sm:pt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={portalChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#6b7280' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#6b7280' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '11px' }}
-                      cursor={{ fill: '#f3f4f6' }}
+                      cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const total = payload.reduce((acc: number, cur: any) => acc + (cur.value || 0), 0);
+                          return (
+                            <div className="bg-surface border border-border p-2.5 shadow-md text-xs font-sans space-y-1.5 min-w-[170px]">
+                              <div className="flex items-center justify-between border-b border-border/80 pb-1 font-mono">
+                                <span className="font-semibold text-foreground">{label}</span>
+                                <span className="font-bold text-primary">{total} Total Actions</span>
+                              </div>
+                              <div className="space-y-1 text-[11px]">
+                                {payload.map((entry: any, index: number) => (
+                                  entry.value > 0 ? (
+                                    <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: entry.color }} />
+                                        <span className="text-muted">{entry.name}</span>
+                                      </div>
+                                      <span className="font-mono font-semibold text-foreground">{entry.value}</span>
+                                    </div>
+                                  ) : null
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
                     />
-                    <Bar dataKey="actions" fill="#002d72" radius={[2, 2, 0, 0]} name="Actions" />
+                    <Bar dataKey="publications" stackId="a" fill="#002d72" name="Content & Articles" />
+                    <Bar dataKey="users" stackId="a" fill="#d97706" name="User Management" />
+                    <Bar dataKey="trash" stackId="a" fill="#059669" name="Trash & Restores" />
+                    <Bar dataKey="system" stackId="a" fill="#64748b" radius={[2, 2, 0, 0]} name="System & Config" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

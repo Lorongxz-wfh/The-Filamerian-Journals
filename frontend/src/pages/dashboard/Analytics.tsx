@@ -16,6 +16,7 @@ import Button from '@/components/ui/Button';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
 import { useSmartPolling } from '@/hooks/useSmartPolling';
+import { ChartSkeleton } from '@/components/ui/Skeleton';
 
 interface AnalyticsData {
   journals: number;
@@ -277,44 +278,82 @@ const Analytics: React.FC = () => {
       {/* Row 1: Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Readership & Activity Trend (2 cols) */}
-        <div className="lg:col-span-2 border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <TrendingUp className="h-4 w-4 text-primary/50 shrink-0" />
-              <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider truncate">Readership & Traffic Trend</h2>
-            </div>
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold bg-background border border-border px-2 py-0.5 text-muted uppercase shrink-0">
-              30-Day Activity
-            </span>
-          </div>
-
-          <div className="h-48 sm:h-64 w-full">
-            {loading ? (
-              <div className="h-full flex items-center justify-center gap-2 text-muted text-xs">
-                <span className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin inline-block" />
-                Loading trend data...
+        <div className="lg:col-span-2">
+          {loading ? (
+            <ChartSkeleton />
+          ) : (
+            <div className="border border-border bg-surface p-4 sm:p-6 space-y-3.5 sm:space-y-5 h-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-3 gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <TrendingUp className="h-4 w-4 text-primary/70 shrink-0" />
+                  <h2 className="text-[11px] sm:text-[12px] font-semibold text-primary uppercase tracking-wider truncate">
+                    Readership & Traffic Trend (30 Days)
+                  </h2>
+                </div>
+                {/* Right-aligned legend */}
+                <div className="flex items-center gap-4 text-[10px] sm:text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#002d72] shrink-0" />
+                    <span className="text-foreground font-medium">Views</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#059669] shrink-0" />
+                    <span className="text-foreground font-medium">PDF Reads</span>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data?.websiteChartData && data.websiteChartData.length > 0 ? data.websiteChartData : [
-                  { date: 'Jul 05', views: 0, downloads: 0 }, { date: 'Jul 10', views: 0, downloads: 0 }, { date: 'Jul 15', views: 0, downloads: 0 },
-                  { date: 'Jul 20', views: 0, downloads: 0 }, { date: 'Jul 25', views: 0, downloads: 0 }, { date: 'Aug 01', views: 0, downloads: 0 }
-                ]}>
-                  <defs>
-                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1e3a8a" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#1e3a8a" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderRadius: '4px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                  <Area type="monotone" dataKey="views" stroke="#1e3a8a" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" name="Article Views" />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+
+              <div className="h-48 sm:h-64 w-full pt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data?.websiteChartData && data.websiteChartData.length > 0 ? data.websiteChartData : [
+                    { date: 'Jul 05', views: 0, downloads: 0 }, { date: 'Jul 10', views: 0, downloads: 0 }, { date: 'Jul 15', views: 0, downloads: 0 },
+                    { date: 'Jul 20', views: 0, downloads: 0 }, { date: 'Jul 25', views: 0, downloads: 0 }, { date: 'Aug 01', views: 0, downloads: 0 }
+                  ]}>
+                    <defs>
+                      <linearGradient id="colorReportViews" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#002d72" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#002d72" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorReportDownloads" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#059669" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#64748b' }} dy={5} />
+                    <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 9, fill: '#64748b' }} />
+                    <Tooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-surface border border-border p-2.5 shadow-md text-xs font-sans space-y-1.5 min-w-[150px]">
+                              <div className="border-b border-border/80 pb-1 font-mono font-semibold text-foreground">
+                                {label}
+                              </div>
+                              <div className="space-y-1 text-[11px]">
+                                {payload.map((entry: any, index: number) => (
+                                  <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                                      <span className="text-muted">{entry.name}</span>
+                                    </div>
+                                    <span className="font-mono font-semibold text-foreground">{entry.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Area type="monotone" dataKey="views" stroke="#002d72" strokeWidth={2} fillOpacity={1} fill="url(#colorReportViews)" name="Article Views" />
+                    <Area type="monotone" dataKey="downloads" stroke="#059669" strokeWidth={2} fillOpacity={1} fill="url(#colorReportDownloads)" name="PDF Reads" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content Category Distribution (1 col) */}

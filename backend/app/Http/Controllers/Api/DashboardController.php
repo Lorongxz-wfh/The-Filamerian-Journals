@@ -50,10 +50,34 @@ class DashboardController extends Controller
             return ['trend' => 'Stable', 'isPositive' => true];
         };
 
-        $activityCounts = \App\Models\ActivityLog::where('created_at', '>=', $thirtyDaysAgo->copy()->startOfDay())
-            ->selectRaw('DATE(created_at) as date, count(*) as count')
-            ->groupBy('date')
-            ->pluck('count', 'date');
+        $rawLogs = \App\Models\ActivityLog::where('created_at', '>=', $thirtyDaysAgo->copy()->startOfDay())->get();
+        $activityByCategory = [];
+        foreach ($rawLogs as $log) {
+            $date = $log->created_at->format('Y-m-d');
+            $action = strtolower($log->action ?? '');
+            $subject = strtolower($log->subject_type ?? '');
+
+            $cat = 'system';
+            if (str_contains($action, 'restore') || str_contains($action, 'purge') || str_contains($action, 'trash') || str_contains($action, 'delete')) {
+                $cat = 'trash';
+            } elseif (str_contains($subject, 'user') || str_contains($action, 'user') || str_contains($action, 'approved') || str_contains($action, 'disabled') || str_contains($action, 'enabled')) {
+                $cat = 'users';
+            } elseif (str_contains($subject, 'article') || str_contains($subject, 'journal') || str_contains($subject, 'volume') || str_contains($subject, 'author') || str_contains($subject, 'category') || str_contains($action, 'article') || str_contains($action, 'journal') || str_contains($action, 'publish')) {
+                $cat = 'publications';
+            }
+
+            if (!isset($activityByCategory[$date])) {
+                $activityByCategory[$date] = [
+                    'publications' => 0,
+                    'users' => 0,
+                    'trash' => 0,
+                    'system' => 0,
+                    'total' => 0,
+                ];
+            }
+            $activityByCategory[$date][$cat]++;
+            $activityByCategory[$date]['total']++;
+        }
 
         $metricsData = \Illuminate\Support\Facades\DB::table('article_metrics')
             ->where('date', '>=', $thirtyDaysAgo->copy()->startOfDay())
@@ -63,16 +87,28 @@ class DashboardController extends Controller
 
         $metricsByDate = [];
         foreach ($metricsData as $metric) {
-            $metricsByDate[$metric->date][$metric->type] = $metric->total;
+            $metricsByDate[$metric->date][$metric->type] = (int) $metric->total;
         }
 
         $chartData = [];
         $websiteChartData = [];
         for ($i = 29; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i)->format('Y-m-d');
+            $dayActivity = $activityByCategory[$date] ?? [
+                'publications' => 0,
+                'users' => 0,
+                'trash' => 0,
+                'system' => 0,
+                'total' => 0,
+            ];
+
             $chartData[] = [
                 'date' => \Carbon\Carbon::parse($date)->format('M d'),
-                'actions' => $activityCounts[$date] ?? 0
+                'publications' => $dayActivity['publications'],
+                'users' => $dayActivity['users'],
+                'trash' => $dayActivity['trash'],
+                'system' => $dayActivity['system'],
+                'actions' => $dayActivity['total'],
             ];
             
             $websiteChartData[] = [
