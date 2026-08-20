@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, FileText, ImageIcon, CheckCircle2, X } from 'lucide-react';
+import { Upload, FileText, ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSettings } from '@/contexts/SettingsContext';
 
@@ -99,17 +99,43 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     }
   };
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (selectedFile && (selectedFile.type.startsWith('image/') || iconType === 'image')) {
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setPreviewUrl(null);
+  }, [selectedFile, iconType]);
+
   const renderIcon = () => {
     if (isDragging) {
-      return <Upload className="h-5 w-5 text-primary scale-110 transition-transform duration-300 ease-out shrink-0" />;
+      return (
+        <div className="w-9 h-9 shrink-0 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary transition-transform duration-200 scale-105">
+          <Upload className="h-4 w-4" />
+        </div>
+      );
     }
     if (selectedFile) {
-      return <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />;
+      if (previewUrl) {
+        return (
+          <div className="w-9 h-9 shrink-0 bg-surface border border-border/80 overflow-hidden flex items-center justify-center">
+            <img src={previewUrl} alt="Selected file preview" className="w-full h-full object-cover" />
+          </div>
+        );
+      }
+      return (
+        <div className="w-9 h-9 shrink-0 bg-primary/5 border border-primary/20 flex items-center justify-center text-primary">
+          <FileText className="h-4 w-4" />
+        </div>
+      );
     }
     if (existingUrl) {
       if (iconType === 'image') {
         return (
-          <div className="w-9 h-9 shrink-0 bg-muted/20 border border-border overflow-hidden rounded flex items-center justify-center">
+          <div className="w-9 h-9 shrink-0 bg-muted/10 border border-border/80 overflow-hidden flex items-center justify-center">
             <img 
               src={existingUrl} 
               alt="Existing cover preview" 
@@ -123,14 +149,30 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         );
       }
       return (
-        <div className="w-9 h-9 shrink-0 bg-red-50 border border-red-200 rounded flex items-center justify-center">
-          <FileText className="h-5 w-5 text-red-600 shrink-0" />
+        <div className="w-9 h-9 shrink-0 bg-primary/5 border border-primary/20 flex items-center justify-center text-primary">
+          <FileText className="h-4 w-4" />
         </div>
       );
     }
-    if (iconType === 'image') return <ImageIcon className="h-5 w-5 text-muted group-hover:text-primary transition-colors shrink-0" />;
-    if (iconType === 'pdf') return <FileText className="h-5 w-5 text-muted group-hover:text-primary transition-colors shrink-0" />;
-    return <Upload className="h-5 w-5 text-muted group-hover:text-primary transition-colors shrink-0" />;
+    if (iconType === 'image') {
+      return (
+        <div className="w-9 h-9 shrink-0 bg-muted/10 border border-border flex items-center justify-center text-muted group-hover:text-primary group-hover:border-primary/40 transition-colors">
+          <ImageIcon className="h-4 w-4" />
+        </div>
+      );
+    }
+    if (iconType === 'pdf') {
+      return (
+        <div className="w-9 h-9 shrink-0 bg-muted/10 border border-border flex items-center justify-center text-muted group-hover:text-primary group-hover:border-primary/40 transition-colors">
+          <FileText className="h-4 w-4" />
+        </div>
+      );
+    }
+    return (
+      <div className="w-9 h-9 shrink-0 bg-muted/10 border border-border flex items-center justify-center text-muted group-hover:text-primary group-hover:border-primary/40 transition-colors">
+        <Upload className="h-4 w-4" />
+      </div>
+    );
   };
 
   const dynamicHint = hint !== undefined ? hint : (isPdf ? `PDF (Max: ${maxMb}MB)` : `JPG/PNG (Max: ${maxMb}MB)`);
@@ -158,13 +200,13 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`group relative flex items-center justify-center w-full border transition-all cursor-pointer py-2.5 px-3.5 rounded-sm min-h-[72px] h-[72px] ${
+        className={`group relative flex items-center justify-center w-full border transition-all cursor-pointer py-2.5 px-3 min-h-[64px] h-[64px] ${
           isDragging
-            ? 'border-primary bg-primary/5 scale-[1.005]'
+            ? 'border-primary bg-primary/5'
             : selectedFile
-            ? 'border-green-500/40 bg-green-500/[0.02]'
+            ? 'border-primary/40 bg-surface hover:border-primary/60'
             : existingUrl
-            ? 'border-blue-500/30 bg-blue-500/[0.02] border-solid'
+            ? 'border-border/80 bg-surface/50 hover:border-primary/40'
             : 'border-dashed border-border hover:border-primary/50 bg-background hover:bg-primary/[0.02]'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
@@ -182,18 +224,13 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
 
           <div className="flex-1 min-w-0 text-left">
             {isDragging ? (
-              <p className="text-[12px] font-semibold text-primary truncate">Drop new file here</p>
+              <p className="text-[12px] font-semibold text-primary truncate">Drop file to upload</p>
             ) : selectedFile ? (
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-green-700 bg-green-100 border border-green-200 rounded shrink-0">
-                      Selected
-                    </span>
-                    <p className="text-[12px] font-semibold text-primary truncate">{selectedFile.name}</p>
-                  </div>
-                  <p className="text-[10px] text-muted truncate mt-0.5">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB — Click or drag to replace
+                  <p className="text-[12px] font-medium text-foreground truncate font-sans">{selectedFile.name}</p>
+                  <p className="text-[10px] text-muted truncate mt-0.5 font-mono">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB · Click or drag to replace
                   </p>
                 </div>
                 <button
@@ -203,7 +240,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
                     e.stopPropagation();
                     onFileSelect(null);
                   }}
-                  className="p-1 hover:bg-red-500/10 hover:text-red-500 text-muted transition-colors rounded cursor-pointer shrink-0"
+                  className="p-1 hover:bg-destructive/10 hover:text-destructive text-muted transition-colors cursor-pointer shrink-0"
                   title="Remove selected file"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -212,24 +249,19 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
             ) : existingUrl ? (
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100 border border-blue-200 rounded shrink-0">
-                      Attached
-                    </span>
-                    <p className="text-[12px] font-semibold text-primary truncate">
-                      {iconType === 'image' ? 'Existing Image' : 'Existing PDF'}
-                    </p>
-                  </div>
-                  <p className="text-[10px] text-muted truncate mt-0.5">Click or drag to replace</p>
+                  <p className="text-[12px] font-medium text-foreground truncate">
+                    {iconType === 'image' ? 'Current Cover Image' : 'Current PDF Document'}
+                  </p>
+                  <p className="text-[10px] text-muted truncate mt-0.5 font-mono">Attached · Click or drag to replace</p>
                 </div>
               </div>
             ) : (
               <div>
-                <p className="text-[12px] font-semibold text-primary truncate">
-                  Click or drag & drop file
+                <p className="text-[12px] font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                  Click or drag file to upload
                 </p>
-                <p className="text-[10px] text-muted truncate">
-                  {hint || (accept.includes('pdf') ? `PDF files only (Max ${maxMb}MB)` : accept.includes('image') ? `JPG, PNG image files (Max ${maxMb}MB)` : `Select a file up to ${maxMb}MB`)}
+                <p className="text-[10px] text-muted truncate font-mono mt-0.5">
+                  {hint || (accept.includes('pdf') ? `PDF only (Max ${maxMb}MB)` : accept.includes('image') ? `JPG, PNG (Max ${maxMb}MB)` : `Max size ${maxMb}MB`)}
                 </p>
               </div>
             )}
