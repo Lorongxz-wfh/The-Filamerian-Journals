@@ -327,16 +327,17 @@ const Feedback: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Clean Single Filter Row: Search on Left, followed by Status, Category, and Date */}
-      <div className="flex flex-wrap items-center gap-2.5">
-        {/* Search Input on Left */}
-        <div className="w-full sm:w-64">
-          <SearchInput
-            placeholder="Search feedback..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      <div className="flex flex-col gap-2.5 sm:gap-4">
+        {/* Clean Single Filter Row: Search on Left, followed by Status, Category, and Date */}
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          {/* Search Input on Left */}
+          <div className="w-full sm:w-64">
+            <SearchInput
+              placeholder="Search feedback..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
         {/* Status filter dropdown */}
         <div className="w-full sm:w-36">
@@ -752,6 +753,7 @@ const Feedback: React.FC = () => {
           )}
         </div>
       )}
+      </div>
 
       {/* QUICK VIEW MODAL (For Table Mode) */}
       {quickViewItem && (
