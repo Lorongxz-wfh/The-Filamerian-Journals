@@ -275,8 +275,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
         <Link to="/" className="flex items-center gap-3 group">
           <img src="/TFJ-50pxOutline.svg" alt="The FCU Journals Logo" className="h-8 w-8 object-contain shrink-0" />
           <div className="flex flex-col">
-            <span className="text-[13px] font-bold text-white uppercase tracking-[0.15em] group-hover:text-secondary transition-colors leading-none">
-              The FCU
+            <span className="text-[13px] font-bold text-white uppercase tracking-[0.12em] group-hover:text-secondary transition-colors leading-none">
+              The FCU Journals
             </span>
             <span className="text-[9px] font-semibold text-white/50 uppercase tracking-[0.3em] mt-0.5">
               Dashboard

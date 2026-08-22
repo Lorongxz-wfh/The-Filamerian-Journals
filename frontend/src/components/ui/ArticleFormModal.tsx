@@ -5,7 +5,7 @@ import api, { getFileUrl } from '@/services/api';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import Textarea from '@/components/ui/Textarea';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import AuthorInput from '@/components/ui/AuthorInput';
 import Button from '@/components/ui/Button';
 import FileUploadZone from '@/components/ui/FileUploadZone';
@@ -347,8 +347,10 @@ const ArticleFormModal: React.FC<ArticleFormModalProps> = ({
           </div>
 
           <div className="md:col-span-2">
-            <Textarea 
-              label="Abstract" name="abstract" value={formData.abstract} onChange={handleInputChange} rows={4}
+            <RichTextEditor 
+              label="Abstract" 
+              value={formData.abstract} 
+              onChange={(val) => setFormData(prev => ({ ...prev, abstract: val }))} 
             />
           </div>
 

@@ -319,9 +319,10 @@ const ArticleDetail: React.FC = () => {
         {article.abstract && (
           <div className="pt-6 border-t border-border space-y-3">
             <h3 className="text-[12px] font-bold text-primary uppercase tracking-wider">Abstract</h3>
-            <p className="text-[14px] text-muted leading-relaxed text-justify">
-              {article.abstract}
-            </p>
+            <div 
+              className="text-[14px] text-muted leading-relaxed text-justify prose dark:prose-invert max-w-none [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:list-decimal [&>ol]:pl-5"
+              dangerouslySetInnerHTML={{ __html: article.abstract }}
+            />
           </div>
         )}
       </div>

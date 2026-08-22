@@ -111,9 +111,10 @@ const ArticleQuickViewModal: React.FC<ArticleQuickViewModalProps> = ({
             <div className="font-bold text-muted uppercase tracking-wider text-[10px]">
               Abstract
             </div>
-            <p className="text-xs text-primary/80 leading-relaxed bg-background p-3.5 border border-border max-h-48 overflow-y-auto font-sans">
-              {article.abstract}
-            </p>
+            <div 
+              className="text-xs text-primary/80 leading-relaxed bg-background p-3.5 border border-border max-h-48 overflow-y-auto font-sans prose dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4"
+              dangerouslySetInnerHTML={{ __html: article.abstract }}
+            />
           </div>
         )}
 
