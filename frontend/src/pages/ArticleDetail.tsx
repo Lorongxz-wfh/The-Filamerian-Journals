@@ -9,6 +9,7 @@ import PageWrapper from '@/components/layout/PageWrapper';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatVolumeName } from '@/lib/utils';
 import PdfViewer from '@/components/ui/PdfViewer';
+import { Seo } from '@/components/ui/Seo';
 import {
   Breadcrumbs,
   BreadcrumbList,
@@ -218,6 +219,11 @@ const ArticleDetail: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col w-full">
+      <Seo 
+        title={article.title} 
+        description={article.abstract ? article.abstract.replace(/<[^>]*>?/gm, '').slice(0, 160) : undefined}
+        type="article"
+      />
       {/* Breadcrumbs Navigation */}
       <Breadcrumbs className="mb-4">
         <BreadcrumbList>

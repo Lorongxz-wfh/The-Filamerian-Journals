@@ -38,6 +38,8 @@ interface TrashedItem {
   journal_id?: number;
   deleted_at: string;
   days_remaining: number;
+  nested_volumes_count?: number;
+  nested_articles_count?: number;
   volume?: {
     id?: number;
     volume_number: string | number;
@@ -636,6 +638,17 @@ const TrashBin: React.FC = () => {
 
                         <div className="min-w-0 flex-1 flex items-center gap-2 flex-wrap">
                           <span className="line-clamp-1 text-xs sm:text-[13px] font-semibold">{title}</span>
+                          {/* Cascade transparency pill */}
+                          {item.type === 'journal' && (Boolean(item.nested_volumes_count) || Boolean(item.nested_articles_count)) && (
+                            <span className="text-[9px] sm:text-[10px] font-mono font-medium text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 shrink-0">
+                              Includes {item.nested_volumes_count || 0} Vol, {item.nested_articles_count || 0} Art
+                            </span>
+                          )}
+                          {item.type === 'volume' && Boolean(item.nested_articles_count) && (
+                            <span className="text-[9px] sm:text-[10px] font-mono font-medium text-amber-700 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 shrink-0">
+                              Includes {item.nested_articles_count} Art
+                            </span>
+                          )}
                           {activeTab === 'all' && item.hasChildren && item.childCount && item.childCount > 0 && (
                             <span className="text-[10px] text-muted font-mono font-medium shrink-0">
                               ({item.childCount})

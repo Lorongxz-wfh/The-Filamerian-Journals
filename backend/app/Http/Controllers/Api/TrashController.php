@@ -36,6 +36,7 @@ class TrashController extends Controller
                 $days = 30 - (int) Carbon::now()->diffInDays(Carbon::parse($item->deleted_at));
                 $item->days_remaining = max(0, $days);
                 $item->type = 'volume';
+                $item->nested_articles_count = Article::withTrashed()->where('volume_id', $item->id)->count();
                 return $item;
             });
 
@@ -47,6 +48,9 @@ class TrashController extends Controller
                 $days = 30 - (int) Carbon::now()->diffInDays(Carbon::parse($item->deleted_at));
                 $item->days_remaining = max(0, $days);
                 $item->type = 'journal';
+                $volIds = Volume::withTrashed()->where('journal_id', $item->id)->pluck('id');
+                $item->nested_volumes_count = $volIds->count();
+                $item->nested_articles_count = Article::withTrashed()->whereIn('volume_id', $volIds)->count();
                 return $item;
             });
 

@@ -49,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop — no blur to avoid GPU jank */}
       <div 
         className="fixed inset-0 bg-black/60 cursor-pointer" 
@@ -64,8 +64,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
           className
         )}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-          <h2 className="text-[13px] font-bold uppercase tracking-[0.1em] text-primary font-sans">{title}</h2>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-border shrink-0">
+          <h2 className="text-[12px] sm:text-[13px] font-bold uppercase tracking-[0.1em] text-primary font-sans">{title}</h2>
           <button 
             onClick={handleAttemptClose}
             className="w-7 h-7 flex items-center justify-center text-muted hover:text-primary hover:bg-black/5 transition-colors cursor-pointer"
@@ -76,7 +76,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
         </div>
         
         {/* Body */}
-        <div className={cn("px-6 py-5 overflow-y-auto flex-grow flex flex-col", bodyClassName)}>
+        <div className={cn("px-4 sm:px-6 py-3.5 sm:py-5 overflow-y-auto flex-grow flex flex-col custom-scrollbar", bodyClassName)}>
           {children}
         </div>
       </div>

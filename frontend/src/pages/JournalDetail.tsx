@@ -8,6 +8,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import PageWrapper from '@/components/layout/PageWrapper';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatVolumeName } from '@/lib/utils';
+import { Seo } from '@/components/ui/Seo';
 import {
   Breadcrumbs,
   BreadcrumbList,
@@ -186,6 +187,10 @@ const JournalDetail: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col">
+      <Seo 
+        title={journal.title} 
+        description={journal.description ? journal.description.replace(/<[^>]*>?/gm, '').slice(0, 160) : undefined}
+      />
       {/* Breadcrumbs Navigation */}
       <Breadcrumbs className="mb-4">
         <BreadcrumbList>

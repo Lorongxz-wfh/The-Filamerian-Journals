@@ -10,6 +10,7 @@ import HighlightText from '@/components/ui/HighlightText';
 import PageWrapper from '@/components/layout/PageWrapper';
 import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
+import { Seo } from '@/components/ui/Seo';
 
 interface SearchResults {
   journals: any[];
@@ -59,18 +60,23 @@ const Search: React.FC = () => {
   const [pdfViewUrl, setPdfViewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch categories on load
-    const fetchSettings = async () => {
+    // Fetch categories dynamically from database with fallback
+    const fetchCategories = async () => {
       try {
-        const res = await api.get('/public/settings');
-        const catsString = res.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
-        const catsArray = catsString.split(',').map((s: string) => s.trim()).filter(Boolean);
-        setAvailableCategories(catsArray);
+        const res = await api.get('/public/categories');
+        const categoriesData = res.data.data || [];
+        if (categoriesData.length > 0) {
+          setAvailableCategories(categoriesData.map((c: any) => c.name));
+        } else {
+          const setRes = await api.get('/public/settings');
+          const catsString = setRes.data.data.journal_categories || 'Science, Education, Arts, Multidisciplinary';
+          setAvailableCategories(catsString.split(',').map((s: string) => s.trim()).filter(Boolean));
+        }
       } catch (e) {
-        console.error('Failed to fetch settings', e);
+        console.error('Failed to fetch categories', e);
       }
     };
-    fetchSettings();
+    fetchCategories();
   }, []);
 
   // Reset pagination when filters change
@@ -115,6 +121,10 @@ const Search: React.FC = () => {
 
   return (
     <PageWrapper className="flex flex-col">
+      <Seo 
+        title={query ? `Search: "${query}"` : 'Search Articles & Journals'} 
+        description="Search through the official academic repository of The FCU Journals." 
+      />
       {/* Search Header */}
       <PageHeader
         title="Search Results"

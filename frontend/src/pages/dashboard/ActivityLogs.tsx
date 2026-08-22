@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, RefreshCw, Filter, Calendar, Eye, Copy, Check, Clock, User as UserIcon, Layers, FileText, Activity } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Filter, Calendar, Eye, Copy, Check, Clock, User as UserIcon, Layers, FileText, Activity, Download } from 'lucide-react';
 import api from '@/services/api';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell, DataTableFooter } from '@/components/ui/Table';
 import { ActivityLogsTableSkeleton } from '@/components/ui/Skeleton';
@@ -68,6 +68,35 @@ const ActivityLogs: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleExportCSV = () => {
+    if (logs.length === 0) {
+      toast.error('No logs to export');
+      return;
+    }
+
+    const headers = ['ID', 'User', 'Email', 'Action', 'Target Type', 'Description', 'Timestamp'];
+    const rows = logs.map(l => [
+      l.id,
+      `"${l.user?.name || 'System / Guest'}"`,
+      `"${l.user?.email || 'N/A'}"`,
+      `"${l.action || ''}"`,
+      `"${getCleanTargetType(l.target_type)}"`,
+      `"${(l.description || '').replace(/"/g, '""')}"`,
+      `"${l.created_at}"`
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `activity_logs_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Activity logs exported successfully');
+  };
+
   const getCleanTargetType = (targetType: string | null) => {
     if (!targetType) return 'System Setting / Global';
     const parts = targetType.split('\\');
@@ -101,22 +130,33 @@ const ActivityLogs: React.FC = () => {
         title="Activity Logs"
         helpText="Audit log trail recording administrative events, content publications, metadata updates, user status changes, and system activities."
       >
-        <Button
-          onClick={() => fetchLogs()}
-          className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono h-9 px-2.5 sm:px-4 cursor-pointer"
-          variant="outline"
-          title="Refresh Logs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">Refresh</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono h-9 px-2.5 sm:px-4 cursor-pointer"
+            variant="outline"
+            title="Export CSV"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+          <Button
+            onClick={() => fetchLogs()}
+            className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono h-9 px-2.5 sm:px-4 cursor-pointer"
+            variant="outline"
+            title="Refresh Logs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+        </div>
       </DashboardHeader>
 
       {/* Sleek, Compact Inline Filter Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Action Filter */}
-          <div className="flex items-center gap-1.5 sm:gap-2 w-36 xs:w-44">
+          <div className="flex items-center gap-1.5 sm:gap-2 w-44 xs:w-52">
             <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
             <div className="w-full">
               <Select
@@ -126,11 +166,12 @@ const ActivityLogs: React.FC = () => {
                   setPage(1);
                 }}
                 options={[
-                  { value: 'all', label: 'All Actions' },
+                  { value: 'all', label: 'All Activities' },
+                  { value: 'publications', label: 'Content & Publications' },
+                  { value: 'users', label: 'User Governance' },
+                  { value: 'trash', label: 'Trash & Restores' },
+                  { value: 'system', label: 'System & Config' },
                   { value: 'login', label: 'Logins & Auth' },
-                  { value: 'create', label: 'Created Items' },
-                  { value: 'update', label: 'Updated Items' },
-                  { value: 'delete', label: 'Deleted Items' },
                 ]}
               />
             </div>

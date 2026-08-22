@@ -243,7 +243,47 @@ class DashboardController extends Controller
 
         if ($request->filled('action') && $request->query('action') !== 'all') {
             $actionFilter = strtolower($request->query('action'));
-            $query->whereRaw('LOWER(action) LIKE ?', ["%{$actionFilter}%"]);
+            if ($actionFilter === 'publications') {
+                $query->where(function($q) {
+                    $q->whereRaw("LOWER(subject_type) LIKE '%article%'")
+                      ->orWhereRaw("LOWER(subject_type) LIKE '%journal%'")
+                      ->orWhereRaw("LOWER(subject_type) LIKE '%volume%'")
+                      ->orWhereRaw("LOWER(subject_type) LIKE '%author%'")
+                      ->orWhereRaw("LOWER(subject_type) LIKE '%category%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%article%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%journal%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%publish%'");
+                });
+            } elseif ($actionFilter === 'users') {
+                $query->where(function($q) {
+                    $q->whereRaw("LOWER(subject_type) LIKE '%user%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%user%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%approved%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%disabled%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%enabled%'");
+                });
+            } elseif ($actionFilter === 'trash') {
+                $query->where(function($q) {
+                    $q->whereRaw("LOWER(action) LIKE '%restore%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%purge%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%trash%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%delete%'");
+                });
+            } elseif ($actionFilter === 'system') {
+                $query->where(function($q) {
+                    $q->whereRaw("LOWER(subject_type) LIKE '%setting%'")
+                      ->orWhereRaw("LOWER(subject_type) LIKE '%announcement%'")
+                      ->orWhereRaw("LOWER(subject_type) LIKE '%feedback%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%setting%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%announcement%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%feedback%'")
+                      ->orWhereRaw("LOWER(action) LIKE '%system%'");
+                });
+            } elseif ($actionFilter === 'login') {
+                $query->whereRaw("LOWER(action) LIKE '%login%'");
+            } else {
+                $query->whereRaw('LOWER(action) LIKE ?', ["%{$actionFilter}%"]);
+            }
         }
 
         if ($request->filled('period') && $request->query('period') !== 'all') {
