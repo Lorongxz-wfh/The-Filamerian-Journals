@@ -252,13 +252,13 @@ const ManageAuthors: React.FC = () => {
         <Table containerClassName="max-h-[520px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('last_name')}>
+              <TableHead isSorted={sortConfig?.key === 'last_name'} className="cursor-pointer transition-colors" onClick={() => requestSort('last_name')}>
                 <div className="flex items-center gap-1">Author Name {getSortIcon('last_name')}</div>
               </TableHead>
-              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden sm:table-cell" onClick={() => requestSort('email')}>
+              <TableHead isSorted={sortConfig?.key === 'email'} className="cursor-pointer transition-colors hidden sm:table-cell" onClick={() => requestSort('email')}>
                 <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
               </TableHead>
-              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors text-center" onClick={() => requestSort('articles_count')}>
+              <TableHead isSorted={sortConfig?.key === 'articles_count'} className="cursor-pointer transition-colors text-center" onClick={() => requestSort('articles_count')}>
                 <div className="flex items-center justify-center gap-1">Publications {getSortIcon('articles_count')}</div>
               </TableHead>
               <TableHead className="w-10 sm:w-12 text-right"></TableHead>

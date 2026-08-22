@@ -66,12 +66,19 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
 );
 TableRow.displayName = 'TableRow';
 
-const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
-  ({ className, ...props }, ref) => (
+export interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+  isSorted?: boolean;
+}
+
+const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
+  ({ className, isSorted, ...props }, ref) => (
     <th
       ref={ref}
       className={cn(
-        'h-10 sm:h-12 px-3 sm:px-5 text-left align-middle text-[10px] sm:text-[11px] font-semibold text-muted uppercase tracking-wider',
+        'h-10 sm:h-12 px-3 sm:px-5 text-left align-middle text-[10px] sm:text-[11px] uppercase tracking-wider transition-colors select-none',
+        isSorted
+          ? 'bg-black/[0.045] dark:bg-white/[0.07] text-primary font-bold shadow-2xs border-b border-primary/25'
+          : 'text-muted font-semibold hover:bg-black/[0.02] dark:hover:bg-white/[0.02]',
         className
       )}
       {...props}

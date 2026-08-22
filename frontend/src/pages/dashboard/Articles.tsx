@@ -302,14 +302,14 @@ const Articles: React.FC = () => {
           <Table containerClassName="max-h-[520px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors" onClick={() => requestSort('title')}>
+                <TableHead isSorted={sortConfig?.key === 'title'} className="cursor-pointer transition-colors" onClick={() => requestSort('title')}>
                   <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
                 </TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden sm:table-cell" onClick={() => requestSort('journal')}>
+                <TableHead isSorted={sortConfig?.key === 'journal'} className="cursor-pointer transition-colors hidden sm:table-cell" onClick={() => requestSort('journal')}>
                   <div className="flex items-center gap-1">Journal & Volume {getSortIcon('journal')}</div>
                 </TableHead>
                 <TableHead className="hidden md:table-cell">Lead Author</TableHead>
-                <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden lg:table-cell" onClick={() => requestSort('updated_at')}>
+                <TableHead isSorted={sortConfig?.key === 'updated_at'} className="cursor-pointer transition-colors hidden lg:table-cell" onClick={() => requestSort('updated_at')}>
                   <div className="flex items-center gap-1">Updated {getSortIcon('updated_at')}</div>
                 </TableHead>
                 <TableHead className="w-10 sm:w-12 text-right"></TableHead>
