@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { BookOpen, FileText, ArrowRight, Loader2, Globe } from 'lucide-react';
+import { BookOpen, FileText, ArrowRight, Loader2, Globe, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import api, { getFileUrl } from '@/services/api';
 
@@ -75,8 +75,9 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ query, results, pages, 
         )}
       >
         <div>
-          <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2.5">
-            🔥 Popular Research Topics
+          <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+            <Flame className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <span>Popular Research Topics</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {popularTopics.map((topic) => (

@@ -91,11 +91,6 @@ const Search: React.FC = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query.trim() && selectedCategories.length === 0 && !fromYear.trim() && !toYear.trim()) {
-        setResults({ journals: [], articles: [] });
-        return;
-      }
-      
       setLoading(true);
       try {
         const categoryParam = selectedCategories.length > 0 ? selectedCategories.join(',') : '';
@@ -147,7 +142,7 @@ const Search: React.FC = () => {
                   Showing matches for <strong className="text-primary font-semibold">"{query}"</strong>
                 </span>
               ) : (
-                'Filter through published academic journals and articles.'
+                'Showing all published academic journals and research papers.'
               )}
             </p>
           </div>
@@ -158,6 +153,8 @@ const Search: React.FC = () => {
               e.preventDefault();
               if (searchInputVal.trim()) {
                 navigate(`/search?q=${encodeURIComponent(searchInputVal.trim())}&type=${type}`);
+              } else {
+                navigate(`/search?type=${type}`);
               }
             }}
             className="flex items-center gap-2 w-full md:w-auto min-w-[280px] lg:min-w-[340px]"

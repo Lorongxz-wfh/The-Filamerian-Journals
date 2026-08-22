@@ -32,15 +32,6 @@ class SearchController extends Controller
             }
         }
 
-        if (empty(trim($q)) && empty($category) && empty($year) && empty($fromYear) && empty($toYear)) {
-            return response()->json([
-                'data' => [
-                    'journals' => [],
-                    'articles' => [],
-                ]
-            ]);
-        }
-
         $term = '%' . strtolower($q) . '%';
         $categories = !empty($category) ? array_map('trim', explode(',', $category)) : [];
 
@@ -49,7 +40,7 @@ class SearchController extends Controller
 
         // Search Journals
         if ($type === 'all' || $type === 'journals') {
-            $journalQuery = Journal::with('category')->where('status', 'Published');
+            $journalQuery = Journal::with('category')->where('status', 'Published')->orderBy('created_at', 'desc');
 
             if (!empty(trim($q))) {
                 $journalQuery->where(function ($query) use ($term) {
@@ -79,7 +70,7 @@ class SearchController extends Controller
             }
 
             if ($type === 'all') {
-                $journals = $journalQuery->limit(5)->get();
+                $journals = $journalQuery->limit(8)->get();
             } else {
                 $journals = $journalQuery->paginate(15);
             }
@@ -91,7 +82,8 @@ class SearchController extends Controller
                 ->where('status', 'Published')
                 ->whereHas('volume.journal', function ($q) {
                     $q->where('status', 'Published');
-                });
+                })
+                ->orderBy('created_at', 'desc');
 
             if (!empty(trim($q))) {
                 $articleQuery->where(function ($query) use ($term) {
@@ -123,7 +115,7 @@ class SearchController extends Controller
             }
 
             if ($type === 'all') {
-                $articles = $articleQuery->limit(5)->get();
+                $articles = $articleQuery->limit(15)->get();
             } else {
                 $articles = $articleQuery->paginate(15);
             }

@@ -51,6 +51,8 @@ const Home: React.FC = () => {
     e.preventDefault();
     if (heroSearchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(heroSearchQuery.trim())}`);
+    } else {
+      navigate('/search');
     }
   };
 
