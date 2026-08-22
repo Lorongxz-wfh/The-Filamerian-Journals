@@ -154,9 +154,9 @@ const ActivityLogs: React.FC = () => {
 
       {/* Sleek, Compact Inline Filter Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* Action Filter */}
-          <div className="flex items-center gap-1.5 sm:gap-2 w-44 xs:w-52">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-[170px] sm:min-w-[190px]">
             <Filter className="h-3.5 w-3.5 text-muted shrink-0" />
             <div className="w-full">
               <Select
@@ -167,7 +167,7 @@ const ActivityLogs: React.FC = () => {
                 }}
                 options={[
                   { value: 'all', label: 'All Activities' },
-                  { value: 'publications', label: 'Content & Publications' },
+                  { value: 'publications', label: 'Publications' },
                   { value: 'users', label: 'User Governance' },
                   { value: 'trash', label: 'Trash & Restores' },
                   { value: 'system', label: 'System & Config' },
@@ -178,7 +178,7 @@ const ActivityLogs: React.FC = () => {
           </div>
 
           {/* Timeframe Filter */}
-          <div className="flex items-center gap-1.5 sm:gap-2 w-32 xs:w-40">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-[125px] sm:min-w-[140px]">
             <Calendar className="h-3.5 w-3.5 text-muted shrink-0" />
             <div className="w-full">
               <Select

@@ -55,7 +55,7 @@ class DashboardController extends Controller
         foreach ($rawLogs as $log) {
             $date = $log->created_at->format('Y-m-d');
             $action = strtolower($log->action ?? '');
-            $subject = strtolower($log->subject_type ?? '');
+            $subject = strtolower($log->target_type ?? '');
 
             $cat = 'system';
             if (str_contains($action, 'restore') || str_contains($action, 'purge') || str_contains($action, 'trash') || str_contains($action, 'delete')) {
@@ -245,18 +245,18 @@ class DashboardController extends Controller
             $actionFilter = strtolower($request->query('action'));
             if ($actionFilter === 'publications') {
                 $query->where(function($q) {
-                    $q->whereRaw("LOWER(subject_type) LIKE '%article%'")
-                      ->orWhereRaw("LOWER(subject_type) LIKE '%journal%'")
-                      ->orWhereRaw("LOWER(subject_type) LIKE '%volume%'")
-                      ->orWhereRaw("LOWER(subject_type) LIKE '%author%'")
-                      ->orWhereRaw("LOWER(subject_type) LIKE '%category%'")
+                    $q->whereRaw("LOWER(target_type) LIKE '%article%'")
+                      ->orWhereRaw("LOWER(target_type) LIKE '%journal%'")
+                      ->orWhereRaw("LOWER(target_type) LIKE '%volume%'")
+                      ->orWhereRaw("LOWER(target_type) LIKE '%author%'")
+                      ->orWhereRaw("LOWER(target_type) LIKE '%category%'")
                       ->orWhereRaw("LOWER(action) LIKE '%article%'")
                       ->orWhereRaw("LOWER(action) LIKE '%journal%'")
                       ->orWhereRaw("LOWER(action) LIKE '%publish%'");
                 });
             } elseif ($actionFilter === 'users') {
                 $query->where(function($q) {
-                    $q->whereRaw("LOWER(subject_type) LIKE '%user%'")
+                    $q->whereRaw("LOWER(target_type) LIKE '%user%'")
                       ->orWhereRaw("LOWER(action) LIKE '%user%'")
                       ->orWhereRaw("LOWER(action) LIKE '%approved%'")
                       ->orWhereRaw("LOWER(action) LIKE '%disabled%'")
@@ -271,9 +271,9 @@ class DashboardController extends Controller
                 });
             } elseif ($actionFilter === 'system') {
                 $query->where(function($q) {
-                    $q->whereRaw("LOWER(subject_type) LIKE '%setting%'")
-                      ->orWhereRaw("LOWER(subject_type) LIKE '%announcement%'")
-                      ->orWhereRaw("LOWER(subject_type) LIKE '%feedback%'")
+                    $q->whereRaw("LOWER(target_type) LIKE '%setting%'")
+                      ->orWhereRaw("LOWER(target_type) LIKE '%announcement%'")
+                      ->orWhereRaw("LOWER(target_type) LIKE '%feedback%'")
                       ->orWhereRaw("LOWER(action) LIKE '%setting%'")
                       ->orWhereRaw("LOWER(action) LIKE '%announcement%'")
                       ->orWhereRaw("LOWER(action) LIKE '%feedback%'")
