@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Megaphone, Plus, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Megaphone, Plus, Edit2, Trash2, MoreVertical, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import Modal from '@/components/ui/Modal';
@@ -33,6 +33,11 @@ const ManageAnnouncements: React.FC = () => {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
+
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
+    key: 'created_at',
+    direction: 'desc'
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Announcement | null>(null);
@@ -141,6 +146,30 @@ const ManageAnnouncements: React.FC = () => {
     }
   };
 
+  const sortedAnnouncements = useMemo(() => {
+    let items = [...announcements];
+    items.sort((a, b) => {
+      let aVal = a[sortConfig.key as keyof Announcement] || '';
+      let bVal = b[sortConfig.key as keyof Announcement] || '';
+      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return items;
+  }, [announcements, sortConfig]);
+
+  const requestSort = (key: string) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const getSortIcon = (key: string) => {
+    if (sortConfig.key !== key) return <ArrowUp className="h-3 w-3 opacity-20" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3 opacity-100" /> : <ArrowDown className="h-3 w-3 opacity-100" />;
+  };
+
   return (
     <div className="space-y-4 sm:space-y-8">
       <DashboardHeader 
@@ -168,15 +197,19 @@ const ManageAnnouncements: React.FC = () => {
         <Table containerClassName="max-h-[520px]">
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead className="w-44 hidden sm:table-cell">Date</TableHead>
+              <TableHead isSorted={sortConfig.key === 'title'} className="cursor-pointer transition-colors" onClick={() => requestSort('title')}>
+                <div className="flex items-center gap-1">Title {getSortIcon('title')}</div>
+              </TableHead>
+              <TableHead isSorted={sortConfig.key === 'created_at'} className="w-44 hidden sm:table-cell cursor-pointer transition-colors" onClick={() => requestSort('created_at')}>
+                <div className="flex items-center gap-1">Date {getSortIcon('created_at')}</div>
+              </TableHead>
               <TableHead className="w-10 sm:w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <ListSkeleton colSpans={[4, 6, 2]} rows={PER_PAGE} />
-            ) : announcements.length === 0 ? (
+            ) : sortedAnnouncements.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="h-32 text-center">
                   <EmptyState 
@@ -194,7 +227,7 @@ const ManageAnnouncements: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              announcements.map((item) => (
+              sortedAnnouncements.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="py-2.5 sm:py-3.5">
                     <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">

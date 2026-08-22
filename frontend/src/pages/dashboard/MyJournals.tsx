@@ -80,7 +80,7 @@ const MyJournals: React.FC = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [availableCategories, setAvailableCategories] = useState<any[]>([]);
 
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'updated_at', direction: 'desc' });
 
   const sortedJournals = React.useMemo(() => {
     let sortableItems = [...journals];

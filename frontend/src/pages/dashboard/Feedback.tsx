@@ -56,7 +56,7 @@ const Feedback: React.FC = () => {
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  // Sorting
+  // Sorting (default active on Date / created_at desc)
   const [sortField, setSortField] = useState('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -193,7 +193,6 @@ const Feedback: React.FC = () => {
     return sortDir === 'asc' ? <ArrowUp className="h-3 w-3 opacity-100" /> : <ArrowDown className="h-3 w-3 opacity-100" />;
   };
 
-  // Open Export Modal with current active filters as defaults
   const handleOpenExportModal = () => {
     setExportStatus(statusFilter);
     setExportCategory(categoryFilter);
@@ -203,7 +202,6 @@ const Feedback: React.FC = () => {
     setIsExportModalOpen(true);
   };
 
-  // Run CSV Export from Modal Configuration
   const handleExecuteExportCsv = async () => {
     try {
       setIsExporting(true);
@@ -280,7 +278,7 @@ const Feedback: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-3 font-sans relative">
+    <div className="space-y-4 sm:space-y-8 font-sans relative">
       <DashboardHeader 
         title="User Feedback & Inquiries"
         helpText="Review inquiries, research correspondence, suggestions, and submissions sent through the public repository."
@@ -320,7 +318,7 @@ const Feedback: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={handleOpenExportModal}
-            className="text-xs flex items-center gap-1.5 border-border hover:bg-background"
+            className="text-xs flex items-center gap-1.5 border-border hover:bg-background h-9 px-3"
             title="Configure and download CSV export"
           >
             <Download className="h-3.5 w-3.5 text-primary" />
@@ -329,58 +327,62 @@ const Feedback: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Sleek Integrated Filter Row (No bulky outer wrapper) */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex flex-wrap items-center gap-2 flex-1">
-          {/* Search Input */}
-          <div className="w-full sm:w-56">
-            <SearchInput
-              placeholder="Search sender, email, topic..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      {/* Filter Row: Matching Articles & MyJournals standard structure */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
+        {/* Status segmented buttons */}
+        <div className="flex items-center gap-0.5 sm:gap-1 border border-border bg-surface p-0.5 sm:p-1 w-full lg:w-auto">
+          {[
+            { key: 'all' as const, label: 'All' },
+            { key: 'active' as const, label: 'Active' },
+            { key: 'archived' as const, label: 'Archived' },
+          ].map((t) => (
+            <button
+              key={t.key}
+              onClick={() => { setStatusFilter(t.key); setPage(1); }}
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 text-xs font-semibold tracking-wider transition-colors cursor-pointer ${
+                statusFilter === t.key
+                  ? 'bg-primary text-white'
+                  : 'text-muted hover:text-primary hover:bg-background'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
+          {/* Category filter */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Category:</label>
+            <div className="w-full sm:w-[160px]">
+              <Select
+                className="py-1.5 h-9 text-xs"
+                value={categoryFilter}
+                onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
+                options={categoryOptions}
+              />
+            </div>
           </div>
 
-          {/* Status Filter (All, Active, Archived) */}
-          <div className="w-full sm:w-36">
-            <Select
-              className="py-1.5 h-9 text-xs"
-              value={statusFilter}
-              onChange={(val) => { setStatusFilter(val as any); setPage(1); }}
-              options={[
-                { value: 'all', label: 'All Status' },
-                { value: 'active', label: 'Active Only' },
-                { value: 'archived', label: 'Archived Only' },
-              ]}
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div className="w-full sm:w-40">
-            <Select
-              className="py-1.5 h-9 text-xs"
-              value={categoryFilter}
-              onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
-              options={categoryOptions}
-            />
-          </div>
-
-          {/* Date Range Preset Filter */}
-          <div className="w-full sm:w-36">
-            <Select
-              className="py-1.5 h-9 text-xs"
-              value={datePreset}
-              onChange={(val) => { setDatePreset(val as string); setPage(1); }}
-              options={[
-                { value: 'all', label: 'All Time' },
-                { value: 'today', label: 'Today' },
-                { value: 'last_7_days', label: 'Last 7 Days' },
-                { value: 'this_month', label: 'This Month' },
-                { value: 'last_30_days', label: 'Last 30 Days' },
-                { value: 'this_year', label: 'This Year' },
-                { value: 'custom', label: 'Custom Range...' }
-              ]}
-            />
+          {/* Date filter */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Date:</label>
+            <div className="w-full sm:w-[150px]">
+              <Select
+                className="py-1.5 h-9 text-xs"
+                value={datePreset}
+                onChange={(val) => { setDatePreset(val as string); setPage(1); }}
+                options={[
+                  { value: 'all', label: 'All Time' },
+                  { value: 'today', label: 'Today' },
+                  { value: 'last_7_days', label: 'Last 7 Days' },
+                  { value: 'this_month', label: 'This Month' },
+                  { value: 'last_30_days', label: 'Last 30 Days' },
+                  { value: 'this_year', label: 'This Year' },
+                  { value: 'custom', label: 'Custom Range...' }
+                ]}
+              />
+            </div>
           </div>
 
           {/* Custom Date Range Inputs */}
@@ -403,16 +405,21 @@ const Feedback: React.FC = () => {
               />
             </div>
           )}
-        </div>
 
-        <div className="text-[11px] text-muted self-end sm:self-center shrink-0">
-          Showing <span className="font-semibold text-primary">{feedbacks.length}</span> of <span className="font-semibold text-primary">{total}</span>
+          {/* Search Input */}
+          <div className="w-full sm:w-60">
+            <SearchInput
+              placeholder="Search feedback..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
-      {/* VIEW MODE 1: MASTER-DETAIL INBOX VIEW (Compact height to fit laptop screens cleanly) */}
+      {/* VIEW MODE 1: MASTER-DETAIL INBOX VIEW */}
       {viewMode === 'inbox' && (
-        <div className="border border-border bg-surface h-[440px] overflow-hidden flex flex-col">
+        <div className="border border-border bg-surface h-[500px] overflow-hidden flex flex-col">
           <div className="grid grid-cols-1 lg:grid-cols-12 h-full">
             {/* Message List */}
             <div className="lg:col-span-5 flex flex-col h-full border-b lg:border-b-0 lg:border-r border-border">
@@ -533,7 +540,7 @@ const Feedback: React.FC = () => {
                       <span>{new Date(selectedItem.created_at).toLocaleString()}</span>
                     </div>
                   </div>
-                  <p className="text-[12px] text-primary/85 leading-relaxed whitespace-pre-wrap flex-grow bg-background p-3.5 border border-border font-sans max-h-56 overflow-y-auto">
+                  <p className="text-[12px] text-primary/85 leading-relaxed whitespace-pre-wrap flex-grow bg-background p-3.5 border border-border font-sans max-h-60 overflow-y-auto">
                     {selectedItem.message}
                   </p>
                   <div className="pt-2.5 border-t border-border mt-auto flex items-center justify-between text-[11px] text-muted">
@@ -628,7 +635,7 @@ const Feedback: React.FC = () => {
       {/* VIEW MODE 2: FULL TABULAR DATA TABLE */}
       {viewMode === 'table' && (
         <div className="border border-border bg-surface flex flex-col">
-          <Table containerClassName="max-h-[440px]">
+          <Table containerClassName="max-h-[500px]">
             <TableHeader>
               <TableRow>
                 <TableHead isSorted={sortField === 'created_at'} className="cursor-pointer transition-colors w-[120px]" onClick={() => handleSort('created_at')}>
@@ -743,17 +750,19 @@ const Feedback: React.FC = () => {
             </TableBody>
           </Table>
 
-          {lastPage > 1 && (
-            <div className="border-t border-border p-2.5 bg-background/50 flex items-center justify-between">
+          {total > 0 && (
+            <div className="border-t border-border p-2.5 bg-background/50 flex flex-col sm:flex-row items-center justify-between gap-2">
               <span className="text-[11px] text-muted">
-                Page {page} of {lastPage}
+                Showing <strong className="text-primary font-semibold">{feedbacks.length}</strong> of <strong className="text-primary font-semibold">{total}</strong> feedback messages
               </span>
-              <Pagination
-                currentPage={page}
-                lastPage={lastPage}
-                onPageChange={setPage}
-                className="mt-0"
-              />
+              {lastPage > 1 && (
+                <Pagination
+                  currentPage={page}
+                  lastPage={lastPage}
+                  onPageChange={setPage}
+                  className="mt-0"
+                />
+              )}
             </div>
           )}
         </div>
@@ -860,7 +869,7 @@ const Feedback: React.FC = () => {
         >
           <div className="space-y-4 py-1">
             <p className="text-xs text-muted leading-relaxed">
-              Customize the criteria below to generate and download a comprehensive CSV spreadsheet for institutional records and auditing.
+              Configure the filters below to export an official CSV spreadsheet for academic audit, accreditation, and research records.
             </p>
 
             <div className="space-y-3 bg-surface p-3.5 border border-border">

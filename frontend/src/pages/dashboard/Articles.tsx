@@ -62,7 +62,7 @@ const Articles: React.FC = () => {
 
   // Default sort: newest first
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({
-    key: 'created_at',
+    key: 'updated_at',
     direction: 'desc',
   });
 
