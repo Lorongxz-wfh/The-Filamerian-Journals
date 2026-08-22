@@ -26,7 +26,7 @@ const SplashLoader: React.FC = () => {
           <div className="flex flex-col items-center gap-5">
             <img src="/TFJ-50pxOutline.svg" alt="The FCU Journals Logo" className="h-24 w-24 md:h-28 md:w-28 object-contain" />
             <h1 className="text-2xl md:text-3xl font-bold uppercase tracking-widest text-primary font-display text-center">
-              The FCU {isDashboard ? 'Dashboard' : 'Journals'}
+              The FCU Journals{isDashboard ? ' Dashboard' : ''}
             </h1>
             <div className="h-0.5 w-32 bg-primary/10 overflow-hidden relative">
               <motion.div 

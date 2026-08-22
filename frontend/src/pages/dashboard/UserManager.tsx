@@ -68,7 +68,8 @@ const UserManager: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [confirmEmailInput, setConfirmEmailInput] = useState('');
   const [approveTarget, setApproveTarget] = useState<number | null>(null);
   const [createdCredentials, setCreatedCredentials] = useState<{ user: any; tempPassword: string } | null>(null);
   const [copiedPass, setCopiedPass] = useState(false);
@@ -216,7 +217,10 @@ const UserManager: React.FC = () => {
     }
   };
 
-  const handleDelete = (id: number) => setDeleteTarget(id);
+  const handleDelete = (user: User) => {
+    setDeleteTarget(user);
+    setConfirmEmailInput('');
+  };
   const handleApprove = (id: number) => setApproveTarget(id);
 
   const handleToggleStatus = async (user: User) => {
@@ -240,14 +244,15 @@ const UserManager: React.FC = () => {
     if (!deleteTarget || isDeleting) return;
     try {
       setIsDeleting(true);
-      await api.delete(`/users/${deleteTarget}`);
+      await api.delete(`/users/${deleteTarget.id}`);
       await fetchUsers();
-      toast.success('User deleted successfully');
+      toast.success('User account deleted successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to delete user.');
     } finally {
       setIsDeleting(false);
       setDeleteTarget(null);
+      setConfirmEmailInput('');
     }
   };
 
@@ -556,7 +561,7 @@ const UserManager: React.FC = () => {
                           size="sm"
                           disabled={!canDeletePermanently}
                           onClick={() => {
-                            handleDelete(editingUser.id);
+                            handleDelete(editingUser);
                             handleCloseModal();
                           }}
                           className="text-xs flex items-center gap-1"
@@ -665,14 +670,65 @@ const UserManager: React.FC = () => {
         </Modal>
       )}
 
-      <ConfirmDialog 
+      {/* GitHub-Style Email Confirmation Delete Modal */}
+      <Modal
         isOpen={!!deleteTarget}
-        onClose={() => !isDeleting && setDeleteTarget(null)}
-        onConfirm={confirmDelete}
-        title="Delete User"
-        message="Are you sure you want to remove this user account? Their contributions and activity logs will remain preserved."
-        isLoading={isDeleting}
-      />
+        onClose={() => {
+          if (!isDeleting) {
+            setDeleteTarget(null);
+            setConfirmEmailInput('');
+          }
+        }}
+        title="Delete User Account"
+        className="max-w-md"
+      >
+        <div className="space-y-4 py-1">
+          <div className="space-y-2 text-[13px] text-foreground/80 leading-relaxed">
+            <p>
+              This will permanently remove access for <strong>{deleteTarget?.name}</strong>. Their past contributions and audit logs will remain preserved.
+            </p>
+            <p className="text-xs text-muted">
+              To confirm deletion, please type the user's email address <strong className="font-mono text-primary bg-primary/5 px-1.5 py-0.5 rounded border border-primary/20 select-all">{deleteTarget?.email}</strong> below:
+            </p>
+          </div>
+
+          <div>
+            <input
+              type="email"
+              value={confirmEmailInput}
+              onChange={(e) => setConfirmEmailInput(e.target.value)}
+              placeholder={deleteTarget?.email || 'user@example.com'}
+              autoFocus
+              className="w-full px-3.5 py-2.5 bg-background border border-border text-xs font-mono focus:outline-none focus:border-red-500 transition-colors"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDeleteTarget(null);
+                setConfirmEmailInput('');
+              }}
+              disabled={isDeleting}
+              className="text-xs px-4"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={confirmDelete}
+              isLoading={isDeleting}
+              disabled={isDeleting || confirmEmailInput.trim().toLowerCase() !== (deleteTarget?.email || '').toLowerCase()}
+              className="text-xs px-4 font-semibold"
+            >
+              Delete Account
+            </Button>
+          </div>
+        </div>
+      </Modal>
       
       <ConfirmDialog 
         isOpen={!!approveTarget}
