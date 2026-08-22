@@ -77,15 +77,54 @@ class JournalController extends Controller
             'editor' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
             'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
-        ]);
+        $title = trim($request->input('title', ''));
+        if ($title !== '') {
+            $existingActive = Journal::where('title', $title)->first();
+            if ($existingActive) {
+                return response()->json([
+                    'message' => "A journal titled '{$title}' already exists.",
+                    'errors' => [
+                        'title' => ["A journal titled '{$title}' already exists."]
+                    ]
+                ], 422);
+            }
+
+            $existingTrashed = Journal::onlyTrashed()->where('title', $title)->first();
+            if ($existingTrashed) {
+                return response()->json([
+                    'message' => "A journal titled '{$title}' is currently in the Trash Bin. You can restore it from Trash or choose a different title.",
+                    'errors' => [
+                        'title' => ["A journal with this title is currently in the Trash Bin."]
+                    ]
+                ], 422);
+            }
+        }
 
         if (empty($validated['status'])) {
             $validated['status'] = 'Published';
         }
 
-        // Auto-generate slug from title if not provided
+        // Auto-generate unique slug from title if not provided, or validate unique
         if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
+            $baseSlug = Str::slug($validated['title'] ?: 'journal');
+            $slug = $baseSlug;
+            $counter = 1;
+            while (Journal::withTrashed()->where('slug', $slug)->exists()) {
+                $counter++;
+                $slug = "{$baseSlug}-{$counter}";
+            }
+            $validated['slug'] = $slug;
+        } else {
+            $slugCheck = Journal::withTrashed()->where('slug', $validated['slug'])->first();
+            if ($slugCheck) {
+                $inTrash = $slugCheck->trashed() ? ' (currently in the Trash Bin)' : '';
+                return response()->json([
+                    'message' => "The web address (slug) '{$validated['slug']}' is already in use{$inTrash}.",
+                    'errors' => [
+                        'slug' => ["The slug '{$validated['slug']}' is already in use{$inTrash}."]
+                    ]
+                ], 422);
+            }
         }
 
         try {
@@ -149,7 +188,7 @@ class JournalController extends Controller
     {
         $validated = $request->validate([
             'title' => 'string|max:255',
-            'slug' => 'string|max:255|unique:journals,slug,' . $journal->id,
+            'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
             'status' => 'nullable|string|in:Published,Draft',
@@ -160,6 +199,42 @@ class JournalController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
             'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
         ]);
+
+        if ($request->filled('title') && $request->input('title') !== $journal->title) {
+            $title = trim($request->input('title'));
+            $existingActive = Journal::where('title', $title)->where('id', '!=', $journal->id)->first();
+            if ($existingActive) {
+                return response()->json([
+                    'message' => "A journal titled '{$title}' already exists.",
+                    'errors' => [
+                        'title' => ["A journal titled '{$title}' already exists."]
+                    ]
+                ], 422);
+            }
+
+            $existingTrashed = Journal::onlyTrashed()->where('title', $title)->where('id', '!=', $journal->id)->first();
+            if ($existingTrashed) {
+                return response()->json([
+                    'message' => "A journal titled '{$title}' is currently in the Trash Bin. You can restore it from Trash or choose a different title.",
+                    'errors' => [
+                        'title' => ["A journal with this title is currently in the Trash Bin."]
+                    ]
+                ], 422);
+            }
+        }
+
+        if ($request->filled('slug') && $request->input('slug') !== $journal->slug) {
+            $slugCheck = Journal::withTrashed()->where('slug', $request->input('slug'))->where('id', '!=', $journal->id)->first();
+            if ($slugCheck) {
+                $inTrash = $slugCheck->trashed() ? ' (currently in the Trash Bin)' : '';
+                return response()->json([
+                    'message' => "The web address (slug) '{$request->input('slug')}' is already in use{$inTrash}.",
+                    'errors' => [
+                        'slug' => ["The slug '{$request->input('slug')}' is already in use{$inTrash}."]
+                    ]
+                ], 422);
+            }
+        }
 
         try {
             if ($request->hasFile('cover_image')) {
@@ -320,6 +395,7 @@ class JournalController extends Controller
         $headers = [
             'Access-Control-Allow-Origin' => '*',
             'Content-Type' => 'application/pdf',
+            'Cache-Control' => 'public, max-age=3600, must-revalidate',
         ];
 
         if ($request->query('download')) {
@@ -380,7 +456,7 @@ class JournalController extends Controller
         $headers = [
             'Access-Control-Allow-Origin' => '*',
             'Content-Type' => $mimeType,
-            'Cache-Control' => 'public, max-age=86400',
+            'Cache-Control' => 'public, max-age=3600, must-revalidate',
         ];
 
         try {

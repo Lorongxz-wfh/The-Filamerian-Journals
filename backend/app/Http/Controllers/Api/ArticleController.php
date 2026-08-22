@@ -66,7 +66,18 @@ class ArticleController extends Controller
             'keyword_ids.*' => 'exists:keywords,id',
             'keyword_names' => 'nullable|array',
             'keyword_names.*' => 'string|max:255',
-        ]);
+        if ($request->filled('doi')) {
+            $doi = trim($request->input('doi'));
+            $existingDoi = Article::where('doi', $doi)->first();
+            if ($existingDoi) {
+                return response()->json([
+                    'message' => "An article with DOI '{$doi}' already exists.",
+                    'errors' => [
+                        'doi' => ["The DOI '{$doi}' is already assigned to another paper."]
+                    ]
+                ], 422);
+            }
+        }
 
         try {
             if ($request->hasFile('pdf_path')) {
@@ -217,7 +228,18 @@ class ArticleController extends Controller
             'keyword_ids.*' => 'exists:keywords,id',
             'keyword_names' => 'nullable|array',
             'keyword_names.*' => 'string|max:255',
-        ]);
+        if ($request->filled('doi') && $request->input('doi') !== $article->doi) {
+            $doi = trim($request->input('doi'));
+            $existingDoi = Article::where('doi', $doi)->where('id', '!=', $article->id)->first();
+            if ($existingDoi) {
+                return response()->json([
+                    'message' => "An article with DOI '{$doi}' already exists.",
+                    'errors' => [
+                        'doi' => ["The DOI '{$doi}' is already assigned to another paper."]
+                    ]
+                ], 422);
+            }
+        }
 
         try {
             if ($request->hasFile('pdf_path')) {
@@ -416,6 +438,7 @@ class ArticleController extends Controller
         $headers = [
             'Access-Control-Allow-Origin' => '*',
             'Content-Type' => 'application/pdf',
+            'Cache-Control' => 'public, max-age=3600, must-revalidate',
         ];
 
         if ($request->query('download')) {

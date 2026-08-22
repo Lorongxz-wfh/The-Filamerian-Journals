@@ -29,6 +29,29 @@ class VolumeController extends Controller
             'year' => 'required|integer',
         ]);
 
+        $journalId = $validated['journal_id'];
+        $volNum = trim($validated['volume_number']);
+        
+        $existingVol = Volume::where('journal_id', $journalId)->where('volume_number', $volNum)->first();
+        if ($existingVol) {
+            return response()->json([
+                'message' => "Volume {$volNum} already exists for this journal.",
+                'errors' => [
+                    'volume_number' => ["Volume {$volNum} already exists for this journal."]
+                ]
+            ], 422);
+        }
+
+        $trashedVol = Volume::onlyTrashed()->where('journal_id', $journalId)->where('volume_number', $volNum)->first();
+        if ($trashedVol) {
+            return response()->json([
+                'message' => "Volume {$volNum} for this journal is currently in the Trash Bin. You can restore it from Trash or choose a different number.",
+                'errors' => [
+                    'volume_number' => ["Volume {$volNum} is currently in the Trash Bin."]
+                ]
+            ], 422);
+        }
+
         $volume = Volume::create($validated);
         $journalTitle = $volume->journal?->title ?? "Journal #{$volume->journal_id}";
 
@@ -69,6 +92,31 @@ class VolumeController extends Controller
             'volume_number' => 'string',
             'year' => 'integer',
         ]);
+
+        $journalId = $validated['journal_id'] ?? $volume->journal_id;
+        $volNum = isset($validated['volume_number']) ? trim($validated['volume_number']) : null;
+
+        if ($volNum !== null && ($volNum !== (string)$volume->volume_number || $journalId !== $volume->journal_id)) {
+            $existingVol = Volume::where('journal_id', $journalId)->where('volume_number', $volNum)->where('id', '!=', $volume->id)->first();
+            if ($existingVol) {
+                return response()->json([
+                    'message' => "Volume {$volNum} already exists for this journal.",
+                    'errors' => [
+                        'volume_number' => ["Volume {$volNum} already exists for this journal."]
+                    ]
+                ], 422);
+            }
+
+            $trashedVol = Volume::onlyTrashed()->where('journal_id', $journalId)->where('volume_number', $volNum)->where('id', '!=', $volume->id)->first();
+            if ($trashedVol) {
+                return response()->json([
+                    'message' => "Volume {$volNum} for this journal is currently in the Trash Bin. You can restore it from Trash or choose a different number.",
+                    'errors' => [
+                        'volume_number' => ["Volume {$volNum} is currently in the Trash Bin."]
+                    ]
+                ], 422);
+            }
+        }
 
         $volume->update($validated);
         $journalTitle = $volume->journal?->title ?? "Journal #{$volume->journal_id}";
