@@ -66,6 +66,8 @@ class ArticleController extends Controller
             'keyword_ids.*' => 'exists:keywords,id',
             'keyword_names' => 'nullable|array',
             'keyword_names.*' => 'string|max:255',
+        ]);
+
         if ($request->filled('doi')) {
             $doi = trim($request->input('doi'));
             $existingDoi = Article::where('doi', $doi)->first();
@@ -228,6 +230,8 @@ class ArticleController extends Controller
             'keyword_ids.*' => 'exists:keywords,id',
             'keyword_names' => 'nullable|array',
             'keyword_names.*' => 'string|max:255',
+        ]);
+
         if ($request->filled('doi') && $request->input('doi') !== $article->doi) {
             $doi = trim($request->input('doi'));
             $existingDoi = Article::where('doi', $doi)->where('id', '!=', $article->id)->first();

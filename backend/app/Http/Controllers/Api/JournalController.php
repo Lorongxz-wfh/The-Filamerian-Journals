@@ -79,6 +79,8 @@ class JournalController extends Controller
             'editor' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:' . \App\Models\Setting::getMaxImageUploadSizeKb(),
             'pdf_path' => 'nullable|file|mimes:pdf|max:' . \App\Models\Setting::getMaxPdfUploadSizeKb(),
+        ]);
+
         $title = trim($request->input('title', ''));
         if ($title !== '') {
             $existingActive = Journal::where('title', $title)->first();
