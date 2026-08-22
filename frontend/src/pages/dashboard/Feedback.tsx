@@ -278,7 +278,7 @@ const Feedback: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-4 sm:space-y-8 font-sans relative">
+    <div className="space-y-3 sm:space-y-4 font-sans relative">
       <DashboardHeader 
         title="User Feedback & Inquiries"
         helpText="Review inquiries, research correspondence, suggestions, and submissions sent through the public repository."
@@ -327,99 +327,84 @@ const Feedback: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Filter Row: Matching Articles & MyJournals standard structure */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
-        {/* Status segmented buttons */}
-        <div className="flex items-center gap-0.5 sm:gap-1 border border-border bg-surface p-0.5 sm:p-1 w-full lg:w-auto">
-          {[
-            { key: 'all' as const, label: 'All' },
-            { key: 'active' as const, label: 'Active' },
-            { key: 'archived' as const, label: 'Archived' },
-          ].map((t) => (
-            <button
-              key={t.key}
-              onClick={() => { setStatusFilter(t.key); setPage(1); }}
-              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 text-xs font-semibold tracking-wider transition-colors cursor-pointer ${
-                statusFilter === t.key
-                  ? 'bg-primary text-white'
-                  : 'text-muted hover:text-primary hover:bg-background'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+      {/* Clean Single Filter Row: Search on Left, followed by Status, Category, and Date */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {/* Search Input on Left */}
+        <div className="w-full sm:w-64">
+          <SearchInput
+            placeholder="Search feedback..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
-          {/* Category filter */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Category:</label>
-            <div className="w-full sm:w-[160px]">
-              <Select
-                className="py-1.5 h-9 text-xs"
-                value={categoryFilter}
-                onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
-                options={categoryOptions}
-              />
-            </div>
-          </div>
+        {/* Status filter dropdown */}
+        <div className="w-full sm:w-36">
+          <Select
+            className="py-1.5 h-9 text-xs"
+            value={statusFilter}
+            onChange={(val) => { setStatusFilter(val as any); setPage(1); }}
+            options={[
+              { value: 'all', label: 'All Status' },
+              { value: 'active', label: 'Active Only' },
+              { value: 'archived', label: 'Archived Only' },
+            ]}
+          />
+        </div>
 
-          {/* Date filter */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <label className="text-[11px] sm:text-xs font-medium text-muted uppercase tracking-wider shrink-0 hidden sm:inline">Date:</label>
-            <div className="w-full sm:w-[150px]">
-              <Select
-                className="py-1.5 h-9 text-xs"
-                value={datePreset}
-                onChange={(val) => { setDatePreset(val as string); setPage(1); }}
-                options={[
-                  { value: 'all', label: 'All Time' },
-                  { value: 'today', label: 'Today' },
-                  { value: 'last_7_days', label: 'Last 7 Days' },
-                  { value: 'this_month', label: 'This Month' },
-                  { value: 'last_30_days', label: 'Last 30 Days' },
-                  { value: 'this_year', label: 'This Year' },
-                  { value: 'custom', label: 'Custom Range...' }
-                ]}
-              />
-            </div>
-          </div>
+        {/* Category filter dropdown */}
+        <div className="w-full sm:w-44">
+          <Select
+            className="py-1.5 h-9 text-xs"
+            value={categoryFilter}
+            onChange={(val) => { setCategoryFilter(val as string); setPage(1); }}
+            options={categoryOptions}
+          />
+        </div>
 
-          {/* Custom Date Range Inputs */}
-          {datePreset === 'custom' && (
-            <div className="flex items-center gap-1.5 w-full sm:w-auto">
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => { setFromDate(e.target.value); setPage(1); }}
-                className="h-9 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
-                title="From Date"
-              />
-              <span className="text-xs text-muted">to</span>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => { setToDate(e.target.value); setPage(1); }}
-                className="h-9 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
-                title="To Date"
-              />
-            </div>
-          )}
+        {/* Date filter dropdown */}
+        <div className="w-full sm:w-36">
+          <Select
+            className="py-1.5 h-9 text-xs"
+            value={datePreset}
+            onChange={(val) => { setDatePreset(val as string); setPage(1); }}
+            options={[
+              { value: 'all', label: 'All Time' },
+              { value: 'today', label: 'Today' },
+              { value: 'last_7_days', label: 'Last 7 Days' },
+              { value: 'this_month', label: 'This Month' },
+              { value: 'last_30_days', label: 'Last 30 Days' },
+              { value: 'this_year', label: 'This Year' },
+              { value: 'custom', label: 'Custom Range...' }
+            ]}
+          />
+        </div>
 
-          {/* Search Input */}
-          <div className="w-full sm:w-60">
-            <SearchInput
-              placeholder="Search feedback..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+        {/* Custom Date Range Inputs */}
+        {datePreset === 'custom' && (
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => { setFromDate(e.target.value); setPage(1); }}
+              className="h-9 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
+              title="From Date"
+            />
+            <span className="text-xs text-muted">to</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => { setToDate(e.target.value); setPage(1); }}
+              className="h-9 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
+              title="To Date"
             />
           </div>
-        </div>
+        )}
       </div>
 
       {/* VIEW MODE 1: MASTER-DETAIL INBOX VIEW */}
       {viewMode === 'inbox' && (
-        <div className="border border-border bg-surface h-[500px] overflow-hidden flex flex-col">
+        <div className="border border-border bg-surface h-[480px] overflow-hidden flex flex-col">
           <div className="grid grid-cols-1 lg:grid-cols-12 h-full">
             {/* Message List */}
             <div className="lg:col-span-5 flex flex-col h-full border-b lg:border-b-0 lg:border-r border-border">
@@ -635,7 +620,7 @@ const Feedback: React.FC = () => {
       {/* VIEW MODE 2: FULL TABULAR DATA TABLE */}
       {viewMode === 'table' && (
         <div className="border border-border bg-surface flex flex-col">
-          <Table containerClassName="max-h-[500px]">
+          <Table containerClassName="max-h-[480px]">
             <TableHeader>
               <TableRow>
                 <TableHead isSorted={sortField === 'created_at'} className="cursor-pointer transition-colors w-[120px]" onClick={() => handleSort('created_at')}>

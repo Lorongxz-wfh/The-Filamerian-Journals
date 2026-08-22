@@ -396,13 +396,6 @@ const TrashBin: React.FC = () => {
         helpText="Soft-deleted articles, volumes, and journals are retained here for 30 days before permanent deletion from storage. You can restore them anytime or permanently purge them."
       >
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <SearchInput
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
-            containerClassName="w-32 xs:w-44 sm:w-72"
-            className="h-9 text-xs"
-          />
           <Button
             type="button"
             variant={isSelectMode ? "primary" : "outline"}
@@ -429,8 +422,8 @@ const TrashBin: React.FC = () => {
         </div>
       </DashboardHeader>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center justify-between border-b border-border pb-2 sm:pb-3">
+      {/* Filter Tabs & Search Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2 sm:pb-3">
         <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto custom-scrollbar pr-2">
           <button
             onClick={() => setActiveTab('all')}
@@ -472,6 +465,15 @@ const TrashBin: React.FC = () => {
           >
             Journals ({journals.length})
           </button>
+        </div>
+
+        <div className="w-full sm:w-64 shrink-0">
+          <SearchInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search trash..."
+            className="h-9 text-xs"
+          />
         </div>
       </div>
 
