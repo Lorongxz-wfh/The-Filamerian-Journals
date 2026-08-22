@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
-import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft, ChevronDown } from 'lucide-react';
+import { FileText, BookOpen, ExternalLink, Quote, ArrowLeft, ChevronDown, Search as SearchIcon, X } from 'lucide-react';
 import api, { getFileUrl } from '@/services/api';
 import JournalCard from '@/components/ui/JournalCard';
 import CitationModal from '@/components/ui/CitationModal';
@@ -8,8 +8,8 @@ import PdfViewerModal from '@/components/ui/PdfViewerModal';
 import EmptyState from '@/components/ui/EmptyState';
 import HighlightText from '@/components/ui/HighlightText';
 import PageWrapper from '@/components/layout/PageWrapper';
-import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
+import Button from '@/components/ui/Button';
 import { Seo } from '@/components/ui/Seo';
 
 interface SearchResults {
@@ -23,6 +23,11 @@ const Search: React.FC = () => {
   
   const [results, setResults] = useState<SearchResults>({ journals: [], articles: [] });
   const [loading, setLoading] = useState(false);
+  const [searchInputVal, setSearchInputVal] = useState(query);
+
+  useEffect(() => {
+    setSearchInputVal(query);
+  }, [query]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -125,29 +130,64 @@ const Search: React.FC = () => {
         title={query ? `Search: "${query}"` : 'Search Articles & Journals'} 
         description="Search through the official academic repository of The FCU Journals." 
       />
-      {/* Search Header */}
-      <PageHeader
-        title="Search Results"
-        className="mb-8"
-        preTitle={
-          <button 
-            onClick={() => navigate(-1)} 
-            className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider mb-4 cursor-pointer"
+      {/* Search Header with In-Page Search Refinement */}
+      <div className="border-b border-border pb-5 mb-8">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-[12px] font-semibold text-muted hover:text-primary transition-colors uppercase tracking-wider mb-4 cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to previous page
+        </button>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl uppercase tracking-wider font-bold text-primary font-serif">Search Results</h1>
+            <p className="text-[14px] text-muted mt-1">
+              {query ? (
+                <span>
+                  Showing matches for <strong className="text-primary font-semibold">"{query}"</strong>
+                </span>
+              ) : (
+                'Filter through published academic journals and articles.'
+              )}
+            </p>
+          </div>
+
+          {/* Right-aligned In-Page Search Refinement Bar */}
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchInputVal.trim()) {
+                navigate(`/search?q=${encodeURIComponent(searchInputVal.trim())}&type=${type}`);
+              }
+            }}
+            className="flex items-center gap-2 w-full md:w-auto min-w-[280px] lg:min-w-[340px]"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to previous page
-          </button>
-        }
-      >
-        <p className="text-[14px] text-muted">
-          {query ? (
-            <span>
-              Showing matches for <strong className="text-primary font-semibold">"{query}"</strong>
-            </span>
-          ) : (
-            'Filter through published academic journals and articles.'
-          )}
-        </p>
-      </PageHeader>
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+              <input
+                type="text"
+                value={searchInputVal}
+                onChange={(e) => setSearchInputVal(e.target.value)}
+                placeholder="Search articles, DOIs, authors..."
+                className="w-full pl-9 pr-8 py-2 bg-surface border border-border text-xs sm:text-[13px] text-primary focus:outline-none focus:border-primary transition-colors font-sans rounded-none"
+              />
+              {searchInputVal && (
+                <button
+                  type="button"
+                  onClick={() => setSearchInputVal('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-primary p-0.5 cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <Button type="submit" className="h-[38px] px-4 text-xs shrink-0 cursor-pointer">
+              Search
+            </Button>
+          </form>
+        </div>
+      </div>
 
       {/* Main Content Layout */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -233,7 +273,7 @@ const Search: React.FC = () => {
                       <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">From</label>
                       <input
                         type="number"
-                        placeholder="e.g. 2020"
+                        placeholder="2020"
                         value={fromYear}
                         onChange={(e) => setFromYear(e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
@@ -243,7 +283,7 @@ const Search: React.FC = () => {
                       <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">To</label>
                       <input
                         type="number"
-                        placeholder="e.g. 2024"
+                        placeholder="2026"
                         value={toYear}
                         onChange={(e) => setToYear(e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"

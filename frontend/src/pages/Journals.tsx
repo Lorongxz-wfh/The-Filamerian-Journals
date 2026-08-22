@@ -262,7 +262,7 @@ const Journals: React.FC = () => {
                 <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">From</label>
                 <input
                   type="number"
-                  placeholder="e.g. 2020"
+                  placeholder="2020"
                   value={fromYear}
                   onChange={(e) => setFromYear(e.target.value)}
                   className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
@@ -272,7 +272,7 @@ const Journals: React.FC = () => {
                 <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">To</label>
                 <input
                   type="number"
-                  placeholder="e.g. 2024"
+                  placeholder="2026"
                   value={toYear}
                   onChange={(e) => setToYear(e.target.value)}
                   className="w-full px-2.5 py-1.5 bg-surface border border-border text-[12px] focus:outline-none focus:border-primary transition-colors font-mono"
