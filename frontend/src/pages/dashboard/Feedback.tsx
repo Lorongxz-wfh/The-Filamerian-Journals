@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   MessageSquare, Trash2, Archive, ArchiveRestore, ArrowLeft, 
   Download, Table as TableIcon, Mail, ArrowUp, ArrowDown, 
-  Eye
+  Eye, FileSpreadsheet
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/services/api';
@@ -35,9 +35,17 @@ const Feedback: React.FC = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isSuperAdmin = user?.role === 'Super Admin';
 
-  // Tabs & Views
-  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  // View Mode: Inbox vs Table
   const [viewMode, setViewMode] = useState<'inbox' | 'table'>('inbox');
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived'>('active');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [datePreset, setDatePreset] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Data & Pagination
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
@@ -48,18 +56,20 @@ const Feedback: React.FC = () => {
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  // Filters & Sorting
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [datePreset, setDatePreset] = useState('all');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  // Sorting
   const [sortField, setSortField] = useState('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  // Export & Delete state
+  // Export Modal State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportStatus, setExportStatus] = useState<'all' | 'active' | 'archived'>('active');
+  const [exportCategory, setExportCategory] = useState('all');
+  const [exportDatePreset, setExportDatePreset] = useState('all');
+  const [exportFromDate, setExportFromDate] = useState('');
+  const [exportToDate, setExportToDate] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+
+  // Delete State
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -75,9 +85,9 @@ const Feedback: React.FC = () => {
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      const isArchived = activeTab === 'archived';
+      const archivedParam = statusFilter === 'all' ? 'all' : (statusFilter === 'archived' ? 'true' : 'false');
       const params = new URLSearchParams({
-        archived: isArchived ? 'true' : 'false',
+        archived: archivedParam,
         page: page.toString(),
         sort_by: sortField,
         sort_dir: sortDir,
@@ -106,7 +116,7 @@ const Feedback: React.FC = () => {
   useEffect(() => {
     fetchFeedbacks();
     setSelected(null);
-  }, [page, activeTab, debouncedSearch, categoryFilter, datePreset, fromDate, toDate, sortField, sortDir]);
+  }, [page, statusFilter, debouncedSearch, categoryFilter, datePreset, fromDate, toDate, sortField, sortDir]);
 
   const handleSelect = async (id: number) => {
     setSelected(id);
@@ -137,7 +147,11 @@ const Feedback: React.FC = () => {
     try {
       await api.put(`/feedbacks/${id}`, { is_archived: !currentArchived });
       toast.success(currentArchived ? 'Feedback restored to active inbox' : 'Feedback moved to archive');
-      setFeedbacks(feedbacks.filter(f => f.id !== id));
+      if (statusFilter !== 'all') {
+        setFeedbacks(feedbacks.filter(f => f.id !== id));
+      } else {
+        setFeedbacks(feedbacks.map(f => f.id === id ? { ...f, is_archived: !currentArchived } : f));
+      }
       if (selected === id) setSelected(null);
       if (quickViewItem?.id === id) setQuickViewItem(null);
     } catch (err) {
@@ -179,35 +193,47 @@ const Feedback: React.FC = () => {
     return sortDir === 'asc' ? <ArrowUp className="h-3 w-3 opacity-100" /> : <ArrowDown className="h-3 w-3 opacity-100" />;
   };
 
-  // Export CSV
-  const handleExportCsv = async () => {
+  // Open Export Modal with current active filters as defaults
+  const handleOpenExportModal = () => {
+    setExportStatus(statusFilter);
+    setExportCategory(categoryFilter);
+    setExportDatePreset(datePreset);
+    setExportFromDate(fromDate);
+    setExportToDate(toDate);
+    setIsExportModalOpen(true);
+  };
+
+  // Run CSV Export from Modal Configuration
+  const handleExecuteExportCsv = async () => {
     try {
       setIsExporting(true);
-      const isArchived = activeTab === 'archived';
+      const archivedParam = exportStatus === 'all' ? 'all' : (exportStatus === 'archived' ? 'true' : 'false');
       const params = new URLSearchParams({
-        archived: isArchived ? 'true' : 'false',
+        archived: archivedParam,
         per_page: 'all',
-        sort_by: sortField,
-        sort_dir: sortDir,
+        sort_by: 'created_at',
+        sort_dir: 'desc',
       });
 
       if (debouncedSearch) params.append('search', debouncedSearch);
-      if (categoryFilter && categoryFilter !== 'all') params.append('category', categoryFilter);
-      if (datePreset && datePreset !== 'all' && datePreset !== 'custom') params.append('date_preset', datePreset);
-      if (datePreset === 'custom') {
-        if (fromDate) params.append('from_date', fromDate);
-        if (toDate) params.append('to_date', toDate);
+      if (exportCategory && exportCategory !== 'all') params.append('category', exportCategory);
+      if (exportDatePreset && exportDatePreset !== 'all' && exportDatePreset !== 'custom') {
+        params.append('date_preset', exportDatePreset);
+      }
+      if (exportDatePreset === 'custom') {
+        if (exportFromDate) params.append('from_date', exportFromDate);
+        if (exportToDate) params.append('to_date', exportToDate);
       }
 
       const res = await api.get(`/feedbacks?${params.toString()}`);
       const exportList: FeedbackItem[] = res.data.data || [];
 
       if (exportList.length === 0) {
-        toast.info('No feedback records found to export.');
+        toast.info('No feedback records found matching the selected export criteria.');
         return;
       }
 
-      const headers = ['ID', 'Date Submitted', 'Category', 'Sender Name', 'Sender Email', 'Subject', 'Message', 'Status'];
+      const headers = ['ID', 'Date Submitted', 'Category', 'Sender Name', 'Sender Email', 'Subject', 'Message Content', 'Archive Status', 'Read Status'];
       const rows = exportList.map(item => [
         item.id,
         new Date(item.created_at).toISOString().split('T')[0],
@@ -216,7 +242,8 @@ const Feedback: React.FC = () => {
         `"${(item.email || '').replace(/"/g, '""')}"`,
         `"${(item.subject || '').replace(/"/g, '""')}"`,
         `"${(item.message || '').replace(/"/g, '""')}"`,
-        item.is_archived ? 'Archived' : (item.is_read ? 'Read' : 'Unread')
+        item.is_archived ? 'Archived' : 'Active',
+        item.is_read ? 'Read' : 'Unread'
       ]);
 
       const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
@@ -224,13 +251,14 @@ const Feedback: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `FCU_Journals_Feedback_Export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `FCU_Journals_Feedback_${exportStatus}_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success(`Exported ${exportList.length} feedback records to CSV.`);
+      setIsExportModalOpen(false);
+      toast.success(`Successfully exported ${exportList.length} feedback records to CSV.`);
     } catch (err) {
       console.error('Export failed', err);
       toast.error('Failed to export feedback records.');
@@ -252,37 +280,12 @@ const Feedback: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-4 sm:space-y-6 font-sans relative">
+    <div className="space-y-3 font-sans relative">
       <DashboardHeader 
         title="User Feedback & Inquiries"
         helpText="Review inquiries, research correspondence, suggestions, and submissions sent through the public repository."
       >
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Active vs Archived tabs */}
-          <div className="flex items-center gap-0.5 border border-border bg-surface p-0.5">
-            <button
-              onClick={() => { setActiveTab('active'); setPage(1); }}
-              className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors cursor-pointer ${
-                activeTab === 'active'
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'text-muted hover:text-primary hover:bg-background'
-              }`}
-            >
-              Active Feedback
-            </button>
-            <button
-              onClick={() => { setActiveTab('archived'); setPage(1); }}
-              className={`px-3 py-1.5 text-xs font-semibold tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'archived'
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'text-muted hover:text-primary hover:bg-background'
-              }`}
-            >
-              <Archive className="h-3.5 w-3.5" />
-              Archived
-            </button>
-          </div>
-
+        <div className="flex items-center gap-2">
           {/* View Mode Toggle: Inbox vs Table */}
           <div className="flex items-center gap-0.5 border border-border bg-surface p-0.5">
             <button
@@ -295,7 +298,7 @@ const Feedback: React.FC = () => {
               title="Split Inbox View"
             >
               <Mail className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">Inbox</span>
+              <span>Inbox</span>
             </button>
             <button
               onClick={() => setViewMode('table')}
@@ -307,7 +310,7 @@ const Feedback: React.FC = () => {
               title="Full Tabular View"
             >
               <TableIcon className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">Table</span>
+              <span>Table</span>
             </button>
           </div>
 
@@ -316,22 +319,21 @@ const Feedback: React.FC = () => {
             type="button"
             variant="outline"
             size="sm"
-            onClick={handleExportCsv}
-            isLoading={isExporting}
+            onClick={handleOpenExportModal}
             className="text-xs flex items-center gap-1.5 border-border hover:bg-background"
-            title="Download CSV report of current filtered feedback"
+            title="Configure and download CSV export"
           >
             <Download className="h-3.5 w-3.5 text-primary" />
-            <span className="hidden sm:inline">Export CSV</span>
+            <span>Export CSV</span>
           </Button>
         </div>
       </DashboardHeader>
 
-      {/* Filter & Search Bar */}
-      <div className="p-3 sm:p-4 bg-surface border border-border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2.5 flex-1">
+      {/* Sleek Integrated Filter Row (No bulky outer wrapper) */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 flex-1">
           {/* Search Input */}
-          <div className="w-full sm:w-64">
+          <div className="w-full sm:w-56">
             <SearchInput
               placeholder="Search sender, email, topic..."
               value={search}
@@ -339,8 +341,22 @@ const Feedback: React.FC = () => {
             />
           </div>
 
+          {/* Status Filter (All, Active, Archived) */}
+          <div className="w-full sm:w-36">
+            <Select
+              className="py-1.5 h-9 text-xs"
+              value={statusFilter}
+              onChange={(val) => { setStatusFilter(val as any); setPage(1); }}
+              options={[
+                { value: 'all', label: 'All Status' },
+                { value: 'active', label: 'Active Only' },
+                { value: 'archived', label: 'Archived Only' },
+              ]}
+            />
+          </div>
+
           {/* Category Filter */}
-          <div className="w-full sm:w-44">
+          <div className="w-full sm:w-40">
             <Select
               className="py-1.5 h-9 text-xs"
               value={categoryFilter}
@@ -350,7 +366,7 @@ const Feedback: React.FC = () => {
           </div>
 
           {/* Date Range Preset Filter */}
-          <div className="w-full sm:w-40">
+          <div className="w-full sm:w-36">
             <Select
               className="py-1.5 h-9 text-xs"
               value={datePreset}
@@ -374,7 +390,7 @@ const Feedback: React.FC = () => {
                 type="date"
                 value={fromDate}
                 onChange={(e) => { setFromDate(e.target.value); setPage(1); }}
-                className="h-9 px-2.5 bg-background border border-border text-xs focus:outline-none focus:border-primary"
+                className="h-9 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
                 title="From Date"
               />
               <span className="text-xs text-muted">to</span>
@@ -382,59 +398,64 @@ const Feedback: React.FC = () => {
                 type="date"
                 value={toDate}
                 onChange={(e) => { setToDate(e.target.value); setPage(1); }}
-                className="h-9 px-2.5 bg-background border border-border text-xs focus:outline-none focus:border-primary"
+                className="h-9 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
                 title="To Date"
               />
             </div>
           )}
         </div>
 
-        <div className="text-xs text-muted self-end md:self-center shrink-0">
+        <div className="text-[11px] text-muted self-end sm:self-center shrink-0">
           Showing <span className="font-semibold text-primary">{feedbacks.length}</span> of <span className="font-semibold text-primary">{total}</span>
         </div>
       </div>
 
-      {/* VIEW MODE 1: MASTER-DETAIL INBOX VIEW */}
+      {/* VIEW MODE 1: MASTER-DETAIL INBOX VIEW (Compact height to fit laptop screens cleanly) */}
       {viewMode === 'inbox' && (
-        <div className="relative border border-border bg-surface min-h-[480px] sm:min-h-[520px] overflow-hidden">
+        <div className="border border-border bg-surface h-[440px] overflow-hidden flex flex-col">
           <div className="grid grid-cols-1 lg:grid-cols-12 h-full">
             {/* Message List */}
-            <div className="lg:col-span-5 flex flex-col h-full border-b lg:border-b-0 lg:border-r border-border max-h-[540px] sm:max-h-[620px]">
+            <div className="lg:col-span-5 flex flex-col h-full border-b lg:border-b-0 lg:border-r border-border">
               <div className="divide-y divide-border overflow-y-auto flex-grow custom-scrollbar">
                 {loading ? (
-                  <MessageListSkeleton rows={6} />
+                  <MessageListSkeleton rows={5} />
                 ) : feedbacks.length === 0 ? (
-                  <div className="p-8 text-center text-muted text-xs sm:text-[13px]">
-                    {activeTab === 'archived' ? 'No archived feedback messages found.' : 'No feedback messages match your criteria.'}
+                  <div className="p-8 text-center text-muted text-xs">
+                    No feedback messages match your criteria.
                   </div>
                 ) : (
                   feedbacks.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => handleSelect(item.id)}
-                      className={`w-full text-left px-3.5 sm:px-5 py-3 sm:py-4 transition-colors cursor-pointer ${
+                      className={`w-full text-left px-3.5 py-3 transition-colors cursor-pointer ${
                         selected === item.id
                           ? 'bg-primary/5 border-l-3 border-l-primary'
                           : 'hover:bg-background border-l-3 border-l-transparent'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs sm:text-[13px] truncate ${!item.is_read ? 'font-bold text-primary' : 'font-medium text-primary/70'}`}>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className={`text-xs truncate ${!item.is_read ? 'font-bold text-primary' : 'font-medium text-primary/70'}`}>
                           {item.name}
                         </span>
-                        <span className="text-[10px] sm:text-[11px] text-muted shrink-0 ml-2 sm:ml-3">
+                        <span className="text-[10px] text-muted shrink-0 ml-2">
                           {new Date(item.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className={`text-[11px] sm:text-[12px] truncate ${!item.is_read ? 'text-primary font-semibold' : 'text-muted'}`}>
+                      <p className={`text-[11px] truncate ${!item.is_read ? 'text-primary font-semibold' : 'text-muted'}`}>
                         {item.subject}
                       </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20">
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.2 bg-primary/10 text-primary border border-primary/20">
                           {item.category || 'General'}
                         </span>
+                        {item.is_archived && (
+                          <span className="text-[9px] font-bold text-muted bg-muted/10 px-1 py-0.2">
+                            Archived
+                          </span>
+                        )}
                         {!item.is_read && (
-                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600">
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-600">
                             • Unread
                           </span>
                         )}
@@ -445,7 +466,7 @@ const Feedback: React.FC = () => {
               </div>
               
               {lastPage > 1 && (
-                <div className="border-t border-border p-3 sm:p-4 bg-background/50 flex items-center justify-between">
+                <div className="border-t border-border p-2.5 bg-background/50 flex items-center justify-between shrink-0">
                   <Pagination
                     currentPage={page}
                     lastPage={lastPage}
@@ -457,24 +478,31 @@ const Feedback: React.FC = () => {
             </div>
 
             {/* Message Detail (Desktop side-by-side) */}
-            <div className="hidden lg:flex lg:col-span-7 p-6 flex-col h-full min-h-[400px]">
+            <div className="hidden lg:flex lg:col-span-7 p-4 sm:p-5 flex-col h-full overflow-y-auto custom-scrollbar">
               {selectedItem ? (
-                <div className="space-y-6 flex-grow flex flex-col">
-                  <div className="border-b border-border pb-4 space-y-3">
+                <div className="space-y-4 flex-grow flex flex-col">
+                  <div className="border-b border-border pb-3 space-y-2">
                     <div className="flex justify-between items-start gap-4">
                       <div>
-                        <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider mb-2 border border-primary/20">
-                          {selectedItem.category || 'General'}
-                        </span>
-                        <h2 className="text-[16px] font-bold text-primary leading-snug">{selectedItem.subject}</h2>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider border border-primary/20">
+                            {selectedItem.category || 'General'}
+                          </span>
+                          {selectedItem.is_archived && (
+                            <span className="text-[9px] font-bold text-muted bg-muted/10 px-1.5 py-0.5 border border-border">
+                              Archived
+                            </span>
+                          )}
+                        </div>
+                        <h2 className="text-[15px] font-bold text-primary leading-snug">{selectedItem.subject}</h2>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() => handleToggleArchive(selectedItem.id, activeTab === 'archived')}
-                          className="px-2.5 py-1.5 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1.5 cursor-pointer"
-                          title={activeTab === 'archived' ? 'Restore to Active Inbox' : 'Move to Archive'}
+                          onClick={() => handleToggleArchive(selectedItem.id, !!selectedItem.is_archived)}
+                          className="px-2.5 py-1 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1.5 cursor-pointer"
+                          title={selectedItem.is_archived ? 'Restore to Active Inbox' : 'Move to Archive'}
                         >
-                          {activeTab === 'archived' ? (
+                          {selectedItem.is_archived ? (
                             <>
                               <ArchiveRestore className="h-3.5 w-3.5" />
                               <span>Restore</span>
@@ -489,15 +517,15 @@ const Feedback: React.FC = () => {
                         {isSuperAdmin && (
                           <button 
                             onClick={() => setDeleteTargetId(selectedItem.id)}
-                            className="h-8 w-8 shrink-0 flex items-center justify-center text-red-500/60 hover:text-red-600 hover:bg-red-50 transition-colors border border-border cursor-pointer"
+                            className="h-7 w-7 shrink-0 flex items-center justify-center text-red-500/60 hover:text-red-600 hover:bg-red-50 transition-colors border border-border cursor-pointer"
                             title="Permanently Delete Message"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-[12px] text-muted">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[11px] text-muted">
                       <span>From: <span className="font-semibold text-primary">{selectedItem.name}</span></span>
                       <span className="hidden sm:inline">•</span>
                       <span>Email: <a href={`mailto:${selectedItem.email}`} className="text-primary hover:underline font-mono">{selectedItem.email}</a></span>
@@ -505,23 +533,23 @@ const Feedback: React.FC = () => {
                       <span>{new Date(selectedItem.created_at).toLocaleString()}</span>
                     </div>
                   </div>
-                  <p className="text-[13px] text-primary/85 leading-relaxed whitespace-pre-wrap flex-grow bg-background p-4 border border-border font-sans">
+                  <p className="text-[12px] text-primary/85 leading-relaxed whitespace-pre-wrap flex-grow bg-background p-3.5 border border-border font-sans max-h-56 overflow-y-auto">
                     {selectedItem.message}
                   </p>
-                  <div className="pt-3 border-t border-border mt-auto flex items-center justify-between text-xs text-muted">
-                    <span>Click the email link above to open your mail client.</span>
+                  <div className="pt-2.5 border-t border-border mt-auto flex items-center justify-between text-[11px] text-muted">
+                    <span>Click below to compose a direct response in your mail client:</span>
                     <a
                       href={`mailto:${selectedItem.email}?subject=Re: ${encodeURIComponent(selectedItem.subject)}`}
-                      className="px-3 py-1.5 bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1 bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5"
                     >
-                      <Mail className="h-3.5 w-3.5" /> Reply to Sender
+                      <Mail className="h-3.5 w-3.5" /> Reply via Email
                     </a>
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center py-20 flex-grow">
-                  <MessageSquare className="h-10 w-10 text-muted/20 mb-3" />
-                  <p className="text-[13px] text-muted">Select a message from the list to view full details</p>
+                <div className="h-full flex flex-col items-center justify-center text-center py-16 flex-grow">
+                  <MessageSquare className="h-9 w-9 text-muted/20 mb-2" />
+                  <p className="text-xs text-muted">Select a message from the list to read</p>
                 </div>
               )}
             </div>
@@ -535,22 +563,22 @@ const Feedback: React.FC = () => {
           >
             {selectedItem && (
               <div className="flex flex-col h-full overflow-hidden">
-                <div className="p-3.5 border-b border-border bg-background flex items-center justify-between gap-2 shrink-0">
+                <div className="p-3 border-b border-border bg-background flex items-center justify-between gap-2 shrink-0">
                   <button
                     onClick={() => setSelected(null)}
                     className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-secondary transition-colors cursor-pointer py-1 px-2"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    <span>Back to List</span>
+                    <span>Back</span>
                   </button>
 
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => handleToggleArchive(selectedItem.id, activeTab === 'archived')}
+                      onClick={() => handleToggleArchive(selectedItem.id, !!selectedItem.is_archived)}
                       className="px-2.5 py-1 text-xs font-semibold border border-border text-muted hover:text-primary hover:bg-background transition-colors flex items-center gap-1"
                     >
-                      {activeTab === 'archived' ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
-                      <span>{activeTab === 'archived' ? 'Restore' : 'Archive'}</span>
+                      {selectedItem.is_archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
+                      <span>{selectedItem.is_archived ? 'Restore' : 'Archive'}</span>
                     </button>
                     {isSuperAdmin && (
                       <button 
@@ -563,22 +591,22 @@ const Feedback: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4 overflow-y-auto flex-grow space-y-4">
-                  <div className="border-b border-border pb-3.5 space-y-2">
-                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+                <div className="p-4 overflow-y-auto flex-grow space-y-3">
+                  <div className="border-b border-border pb-3 space-y-1.5">
+                    <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">
                       {selectedItem.category || 'General'}
                     </span>
-                    <h2 className="text-base font-bold text-primary leading-snug">
+                    <h2 className="text-sm font-bold text-primary leading-snug">
                       {selectedItem.subject}
                     </h2>
-                    <div className="flex flex-col gap-1 text-xs text-muted pt-1">
+                    <div className="flex flex-col gap-0.5 text-[11px] text-muted pt-1">
                       <div>From: <span className="font-semibold text-primary">{selectedItem.name}</span></div>
-                      <div>Email: <a href={`mailto:${selectedItem.email}`} className="text-primary underline font-mono text-[11px]">{selectedItem.email}</a></div>
-                      <div className="text-[11px] text-muted/80">{new Date(selectedItem.created_at).toLocaleString()}</div>
+                      <div>Email: <a href={`mailto:${selectedItem.email}`} className="text-primary underline font-mono">{selectedItem.email}</a></div>
+                      <div className="text-[10px] text-muted/80">{new Date(selectedItem.created_at).toLocaleString()}</div>
                     </div>
                   </div>
 
-                  <p className="text-xs sm:text-[13px] text-primary/85 leading-relaxed whitespace-pre-wrap bg-background p-3.5 border border-border">
+                  <p className="text-xs text-primary/85 leading-relaxed whitespace-pre-wrap bg-background p-3 border border-border">
                     {selectedItem.message}
                   </p>
 
@@ -600,23 +628,23 @@ const Feedback: React.FC = () => {
       {/* VIEW MODE 2: FULL TABULAR DATA TABLE */}
       {viewMode === 'table' && (
         <div className="border border-border bg-surface flex flex-col">
-          <Table containerClassName="max-h-[560px]">
+          <Table containerClassName="max-h-[440px]">
             <TableHeader>
               <TableRow>
-                <TableHead isSorted={sortField === 'created_at'} className="cursor-pointer transition-colors w-[130px]" onClick={() => handleSort('created_at')}>
+                <TableHead isSorted={sortField === 'created_at'} className="cursor-pointer transition-colors w-[120px]" onClick={() => handleSort('created_at')}>
                   <div className="flex items-center gap-1">Date {getSortIcon('created_at')}</div>
                 </TableHead>
-                <TableHead isSorted={sortField === 'name'} className="cursor-pointer transition-colors w-[160px]" onClick={() => handleSort('name')}>
+                <TableHead isSorted={sortField === 'name'} className="cursor-pointer transition-colors w-[150px]" onClick={() => handleSort('name')}>
                   <div className="flex items-center gap-1">Sender {getSortIcon('name')}</div>
                 </TableHead>
-                <TableHead isSorted={sortField === 'category'} className="cursor-pointer transition-colors w-[140px] hidden sm:table-cell" onClick={() => handleSort('category')}>
+                <TableHead isSorted={sortField === 'category'} className="cursor-pointer transition-colors w-[130px] hidden sm:table-cell" onClick={() => handleSort('category')}>
                   <div className="flex items-center gap-1">Category {getSortIcon('category')}</div>
                 </TableHead>
                 <TableHead isSorted={sortField === 'subject'} className="cursor-pointer transition-colors" onClick={() => handleSort('subject')}>
                   <div className="flex items-center gap-1">Subject & Message {getSortIcon('subject')}</div>
                 </TableHead>
-                <TableHead className="w-[100px] text-center hidden md:table-cell">Status</TableHead>
-                <TableHead className="w-20 text-right">Actions</TableHead>
+                <TableHead className="w-[90px] text-center hidden md:table-cell">Status</TableHead>
+                <TableHead className="w-16 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -652,7 +680,7 @@ const Feedback: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-primary/10 text-primary border border-primary/20">
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20">
                         {item.category || 'General'}
                       </span>
                     </TableCell>
@@ -667,15 +695,20 @@ const Feedback: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-center hidden md:table-cell">
-                      {!item.is_read ? (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-[9px] px-1.5 py-0 font-bold">
-                          Unread
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-semibold text-muted">
-                          Read
-                        </Badge>
-                      )}
+                      <div className="flex flex-col items-center gap-1">
+                        {!item.is_read ? (
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-[8px] px-1 py-0 font-bold">
+                            Unread
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-[8px] px-1 py-0 font-semibold text-muted">
+                            Read
+                          </Badge>
+                        )}
+                        {item.is_archived && (
+                          <span className="text-[8px] font-semibold text-muted bg-muted/20 px-1 rounded">Archived</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -687,11 +720,11 @@ const Feedback: React.FC = () => {
                           <Eye className="h-3.5 w-3.5" />
                         </button>
                         <button
-                          onClick={() => handleToggleArchive(item.id, activeTab === 'archived')}
+                          onClick={() => handleToggleArchive(item.id, !!item.is_archived)}
                           className="p-1 text-muted hover:text-primary hover:bg-background border border-border"
-                          title={activeTab === 'archived' ? 'Restore to Active' : 'Archive'}
+                          title={item.is_archived ? 'Restore to Active' : 'Archive'}
                         >
-                          {activeTab === 'archived' ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
+                          {item.is_archived ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
                         </button>
                         {isSuperAdmin && (
                           <button
@@ -711,8 +744,8 @@ const Feedback: React.FC = () => {
           </Table>
 
           {lastPage > 1 && (
-            <div className="border-t border-border p-3 sm:p-4 bg-background/50 flex items-center justify-between">
-              <span className="text-xs text-muted">
+            <div className="border-t border-border p-2.5 bg-background/50 flex items-center justify-between">
+              <span className="text-[11px] text-muted">
                 Page {page} of {lastPage}
               </span>
               <Pagination
@@ -726,7 +759,7 @@ const Feedback: React.FC = () => {
         </div>
       )}
 
-      {/* Quick View Modal (For Table Mode) */}
+      {/* QUICK VIEW MODAL (For Table Mode) */}
       {quickViewItem && (
         <Modal
           isOpen={!!quickViewItem}
@@ -734,20 +767,27 @@ const Feedback: React.FC = () => {
           title="Feedback Message Details"
           className="max-w-lg"
         >
-          <div className="space-y-4 py-1">
-            <div className="space-y-2 border-b border-border pb-3">
+          <div className="space-y-3.5 py-1">
+            <div className="space-y-1.5 border-b border-border pb-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20">
-                  {quickViewItem.category || 'General'}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider border border-primary/20">
+                    {quickViewItem.category || 'General'}
+                  </span>
+                  {quickViewItem.is_archived && (
+                    <span className="text-[9px] font-bold text-muted bg-muted/10 px-1.5 py-0.5 border border-border">
+                      Archived
+                    </span>
+                  )}
+                </div>
                 <span className="text-[11px] text-muted">
                   {new Date(quickViewItem.created_at).toLocaleString()}
                 </span>
               </div>
-              <h3 className="text-base font-bold text-primary leading-snug">
+              <h3 className="text-[15px] font-bold text-primary leading-snug">
                 {quickViewItem.subject}
               </h3>
-              <div className="text-xs text-muted flex flex-col gap-1">
+              <div className="text-xs text-muted flex flex-col gap-0.5 pt-1">
                 <div>Sender: <strong className="text-primary">{quickViewItem.name}</strong></div>
                 <div>Email: <a href={`mailto:${quickViewItem.email}`} className="text-primary font-mono hover:underline">{quickViewItem.email}</a></div>
               </div>
@@ -755,7 +795,7 @@ const Feedback: React.FC = () => {
 
             <div className="space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-wider text-muted">Message Content</label>
-              <div className="p-3.5 bg-background border border-border text-xs sm:text-[13px] text-primary/85 leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto">
+              <div className="p-3 bg-background border border-border text-xs text-primary/85 leading-relaxed whitespace-pre-wrap max-h-52 overflow-y-auto">
                 {quickViewItem.message}
               </div>
             </div>
@@ -766,10 +806,10 @@ const Feedback: React.FC = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => handleToggleArchive(quickViewItem.id, activeTab === 'archived')}
+                  onClick={() => handleToggleArchive(quickViewItem.id, !!quickViewItem.is_archived)}
                   className="text-xs"
                 >
-                  {activeTab === 'archived' ? 'Restore to Inbox' : 'Archive'}
+                  {quickViewItem.is_archived ? 'Restore to Inbox' : 'Archive'}
                 </Button>
                 {isSuperAdmin && (
                   <Button
@@ -805,6 +845,114 @@ const Feedback: React.FC = () => {
                   <Mail className="h-3.5 w-3.5" /> Reply
                 </a>
               </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* EXPORT OPTIONS MODAL */}
+      {isExportModalOpen && (
+        <Modal
+          isOpen={isExportModalOpen}
+          onClose={() => !isExporting && setIsExportModalOpen(false)}
+          title="Export Feedback to CSV"
+          className="max-w-md"
+        >
+          <div className="space-y-4 py-1">
+            <p className="text-xs text-muted leading-relaxed">
+              Customize the criteria below to generate and download a comprehensive CSV spreadsheet for institutional records and auditing.
+            </p>
+
+            <div className="space-y-3 bg-surface p-3.5 border border-border">
+              {/* Status Selector */}
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">Feedback Status</label>
+                <Select
+                  className="py-1.5 h-9 text-xs"
+                  value={exportStatus}
+                  onChange={(val) => setExportStatus(val as any)}
+                  options={[
+                    { value: 'all', label: 'All Feedback (Active & Archived)' },
+                    { value: 'active', label: 'Active Feedback Only' },
+                    { value: 'archived', label: 'Archived Messages Only' },
+                  ]}
+                />
+              </div>
+
+              {/* Category Selector */}
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">Inquiry Category</label>
+                <Select
+                  className="py-1.5 h-9 text-xs"
+                  value={exportCategory}
+                  onChange={(val) => setExportCategory(val as string)}
+                  options={categoryOptions}
+                />
+              </div>
+
+              {/* Date Range Selector */}
+              <div>
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">Date Range</label>
+                <Select
+                  className="py-1.5 h-9 text-xs"
+                  value={exportDatePreset}
+                  onChange={(val) => setExportDatePreset(val as string)}
+                  options={[
+                    { value: 'all', label: 'All Time (Entire History)' },
+                    { value: 'today', label: 'Today Only' },
+                    { value: 'last_7_days', label: 'Last 7 Days' },
+                    { value: 'this_month', label: 'This Month' },
+                    { value: 'last_30_days', label: 'Last 30 Days' },
+                    { value: 'this_year', label: 'This Year' },
+                    { value: 'custom', label: 'Custom Date Range...' },
+                  ]}
+                />
+              </div>
+
+              {/* Custom Date Inputs inside Modal */}
+              {exportDatePreset === 'custom' && (
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div>
+                    <label className="text-[9px] font-semibold text-muted block mb-0.5">From Date</label>
+                    <input
+                      type="date"
+                      value={exportFromDate}
+                      onChange={(e) => setExportFromDate(e.target.value)}
+                      className="w-full h-8 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-semibold text-muted block mb-0.5">To Date</label>
+                    <input
+                      type="date"
+                      value={exportToDate}
+                      onChange={(e) => setExportToDate(e.target.value)}
+                      className="w-full h-8 px-2 bg-background border border-border text-xs focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsExportModalOpen(false)}
+                disabled={isExporting}
+                className="text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleExecuteExportCsv}
+                isLoading={isExporting}
+                className="text-xs flex items-center gap-1.5"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5" />
+                Download CSV
+              </Button>
             </div>
           </div>
         </Modal>

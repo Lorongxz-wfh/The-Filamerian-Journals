@@ -12,7 +12,9 @@ class FeedbackController extends Controller
     {
         $query = Feedback::query();
 
-        if ($request->has('archived') && $request->archived == 'true') {
+        if ($request->input('archived') === 'all') {
+            // Include all records
+        } elseif ($request->input('archived') === 'true' || $request->input('archived') === '1') {
             $query->where('is_archived', true);
         } else {
             $query->where('is_archived', false);
