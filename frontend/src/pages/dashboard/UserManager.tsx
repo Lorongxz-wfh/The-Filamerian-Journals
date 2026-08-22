@@ -487,11 +487,6 @@ const UserManager: React.FC = () => {
           {/* Account Status & Danger Zone inside Edit Modal */}
           {editingUser && (() => {
             const isSelf = editingUser.id === currentUser.id;
-            const disabledAt = editingUser.disabled_at ? new Date(editingUser.disabled_at) : null;
-            const now = new Date();
-            const hoursElapsed = disabledAt ? Math.floor((now.getTime() - disabledAt.getTime()) / (1000 * 60 * 60)) : 0;
-            const hoursRemaining = Math.max(0, 24 - hoursElapsed);
-            const canDeletePermanently = editingUser.is_disabled && hoursRemaining === 0;
 
             return (
               <div className="pt-4 border-t border-border mt-6 space-y-3">
@@ -541,17 +536,13 @@ const UserManager: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Permanent Delete Section (Shows when disabled with 24-hour countdown) */}
+                    {/* Permanent Delete Section (Active whenever account is disabled) */}
                     {editingUser.is_disabled && (
                       <div className="pt-3 border-t border-border/80 flex items-center justify-between">
                         <div>
                           <div className="text-xs font-semibold text-red-600">Permanent Deletion</div>
                           <div className="text-[11px] text-muted">
-                            {canDeletePermanently ? (
-                              <span className="text-red-600 font-medium">Safety period complete. Ready for permanent deletion.</span>
-                            ) : (
-                              <span>24-Hour Safety Period: <strong>{hoursRemaining} hour(s) remaining</strong> before permanent delete unlocks.</span>
-                            )}
+                            Account is disabled. Requires email verification to delete.
                           </div>
                         </div>
 
@@ -559,7 +550,6 @@ const UserManager: React.FC = () => {
                           type="button"
                           variant="danger"
                           size="sm"
-                          disabled={!canDeletePermanently}
                           onClick={() => {
                             handleDelete(editingUser);
                             handleCloseModal();
