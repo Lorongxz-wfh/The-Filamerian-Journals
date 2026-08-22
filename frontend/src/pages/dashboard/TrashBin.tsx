@@ -737,16 +737,26 @@ const TrashBin: React.FC = () => {
         title="Confirm Item Restoration"
       >
         <div className="space-y-4">
-          <p className="text-[13px] text-muted-foreground leading-relaxed">
-            Are you sure you want to restore <strong>"{selectedItem?.title || `Volume ${selectedItem?.volume_number}`}"</strong> back to active publishing status?
-          </p>
+          {selectedItem?.type === 'article' ? (
+            <p className="text-[13px] text-foreground/80 leading-relaxed">
+              Are you sure you want to restore <strong>"{selectedItem.title}"</strong>? This will restore its parent Volume and Journal back to active publishing status as well.
+            </p>
+          ) : selectedItem?.type === 'volume' ? (
+            <p className="text-[13px] text-foreground/80 leading-relaxed">
+              Are you sure you want to restore <strong>"Volume {selectedItem.volume_number}"</strong>? This will restore its parent Journal and child articles back to active publishing status as well.
+            </p>
+          ) : (
+            <p className="text-[13px] text-foreground/80 leading-relaxed">
+              Are you sure you want to restore <strong>"{selectedItem?.title}"</strong>? This will restore all associated volumes and articles back to active publishing status.
+            </p>
+          )}
           <div className="flex justify-end gap-3 pt-3 border-t border-border">
             <Button variant="outline" onClick={() => setActionType(null)} disabled={actionLoading}>
               Cancel
             </Button>
             <Button variant="primary" onClick={handleRestore} isLoading={actionLoading}>
               <CheckCircle2 className="h-4 w-4 mr-1.5 inline" />
-              Restore Item
+              Confirm Restoration
             </Button>
           </div>
         </div>

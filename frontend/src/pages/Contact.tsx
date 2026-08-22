@@ -172,26 +172,39 @@ const Contact: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Category</label>
-                <Select 
-                  name="category"
-                  value={formData.category}
-                  onChange={(val) => handleChange({ target: { name: 'category', value: val } } as any)}
-                  options={[
-                    { value: "Journal Suggestion", label: "Journal Suggestion" },
-                    { value: "System Issue", label: "System Issue" },
-                    { value: "Other", label: "Other (Please specify)" }
-                  ]}
-                />
-                {formData.category === 'Other' && (
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-semibold text-primary uppercase tracking-wider">Category</label>
+                  {formData.category === 'Other' && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, category: 'Journal Suggestion', otherCategory: '' }))}
+                      className="text-[11px] text-primary hover:underline flex items-center gap-1 cursor-pointer font-medium"
+                    >
+                      ↺ Choose from list
+                    </button>
+                  )}
+                </div>
+                {formData.category === 'Other' ? (
                   <input 
                     type="text" 
                     name="otherCategory"
                     value={formData.otherCategory}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 mt-3 bg-background border border-border text-[13px] focus:outline-none focus:border-primary transition-colors animate-in fade-in slide-in-from-top-2"
-                    placeholder="Please specify category..."
+                    autoFocus
+                    className="w-full px-4 py-3 bg-background border border-primary text-[13px] focus:outline-none transition-colors"
+                    placeholder="Specify custom category (e.g. Copyright, Partnership)..."
+                  />
+                ) : (
+                  <Select 
+                    name="category"
+                    value={formData.category}
+                    onChange={(val) => handleChange({ target: { name: 'category', value: val } } as any)}
+                    options={[
+                      { value: "Journal Suggestion", label: "Journal Suggestion" },
+                      { value: "System Issue", label: "System Issue" },
+                      { value: "Other", label: "Other (Please specify)" }
+                    ]}
                   />
                 )}
               </div>

@@ -56,6 +56,8 @@ class JournalController extends Controller
             }]);
         }
 
+        $query->orderBy('updated_at', 'desc');
+
         // Standardize pagination to 15
         return JournalResource::collection($query->paginate(15));
     }

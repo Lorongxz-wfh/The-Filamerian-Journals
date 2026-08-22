@@ -124,6 +124,11 @@ const ManageAuthors: React.FC = () => {
   const sortedAuthors = React.useMemo(() => {
     const items = [...authors];
     items.sort((a, b) => {
+      if (sortConfig.key === 'articles_count') {
+        const aCount = a.articles_count ?? 0;
+        const bCount = b.articles_count ?? 0;
+        return sortConfig.direction === 'asc' ? aCount - bCount : bCount - aCount;
+      }
       const aVal = (a[sortConfig.key as keyof Author] as string) || '';
       const bVal = (b[sortConfig.key as keyof Author] as string) || '';
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -253,7 +258,9 @@ const ManageAuthors: React.FC = () => {
               <TableHead className="cursor-pointer hover:bg-black/5 transition-colors hidden sm:table-cell" onClick={() => requestSort('email')}>
                 <div className="flex items-center gap-1">Email {getSortIcon('email')}</div>
               </TableHead>
-              <TableHead className="text-center">Publications</TableHead>
+              <TableHead className="cursor-pointer hover:bg-black/5 transition-colors text-center" onClick={() => requestSort('articles_count')}>
+                <div className="flex items-center justify-center gap-1">Publications {getSortIcon('articles_count')}</div>
+              </TableHead>
               <TableHead className="w-10 sm:w-12 text-right"></TableHead>
             </TableRow>
           </TableHeader>

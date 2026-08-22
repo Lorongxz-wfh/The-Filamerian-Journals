@@ -23,7 +23,7 @@ class AuthorController extends Controller
             });
         }
 
-        $sortBy  = in_array($request->sort_by, ['first_name', 'last_name', 'email', 'created_at']) ? $request->sort_by : 'last_name';
+        $sortBy  = in_array($request->sort_by, ['first_name', 'last_name', 'email', 'created_at', 'articles_count']) ? $request->sort_by : 'last_name';
         $sortDir = $request->sort_dir === 'desc' ? 'desc' : 'asc';
         $query->orderBy($sortBy, $sortDir);
 

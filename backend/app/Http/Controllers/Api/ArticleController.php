@@ -37,7 +37,7 @@ class ArticleController extends Controller
             });
         }
 
-        $query->orderBy('created_at', 'desc');
+        $query->orderBy('updated_at', 'desc');
 
         return ArticleResource::collection($query->paginate(50));
     }

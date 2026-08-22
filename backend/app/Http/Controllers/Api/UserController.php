@@ -229,9 +229,11 @@ class UserController extends Controller
         }
 
         // 3. Enforce 24-hour waiting period after disabling
-        $hoursSinceDisabled = now()->diffInHours($user->disabled_at);
-        if ($hoursSinceDisabled < 24) {
-            $hoursLeft = 24 - $hoursSinceDisabled;
+        $disabledTime = \Carbon\Carbon::parse($user->disabled_at);
+        $secondsElapsed = max(0, now()->timestamp - $disabledTime->timestamp);
+        $hoursElapsed = $secondsElapsed / 3600;
+        if ($hoursElapsed < 24) {
+            $hoursLeft = (int) ceil(24 - $hoursElapsed);
             return response()->json([
                 'message' => "Account safety period active. Please wait {$hoursLeft} more hour(s) before permanently deleting this account."
             ], 422);

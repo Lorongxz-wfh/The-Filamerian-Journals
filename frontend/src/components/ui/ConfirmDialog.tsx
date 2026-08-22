@@ -32,22 +32,22 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={() => !isLoading && onClose()} title={title} className="max-w-md">
-      <div className="space-y-4 my-2">
-        <div className={`p-3.5 rounded-lg flex items-start gap-3 border ${
-          isDestructive 
-            ? 'bg-red-500/8 border-red-500/20 text-red-700 dark:text-red-400' 
-            : 'bg-primary/5 border-primary/15 text-primary'
-        }`}>
-          {isDestructive ? (
-            <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-          ) : (
-            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-          )}
-          <div className="space-y-1">
-            <p className="text-[13px] leading-relaxed font-medium">
-              {cleanMessage}
-            </p>
+      <div className="py-2">
+        <div className="flex items-start gap-3.5">
+          <div className={`p-2 rounded shrink-0 ${
+            isDestructive 
+              ? 'bg-red-500/10 text-red-600' 
+              : 'bg-primary/10 text-primary'
+          }`}>
+            {isDestructive ? (
+              <AlertTriangle className="h-5 w-5" />
+            ) : (
+              <Info className="h-5 w-5" />
+            )}
           </div>
+          <p className="text-[13px] text-foreground/80 leading-relaxed font-normal pt-0.5">
+            {cleanMessage}
+          </p>
         </div>
       </div>
 
